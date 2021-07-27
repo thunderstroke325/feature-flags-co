@@ -27,7 +27,6 @@ namespace FeatureFlags.APIs.Services
         Task<CosmosDBEnvironmentUser> AddCosmosDBEnvironmentUserAsync(CosmosDBEnvironmentUser item);
         Task<CosmosDBEnvironmentFeatureFlagUser> AddCosmosDBEnvironmentFeatureFlagUserAsync(CosmosDBEnvironmentFeatureFlagUser item);
         Task UpdateItemAsync(string id, dynamic item);
-        Task UpdateFeatureFlagAsync(CosmosDBFeatureFlag ff);
         Task DeleteItemAsync(string id);
         Task<List<CosmosDBFeatureFlagBasicInfo>> GetEnvironmentFeatureFlagBasicInfoItemsAsync(int environmentId, int pageIndex = 0, int pageSize = 100);
         Task<List<CosmosDBFeatureFlagBasicInfo>> GetEnvironmentArchivedFeatureFlagBasicInfoItemsAsync(int environmentId, int pageIndex = 0, int pageSize = 100);
@@ -145,11 +144,6 @@ namespace FeatureFlags.APIs.Services
             await this._container.UpsertItemAsync<dynamic>(item, new PartitionKey(id));
         }
 
-        public async Task UpdateFeatureFlagAsync(CosmosDBFeatureFlag ff)
-        {
-            await this._container.UpsertItemAsync<CosmosDBFeatureFlag>(ff);
-        }
-
 
         public async Task<CosmosDBFeatureFlag> CreateCosmosDBFeatureFlagAsync(CreateFeatureFlagViewModel param, string currentUserId, int projectId, int accountId)
         {
@@ -166,18 +160,25 @@ namespace FeatureFlags.APIs.Services
                     KeyName = keyName,
                     EnvironmentId = param.EnvironmentId,
                     CreatorUserId = currentUserId,
-                    DefaultRuleValue = param.DefaultRuleValue,
                     Name = param.Name,
-                    PercentageRolloutBasedProperty = param.PercentageRolloutBasedProperty,
-                    PercentageRolloutForFalse = param.PercentageRolloutForFalse,
-                    PercentageRolloutForTrue = param.PercentageRolloutForTrue,
-                    Status = param.Status,
-                    ValueWhenDisabled = param.ValueWhenDisabled
+                    Status = param.Status
                 },
                 FFP = new List<CosmosDBFeatureFlagPrerequisite>(),
                 FFTIUForFalse = new List<CosmosDBFeatureFlagTargetIndividualUser>(),
                 FFTIUForTrue = new List<CosmosDBFeatureFlagTargetIndividualUser>(),
-                FFTUWMTR = new List<CosmosDBFeatureFlagTargetUsersWhoMatchTheseRuleParam>()
+                FFTUWMTR = new List<CosmosDBFeatureFlagTargetUsersWhoMatchTheseRuleParam>(),
+                VariationOptions = new List<VariationOption>() {
+                    new VariationOption() {
+                        DisplayOrder = 1,
+                        LocalId = 1,
+                        VariationValue = "true"
+                    },
+                    new VariationOption() {
+                        DisplayOrder = 2,
+                        LocalId = 2,
+                        VariationValue = "false"
+                    },
+                }
             };
             return await _container.CreateItemAsync<CosmosDBFeatureFlag>(newFeatureFlag);
         }
@@ -210,6 +211,7 @@ namespace FeatureFlags.APIs.Services
                 param.FF.PercentageRolloutForFalseNumber = originFF.FF.PercentageRolloutForFalseNumber;
                 param.FF.PercentageRolloutForTrueNumber = originFF.FF.PercentageRolloutForTrueNumber;
             }
+            param.VariationOptions = param.VariationOptions ?? new List<CosmosDBFeatureFlagVariationOption>();
             return await this._container.UpsertItemAsync<CosmosDBFeatureFlag>(param);
         }
 

@@ -123,7 +123,7 @@ namespace FeatureFlags.APIs.Controllers
             CosmosDBFeatureFlag ff = await _cosmosDbService.GetFeatureFlagAsync(param.Id);
             ff.FF.LastUpdatedTime = DateTime.UtcNow;
             ff.FF.Name = param.Name;
-            await _cosmosDbService.UpdateFeatureFlagAsync(ff);
+            await _cosmosDbService.UpdateCosmosDBFeatureFlagAsync(ff);
             param.LastUpdatedTime = ff.FF.LastUpdatedTime;
             param.KeyName = ff.FF.KeyName;
             return param;

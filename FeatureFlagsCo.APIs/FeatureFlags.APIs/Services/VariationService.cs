@@ -111,7 +111,7 @@ namespace FeatureFlags.APIs.Repositories
             CosmosDBEnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = await RedoMatchingAndUpdateToRedisCacheAsync(
                 featureFlagId, featureFlagUserMappingId, featureFlag, environmentUser);
 
-            await _cosmosDbService.UpdateFeatureFlagAsync(featureFlag);
+            await _cosmosDbService.UpdateCosmosDBFeatureFlagAsync(featureFlag);
 
             return cosmosDBFeatureFlagsUser;
         }
