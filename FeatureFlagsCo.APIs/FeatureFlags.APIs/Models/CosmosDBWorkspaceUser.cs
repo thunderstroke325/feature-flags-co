@@ -40,5 +40,7 @@ namespace FeatureFlags.APIs.Models
         public DateTime? LastUpdatedTime { get; set; }
         public bool? ResultValue { get; set; }
         public string PercentageRolloutBasedRuleId { get; set; }
+
+        public VariationOption VariationOptionResultValue { get; set; }
     }
 }

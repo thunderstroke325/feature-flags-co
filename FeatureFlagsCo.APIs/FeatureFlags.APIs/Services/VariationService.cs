@@ -39,6 +39,7 @@ namespace FeatureFlags.APIs.Repositories
             _cosmosDbService = cosmosDbService;
         }
 
+        #region true false variation
         public async Task<Tuple<bool?, bool>> CheckVariableAsync(string environmentSecret, string featureFlagKeyName, CosmosDBEnvironmentUser environmentUser,
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
         {
@@ -660,7 +661,10 @@ namespace FeatureFlags.APIs.Repositories
                 return ffParam.FF.DefaultRuleValue;
             }
         }
+        #endregion
 
+
+        #region Multi Options
         public async Task<Tuple<VariationOption, bool>> CheckMultiOptionVariationAsync(
             string environmentSecret, string featureFlagKeyName, CosmosDBEnvironmentUser environmentUser, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
         {
@@ -680,7 +684,7 @@ namespace FeatureFlags.APIs.Repositories
             else
             {
                 featureFlag = await _cosmosDbService.GetFeatureFlagAsync(featureFlagId);
-                await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
+                //await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
                 readOnlyOperation = false;
             }
 
@@ -693,17 +697,17 @@ namespace FeatureFlags.APIs.Repositories
             {
                 cosmosDBFeatureFlagsUser = JsonConvert.DeserializeObject<CosmosDBEnvironmentFeatureFlagUser>(featureFlagsUserMappingString);
                 if (featureFlag.FF.LastUpdatedTime == null || cosmosDBFeatureFlagsUser.LastUpdatedTime == null ||
-                featureFlag.FF.LastUpdatedTime.Value.CompareTo(cosmosDBFeatureFlagsUser.LastUpdatedTime.Value) > 0)
+                    featureFlag.FF.LastUpdatedTime.Value.CompareTo(cosmosDBFeatureFlagsUser.LastUpdatedTime.Value) > 0)
                 {
-                    // comosdb 4000 - 处理425个请求 / 秒 - 在RedoMatchingAndUpdateToRedisCacheAsync之前
-                    cosmosDBFeatureFlagsUser = await RedoVariationServiceAsync(
+                    cosmosDBFeatureFlagsUser = await MultiOptionRedoVariationServiceAsync(
                                                         environmentUser,
                                                         featureFlagId,
                                                         featureFlagUserMappingId,
                                                         featureFlag);
                     readOnlyOperation = false;
                 }
-                return new Tuple<VariationOption, bool>(null, readOnlyOperation);
+
+                return new Tuple<VariationOption, bool>(cosmosDBFeatureFlagsUser.VariationOptionResultValue, readOnlyOperation);
             }
             else
             {
@@ -713,7 +717,7 @@ namespace FeatureFlags.APIs.Repositories
                     await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
                 }
 
-                cosmosDBFeatureFlagsUser = await RedoVariationServiceAsync(
+                cosmosDBFeatureFlagsUser = await MultiOptionRedoVariationServiceAsync(
                                                     environmentUser,
                                                     featureFlagId,
                                                     featureFlagUserMappingId,
@@ -726,6 +730,55 @@ namespace FeatureFlags.APIs.Repositories
 
             return new Tuple<VariationOption, bool>(null, false);
         }
+
+
+        public async Task<CosmosDBEnvironmentFeatureFlagUser> MultiOptionRedoVariationServiceAsync(
+                    CosmosDBEnvironmentUser environmentUser,
+                    string featureFlagId,
+                    string featureFlagUserMappingId,
+                    CosmosDBFeatureFlag featureFlag)
+        {
+            CosmosDBEnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = await RedoMatchingAndUpdateToRedisCacheAsync(
+                featureFlagId, featureFlagUserMappingId, featureFlag, environmentUser);
+
+            await _cosmosDbService.UpdateCosmosDBFeatureFlagAsync(featureFlag);
+            await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
+
+            return cosmosDBFeatureFlagsUser;
+        }
+
+        private async Task<CosmosDBEnvironmentFeatureFlagUser> MultiOptionRedoMatchingAndUpdateToRedisCacheAsync(
+           string featureFlagId,
+           string environmentFeatureFlagUserId,
+           CosmosDBFeatureFlag featureFlag,
+           CosmosDBEnvironmentUser environmentUser)
+        {
+            CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser = await _cosmosDbService.GetEnvironmentFeatureFlagUserAsync(environmentFeatureFlagUserId);
+            if (environmentFeatureFlagUser == null)
+            {
+                environmentFeatureFlagUser = new CosmosDBEnvironmentFeatureFlagUser
+                {
+                    FeatureFlagId = featureFlagId,
+                    EnvironmentId = environmentUser.EnvironmentId,
+                    id = environmentFeatureFlagUserId
+                };
+                environmentFeatureFlagUser.LastUpdatedTime = DateTime.UtcNow;
+                environmentFeatureFlagUser.ResultValue = await GetUserVariationResultAsync(featureFlag, environmentUser, environmentFeatureFlagUser);
+                await _cosmosDbService.AddCosmosDBEnvironmentFeatureFlagUserAsync(environmentFeatureFlagUser);
+            }
+            else
+            {
+                environmentFeatureFlagUser.LastUpdatedTime = DateTime.UtcNow;
+                environmentFeatureFlagUser.ResultValue = await GetUserVariationResultAsync(featureFlag, environmentUser, environmentFeatureFlagUser);
+                await _cosmosDbService.UpdateItemAsync(environmentFeatureFlagUser.id, environmentFeatureFlagUser);
+            }
+
+            await _redisCache.SetStringAsync(environmentFeatureFlagUserId, JsonConvert.SerializeObject(environmentFeatureFlagUser));
+            return environmentFeatureFlagUser;
+        }
+
+
+        #endregion
     }
 
 }
