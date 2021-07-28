@@ -24,4 +24,5 @@ namespace FeatureFlags.APIs.Models
         public bool? VariationResult { get; set; }
     }
 
+
 }

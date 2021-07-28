@@ -4,6 +4,7 @@ using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -37,6 +38,7 @@ namespace FeatureFlags.APIs.Services
 
         Task<CosmosDBFeatureFlag> CreateCosmosDBFeatureFlagAsync(CreateFeatureFlagViewModel param, string currentUserId, int projectId, int accountId);
         Task<CosmosDBFeatureFlag> UpdateCosmosDBFeatureFlagAsync(CosmosDBFeatureFlag param);
+        Task<ReturnJsonModel<CosmosDBFeatureFlag>> UpdateMultiValueOptionSupportedFeatureFlagAsync(CosmosDBFeatureFlag param);
         Task<CosmosDBFeatureFlag> ArchiveEnvironmentdFeatureFlagAsync(FeatureFlagArchiveParam param);
         Task<CosmosDBFeatureFlag> UnarchiveEnvironmentdFeatureFlagAsync(FeatureFlagArchiveParam param);
 
@@ -47,6 +49,9 @@ namespace FeatureFlags.APIs.Services
 
         Task<int> GetFeatureFlagTotalUsersAsync(string featureFlagId);
         Task<int> GetFeatureFlagHitUsersAsync(string featureFlagId);
+
+
+        Task CreateEnvrionmentUserForPerformanceTest();
     }
 
     public class CosmosDbService: ICosmosDbService
@@ -184,15 +189,126 @@ namespace FeatureFlags.APIs.Services
         }
 
 
+        public async Task<ReturnJsonModel<CosmosDBFeatureFlag>> UpdateMultiValueOptionSupportedFeatureFlagAsync(CosmosDBFeatureFlag param)
+        {
+            try
+            {
+                var originFF = await this.GetCosmosDBFeatureFlagAsync(param.Id);
+                param.EnvironmentId = param.FF.EnvironmentId;
+                param.Id = param.FF.Id;
+                param.FF.LastUpdatedTime = DateTime.UtcNow;
+
+                if (param.FF.DefaultRulePercentageRollouts == null || param.FF.DefaultRulePercentageRollouts.Count == 0)
+                    return new ReturnJsonModel<CosmosDBFeatureFlag>()
+                    {
+                        StatusCode = 500,
+                        Error = new Exception("In Multi Option supported mode, DefaultRulePercentageRollouts shouldn't be empty")
+                    };
+                if (param.FF.VariationOptionWhenDisabled == null)
+                    return new ReturnJsonModel<CosmosDBFeatureFlag>()
+                    {
+                        StatusCode = 500,
+                        Error = new Exception("In Multi Option supported mode, MultiOptionValueWhenDisabled shouldn't be empty")
+                    };
+                if (param.FFP != null && param.FFP.Count > 0 && param.FFP.Any(p => p.ValueOptionsVariationValue == null))
+                    return new ReturnJsonModel<CosmosDBFeatureFlag>()
+                    {
+                        StatusCode = 500,
+                        Error = new Exception("In Multi Option supported mode, all ValueOptionsVariationValue FFPs shouldn't be empty")
+                    };
+                if (param.FFTUWMTR != null && param.FFTUWMTR.Count > 0 && param.FFTUWMTR.Any(p => p.ValueOptionsVariationRuleValues == null || p.ValueOptionsVariationRuleValues.Count == 0))
+                    return new ReturnJsonModel<CosmosDBFeatureFlag>()
+                    {
+                        StatusCode = 500,
+                        Error = new Exception("In Multi Option supported mode, ValueOptionsVariationRuleValues in all FFTUWMTRs shouldn't be empty")
+                    };
+                if (param.VariationOptions == null || param.VariationOptions.Count == 0)
+                    return new ReturnJsonModel<CosmosDBFeatureFlag>()
+                    {
+                        StatusCode = 500,
+                        Error = new Exception("In Multi Option supported mode, VariationOptions shouldn't be empty")
+                    };
+                if (param.TargetIndividuals != null && param.TargetIndividuals.Count >= 0 && param.TargetIndividuals.Any(p => p.ValueOption == null))
+                    return new ReturnJsonModel<CosmosDBFeatureFlag>()
+                    {
+                        StatusCode = 500,
+                        Error = new Exception("In Multi Option supported mode, ValueOption in TargetIndividual shouldn't be empty")
+                    };
+
+                param.FF.DefaultRuleValue = null;
+                param.FF.ValueWhenDisabled = null;
+                param.IsMultiOptionMode = true;
+
+                foreach (var item in param.FF.DefaultRulePercentageRollouts)
+                {
+                    if(originFF.FF.DefaultRulePercentageRollouts != null)
+                    {
+                        var originDRPR = originFF.FF.DefaultRulePercentageRollouts.FirstOrDefault(p => p.ValueOption.LocalId == item.ValueOption.LocalId);
+                        if (originDRPR != null)
+                        {
+                            item.UserCount = originDRPR.UserCount;
+                        }
+                    }
+                }
+
+                if (param.FFTUWMTR != null && param.FFTUWMTR.Count > 0)
+                {
+                    foreach (var item in param.FFTUWMTR)
+                    {
+                        if (string.IsNullOrWhiteSpace(item.RuleId))
+                        {
+                            item.RuleId = Guid.NewGuid().ToString();
+                        }
+                        else
+                        {
+                            if (originFF.FFTUWMTR != null)
+                            {
+                                var originDRPR = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId);
+                                if (originDRPR.ValueOptionsVariationRuleValues != null && originDRPR.ValueOptionsVariationRuleValues.Count > 0)
+                                {
+                                    foreach (var rItem in item.ValueOptionsVariationRuleValues ?? new List<VariationOptionPercentageRollout>())
+                                    {
+                                        var vovrv = originDRPR.ValueOptionsVariationRuleValues.FirstOrDefault(p => p.ValueOption.LocalId == rItem.ValueOption.LocalId);
+                                        if (vovrv != null)
+                                        {
+                                            rItem.UserCount = vovrv.UserCount;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+
+                await this._container.UpsertItemAsync<CosmosDBFeatureFlag>(param);
+
+                return new ReturnJsonModel<CosmosDBFeatureFlag>
+                {
+                    StatusCode = 200,
+                    Data = param
+                };
+            }
+            catch (Exception exp)
+            {
+                return new ReturnJsonModel<CosmosDBFeatureFlag>
+                {
+                    StatusCode = 500,
+                    Error = exp
+                };
+            }
+
+        }
+
         public async Task<CosmosDBFeatureFlag> UpdateCosmosDBFeatureFlagAsync(CosmosDBFeatureFlag param)
         {
             var originFF = await this.GetCosmosDBFeatureFlagAsync(param.Id);
             param.EnvironmentId = param.FF.EnvironmentId;
             param.Id = param.FF.Id;
             param.FF.LastUpdatedTime = DateTime.UtcNow;
-            if(param.FFTUWMTR != null && param.FFTUWMTR.Count > 0)
+            if (param.FFTUWMTR != null && param.FFTUWMTR.Count > 0)
             {
-                foreach(var item in param.FFTUWMTR)
+                foreach (var item in param.FFTUWMTR)
                 {
                     if (string.IsNullOrWhiteSpace(item.RuleId))
                     {
@@ -205,13 +321,12 @@ namespace FeatureFlags.APIs.Services
                     }
                 }
             }
-            if(originFF.FF.PercentageRolloutForFalse != null && originFF.FF.PercentageRolloutForTrue != null &&
-               param.FF.PercentageRolloutForFalse != null && param.FF.PercentageRolloutForTrue != null)
+            if (originFF.FF.PercentageRolloutForFalse != null && originFF.FF.PercentageRolloutForTrue != null &&
+                param.FF.PercentageRolloutForFalse != null && param.FF.PercentageRolloutForTrue != null)
             {
                 param.FF.PercentageRolloutForFalseNumber = originFF.FF.PercentageRolloutForFalseNumber;
                 param.FF.PercentageRolloutForTrueNumber = originFF.FF.PercentageRolloutForTrueNumber;
             }
-            param.VariationOptions = param.VariationOptions ?? new List<CosmosDBFeatureFlagVariationOption>();
             return await this._container.UpsertItemAsync<CosmosDBFeatureFlag>(param);
         }
 
@@ -497,6 +612,33 @@ namespace FeatureFlags.APIs.Services
                 }
             }
             return 0;
+        }
+
+        public async Task CreateEnvrionmentUserForPerformanceTest()
+        {
+            var ffs = new List<string>();
+            for (int i = 0; i < 30; i++)
+            {
+                ffs.Add("FeatureFlagKey" + i.ToString() + "@@--@@" + "VariationValueCanBeVeryVeryLongLongLongLongVariationValueCanBeVeryVeryLongLongLongLongVariationValueCanBeVeryVeryLongLongLongLong");
+            }
+            for (int i = 0; i < 2000;i++)
+            {
+                await UpsertEnvironmentUserAsync(new CosmosDBEnvironmentUser()
+                {
+                    id = Guid.NewGuid().ToString(),
+                    KeyId = "Performance Test " + Guid.NewGuid().ToString(),
+                    CustomizedProperties = new List<FeatureFlagUserCustomizedProperty> {
+                             new FeatureFlagUserCustomizedProperty(){ Name = "123", Value = "123" },
+                             new FeatureFlagUserCustomizedProperty(){ Name = "1111111", Value = "333333" },
+                             new FeatureFlagUserCustomizedProperty(){ Name = "22222", Value = "444444" },
+                             new FeatureFlagUserCustomizedProperty(){ Name = "33333", Value = "55555" },
+                         },
+                    Name = "Performance Test " + Guid.NewGuid().ToString(),
+                    ObjectType = "EnvironmentUser",
+                    EnvironmentId = 7,
+                    FeatureFlags = ffs
+                });
+            }
         }
     }
 }

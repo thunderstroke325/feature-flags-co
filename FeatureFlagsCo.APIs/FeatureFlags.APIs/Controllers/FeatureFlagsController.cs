@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
+using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,17 +26,21 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IFeatureFlagsService _featureFlagService;
         private readonly ICosmosDbService _cosmosDbService;
         private readonly IDistributedCache _redisCache;
+        private readonly IEnvironmentService _envService;
 
         public FeatureFlagsController(ILogger<FeatureFlagsController> logger, IGenericRepository repository,
             IFeatureFlagsService featureFlagService,
             ICosmosDbService cosmosDbService,
-            IDistributedCache redisCache)
+            IDistributedCache redisCache,
+            IEnvironmentService envService)
         {
             _logger = logger;
             _repository = repository;
             _featureFlagService = featureFlagService;
             _cosmosDbService = cosmosDbService;
             _redisCache = redisCache;
+
+            _envService = envService;
         }
 
 
@@ -100,7 +105,6 @@ namespace FeatureFlags.APIs.Controllers
             var ids = await _featureFlagService.GetAccountAndProjectIdByEnvironmentIdAsync(param.EnvironmentId);
             var newFF = await _cosmosDbService.CreateCosmosDBFeatureFlagAsync(param, currentUserId, ids[0], ids[1]);
             param.Id = newFF.Id;
-            param.LastUpdatedTime = newFF.FF.LastUpdatedTime;
             param.KeyName = newFF.FF.KeyName;
             return param;
         }
@@ -147,5 +151,34 @@ namespace FeatureFlags.APIs.Controllers
         }
 
 
+
+        #region multi variation options
+
+        [HttpPut]
+        [Route("UpdateMultiOptionSupportedFeatureFlag")]
+        public async Task<ReturnJsonModel<CosmosDBFeatureFlag>> UpdateMultiOptionSupportedFeatureFlag([FromBody] CosmosDBFeatureFlag param)
+        {
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvironmentId))
+            {
+                var returnOBj = await _cosmosDbService.UpdateMultiValueOptionSupportedFeatureFlagAsync(param);
+                if (returnOBj.StatusCode == 200)
+                {
+                    await _redisCache.SetStringAsync(returnOBj.Data.Id, JsonConvert.SerializeObject(returnOBj.Data));
+                }
+                else
+                {
+                    _logger.LogError(returnOBj.Error, JsonConvert.SerializeObject(param));
+                }
+                return returnOBj;
+            }
+            return new ReturnJsonModel<CosmosDBFeatureFlag>()
+            {
+                StatusCode = 401,
+                Error = new Exception("Unauthorized")
+            };
+        }
+
+        #endregion
     }
 }

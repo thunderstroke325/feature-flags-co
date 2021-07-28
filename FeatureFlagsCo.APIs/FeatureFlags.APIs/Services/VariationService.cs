@@ -20,6 +20,9 @@ namespace FeatureFlags.APIs.Repositories
     {
         Task<Tuple<bool?, bool>> CheckVariableAsync(string environmentSecret, string featureFlagKeyName, CosmosDBEnvironmentUser ffUser,
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVM);
+
+        Task<Tuple<VariationOption, bool>> CheckMultiOptionVariationAsync(string environmentSecret, string featureFlagKeyName, CosmosDBEnvironmentUser ffUser,
+            FeatureFlagIdByEnvironmentKeyViewModel ffIdVM);
     }
 
     public class VariationService : IVariationService
@@ -656,6 +659,72 @@ namespace FeatureFlags.APIs.Repositories
             {
                 return ffParam.FF.DefaultRuleValue;
             }
+        }
+
+        public async Task<Tuple<VariationOption, bool>> CheckMultiOptionVariationAsync(
+            string environmentSecret, string featureFlagKeyName, CosmosDBEnvironmentUser environmentUser, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
+        {
+            string featureFlagId = ffIdVM.FeatureFlagId;
+
+            int environmentId = Convert.ToInt32(ffIdVM.EnvId);
+            environmentUser.EnvironmentId = environmentId;
+            environmentUser.id = FeatureFlagKeyExtension.GetEnvironmentUserId(environmentId, environmentUser.KeyId);
+
+            bool readOnlyOperation = true;
+
+            // get feature flag info
+            var featureFlagString = await _redisCache.GetStringAsync(featureFlagId);
+            CosmosDBFeatureFlag featureFlag = null;
+            if (!string.IsNullOrWhiteSpace(featureFlagString))
+                featureFlag = JsonConvert.DeserializeObject<CosmosDBFeatureFlag>(featureFlagString);
+            else
+            {
+                featureFlag = await _cosmosDbService.GetFeatureFlagAsync(featureFlagId);
+                await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
+                readOnlyOperation = false;
+            }
+
+            // get environment feature flag user info
+            var featureFlagUserMappingId = FeatureFlagKeyExtension.GetFeatureFlagUserId(featureFlagId, environmentUser.KeyId);
+            var featureFlagsUserMappingString = await _redisCache.GetStringAsync(featureFlagUserMappingId);
+            CosmosDBEnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = null;
+
+            if (!string.IsNullOrWhiteSpace(featureFlagsUserMappingString))
+            {
+                cosmosDBFeatureFlagsUser = JsonConvert.DeserializeObject<CosmosDBEnvironmentFeatureFlagUser>(featureFlagsUserMappingString);
+                if (featureFlag.FF.LastUpdatedTime == null || cosmosDBFeatureFlagsUser.LastUpdatedTime == null ||
+                featureFlag.FF.LastUpdatedTime.Value.CompareTo(cosmosDBFeatureFlagsUser.LastUpdatedTime.Value) > 0)
+                {
+                    // comosdb 4000 - 处理425个请求 / 秒 - 在RedoMatchingAndUpdateToRedisCacheAsync之前
+                    cosmosDBFeatureFlagsUser = await RedoVariationServiceAsync(
+                                                        environmentUser,
+                                                        featureFlagId,
+                                                        featureFlagUserMappingId,
+                                                        featureFlag);
+                    readOnlyOperation = false;
+                }
+                return new Tuple<VariationOption, bool>(null, readOnlyOperation);
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(featureFlagString))
+                {
+                    featureFlag = await _cosmosDbService.GetFeatureFlagAsync(featureFlagId);
+                    await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
+                }
+
+                cosmosDBFeatureFlagsUser = await RedoVariationServiceAsync(
+                                                    environmentUser,
+                                                    featureFlagId,
+                                                    featureFlagUserMappingId,
+                                                    featureFlag);
+            }
+
+            // comosdb 4000 - 处理243个请求 / 秒 - 在AddOrUpdateEnvironmentUserIntoDatabaseAsync之前
+
+            await UpsertEnvironmentUserAsync(environmentUser, environmentId);
+
+            return new Tuple<VariationOption, bool>(null, false);
         }
     }
 

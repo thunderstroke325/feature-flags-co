@@ -18,8 +18,9 @@ namespace FeatureFlags.APIs.Models
         public string KeyId { get; set; }
         public List<FeatureFlagUserCustomizedProperty> CustomizedProperties { get; set; }
         //public List<FeatureFlagUserPercentageRecord> FeatureFlagUserPercentageRecords { get; set; }
-    }
 
+        public List<string> FeatureFlags { get; set; }
+    }
 
     public class FeatureFlagUserCustomizedProperty
     {

@@ -50,6 +50,7 @@ namespace FeatureFlags.APIs.Controllers
             return returnResult.Item1;
         }
 
+
         private async Task<Tuple<bool?, bool>> GetVariationCore(GetUserVariationResultParam param)
         {
             var ffIdVM = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
@@ -90,6 +91,54 @@ namespace FeatureFlags.APIs.Controllers
             {
                 VariationResult = returnResult.Item1
             };
+        }
+
+        [HttpPost]
+        [Route("GetMultiOptionVariation")]
+        public async Task<ReturnJsonModel<VariationOption>> GetMultiOptionVariation([FromBody] GetUserVariationResultParam param)
+        {
+            try
+            {
+                var ffIdVM = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
+                var returnResult = await _variationService.CheckMultiOptionVariationAsync(param.EnvironmentSecret, param.FeatureFlagKeyName,
+                    new CosmosDBEnvironmentUser()
+                    {
+                        Country = param.FFUserCountry,
+                        CustomizedProperties = param.FFUserCustomizedProperties,
+                        Email = param.FFUserEmail,
+                        KeyId = param.FFUserKeyId,
+                        Name = param.FFUserName
+                    },
+                    ffIdVM);
+                var customizedTraceProperties = new Dictionary<string, object>()
+                {
+                    ["envId"] = ffIdVM.EnvId,
+                    ["accountId"] = ffIdVM.AccountId,
+                    ["projectId"] = ffIdVM.ProjectId,
+                    ["featureFlagKey"] = param.FeatureFlagKeyName,
+                    ["userKey"] = param.FFUserKeyId,
+                    ["readOnlyOperation"] = returnResult.Item2,
+                };
+                using (_logger.BeginScope(customizedTraceProperties))
+                {
+                    _logger.LogInformation("variation-request");
+                }
+
+                return new ReturnJsonModel<VariationOption>()
+                {
+                    StatusCode = 200,
+                    Data = returnResult.Item1
+                };
+            }
+            catch(Exception exp)
+            {
+                _logger.LogError(exp, "Post /Variation/GetMultiOptionVariation ; Body: " + JsonConvert.SerializeObject(param));
+                return new ReturnJsonModel<VariationOption>()
+                {
+                    StatusCode = 500,
+                    Error = exp
+                };
+            }
         }
 
 

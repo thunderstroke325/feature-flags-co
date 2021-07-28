@@ -69,5 +69,14 @@ namespace FeatureFlags.APIs.Controllers
         {
             return await _cosmosDbService.GetEnvironmentUserAsync(id);
         }
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("CreateEnvironmentUsers")]
+        public async Task CreateEnvironmentUsers()
+        {
+            await _cosmosDbService.CreateEnvrionmentUserForPerformanceTest();
+        }
     }
 }
