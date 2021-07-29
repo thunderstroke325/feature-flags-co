@@ -81,7 +81,7 @@ namespace FeatureFlags.APIs.Services
             return Convert.ToInt32(featureFlagId.Split("__")[3]);
 
         }
-        public static string GetEnvIdByFeautreFlagKeyById(string featureFlagId)
+        public static string GetFeautreFlagKeyById(string featureFlagId)
         {
             return featureFlagId.Split("__")[4].Trim();
 

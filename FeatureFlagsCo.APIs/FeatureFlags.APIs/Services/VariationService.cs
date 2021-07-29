@@ -688,7 +688,7 @@ namespace FeatureFlags.APIs.Repositories
             else
             {
                 featureFlag = await _cosmosDbService.GetFeatureFlagAsync(featureFlagId);
-                //await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
+                await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
                 readOnlyOperation = false;
             }
 
@@ -700,159 +700,113 @@ namespace FeatureFlags.APIs.Repositories
             if (!string.IsNullOrWhiteSpace(featureFlagsUserMappingString))
             {
                 cosmosDBFeatureFlagsUser = JsonConvert.DeserializeObject<CosmosDBEnvironmentFeatureFlagUser>(featureFlagsUserMappingString);
-                if (featureFlag.FF.LastUpdatedTime == null || cosmosDBFeatureFlagsUser.LastUpdatedTime == null ||
-                    featureFlag.FF.LastUpdatedTime.Value.CompareTo(cosmosDBFeatureFlagsUser.LastUpdatedTime.Value) > 0)
+                if (featureFlag.FF.LastUpdatedTime != null && cosmosDBFeatureFlagsUser.LastUpdatedTime != null &&
+                    featureFlag.FF.LastUpdatedTime.Value.CompareTo(cosmosDBFeatureFlagsUser.LastUpdatedTime.Value) <= 0)
                 {
-                    cosmosDBFeatureFlagsUser = await RedoMatchingAndUpdateToRedisCacheAsync(
-                        featureFlagId, featureFlagUserMappingId, featureFlag, environmentUser);
-                    readOnlyOperation = false;
+                    return new Tuple<VariationOption, bool>(cosmosDBFeatureFlagsUser.VariationOptionResultValue, readOnlyOperation);
                 }
-
-                return new Tuple<VariationOption, bool>(cosmosDBFeatureFlagsUser.VariationOptionResultValue, readOnlyOperation);
-            }
-            else
-            {
-                if (!string.IsNullOrWhiteSpace(featureFlagString))
-                {
-                    featureFlag = await _cosmosDbService.GetFeatureFlagAsync(featureFlagId);
-                    await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
-                }
-
-                cosmosDBFeatureFlagsUser = await RedoMatchingAndUpdateToRedisCacheAsync(
-                    featureFlagId, featureFlagUserMappingId, featureFlag, environmentUser);
             }
 
-            // comosdb 4000 - 处理243个请求 / 秒 - 在AddOrUpdateEnvironmentUserIntoDatabaseAsync之前
+            cosmosDBFeatureFlagsUser = await MultiOptionRedoMatchingAndUpdateToRedisCacheAsync(
+                featureFlagId, featureFlagUserMappingId, featureFlag,
+                environmentUser, environmentSecret, ffIdVM);
+            await _redisCache.SetStringAsync(featureFlagUserMappingId, JsonConvert.SerializeObject(cosmosDBFeatureFlagsUser));
 
             await UpsertEnvironmentUserAsync(environmentUser, environmentId);
 
-            return new Tuple<VariationOption, bool>(null, false);
+            return new Tuple<VariationOption, bool>(cosmosDBFeatureFlagsUser.VariationOptionResultValue, false);
         }
 
         private async Task<CosmosDBEnvironmentFeatureFlagUser> MultiOptionRedoMatchingAndUpdateToRedisCacheAsync(
            string featureFlagId,
            string environmentFeatureFlagUserId,
            CosmosDBFeatureFlag featureFlag,
-           CosmosDBEnvironmentUser environmentUser)
+           CosmosDBEnvironmentUser environmentUser,
+           string environmentSecret,
+           FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
         {
-            environmentFeatureFlagUser = new CosmosDBEnvironmentFeatureFlagUser
-            {
-                FeatureFlagId = featureFlagId,
-                EnvironmentId = environmentUser.EnvironmentId,
-                id = environmentFeatureFlagUserId
-            };
+            CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser = new CosmosDBEnvironmentFeatureFlagUser
+                {
+                    FeatureFlagId = featureFlagId,
+                    EnvironmentId = environmentUser.EnvironmentId,
+                    id = environmentFeatureFlagUserId
+                };
             environmentFeatureFlagUser.LastUpdatedTime = DateTime.UtcNow;
-            environmentFeatureFlagUser.ResultValue = await GetUserVariationResultAsync(featureFlag, environmentUser, environmentFeatureFlagUser);
-            await _cosmosDbService.AddCosmosDBEnvironmentFeatureFlagUserAsync(environmentFeatureFlagUser);
-
-            await _redisCache.SetStringAsync(environmentFeatureFlagUserId, JsonConvert.SerializeObject(environmentFeatureFlagUser));
+            environmentFeatureFlagUser.VariationOptionResultValue = 
+                await MultiOptionGetUserVariationResultAsync(
+                        featureFlag, environmentUser, environmentFeatureFlagUser, environmentSecret, ffIdVM);
             return environmentFeatureFlagUser;
         }
 
-        public async Task<bool?> MultiOptionGetUserVariationResultAsync(CosmosDBFeatureFlag cosmosDBFeatureFlag, CosmosDBEnvironmentUser featureFlagsUser)
+        public async Task<VariationOption> MultiOptionGetUserVariationResultAsync(
+            CosmosDBFeatureFlag cosmosDBFeatureFlag, 
+            CosmosDBEnvironmentUser environmentUser,
+            CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser,
+            string environmentSecret,
+            FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
         {
             var wsId = cosmosDBFeatureFlag.EnvironmentId;
-            //var environment = await _dbContext.Environments.FirstOrDefaultAsync(p => p.Id == wsId);
 
             if (cosmosDBFeatureFlag.FF.Status == FeatureFlagStatutEnum.Disabled.ToString())
-                return cosmosDBFeatureFlag.FF.ValueWhenDisabled ?? false;
+                return cosmosDBFeatureFlag.FF.VariationOptionWhenDisabled;
 
             // 判断Prequisite
             foreach (var ffPItem in cosmosDBFeatureFlag.FFP)
             {
                 if (ffPItem.PrerequisiteFeatureFlagId != cosmosDBFeatureFlag.FF.Id)
                 {
-                    var newFF = await _cosmosDbService.GetItemAsync(ffPItem.PrerequisiteFeatureFlagId);
-                    var ffPResult = await MultiOptionGetUserVariationResultAsync(newFF, featureFlagsUser);
-                    if (ffPResult.Value != ffPItem.VariationValue)
-                        return cosmosDBFeatureFlag.FF.ValueWhenDisabled ?? false;
+                    var r = await CheckMultiOptionVariationAsync(
+                                    environmentSecret,
+                                    FeatureFlagKeyExtension.GetFeautreFlagKeyById(ffPItem.PrerequisiteFeatureFlagId),
+                                    environmentUser,
+                                    new FeatureFlagIdByEnvironmentKeyViewModel()
+                                    {
+                                        AccountId = ffIdVM.AccountId,
+                                        EnvId = ffIdVM.EnvId,
+                                        FeatureFlagId = ffPItem.PrerequisiteFeatureFlagId,
+                                        ProjectId = ffIdVM.ProjectId
+                                    });
+                    if (r.Item1.LocalId != ffPItem.ValueOptionsVariationValue.LocalId)
+                        return cosmosDBFeatureFlag.FF.VariationOptionWhenDisabled;
                 }
             }
 
-            // 判断Individual Rule
-            if (cosmosDBFeatureFlag.FFTIUForFalse != null && cosmosDBFeatureFlag.FFTIUForFalse.Count > 0 &&
-                cosmosDBFeatureFlag.FFTIUForFalse.Any(p => p.KeyId == featureFlagsUser.KeyId))
-                return false;
-            if (cosmosDBFeatureFlag.FFTIUForTrue != null && cosmosDBFeatureFlag.FFTIUForTrue.Count > 0 &&
-                cosmosDBFeatureFlag.FFTIUForTrue.Any(p => p.KeyId == featureFlagsUser.KeyId))
-                return true;
+            if(cosmosDBFeatureFlag.TargetIndividuals != null && cosmosDBFeatureFlag.TargetIndividuals.Count > 0)
+            {
+                foreach(var individualItem in cosmosDBFeatureFlag.TargetIndividuals)
+                {
+                    if (individualItem.Individuals.Any(p => p.KeyId == environmentUser.KeyId))
+                        return individualItem.ValueOption;
+                }
+            }
 
             // 判断Match Rules
-            var ffUserCustomizedProperties = featureFlagsUser.CustomizedProperties ?? new List<FeatureFlagUserCustomizedProperty>();
+            var ffUserCustomizedProperties = environmentUser.CustomizedProperties ?? new List<FeatureFlagUserCustomizedProperty>();
             var ffTargetUsersWhoMatchRules = cosmosDBFeatureFlag.FFTUWMTR ?? new List<CosmosDBFeatureFlagTargetUsersWhoMatchTheseRuleParam>();
-            var ruleMatchResult = GetUserVariationRuleMatchResult(
+            var ruleMatchResult = MultiOptionGetUserVariationRuleMatchResult(
                 cosmosDBFeatureFlag,
-                featureFlagsUser,
+                environmentUser,
                 environmentFeatureFlagUser);
             if (ruleMatchResult != null)
                 return ruleMatchResult;
 
             // 判断Default Rule
-            if (cosmosDBFeatureFlag.FF.PercentageRolloutForFalse != null &&
-                cosmosDBFeatureFlag.FF.PercentageRolloutForTrue != null)
+            if (cosmosDBFeatureFlag.FF.DefaultRulePercentageRollouts != null)
             {
-                return GetUserVariationDefaultRulePercentageResult(cosmosDBFeatureFlag, featureFlagsUser);
-            }
-            if (cosmosDBFeatureFlag.FF.DefaultRuleValue != null)
-                return cosmosDBFeatureFlag.FF.DefaultRuleValue;
-
-
-            return false;
-        }
-
-        public async Task<bool?> MultiOptionGetUserVariationResultAsync(CosmosDBFeatureFlag cosmosDBFeatureFlag, CosmosDBEnvironmentUser featureFlagsUser)
-        {
-            var wsId = cosmosDBFeatureFlag.EnvironmentId;
-            //var environment = await _dbContext.Environments.FirstOrDefaultAsync(p => p.Id == wsId);
-
-            if (cosmosDBFeatureFlag.FF.Status == FeatureFlagStatutEnum.Disabled.ToString())
-                return cosmosDBFeatureFlag.FF.ValueWhenDisabled ?? false;
-
-            // 判断Prequisite
-            foreach (var ffPItem in cosmosDBFeatureFlag.FFP)
-            {
-                if (ffPItem.PrerequisiteFeatureFlagId != cosmosDBFeatureFlag.FF.Id)
+                foreach (var item in cosmosDBFeatureFlag.FF.DefaultRulePercentageRollouts)
                 {
-                    var newFF = await _cosmosDbService.GetItemAsync(ffPItem.PrerequisiteFeatureFlagId);
-                    var ffPResult = await GetUserVariationResultAsync(newFF, featureFlagsUser, environmentFeatureFlagUser);
-                    if (ffPResult.Value != ffPItem.VariationValue)
-                        return cosmosDBFeatureFlag.FF.ValueWhenDisabled ?? false;
+                    if (IfBelongRolloutPercentage(environmentUser.KeyId, item.RolloutPercentage))
+                        return item.ValueOption;
                 }
             }
 
-            // 判断Individual Rule
-            if (cosmosDBFeatureFlag.FFTIUForFalse != null && cosmosDBFeatureFlag.FFTIUForFalse.Count > 0 &&
-                cosmosDBFeatureFlag.FFTIUForFalse.Any(p => p.KeyId == featureFlagsUser.KeyId))
-                return false;
-            if (cosmosDBFeatureFlag.FFTIUForTrue != null && cosmosDBFeatureFlag.FFTIUForTrue.Count > 0 &&
-                cosmosDBFeatureFlag.FFTIUForTrue.Any(p => p.KeyId == featureFlagsUser.KeyId))
-                return true;
-
-            // 判断Match Rules
-            var ffUserCustomizedProperties = featureFlagsUser.CustomizedProperties ?? new List<FeatureFlagUserCustomizedProperty>();
-            var ffTargetUsersWhoMatchRules = cosmosDBFeatureFlag.FFTUWMTR ?? new List<CosmosDBFeatureFlagTargetUsersWhoMatchTheseRuleParam>();
-            var ruleMatchResult = MultiOptionGetUserVariationRuleMatchResult(
-                cosmosDBFeatureFlag,
-                featureFlagsUser);
-            if (ruleMatchResult != null)
-                return ruleMatchResult;
-
-            // 判断Default Rule
-            if (cosmosDBFeatureFlag.FF.PercentageRolloutForFalse != null &&
-                cosmosDBFeatureFlag.FF.PercentageRolloutForTrue != null)
-            {
-                return GetUserVariationDefaultRulePercentageResult(cosmosDBFeatureFlag, featureFlagsUser, environmentFeatureFlagUser);
-            }
-            if (cosmosDBFeatureFlag.FF.DefaultRuleValue != null)
-                return cosmosDBFeatureFlag.FF.DefaultRuleValue;
-
-
-            return false;
+            return cosmosDBFeatureFlag.FF.VariationOptionWhenDisabled;
         }
 
-        private bool? MultiOptionGetUserVariationRuleMatchResult(
+        private VariationOption MultiOptionGetUserVariationRuleMatchResult(
           CosmosDBFeatureFlag cosmosDBFeatureFlag,
-          CosmosDBEnvironmentUser ffUser)
+          CosmosDBEnvironmentUser ffUser,
+          CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser)
         {
             foreach (var ffTUWMRItem in cosmosDBFeatureFlag.FFTUWMTR)
             {
@@ -1115,79 +1069,8 @@ namespace FeatureFlags.APIs.Repositories
                 {
                     foreach(var item in ffTUWMRItem.ValueOptionsVariationRuleValues)
                     {
-                        IfBelongRolloutPercentage(ffUser.KeyId, item.RolloutPercentage);
-                    }
-                    if (ffTUWMRItem.PercentageRolloutForFalse != null && ffTUWMRItem.PercentageRolloutForTrue != null)
-                    {
-                        string ffuKeyId = ffUser.KeyId;
-
-                        if (ffTUWMRItem.PercentageRolloutForTrue > 1)
-                            ffTUWMRItem.PercentageRolloutForTrue = ffTUWMRItem.PercentageRolloutForTrue / 100;
-                        if (ffTUWMRItem.PercentageRolloutForFalse > 1)
-                            ffTUWMRItem.PercentageRolloutForFalse = ffTUWMRItem.PercentageRolloutForFalse / 100;
-
-                        int trueUserCount = ffTUWMRItem.PercentageRolloutForTrueNumber;
-                        int falseUserCount = ffTUWMRItem.PercentageRolloutForFalseNumber;
-
-                        if (ffTUWMRItem.PercentageRolloutForTrue >= 1)
-                        {
-                            SetPercentageAndResultWhenTrue(environmentFeatureFlagUser, ffTUWMRItem);
-                        }
-                        else if (ffTUWMRItem.PercentageRolloutForFalse >= 1)
-                        {
-                            SetPercentageAndResultWhenFalse(environmentFeatureFlagUser, ffTUWMRItem);
-                            //environmentFeatureFlagUser.ResultValue = false;
-                            //ffTUWMRItem.PercentageRolloutForFalseNumber++;
-                        }
-                        else if ((ffTUWMRItem.PercentageRolloutForTrue ?? 0) < (ffTUWMRItem.PercentageRolloutForFalse ?? 0))
-                        {
-                            if (trueUserCount == 0 && falseUserCount == 0 && ffTUWMRItem.PercentageRolloutForTrue != 0)
-                            {
-                                SetPercentageAndResultWhenTrue(environmentFeatureFlagUser, ffTUWMRItem);
-                                //environmentFeatureFlagUser.ResultValue = true;
-                                //ffTUWMRItem.PercentageRolloutForTrueNumber++;
-                            }
-                            else if (((double)trueUserCount / ((double)trueUserCount + (double)falseUserCount)) <= ffTUWMRItem.PercentageRolloutForTrue)
-                            {
-                                SetPercentageAndResultWhenTrue(environmentFeatureFlagUser, ffTUWMRItem);
-                                //environmentFeatureFlagUser.ResultValue = true;
-                                //ffTUWMRItem.PercentageRolloutForTrueNumber++;
-                            }
-                            else
-                            {
-                                SetPercentageAndResultWhenFalse(environmentFeatureFlagUser, ffTUWMRItem);
-                                //environmentFeatureFlagUser.ResultValue = false;
-                                //ffTUWMRItem.PercentageRolloutForFalseNumber++;
-                            }
-                        }
-                        else
-                        {
-                            if (trueUserCount == 0 && falseUserCount == 0 && ffTUWMRItem.PercentageRolloutForFalse != 0)
-                            {
-                                SetPercentageAndResultWhenFalse(environmentFeatureFlagUser, ffTUWMRItem);
-                                //environmentFeatureFlagUser.ResultValue = false;
-                                //ffTUWMRItem.PercentageRolloutForFalseNumber++;
-                            }
-                            else if (((double)falseUserCount / ((double)trueUserCount + (double)falseUserCount)) <= ffTUWMRItem.PercentageRolloutForFalse)
-                            {
-                                SetPercentageAndResultWhenFalse(environmentFeatureFlagUser, ffTUWMRItem);
-                                //environmentFeatureFlagUser.ResultValue = false;
-                                //ffTUWMRItem.PercentageRolloutForFalseNumber++;
-                            }
-                            else
-                            {
-                                SetPercentageAndResultWhenTrue(environmentFeatureFlagUser, ffTUWMRItem);
-                                //environmentFeatureFlagUser.ResultValue = true;
-                                //ffTUWMRItem.PercentageRolloutForTrueNumber++;
-                            }
-                        }
-                        //}
-
-                        return environmentFeatureFlagUser.ResultValue;
-                    }
-                    else
-                    {
-                        return ffTUWMRItem.VariationRuleValue;
+                        if (IfBelongRolloutPercentage(ffUser.KeyId, item.RolloutPercentage))
+                            return item.ValueOption;
                     }
                 }
             }

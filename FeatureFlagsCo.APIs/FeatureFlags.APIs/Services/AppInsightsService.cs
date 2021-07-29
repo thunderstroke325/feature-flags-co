@@ -35,7 +35,7 @@ namespace FeatureFlags.APIs.Services
         {
             var returnModel = new FeatureFlagUsageChartDataViewModel();
             int envId = FeatureFlagKeyExtension.GetEnvIdByFeautreFlagId(featureFlagId);
-            var featureFlagKey = FeatureFlagKeyExtension.GetEnvIdByFeautreFlagKeyById(featureFlagId);
+            var featureFlagKey = FeatureFlagKeyExtension.GetFeautreFlagKeyById(featureFlagId);
             string binSpan = "10m";
             if (chartQueryTimeSpan == FeatureFlagUsageChartQueryTimeSpanEnum.P1D.ToString())
                 binSpan = "2h";
