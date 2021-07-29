@@ -703,11 +703,8 @@ namespace FeatureFlags.APIs.Repositories
                 if (featureFlag.FF.LastUpdatedTime == null || cosmosDBFeatureFlagsUser.LastUpdatedTime == null ||
                     featureFlag.FF.LastUpdatedTime.Value.CompareTo(cosmosDBFeatureFlagsUser.LastUpdatedTime.Value) > 0)
                 {
-                    cosmosDBFeatureFlagsUser = await MultiOptionRedoVariationServiceAsync(
-                                                        environmentUser,
-                                                        featureFlagId,
-                                                        featureFlagUserMappingId,
-                                                        featureFlag);
+                    cosmosDBFeatureFlagsUser = await RedoMatchingAndUpdateToRedisCacheAsync(
+                        featureFlagId, featureFlagUserMappingId, featureFlag, environmentUser);
                     readOnlyOperation = false;
                 }
 
@@ -721,11 +718,8 @@ namespace FeatureFlags.APIs.Repositories
                     await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
                 }
 
-                cosmosDBFeatureFlagsUser = await MultiOptionRedoVariationServiceAsync(
-                                                    environmentUser,
-                                                    featureFlagId,
-                                                    featureFlagUserMappingId,
-                                                    featureFlag);
+                cosmosDBFeatureFlagsUser = await RedoMatchingAndUpdateToRedisCacheAsync(
+                    featureFlagId, featureFlagUserMappingId, featureFlag, environmentUser);
             }
 
             // comosdb 4000 - 处理243个请求 / 秒 - 在AddOrUpdateEnvironmentUserIntoDatabaseAsync之前
@@ -735,51 +729,472 @@ namespace FeatureFlags.APIs.Repositories
             return new Tuple<VariationOption, bool>(null, false);
         }
 
-
-        public async Task<CosmosDBEnvironmentFeatureFlagUser> MultiOptionRedoVariationServiceAsync(
-                    CosmosDBEnvironmentUser environmentUser,
-                    string featureFlagId,
-                    string featureFlagUserMappingId,
-                    CosmosDBFeatureFlag featureFlag)
-        {
-            CosmosDBEnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = await RedoMatchingAndUpdateToRedisCacheAsync(
-                featureFlagId, featureFlagUserMappingId, featureFlag, environmentUser);
-
-            await _cosmosDbService.UpdateCosmosDBFeatureFlagAsync(featureFlag);
-            await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
-
-            return cosmosDBFeatureFlagsUser;
-        }
-
         private async Task<CosmosDBEnvironmentFeatureFlagUser> MultiOptionRedoMatchingAndUpdateToRedisCacheAsync(
            string featureFlagId,
            string environmentFeatureFlagUserId,
            CosmosDBFeatureFlag featureFlag,
            CosmosDBEnvironmentUser environmentUser)
         {
-            CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser = await _cosmosDbService.GetEnvironmentFeatureFlagUserAsync(environmentFeatureFlagUserId);
-            if (environmentFeatureFlagUser == null)
+            environmentFeatureFlagUser = new CosmosDBEnvironmentFeatureFlagUser
             {
-                environmentFeatureFlagUser = new CosmosDBEnvironmentFeatureFlagUser
-                {
-                    FeatureFlagId = featureFlagId,
-                    EnvironmentId = environmentUser.EnvironmentId,
-                    id = environmentFeatureFlagUserId
-                };
-                environmentFeatureFlagUser.LastUpdatedTime = DateTime.UtcNow;
-                environmentFeatureFlagUser.ResultValue = await GetUserVariationResultAsync(featureFlag, environmentUser, environmentFeatureFlagUser);
-                await _cosmosDbService.AddCosmosDBEnvironmentFeatureFlagUserAsync(environmentFeatureFlagUser);
-            }
-            else
-            {
-                environmentFeatureFlagUser.LastUpdatedTime = DateTime.UtcNow;
-                environmentFeatureFlagUser.ResultValue = await GetUserVariationResultAsync(featureFlag, environmentUser, environmentFeatureFlagUser);
-                await _cosmosDbService.UpdateItemAsync(environmentFeatureFlagUser.id, environmentFeatureFlagUser);
-            }
+                FeatureFlagId = featureFlagId,
+                EnvironmentId = environmentUser.EnvironmentId,
+                id = environmentFeatureFlagUserId
+            };
+            environmentFeatureFlagUser.LastUpdatedTime = DateTime.UtcNow;
+            environmentFeatureFlagUser.ResultValue = await GetUserVariationResultAsync(featureFlag, environmentUser, environmentFeatureFlagUser);
+            await _cosmosDbService.AddCosmosDBEnvironmentFeatureFlagUserAsync(environmentFeatureFlagUser);
 
             await _redisCache.SetStringAsync(environmentFeatureFlagUserId, JsonConvert.SerializeObject(environmentFeatureFlagUser));
             return environmentFeatureFlagUser;
         }
+
+        public async Task<bool?> MultiOptionGetUserVariationResultAsync(CosmosDBFeatureFlag cosmosDBFeatureFlag, CosmosDBEnvironmentUser featureFlagsUser)
+        {
+            var wsId = cosmosDBFeatureFlag.EnvironmentId;
+            //var environment = await _dbContext.Environments.FirstOrDefaultAsync(p => p.Id == wsId);
+
+            if (cosmosDBFeatureFlag.FF.Status == FeatureFlagStatutEnum.Disabled.ToString())
+                return cosmosDBFeatureFlag.FF.ValueWhenDisabled ?? false;
+
+            // 判断Prequisite
+            foreach (var ffPItem in cosmosDBFeatureFlag.FFP)
+            {
+                if (ffPItem.PrerequisiteFeatureFlagId != cosmosDBFeatureFlag.FF.Id)
+                {
+                    var newFF = await _cosmosDbService.GetItemAsync(ffPItem.PrerequisiteFeatureFlagId);
+                    var ffPResult = await MultiOptionGetUserVariationResultAsync(newFF, featureFlagsUser);
+                    if (ffPResult.Value != ffPItem.VariationValue)
+                        return cosmosDBFeatureFlag.FF.ValueWhenDisabled ?? false;
+                }
+            }
+
+            // 判断Individual Rule
+            if (cosmosDBFeatureFlag.FFTIUForFalse != null && cosmosDBFeatureFlag.FFTIUForFalse.Count > 0 &&
+                cosmosDBFeatureFlag.FFTIUForFalse.Any(p => p.KeyId == featureFlagsUser.KeyId))
+                return false;
+            if (cosmosDBFeatureFlag.FFTIUForTrue != null && cosmosDBFeatureFlag.FFTIUForTrue.Count > 0 &&
+                cosmosDBFeatureFlag.FFTIUForTrue.Any(p => p.KeyId == featureFlagsUser.KeyId))
+                return true;
+
+            // 判断Match Rules
+            var ffUserCustomizedProperties = featureFlagsUser.CustomizedProperties ?? new List<FeatureFlagUserCustomizedProperty>();
+            var ffTargetUsersWhoMatchRules = cosmosDBFeatureFlag.FFTUWMTR ?? new List<CosmosDBFeatureFlagTargetUsersWhoMatchTheseRuleParam>();
+            var ruleMatchResult = GetUserVariationRuleMatchResult(
+                cosmosDBFeatureFlag,
+                featureFlagsUser,
+                environmentFeatureFlagUser);
+            if (ruleMatchResult != null)
+                return ruleMatchResult;
+
+            // 判断Default Rule
+            if (cosmosDBFeatureFlag.FF.PercentageRolloutForFalse != null &&
+                cosmosDBFeatureFlag.FF.PercentageRolloutForTrue != null)
+            {
+                return GetUserVariationDefaultRulePercentageResult(cosmosDBFeatureFlag, featureFlagsUser);
+            }
+            if (cosmosDBFeatureFlag.FF.DefaultRuleValue != null)
+                return cosmosDBFeatureFlag.FF.DefaultRuleValue;
+
+
+            return false;
+        }
+
+        public async Task<bool?> MultiOptionGetUserVariationResultAsync(CosmosDBFeatureFlag cosmosDBFeatureFlag, CosmosDBEnvironmentUser featureFlagsUser)
+        {
+            var wsId = cosmosDBFeatureFlag.EnvironmentId;
+            //var environment = await _dbContext.Environments.FirstOrDefaultAsync(p => p.Id == wsId);
+
+            if (cosmosDBFeatureFlag.FF.Status == FeatureFlagStatutEnum.Disabled.ToString())
+                return cosmosDBFeatureFlag.FF.ValueWhenDisabled ?? false;
+
+            // 判断Prequisite
+            foreach (var ffPItem in cosmosDBFeatureFlag.FFP)
+            {
+                if (ffPItem.PrerequisiteFeatureFlagId != cosmosDBFeatureFlag.FF.Id)
+                {
+                    var newFF = await _cosmosDbService.GetItemAsync(ffPItem.PrerequisiteFeatureFlagId);
+                    var ffPResult = await GetUserVariationResultAsync(newFF, featureFlagsUser, environmentFeatureFlagUser);
+                    if (ffPResult.Value != ffPItem.VariationValue)
+                        return cosmosDBFeatureFlag.FF.ValueWhenDisabled ?? false;
+                }
+            }
+
+            // 判断Individual Rule
+            if (cosmosDBFeatureFlag.FFTIUForFalse != null && cosmosDBFeatureFlag.FFTIUForFalse.Count > 0 &&
+                cosmosDBFeatureFlag.FFTIUForFalse.Any(p => p.KeyId == featureFlagsUser.KeyId))
+                return false;
+            if (cosmosDBFeatureFlag.FFTIUForTrue != null && cosmosDBFeatureFlag.FFTIUForTrue.Count > 0 &&
+                cosmosDBFeatureFlag.FFTIUForTrue.Any(p => p.KeyId == featureFlagsUser.KeyId))
+                return true;
+
+            // 判断Match Rules
+            var ffUserCustomizedProperties = featureFlagsUser.CustomizedProperties ?? new List<FeatureFlagUserCustomizedProperty>();
+            var ffTargetUsersWhoMatchRules = cosmosDBFeatureFlag.FFTUWMTR ?? new List<CosmosDBFeatureFlagTargetUsersWhoMatchTheseRuleParam>();
+            var ruleMatchResult = MultiOptionGetUserVariationRuleMatchResult(
+                cosmosDBFeatureFlag,
+                featureFlagsUser);
+            if (ruleMatchResult != null)
+                return ruleMatchResult;
+
+            // 判断Default Rule
+            if (cosmosDBFeatureFlag.FF.PercentageRolloutForFalse != null &&
+                cosmosDBFeatureFlag.FF.PercentageRolloutForTrue != null)
+            {
+                return GetUserVariationDefaultRulePercentageResult(cosmosDBFeatureFlag, featureFlagsUser, environmentFeatureFlagUser);
+            }
+            if (cosmosDBFeatureFlag.FF.DefaultRuleValue != null)
+                return cosmosDBFeatureFlag.FF.DefaultRuleValue;
+
+
+            return false;
+        }
+
+        private bool? MultiOptionGetUserVariationRuleMatchResult(
+          CosmosDBFeatureFlag cosmosDBFeatureFlag,
+          CosmosDBEnvironmentUser ffUser)
+        {
+            foreach (var ffTUWMRItem in cosmosDBFeatureFlag.FFTUWMTR)
+            {
+
+                var rules = ffTUWMRItem.RuleJsonContent;
+                bool isInCondition = true;
+                if (rules != null && rules.Count > 0)
+                {
+                    foreach (var rule in rules)
+                    {
+                        var ffUCProperty = ffUser.CustomizedProperties.FirstOrDefault(p => p.Name == rule.Property);
+                        if (ffUCProperty == null)
+                            ffUCProperty = new FeatureFlagUserCustomizedProperty();
+                        if (rule.Operation.Contains("Than") && ffUCProperty != null)
+                        {
+                            double conditionDoubleValue, ffUserDoubleValue;
+                            if (!Double.TryParse(rule.Value, out conditionDoubleValue))
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                            if (!Double.TryParse(ffUCProperty.Value, out ffUserDoubleValue))
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+
+                            if (rule.Operation == RuleTypeEnum.BiggerEqualThan.ToString() &&
+                                Math.Round(ffUserDoubleValue, 5) >= Math.Round(conditionDoubleValue, 5))
+                                continue;
+                            else if (rule.Operation == RuleTypeEnum.BiggerThan.ToString() &&
+                                Math.Round(ffUserDoubleValue, 5) > Math.Round(conditionDoubleValue, 5))
+                                continue;
+                            else if (rule.Operation == RuleTypeEnum.LessEqualThan.ToString() &&
+                                Math.Round(ffUserDoubleValue, 5) <= Math.Round(conditionDoubleValue, 5))
+                                continue;
+                            else if (rule.Operation == RuleTypeEnum.LessThan.ToString() &&
+                                Math.Round(ffUserDoubleValue, 5) < Math.Round(conditionDoubleValue, 5))
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.Equal.ToString())
+                        {
+                            if (rule.Property == "KeyId" &&
+                                rule.Value == ffUser.KeyId)
+                                continue;
+                            else if (rule.Property == "Name" &&
+                                     rule.Value == ffUser.Name)
+                                continue;
+                            else if (rule.Property == "Email" &&
+                                     rule.Value == ffUser.Email)
+                                continue;
+                            else if (rule.Property == ffUCProperty.Name &&
+                                     rule.Value == ffUCProperty.Value)
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.NotEqual.ToString())
+                        {
+                            if (rule.Property == "KeyId" &&
+                                rule.Value != ffUser.KeyId)
+                                continue;
+                            else if (rule.Property == "Name" &&
+                                     rule.Value != ffUser.Name)
+                                continue;
+                            else if (rule.Property == "Email" &&
+                                     rule.Value != ffUser.Email)
+                                continue;
+                            else if (rule.Property == ffUCProperty.Name &&
+                                     rule.Value != ffUCProperty.Value)
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.Contains.ToString())
+                        {
+                            if (rule.Property == "KeyId" &&
+                                ffUser.KeyId.Contains(rule.Value))
+                                continue;
+                            else if (rule.Property == "Name" &&
+                                ffUser.Name.Contains(rule.Value))
+                                continue;
+                            else if (rule.Property == "Email" &&
+                                ffUser.Email.Contains(rule.Value))
+                                continue;
+                            else if (rule.Property == ffUCProperty.Name &&
+                                ffUCProperty.Value.Contains(rule.Value))
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.NotContain.ToString())
+                        {
+                            if (rule.Property == "KeyId" &&
+                                !ffUser.KeyId.Contains(rule.Value))
+                                continue;
+                            else if (rule.Property == "Name" &&
+                                !ffUser.Name.Contains(rule.Value))
+                                continue;
+                            else if (rule.Property == "Email" &&
+                                !ffUser.Email.Contains(rule.Value))
+                                continue;
+                            else if (rule.Property == ffUCProperty.Name &&
+                                !ffUCProperty.Value.Contains(rule.Value))
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.IsOneOf.ToString())
+                        {
+                            var ruleValues = JsonConvert.DeserializeObject<List<string>>(rule.Value);
+                            if (rule.Property == "KeyId" &&
+                                ruleValues.Contains(ffUser.KeyId))
+                                continue;
+                            else if (rule.Property == "Name" &&
+                                ruleValues.Contains(ffUser.Name))
+                                continue;
+                            else if (rule.Property == "Email" &&
+                                ruleValues.Contains(ffUser.Email))
+                                continue;
+                            else if (rule.Property == ffUCProperty.Name &&
+                                ruleValues.Contains(ffUCProperty.Value))
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.NotOneOf.ToString())
+                        {
+                            var ruleValues = JsonConvert.DeserializeObject<List<string>>(rule.Value);
+                            if (rule.Property == "KeyId" &&
+                                !ruleValues.Contains(ffUser.KeyId))
+                                continue;
+                            else if (rule.Property == "Name" &&
+                                !ruleValues.Contains(ffUser.Name))
+                                continue;
+                            else if (rule.Property == "Email" &&
+                                !ruleValues.Contains(ffUser.Email))
+                                continue;
+                            else if (rule.Property == ffUCProperty.Name &&
+                                !ruleValues.Contains(ffUCProperty.Value))
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.StartsWith.ToString())
+                        {
+                            if (rule.Property == "KeyId" &&
+                                ffUser.KeyId.StartsWith(rule.Value))
+                                continue;
+                            else if (rule.Property == "Name" &&
+                                ffUser.Name.StartsWith(rule.Value))
+                                continue;
+                            else if (rule.Property == "Email" &&
+                                ffUser.Email.StartsWith(rule.Value))
+                                continue;
+                            else if (rule.Property == ffUCProperty.Name &&
+                                ffUCProperty.Value.StartsWith(rule.Value))
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.EndsWith.ToString())
+                        {
+                            if (rule.Property == "KeyId" &&
+                                ffUser.KeyId.EndsWith(rule.Value))
+                                continue;
+                            else if (rule.Property == "Name" &&
+                                ffUser.Name.EndsWith(rule.Value))
+                                continue;
+                            else if (rule.Property == "Email" &&
+                                ffUser.Email.EndsWith(rule.Value))
+                                continue;
+                            else if (rule.Property == ffUCProperty.Name &&
+                                ffUCProperty.Value.EndsWith(rule.Value))
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.IsTrue.ToString())
+                        {
+                            if (rule.Property == ffUCProperty.Name &&
+                                (ffUCProperty.Value ?? "").ToUpper() == "TRUE")
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.IsFalse.ToString())
+                        {
+                            if (rule.Property == ffUCProperty.Name &&
+                                (ffUCProperty.Value ?? "").ToUpper() == "FALSE")
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.MatchRegex.ToString())
+                        {
+                            Regex rgx = new Regex(rule.Value, RegexOptions.IgnoreCase);
+                            MatchCollection matches = rgx.Matches(ffUCProperty.Value);
+                            if (matches.Count > 0)
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                        else if (rule.Operation == RuleTypeEnum.NotMatchRegex.ToString())
+                        {
+                            Regex rgx = new Regex(rule.Value, RegexOptions.IgnoreCase);
+                            MatchCollection matches = rgx.Matches(ffUCProperty.Value);
+                            if (matches == null || matches.Count == 0)
+                                continue;
+                            else
+                            {
+                                isInCondition = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                    isInCondition = false;
+
+                if (isInCondition)
+                {
+                    foreach(var item in ffTUWMRItem.ValueOptionsVariationRuleValues)
+                    {
+                        IfBelongRolloutPercentage(ffUser.KeyId, item.RolloutPercentage);
+                    }
+                    if (ffTUWMRItem.PercentageRolloutForFalse != null && ffTUWMRItem.PercentageRolloutForTrue != null)
+                    {
+                        string ffuKeyId = ffUser.KeyId;
+
+                        if (ffTUWMRItem.PercentageRolloutForTrue > 1)
+                            ffTUWMRItem.PercentageRolloutForTrue = ffTUWMRItem.PercentageRolloutForTrue / 100;
+                        if (ffTUWMRItem.PercentageRolloutForFalse > 1)
+                            ffTUWMRItem.PercentageRolloutForFalse = ffTUWMRItem.PercentageRolloutForFalse / 100;
+
+                        int trueUserCount = ffTUWMRItem.PercentageRolloutForTrueNumber;
+                        int falseUserCount = ffTUWMRItem.PercentageRolloutForFalseNumber;
+
+                        if (ffTUWMRItem.PercentageRolloutForTrue >= 1)
+                        {
+                            SetPercentageAndResultWhenTrue(environmentFeatureFlagUser, ffTUWMRItem);
+                        }
+                        else if (ffTUWMRItem.PercentageRolloutForFalse >= 1)
+                        {
+                            SetPercentageAndResultWhenFalse(environmentFeatureFlagUser, ffTUWMRItem);
+                            //environmentFeatureFlagUser.ResultValue = false;
+                            //ffTUWMRItem.PercentageRolloutForFalseNumber++;
+                        }
+                        else if ((ffTUWMRItem.PercentageRolloutForTrue ?? 0) < (ffTUWMRItem.PercentageRolloutForFalse ?? 0))
+                        {
+                            if (trueUserCount == 0 && falseUserCount == 0 && ffTUWMRItem.PercentageRolloutForTrue != 0)
+                            {
+                                SetPercentageAndResultWhenTrue(environmentFeatureFlagUser, ffTUWMRItem);
+                                //environmentFeatureFlagUser.ResultValue = true;
+                                //ffTUWMRItem.PercentageRolloutForTrueNumber++;
+                            }
+                            else if (((double)trueUserCount / ((double)trueUserCount + (double)falseUserCount)) <= ffTUWMRItem.PercentageRolloutForTrue)
+                            {
+                                SetPercentageAndResultWhenTrue(environmentFeatureFlagUser, ffTUWMRItem);
+                                //environmentFeatureFlagUser.ResultValue = true;
+                                //ffTUWMRItem.PercentageRolloutForTrueNumber++;
+                            }
+                            else
+                            {
+                                SetPercentageAndResultWhenFalse(environmentFeatureFlagUser, ffTUWMRItem);
+                                //environmentFeatureFlagUser.ResultValue = false;
+                                //ffTUWMRItem.PercentageRolloutForFalseNumber++;
+                            }
+                        }
+                        else
+                        {
+                            if (trueUserCount == 0 && falseUserCount == 0 && ffTUWMRItem.PercentageRolloutForFalse != 0)
+                            {
+                                SetPercentageAndResultWhenFalse(environmentFeatureFlagUser, ffTUWMRItem);
+                                //environmentFeatureFlagUser.ResultValue = false;
+                                //ffTUWMRItem.PercentageRolloutForFalseNumber++;
+                            }
+                            else if (((double)falseUserCount / ((double)trueUserCount + (double)falseUserCount)) <= ffTUWMRItem.PercentageRolloutForFalse)
+                            {
+                                SetPercentageAndResultWhenFalse(environmentFeatureFlagUser, ffTUWMRItem);
+                                //environmentFeatureFlagUser.ResultValue = false;
+                                //ffTUWMRItem.PercentageRolloutForFalseNumber++;
+                            }
+                            else
+                            {
+                                SetPercentageAndResultWhenTrue(environmentFeatureFlagUser, ffTUWMRItem);
+                                //environmentFeatureFlagUser.ResultValue = true;
+                                //ffTUWMRItem.PercentageRolloutForTrueNumber++;
+                            }
+                        }
+                        //}
+
+                        return environmentFeatureFlagUser.ResultValue;
+                    }
+                    else
+                    {
+                        return ffTUWMRItem.VariationRuleValue;
+                    }
+                }
+            }
+            return null;
+        }
+
+
 
         public bool IfBelongRolloutPercentage(string userFFKeyId, double[] rolloutPercentageRange)
         {

@@ -116,7 +116,7 @@ namespace FeatureFlags.APIs.Models
 
     public class VariationOptionPercentageRollout
     {
-        public double? RolloutPercentage { get; set; }
+        public double[] RolloutPercentage { get; set; }
         public VariationOption ValueOption { get; set; }
     }    
 }
