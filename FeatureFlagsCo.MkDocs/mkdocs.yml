@@ -2,6 +2,7 @@ site_name: " "
 nav:
     - 案例&实践: 
       - 快速入门: index.md
+      - Rollout百分比分配算法: quickstart/rollout-algo.md
       - 使用者说: quickstart/feedback.md
       - 案例-灵活的选择用户: quickstart/effects.md
       - 案例-灰度发布: quickstart/mjkgvshd.md

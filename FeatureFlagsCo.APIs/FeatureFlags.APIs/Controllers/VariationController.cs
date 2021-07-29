@@ -141,6 +141,39 @@ namespace FeatureFlags.APIs.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("IfBelongRolloutPercentage")]
+        public string IfBelongRolloutPercentage()
+        {
+            string returnValue = "";
+            for(int k = 0; k < 10; k++)
+            {
+                returnValue += $"   ##Rround {k}## ";
+                int trueCount = 0;
+                for (int i = 0; i < 100; i++)
+                {
+                    if (_variationService.IfBelongRolloutPercentage(Guid.NewGuid().ToString(), new double[] { 0.0, 0.333 }))
+                        trueCount++;
+                }
+                returnValue += $" 100 sample: {trueCount};";
+                trueCount = 0;
+                for (int i = 0; i < 1000; i++)
+                {
+                    if (_variationService.IfBelongRolloutPercentage(Guid.NewGuid().ToString(), new double[] { 0.0, 0.333 }))
+                        trueCount++;
+                }
+                returnValue += $" 1000 sample: {trueCount};";
+                trueCount = 0;
+                for (int i = 0; i < 10000; i++)
+                {
+                    if (_variationService.IfBelongRolloutPercentage(Guid.NewGuid().ToString(), new double[] { 0.0, 0.333 }))
+                        trueCount++;
+                }
+                returnValue += $" 10000 sample: {trueCount};";
+            }
+            return returnValue;
+        }
+
 
         [HttpPost]
         [Route("VariationResultTest")]

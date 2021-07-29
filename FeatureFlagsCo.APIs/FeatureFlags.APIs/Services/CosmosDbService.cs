@@ -239,17 +239,6 @@ namespace FeatureFlags.APIs.Services
                 param.FF.ValueWhenDisabled = null;
                 param.IsMultiOptionMode = true;
 
-                foreach (var item in param.FF.DefaultRulePercentageRollouts)
-                {
-                    if(originFF.FF.DefaultRulePercentageRollouts != null)
-                    {
-                        var originDRPR = originFF.FF.DefaultRulePercentageRollouts.FirstOrDefault(p => p.ValueOption.LocalId == item.ValueOption.LocalId);
-                        if (originDRPR != null)
-                        {
-                            item.UserCount = originDRPR.UserCount;
-                        }
-                    }
-                }
 
                 if (param.FFTUWMTR != null && param.FFTUWMTR.Count > 0)
                 {
@@ -258,25 +247,6 @@ namespace FeatureFlags.APIs.Services
                         if (string.IsNullOrWhiteSpace(item.RuleId))
                         {
                             item.RuleId = Guid.NewGuid().ToString();
-                        }
-                        else
-                        {
-                            if (originFF.FFTUWMTR != null)
-                            {
-                                var originDRPR = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId);
-                                if (originDRPR.ValueOptionsVariationRuleValues != null && originDRPR.ValueOptionsVariationRuleValues.Count > 0)
-                                {
-                                    foreach (var rItem in item.ValueOptionsVariationRuleValues ?? new List<VariationOptionPercentageRollout>())
-                                    {
-                                        var vovrv = originDRPR.ValueOptionsVariationRuleValues.FirstOrDefault(p => p.ValueOption.LocalId == rItem.ValueOption.LocalId);
-                                        if (vovrv != null)
-                                        {
-                                            rItem.UserCount = vovrv.UserCount;
-                                        }
-                                    }
-                                }
-                            }
-                            
                         }
                     }
                 }

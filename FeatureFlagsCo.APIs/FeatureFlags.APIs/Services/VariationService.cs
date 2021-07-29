@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace FeatureFlags.APIs.Repositories
 {
@@ -23,6 +25,8 @@ namespace FeatureFlags.APIs.Repositories
 
         Task<Tuple<VariationOption, bool>> CheckMultiOptionVariationAsync(string environmentSecret, string featureFlagKeyName, CosmosDBEnvironmentUser ffUser,
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVM);
+
+        bool IfBelongRolloutPercentage(string userFFKeyId, double[] rolloutPercentageRange);
     }
 
     public class VariationService : IVariationService
@@ -777,6 +781,18 @@ namespace FeatureFlags.APIs.Repositories
             return environmentFeatureFlagUser;
         }
 
+        public bool IfBelongRolloutPercentage(string userFFKeyId, double[] rolloutPercentageRange)
+        {
+            byte[] hashedKey = new MD5CryptoServiceProvider().ComputeHash(ASCIIEncoding.ASCII.GetBytes(userFFKeyId));
+            int a0 = BitConverter.ToInt32(hashedKey, 0);
+            double y = Math.Abs((double)a0 / (double)int.MinValue);
+            if (y >= rolloutPercentageRange[0] && y <= rolloutPercentageRange[1])
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         #endregion
     }
