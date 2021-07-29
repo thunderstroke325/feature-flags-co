@@ -39,7 +39,7 @@ stages:
           inputs:
             targetType: 'inline'
             script: |
-              cd /FeatureFlagsCo.MkDocs
+              cd FeatureFlagsCo.MkDocs
               python -c 'import sys; print(sys.version_info[:])'
               pip install mkdocs
               pip install mkdocs-material
