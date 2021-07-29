@@ -25,21 +25,23 @@
 
 ### 测试代码与结果
 
-对于上面的代码，我们做了5轮测试，每轮分别做100、1000、10000个基于用户GUID的百分比分配测试：
+对于上面的代码，我们做了5轮测试，每轮分别做100、1000、10000个基于用户GUID的百分比分配测试。
+
+只针对GUID进行测试，会有Guid的生成也自存在均匀分布的风险。所以我们同样进行了以邮箱为ID的测试，且邮箱的变化极小。
 
 
 **结果如下**: 
 
-##Rround 0##  100 sample: 32; 1000 sample: 326; 10000 sample: 3315;   
-##Rround 1##  100 sample: 32; 1000 sample: 337; 10000 sample: 3335;   
-##Rround 2##  100 sample: 34; 1000 sample: 322; 10000 sample: 3319;   
-##Rround 3##  100 sample: 41; 1000 sample: 332; 10000 sample: 3276;   
-##Rround 4##  100 sample: 36; 1000 sample: 329; 10000 sample: 3364;   
-##Rround 5##  100 sample: 36; 1000 sample: 322; 10000 sample: 3315;   
-##Rround 6##  100 sample: 36; 1000 sample: 351; 10000 sample: 3319;   
-##Rround 7##  100 sample: 32; 1000 sample: 348; 10000 sample: 3415;   
-##Rround 8##  100 sample: 30; 1000 sample: 316; 10000 sample: 3271;   
-##Rround 9##  100 sample: 31; 1000 sample: 340; 10000 sample: 3348;
+##Rround 0##  100 sample (GUID): 41; 100 sample (小变化): 27; 1000 sample (GUID): 343; 1000 sample (小变化): 317; 10000 sample: 3247; 10000 sample (小变化): 3308;   
+##Rround 1##  100 sample (GUID): 25; 100 sample (小变化): 40; 1000 sample (GUID): 342; 1000 sample (小变化): 336; 10000 sample: 3406; 10000 sample (小变化): 3354;   
+##Rround 2##  100 sample (GUID): 34; 100 sample (小变化): 37; 1000 sample (GUID): 342; 1000 sample (小变化): 318; 10000 sample: 3286; 10000 sample (小变化): 3323;   
+##Rround 3##  100 sample (GUID): 32; 100 sample (小变化): 28; 1000 sample (GUID): 322; 1000 sample (小变化): 348; 10000 sample: 3280; 10000 sample (小变化): 3328;   
+##Rround 4##  100 sample (GUID): 39; 100 sample (小变化): 36; 1000 sample (GUID): 328; 1000 sample (小变化): 338; 10000 sample: 3312; 10000 sample (小变化): 3295;   
+##Rround 5##  100 sample (GUID): 36; 100 sample (小变化): 33; 1000 sample (GUID): 334; 1000 sample (小变化): 374; 10000 sample: 3266; 10000 sample (小变化): 3452;   
+##Rround 6##  100 sample (GUID): 29; 100 sample (小变化): 35; 1000 sample (GUID): 329; 1000 sample (小变化): 284; 10000 sample: 3263; 10000 sample (小变化): 3365;   
+##Rround 7##  100 sample (GUID): 40; 100 sample (小变化): 32; 1000 sample (GUID): 334; 1000 sample (小变化): 332; 10000 sample: 3351; 10000 sample (小变化): 3410;   
+##Rround 8##  100 sample (GUID): 33; 100 sample (小变化): 28; 1000 sample (GUID): 357; 1000 sample (小变化): 303; 10000 sample: 3223; 10000 sample (小变化): 3297;   
+##Rround 9##  100 sample (GUID): 33; 100 sample (小变化): 33; 1000 sample (GUID): 345; 1000 sample (小变化): 351; 10000 sample: 3298; 10000 sample (小变化): 3337;
 
 **测试代码(C#)**:
     public string IfBelongRolloutPercentage()
@@ -54,14 +56,31 @@
                 if (_variationService.IfBelongRolloutPercentage(Guid.NewGuid().ToString(), new double[] { 0.0, 0.333 }))
                     trueCount++;
             }
-            returnValue += $" 100 sample: {trueCount};";
+            returnValue += $" 100 sample (GUID): {trueCount};";
+            trueCount = 0;
+            for (int i = 0; i < 100; i++)
+            {
+                if (_variationService.IfBelongRolloutPercentage($"hu-beau{1000*k+i}@outlook.com", new double[] { 0.0, 0.333 }))
+                    trueCount++;
+            }
+            returnValue += $" 100 sample (小变化邮箱): {trueCount};";
+
+
             trueCount = 0;
             for (int i = 0; i < 1000; i++)
             {
                 if (_variationService.IfBelongRolloutPercentage(Guid.NewGuid().ToString(), new double[] { 0.0, 0.333 }))
                     trueCount++;
             }
-            returnValue += $" 1000 sample: {trueCount};";
+            returnValue += $" 1000 sample (GUID): {trueCount};";
+            trueCount = 0;
+            for (int i = 0; i < 1000; i++)
+            {
+                if (_variationService.IfBelongRolloutPercentage($"hu-beau{10000 * k + i}@outlook.com", new double[] { 0.0, 0.333 }))
+                    trueCount++;
+            }
+            returnValue += $" 1000 sample (小变化邮箱): {trueCount};";
+
             trueCount = 0;
             for (int i = 0; i < 10000; i++)
             {
@@ -69,6 +88,13 @@
                     trueCount++;
             }
             returnValue += $" 10000 sample: {trueCount};";
+            trueCount = 0;
+            for (int i = 0; i < 10000; i++)
+            {
+                if (_variationService.IfBelongRolloutPercentage($"hu-beau{100000 * k + i}@outlook.com", new double[] { 0.0, 0.333 }))
+                    trueCount++;
+            }
+            returnValue += $" 10000 sample (小变化邮箱): {trueCount};";
         }
         return returnValue;
     }

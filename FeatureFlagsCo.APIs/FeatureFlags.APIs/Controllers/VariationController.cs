@@ -155,14 +155,31 @@ namespace FeatureFlags.APIs.Controllers
                     if (_variationService.IfBelongRolloutPercentage(Guid.NewGuid().ToString(), new double[] { 0.0, 0.333 }))
                         trueCount++;
                 }
-                returnValue += $" 100 sample: {trueCount};";
+                returnValue += $" 100 sample (GUID): {trueCount};";
+                trueCount = 0;
+                for (int i = 0; i < 100; i++)
+                {
+                    if (_variationService.IfBelongRolloutPercentage($"hu-beau{1000*k+i}@outlook.com", new double[] { 0.0, 0.333 }))
+                        trueCount++;
+                }
+                returnValue += $" 100 sample (小变化邮箱): {trueCount};";
+
+
                 trueCount = 0;
                 for (int i = 0; i < 1000; i++)
                 {
                     if (_variationService.IfBelongRolloutPercentage(Guid.NewGuid().ToString(), new double[] { 0.0, 0.333 }))
                         trueCount++;
                 }
-                returnValue += $" 1000 sample: {trueCount};";
+                returnValue += $" 1000 sample (GUID): {trueCount};";
+                trueCount = 0;
+                for (int i = 0; i < 1000; i++)
+                {
+                    if (_variationService.IfBelongRolloutPercentage($"hu-beau{10000 * k + i}@outlook.com", new double[] { 0.0, 0.333 }))
+                        trueCount++;
+                }
+                returnValue += $" 1000 sample (小变化邮箱): {trueCount};";
+
                 trueCount = 0;
                 for (int i = 0; i < 10000; i++)
                 {
@@ -170,10 +187,16 @@ namespace FeatureFlags.APIs.Controllers
                         trueCount++;
                 }
                 returnValue += $" 10000 sample: {trueCount};";
+                trueCount = 0;
+                for (int i = 0; i < 10000; i++)
+                {
+                    if (_variationService.IfBelongRolloutPercentage($"hu-beau{100000 * k + i}@outlook.com", new double[] { 0.0, 0.333 }))
+                        trueCount++;
+                }
+                returnValue += $" 10000 sample (小变化邮箱): {trueCount};";
             }
             return returnValue;
         }
-
 
         [HttpPost]
         [Route("VariationResultTest")]
