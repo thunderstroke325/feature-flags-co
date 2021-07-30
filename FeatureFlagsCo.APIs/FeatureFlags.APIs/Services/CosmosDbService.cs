@@ -286,8 +286,12 @@ namespace FeatureFlags.APIs.Services
                     }
                     else
                     {
-                        item.PercentageRolloutForFalseNumber = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId).PercentageRolloutForFalseNumber;
-                        item.PercentageRolloutForTrueNumber = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId).PercentageRolloutForTrueNumber;
+                        var fftu = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId);
+                        if(fftu != null)
+                        {
+                            item.PercentageRolloutForFalseNumber = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId).PercentageRolloutForFalseNumber;
+                            item.PercentageRolloutForTrueNumber = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId).PercentageRolloutForTrueNumber;
+                        }
                     }
                 }
             }
