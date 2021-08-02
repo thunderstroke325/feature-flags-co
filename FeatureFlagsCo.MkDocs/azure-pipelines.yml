@@ -4,7 +4,7 @@
 # https://aka.ms/yaml
 
 trigger:
-- main
+- main-mkdocs
 
 pool:
   vmImage: windows-latest
@@ -27,25 +27,29 @@ stages:
             versionSpec: '3.6'
             addToPath: true
             architecture: 'x64'
+        
         - task: Bash@3
           inputs:
             targetType: 'inline'
             script: |
+              ls
+              echo $(System.DefaultWorkingDirectory)
+
+        - task: Bash@3
+          inputs:
+            targetType: 'inline'
+            script: |
+              cd FeatureFlagsCo.MkDocs
               python -c 'import sys; print(sys.version_info[:])'
               pip install mkdocs
               pip install mkdocs-material
               mkdocs build
-        # - task: PythonScript@0
-        #   inputs:
-        #     scriptSource: 'inline'
-        #     script: |
-        #       python install mkdocs
-        #       python install mkdocs-material
-        #       mkdocs build
+        
+
         
         - task: AzureFileCopy@4
           inputs:
-            SourcePath: $(System.DefaultWorkingDirectory)/site/*
+            SourcePath: $(System.DefaultWorkingDirectory)/FeatureFlagsCo.MkDocs/site/*
             azureSubscription: 'azure-china-devops'
             Destination: 'AzureBlob'
             storage: 'ffc0st0sws0mkdocs'
