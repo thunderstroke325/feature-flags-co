@@ -17,6 +17,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFs.SDKs.Test", "FFs.SDKs.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs", "FeatureFlags.APIs\FeatureFlags.APIs.csproj", "{DB0AA70E-2760-4AAC-8832-CB6E2337324C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FeatureFlags.APIs.Tests", "FeatureFlags.APIs.Tests", "{FC22267D-8758-4C36-B8CE-BAE5BEA6D0F0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Postman", "Postman", "{54812895-09E5-4E82-8756-890CB72E6443}"
+	ProjectSection(SolutionItems) = preProject
+		FeatureFlags.APIs.Tests\Postman\feature-flags.co.postman_collection.json = FeatureFlags.APIs.Tests\Postman\feature-flags.co.postman_collection.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +45,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{54812895-09E5-4E82-8756-890CB72E6443} = {FC22267D-8758-4C36-B8CE-BAE5BEA6D0F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D9438C6D-E691-4012-A07F-96471322805E}
