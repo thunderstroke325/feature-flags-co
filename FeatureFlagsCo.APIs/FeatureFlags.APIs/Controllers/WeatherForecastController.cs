@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
@@ -85,6 +87,21 @@ namespace FeatureFlags.APIs.Controllers
             throw new Exception("ThrowException test");
         }
 
+        [HttpGet]
+        [Route("ReturnTest200")]
+        public JsonResult ReturnTest200()
+        {
+            Response.StatusCode = 200;
+            return new JsonResult(new VariationOption());
+        }
+
+        [HttpGet]
+        [Route("ReturnTest501")]
+        public JsonResult ReturnTest501()
+        {
+            Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            return new JsonResult(new VariationOption());
+        }
 
         [HttpGet]
         [Route("redistest2")]

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
@@ -95,8 +96,28 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("GetMultiOptionVariation")]
-        public async Task<ReturnJsonModel<VariationOption>> GetMultiOptionVariation([FromBody] GetUserVariationResultParam param)
+        public async Task<JsonResult> GetMultiOptionVariation([FromBody] GetUserVariationResultParam param)
         {
+            if(param == null)
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("Parameter incorrect");
+            }
+            else if (string.IsNullOrWhiteSpace(param.EnvironmentSecret))
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("EnvironmentSecret shouldn't be empty");
+            }
+            else if (string.IsNullOrWhiteSpace(param.FeatureFlagKeyName))
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("FeatureFlagKeyName shouldn't be empty");
+            }
+            else if (string.IsNullOrWhiteSpace(param.FFUserKeyId))
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("FFUserKeyId shouldn't be empty");
+            }
             try
             {
                 var ffIdVM = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
@@ -124,20 +145,13 @@ namespace FeatureFlags.APIs.Controllers
                     _logger.LogInformation("variation-request");
                 }
 
-                return new ReturnJsonModel<VariationOption>()
-                {
-                    StatusCode = 200,
-                    Data = returnResult.Item1
-                };
+                return new JsonResult(returnResult.Item1);
             }
             catch(Exception exp)
             {
                 _logger.LogError(exp, "Post /Variation/GetMultiOptionVariation ; Body: " + JsonConvert.SerializeObject(param));
-                return new ReturnJsonModel<VariationOption>()
-                {
-                    StatusCode = 500,
-                    Error = exp
-                };
+                Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                return new JsonResult(exp.Message);
             }
         }
 
