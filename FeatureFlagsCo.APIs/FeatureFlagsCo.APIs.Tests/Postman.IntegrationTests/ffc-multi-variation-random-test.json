@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "6fca63cb-b189-4c33-925d-8f21c750341c",
-		"name": "feature-flags.co",
+		"name": "ffc-multi-variation-test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
