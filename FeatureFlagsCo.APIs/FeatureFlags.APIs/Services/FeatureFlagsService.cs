@@ -17,7 +17,6 @@ namespace FeatureFlags.APIs.Repositories
     public interface IFeatureFlagsService
     {
         Task<EnvironmentUserQueryResultViewModel> QueryEnvironmentFeatureFlagUsersAsync(string searchText, int environmentId, int pageIndex, int pageSize, string currentUserId);
-        Task<List<string>> GetEnvironmentUserPropertiesAsync(int environmentId);
         Task<List<int>> GetAccountAndProjectIdByEnvironmentIdAsync(int environmentId);
     }
 
@@ -53,22 +52,6 @@ namespace FeatureFlags.APIs.Repositories
                 Count = pageTotalNumber,
                 Users = users
             };
-        }
-
-        public async Task<List<string>> GetEnvironmentUserPropertiesAsync(int environmentId)
-        {
-            var returnModel = new List<string>() { "KeyId", "Name", "Email" };
-            //var customizedPropertieJsons = await _dbContext.FeatureFlagsUsers.Where(p => p.EnvironmentId == environmentId).Select(p => p.CustomizedPropertiesInJson).ToListAsync();
-            //foreach (var item in customizedPropertieJsons)
-            //{
-            //    if (!string.IsNullOrWhiteSpace(item))
-            //    {
-            //        var customizedProperties = JsonConvert.DeserializeObject<List<FeatureFlagUserCustomizedPropertyViewModel>>(item);
-            //        var properties = customizedProperties.Select(p => p.Name).Distinct().ToList();
-            //        returnModel.AddRange(properties);
-            //    }
-            //}
-            return returnModel.Distinct().ToList();
         }
 
         public async Task<List<int>> GetAccountAndProjectIdByEnvironmentIdAsync(int environmentId)

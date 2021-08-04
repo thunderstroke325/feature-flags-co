@@ -37,14 +37,60 @@ stages:
                   version: 3.1.x
                   packageType: runtime
 
+              - task: PowerShell@2
+                displayName: Replace Settings
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs/FeatureFlags.APIs
+                    $pathToJson = "appsettings.json"
+                    $a = Get-Content $pathToJson | ConvertFrom-Json
+            
+                    $a.ConnectionStrings.ConnStr = "$(SQLDATABASE_ConnectionString_Dev)"
+                    $a.ConnectionStrings.RedisServerUrl = "$(REDISCACHE_ConnectionString_Dev)"
+                    $a.JWT.Secret = "$(JWT_Secret_Dev)"
+                    $a.CosmosDb.Account = "$(CosmosDb_Account_Dev)"
+                    $a.CosmosDb.Key = "$(CosmosDb_Key_Dev)"
+                    $a.CosmosDb.DatabaseName = "$(CosmosDb_Account_DatabaseName)"
+                    $a.CosmosDb.ContainerName = "$(CosmosDb_Account_ContainerName)"
+
+                    $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey_Dev)"
+                    $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString_Dev)"
+                    $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId_Dev)"
+                    $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret_Dev)"
+
+                    $a.MySettings.SendCloudAPIUser = "$(SendCloudAPIUser)"
+                    $a.MySettings.SendCloudAPIKey = "$(SendCloudAPIKey)"
+                    $a.MySettings.SendCloudFrom = "noreply@feature-flags.co"
+                    $a.MySettings.SendCloudFromName = "feature-flags.co"
+                    $a.MySettings.SendCloudTemplate = "forgetpassword"
+                    $a.MySettings.SendCloudEmailSubject = "feature-flags.co"
+
+                    ConvertTo-Json $a -depth 100  | set-content $pathToJson
+
+                    $pathToJsonCheck = "appsettings.json"
+                    $aCheck = Get-Content $pathToJson | ConvertFrom-Json
+                    Write-Host $aCheck.ConnectionStrings.ConnStr
+                    Write-Host $aCheck.ConnectionStrings.RedisServerUrl
+                    Write-Host $aCheck.JWT.Secret
+                    Write-Host $aCheck.CosmosDb.Account
+                    Write-Host $aCheck.CosmosDb.Key
+                    Write-Host $aCheck.CosmosDb.DatabaseName
+                    Write-Host $aCheck.CosmosDb.ContainerName
+                    Write-Host $aCheck.ApplicationInsights.InstrumentationKey
+                    Write-Host $aCheck.ApplicationInsights.ConnectionString
+                    Write-Host $aCheck.MySettings.AppInsightsApplicationId
+                    Write-Host $aCheck.MySettings.AppInsightsApplicationApiSecret.
+
               - task: DotNetCoreCLI@2
                 displayName: dotnet restore
                 inputs:
-                    command: restore
+                  command: restore
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
               - task: DotNetCoreCLI@2
                 inputs:
                   command: 'build'
-                  projects: '**/FeatureFlags.APIs.csproj'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
     
               - task: DotNetCoreCLI@2
                 inputs:
@@ -60,7 +106,47 @@ stages:
                   appName: 'ffc-api-ce2-dev'
                   package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
                   deploymentMethod: 'auto'
+            
+              - task: PowerShell@2
+                displayName: Replace Postman Setting
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests
+                    $pathToJson = "ffc-variation-random-test.json"
+                    $a = Get-Content $pathToJson | ConvertFrom-Json
+            
+                    $a.variable[0].value = "$(API_URL_Dev)"
 
+                    ConvertTo-Json $a -depth 100  | set-content $pathToJson
+
+                    $pathToJsonCheck = "ffc-variation-random-test.json"
+                    $aCheck = Get-Content $pathToJson | ConvertFrom-Json
+                    Write-Host $a.variable[0].key
+                    Write-Host $a.variable[0].value
+              
+              - task: Bash@3
+                displayName: 'run newman'
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    ls
+                    cd FeatureFlagsCo.APIs
+                    ls
+                    cd FeatureFlagsCo.APIs.Tests
+                    ls 
+                    cd Postman.IntegrationTests
+                    ls
+                    npm install -g newman
+                    newman run ffc-variation-random-test.json --reporters cli,junit --reporter-junit-export junit-report.xml
+
+              - task: PublishTestResults@2
+                inputs:
+                  testResultsFormat: 'JUnit'
+                  testResultsFiles: '**/*.xml'
+                  mergeTestResults: true
+                  failTaskOnFailedTests: true
+                displayName: 'Publish Test Results'        
 
 - stage: 'Production'
   condition: succeeded()
@@ -83,7 +169,7 @@ stages:
                 inputs:
                   targetType: 'inline'
                   script: |
-                    cd FeatureFlags.AdminWebAPIs
+                    cd FeatureFlagsCo.APIs/FeatureFlags.APIs
                     $pathToJson = "appsettings.json"
                     $a = Get-Content $pathToJson | ConvertFrom-Json
             
@@ -92,10 +178,20 @@ stages:
                     $a.JWT.Secret = "$(JWT_Secret)"
                     $a.CosmosDb.Account = "$(CosmosDb_Account)"
                     $a.CosmosDb.Key = "$(CosmosDb_Key)"
+                    $a.CosmosDb.DatabaseName = "$(CosmosDb_Account_DatabaseName)"
+                    $a.CosmosDb.ContainerName = "$(CosmosDb_Account_ContainerName)"
+
                     $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey)"
                     $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString)"
                     $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId)"
                     $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret)"
+                    
+                    $a.MySettings.SendCloudAPIUser = "$(SendCloudAPIUser)"
+                    $a.MySettings.SendCloudAPIKey = "$(SendCloudAPIKey)"
+                    $a.MySettings.SendCloudFrom = "noreply@feature-flags.co"
+                    $a.MySettings.SendCloudFromName = "feature-flags.co"
+                    $a.MySettings.SendCloudTemplate = "forgetpassword"
+                    $a.MySettings.SendCloudEmailSubject = "feature-flags.co"
 
                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
 
@@ -108,10 +204,11 @@ stages:
                 displayName: dotnet restore
                 inputs:
                   command: restore
+                  projects: '/FeatureFlagsCo.APIs'
               - task: DotNetCoreCLI@2
                 inputs:
                   command: 'build'
-                  projects: '**/FeatureFlags.APIs.csproj'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
     
               - task: DotNetCoreCLI@2
                 inputs:

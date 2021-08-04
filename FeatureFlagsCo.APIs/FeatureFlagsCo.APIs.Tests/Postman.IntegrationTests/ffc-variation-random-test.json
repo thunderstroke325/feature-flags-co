@@ -1,0 +1,1349 @@
+{
+	"info": {
+		"_postman_id": "6fca63cb-b189-4c33-925d-8f21c750341c",
+		"name": "ffc-multi-variation-test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Data Initialization",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var environmentSecret = \"MzkwLWZlYjctNCUyMDIxMDczMTExNDkwNV9fNF9fMl9fNF9fZGVmYXVsdF9hNGIyYQ==\";\r",
+							"var environmentId = 4;\r",
+							"\r",
+							"\r",
+							"pm.collectionVariables.set(\"environmentId\", environmentId);\r",
+							"pm.collectionVariables.set(\"projectId\", 2);\r",
+							"pm.collectionVariables.set(\"organizationId\", 4);\r",
+							"pm.collectionVariables.set(\"organizationId\", 4);\r",
+							"pm.collectionVariables.set(\"environmentSecret\", environmentSecret)\r",
+							"\r",
+							"var users = generateUsers(environmentSecret);\r",
+							"var variationOptions = generateVariationOptions(5);\r",
+							"\r",
+							"for (var i = 0; i < 1; i++) {\r",
+							"    var defaultRulePercentageRollouts = generateDefaultRulePercentageRollouts(variationOptions.length);\r",
+							"    var variationOptionWhenDisabled = randomGetVariationOption(variationOptions);\r",
+							"    var targetIndividuals = generateRandomlyTargetIndividuals(variationOptions, users);\r",
+							"    // initialize static test data. \r",
+							"    for(var r = 0;r<targetIndividuals.length;r++){\r",
+							"        var idividuals = targetIndividuals[r].individuals;     \r",
+							"\r",
+							"        // data for test \"Get Varation - DefaultRulePercentageRollouts\"\r",
+							"        var index = idividuals.findIndex(p=>p.keyId === \"nuser-5@feature-flags.test\");\r",
+							"        if(index !== -1)\r",
+							"            idividuals.splice(index, 1);\r",
+							"        // data for test \"Get Varation - fftuwmtr - condition 0\"\r",
+							"        index = idividuals.findIndex(p=>p.keyId === \"nuser-9@feature-flags.test\");\r",
+							"        if(index !== -1)\r",
+							"            idividuals.splice(index, 1);\r",
+							"        // data for test \"Get Varation - fftuwmtr - condition 1\"\r",
+							"        index = idividuals.findIndex(p=>p.keyId === \"nuser-10@feature-flags.test\");\r",
+							"        if(index !== -1)\r",
+							"            idividuals.splice(index, 1); \r",
+							"        // data for test \"Get Varation - fftuwmtr - condition 2\"\r",
+							"        index = idividuals.findIndex(p=>p.keyId === \"nuser-11@feature-flags.test\");\r",
+							"        if(index !== -1)\r",
+							"            idividuals.splice(index, 1); \r",
+							"    }\r",
+							"    // data for test \"Get Varation - Target Individuals\"\r",
+							"    targetIndividuals[0].individuals.push({\r",
+							"        \"id\": \"WU__\" + environmentId + \"__nuser-3@feature-flags.test\",\r",
+							"        \"name\": \"nuser-3\",\r",
+							"        \"keyId\": \"nuser-3@feature-flags.test\",\r",
+							"        \"email\": \"nuser-3@feature-flags.test\"\r",
+							"    });\r",
+							"\r",
+							"    var fftuwmtr = generateFFTUWMTR(variationOptions);\r",
+							"    var testData = {\r",
+							"        \"id\": \"##{featureFlagId}##\",\r",
+							"        \"environmentId\": environmentId,\r",
+							"        \"objectType\": \"FeatureFlag\",\r",
+							"        \"ff\": {\r",
+							"            \"id\": \"##{featureFlagId}##\",\r",
+							"            \"name\": \"##{featureFlagName}##\",\r",
+							"            \"keyName\": \"##{featureFlagKeyName}##\",\r",
+							"            \"environmentId\": environmentId,\r",
+							"            \"status\": \"Enabled\",\r",
+							"            \"defaultRulePercentageRollouts\": defaultRulePercentageRollouts,\r",
+							"            \"variationOptionWhenDisabled\": variationOptionWhenDisabled\r",
+							"        },\r",
+							"        \"ffp\": [\r",
+							"        ],\r",
+							"        \"fftuwmtr\": fftuwmtr,\r",
+							"        \"targetIndividuals\": targetIndividuals,\r",
+							"        \"variationOptions\": variationOptions,\r",
+							"        \"isMultiOptionMode\": true\r",
+							"    }\r",
+							"\r",
+							"\r",
+							"    console.log(testData);\r",
+							"    pm.collectionVariables.set(\"dataSample\" + i, JSON.stringify(testData));\r",
+							"}\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"// ======================== ==============================================\r",
+							"\r",
+							"function getRandomArbitrary(min, max) {\r",
+							"    return Math.random() * (max - min) + min;\r",
+							"}\r",
+							"function getRandomInt(min, max) {\r",
+							"    min = Math.ceil(min);\r",
+							"    max = Math.floor(max);\r",
+							"    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive\r",
+							"}\r",
+							"function randomPercentagesAddUpTo100(amount, min, max) {\r",
+							"    const arr = [];\r",
+							"    let total = 0;\r",
+							"\r",
+							"    // fill an array with random numbers\r",
+							"    for (let i = 0; i < amount; i++) arr.push(getRandomInt(min, max));\r",
+							"\r",
+							"    // add up all the numbers\r",
+							"    for (let i = 0; i < amount; i++) total += arr[i];\r",
+							"\r",
+							"    // normalise so numbers add up to 1\r",
+							"    for (let i = 0; i < amount; i++) arr[i] /= total;\r",
+							"\r",
+							"    return arr;\r",
+							"};\r",
+							"function arraySum(arr, stopIndex) {\r",
+							"    var sum = 0;\r",
+							"    for (let i = 0; i < stopIndex; i++) {\r",
+							"        sum += arr[i];\r",
+							"    }\r",
+							"    return sum;\r",
+							"}\r",
+							"function randomGetVariationOption(vops) {\r",
+							"    return vops[getRandomInt(0, vops.length - 1)];\r",
+							"}\r",
+							"\r",
+							"function generateDefaultRulePercentageRollouts(variationOptionCount) {\r",
+							"    var defaultRulePercentageRollouts = [];\r",
+							"    var defaultRuleRolloutCount = getRandomInt(1, variationOptionCount);\r",
+							"    var existedVariaIndexes = [];\r",
+							"    var percentages = randomPercentagesAddUpTo100(defaultRuleRolloutCount, 1, 5);\r",
+							"    var percentageRanges = [];\r",
+							"    for (var r = 0; r < percentages.length; r++) {\r",
+							"        var p = Math.round(arraySum(percentages, r + 1) * 100) / 100;\r",
+							"        var sum = Math.round(arraySum(percentages, r) * 100) / 100;\r",
+							"        var percentageRange = [sum, p];\r",
+							"        percentageRanges.push(percentageRange);\r",
+							"    }\r",
+							"    for (var r = 0; r < defaultRuleRolloutCount; r++) {\r",
+							"        var variaIndex = getRandomInt(0, variationOptionCount);\r",
+							"        while (existedVariaIndexes.includes(variaIndex) === true) {\r",
+							"            variaIndex = getRandomInt(0, variationOptionCount);\r",
+							"        }\r",
+							"        existedVariaIndexes.push(variaIndex);\r",
+							"\r",
+							"        defaultRulePercentageRollouts.push({\r",
+							"            \"rolloutPercentage\": percentageRanges[r],\r",
+							"            \"valueOption\": variationOptions[variaIndex]\r",
+							"        });\r",
+							"\r",
+							"    }\r",
+							"\r",
+							"    return defaultRulePercentageRollouts\r",
+							"}\r",
+							"function generateVariationOptions(variationOptionCount) {\r",
+							"    var variationOptions = [];\r",
+							"    for (var i = 0; i < variationOptionCount; i++) {\r",
+							"        variationOptions.push({\r",
+							"            \"localId\": i,\r",
+							"            \"displayOrder\": i,\r",
+							"            \"variationValue\": \"Value\" + i\r",
+							"        });\r",
+							"    }\r",
+							"    return variationOptions;\r",
+							"}\r",
+							"function generateFFUserCustomizedProperties() {\r",
+							"    var cps = [];\r",
+							"    for (var i = 0; i < 10; i++) {\r",
+							"        value = \"\";\r",
+							"        if (i % 3 === 0) {\r",
+							"            value = \"value-\" + i\r",
+							"        }\r",
+							"        else if (i % 3 === 1) {\r",
+							"            value = getRandomInt(0, 999);\r",
+							"        }\r",
+							"        else if (i % 3 == 2) {\r",
+							"            value = (getRandomInt(1, 2) % 2 === 1);\r",
+							"        }\r",
+							"        cps.push({\r",
+							"            \"name\": \"property-\" + i,\r",
+							"            \"value\": `${value}`\r",
+							"        });\r",
+							"    }\r",
+							"    return cps;\r",
+							"}\r",
+							"function generateUsers(environmentSecret) {\r",
+							"    var users = [];\r",
+							"    var userCount = 100;\r",
+							"    var customizedProperties = generateFFUserCustomizedProperties();\r",
+							"    console.log(JSON.stringify(customizedProperties));\r",
+							"    for (var i = 0; i < userCount; i++) {\r",
+							"        users.push({\r",
+							"            \"featureFlagKeyName\": \"\",\r",
+							"            \"environmentSecret\": environmentSecret,\r",
+							"            \"ffUserName\": \"nuser-\" + i,\r",
+							"            \"ffUserEmail\": \"nuser-\" + i + \"@feature-flags.test\",\r",
+							"            \"ffUserKeyId\": \"nuser-\" + i + \"@feature-flags.test\",\r",
+							"            \"ffUserCustomizedProperties\": customizedProperties\r",
+							"        });\r",
+							"    }\r",
+							"    return users;\r",
+							"}\r",
+							"function generateRandomlyTargetIndividuals(variationOptions, users, environmentId) {\r",
+							"    var targetIndividuals = [];\r",
+							"    var targetIndividualsCount = getRandomInt(1, variationOptions.length);\r",
+							"    for (var i = 0; i < targetIndividualsCount; i++) {\r",
+							"        var ti = {\r",
+							"            individuals: [],\r",
+							"            valueOption: null\r",
+							"        };\r",
+							"        var targetIndividualUserCount = getRandomInt(1, users.length);\r",
+							"        var selectedUsers = getRandomElementsFromArray(users, Math.floor(users.length / targetIndividualsCount - 1));\r",
+							"        var variationOption = getRandomElementsFromArray(variationOptions, 1);\r",
+							"        for (var j = 0; j < selectedUsers.length; j++) {\r",
+							"            ti.individuals.push({\r",
+							"                \"id\": \"WU__\" + environmentId + \"__\" + selectedUsers[j].ffUserKeyId,\r",
+							"                \"name\": selectedUsers[j].ffUserName,\r",
+							"                \"keyId\": selectedUsers[j].ffUserKeyId,\r",
+							"                \"email\": selectedUsers[j].ffUserEmail\r",
+							"            });\r",
+							"        }\r",
+							"        ti.valueOption = variationOption[0];\r",
+							"        targetIndividuals.push(ti);\r",
+							"    }\r",
+							"\r",
+							"    return targetIndividuals;\r",
+							"}\r",
+							"function getRandomElementsFromArray(arr, n) {\r",
+							"    var result = new Array(n),\r",
+							"        len = arr.length,\r",
+							"        taken = new Array(len);\r",
+							"    if (n > len)\r",
+							"        throw new RangeError(\"getRandom: more elements taken than available\");\r",
+							"    while (n--) {\r",
+							"        var x = Math.floor(Math.random() * len);\r",
+							"        result[n] = arr[x in taken ? taken[x] : x];\r",
+							"        taken[x] = --len in taken ? taken[len] : len;\r",
+							"    }\r",
+							"    return result;\r",
+							"}\r",
+							"function uuidv4() {\r",
+							"    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {\r",
+							"        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);\r",
+							"        return v.toString(16);\r",
+							"    });\r",
+							"}\r",
+							"function generateFFTUWMTR(variationOptions) {\r",
+							"    var fftuvmtr = [];\r",
+							"    for (var i = 0; i < 3; i++) {\r",
+							"        var valueOptionsVariationRuleValues = generateDefaultRulePercentageRollouts(variationOptions.length);\r",
+							"        var fft = {\r",
+							"            \"RuleId\": uuidv4(),\r",
+							"            \"RuleName\": \"rule\" + i,\r",
+							"            \"RuleJsonContent\": [\r",
+							"            ],\r",
+							"            \"valueOptionsVariationRuleValues\": valueOptionsVariationRuleValues\r",
+							"        };\r",
+							"        if (i % 3 === 0) {\r",
+							"            fft.RuleJsonContent = [\r",
+							"                {\r",
+							"                    \"property\": \"property-0\",\r",
+							"                    \"operation\": \"Contains\",\r",
+							"                    \"value\": \"value-\"\r",
+							"                },\r",
+							"                {\r",
+							"                    \"property\": \"property-3\",\r",
+							"                    \"operation\": \"StartsWith\",\r",
+							"                    \"value\": \"value\"\r",
+							"                },\r",
+							"                {\r",
+							"                    \"property\": \"property-6\",\r",
+							"                    \"operation\": \"EndsWith\",\r",
+							"                    \"value\": \"-6\"\r",
+							"                }\r",
+							"            ];\r",
+							"        }\r",
+							"        else if (i % 3 === 1) {\r",
+							"            fft.RuleJsonContent = [\r",
+							"                {\r",
+							"                    \"property\": \"property-1\",\r",
+							"                    \"operation\": \"BiggerEqualThan\",\r",
+							"                    \"value\": \"99\"\r",
+							"                },\r",
+							"                {\r",
+							"                    \"property\": \"property-3\",\r",
+							"                    \"operation\": \"LessEqualThan\",\r",
+							"                    \"value\": \"699\"\r",
+							"                }\r",
+							"            ];\r",
+							"            value = getRandomInt(0, 999);\r",
+							"        }\r",
+							"        else if (i % 3 == 2) {\r",
+							"            fft.RuleJsonContent = [\r",
+							"                {\r",
+							"                    \"property\": \"property-2\",\r",
+							"                    \"operation\": \"IsTrue\",\r",
+							"                    \"value\": \"true\"\r",
+							"                }\r",
+							"            ];\r",
+							"        }\r",
+							"\r",
+							"        fftuvmtr.push(fft);\r",
+							"    }\r",
+							"\r",
+							"    return fftuvmtr;\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apihost}}/api/Authenticate/Probe",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"api",
+						"Authenticate",
+						"Probe"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"pm.collectionVariables.set(\"token\", jsonData.token);\r",
+							"\r",
+							"console.log(jsonData);\r",
+							"tests[\"name = \" + jsonData.token] = true;\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"token\");\r",
+							"});\r",
+							"\r",
+							"console.log('#########LOGIN END#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########LOGIN STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"hu-beau@outlook.com\",\r\n  \"password\": \"@nlc0ccmb\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/api/Authenticate/login",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"api",
+						"Authenticate",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Feature Flag",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Create feature flag STARTED#######');\r",
+							"\r",
+							"\r",
+							"var flagName = \"flag\" + new Date().getTime();\r",
+							"pm.environment.set(\"flag-name\", flagName);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"console.log(jsonData);\r",
+							"pm.collectionVariables.set(\"featureFlagId\", jsonData.id);\r",
+							"\r",
+							"console.log('#########Create feature flag END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"{{flag-name}}\",\r\n  \"environmentId\": {{environmentId}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/CreateFeatureFlag",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"CreateFeatureFlag"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Feature Flag",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Get feature flag STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"pm.test(\"Successful Get request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);\r",
+							"});\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"console.log(jsonData);\r",
+							"\r",
+							"pm.collectionVariables.set(\"featureFlagName\", jsonData.ff.name);\r",
+							"pm.collectionVariables.set(\"featureFlagKeyName\", jsonData.ff.keyName);\r",
+							"\r",
+							"\r",
+							"console.log('#########Create feature flag END#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/GetFeatureFlag?id={{featureFlagId}}",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"GetFeatureFlag"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{featureFlagId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Feature Flag",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Update feature flag STARTED#######');\r",
+							"var dataSampleStr = pm.collectionVariables.get(\"dataSample0\");\r",
+							"\r",
+							"dataSampleStr = dataSampleStr.replace('##{featureFlagId}##', pm.variables.get(\"featureFlagId\"));\r",
+							"dataSampleStr = dataSampleStr.replace('##{featureFlagId}##', pm.variables.get(\"featureFlagId\"));\r",
+							"dataSampleStr = dataSampleStr.replace('##{featureFlagName}##', pm.variables.get(\"featureFlagName\"));\r",
+							"dataSampleStr = dataSampleStr.replace('##{featureFlagKeyName}##', pm.variables.get(\"featureFlagKeyName\"));\r",
+							"\r",
+							"console.log(JSON.parse(dataSampleStr));\r",
+							"\r",
+							"pm.collectionVariables.set(\"dataSample0-update\", dataSampleStr);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Update feature flag END#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{dataSample0-update}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/UpdateFeatureFlag",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"UpdateFeatureFlag"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Feature Flag For Update Validation",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Get feature flag for validation STARTED#######');\r",
+							"\r",
+							"// console.log(pm.collectionVariables.get(\"dataSample0-update\"));"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = JSON.parse(responseBody);\r",
+							"\r",
+							"var updateData = JSON.parse(pm.collectionVariables.get(\"dataSample0-update\"));\r",
+							"\r",
+							"console.log(\"updateData\");\r",
+							"console.log(updateData);\r",
+							"console.log(\"responseData\");\r",
+							"console.log(responseData);\r",
+							"\r",
+							"pm.test(\"Random validation\", function () {\r",
+							"    pm.expect(responseData.ff.keyName).to.be.eq(updateData.ff.keyName);\r",
+							"    pm.expect(responseData.ff.id).to.be.eq(updateData.ff.id);\r",
+							"    pm.expect(JSON.stringify(responseData.ff.defaultRulePercentageRollouts)).to.be.eq(JSON.stringify(updateData.ff.defaultRulePercentageRollouts));\r",
+							"    pm.expect(responseData.fftuwmtr[0].RuleId).to.be.eq(updateData.fftuwmtr[0].ruleId);\r",
+							"    pm.expect(JSON.stringify(responseData.fftuwmtr[0].valueOptionsVariationRuleValues)).to.be.eq(JSON.stringify(updateData.fftuwmtr[0].valueOptionsVariationRuleValues));\r",
+							"\r",
+							"    pm.expect(JSON.stringify(responseData.targetIndividuals[0])).to.be.eq(JSON.stringify(updateData.targetIndividuals[0]));\r",
+							"    pm.expect(JSON.stringify(responseData.variationOptions)).to.be.eq(JSON.stringify(updateData.variationOptions));\r",
+							"});\r",
+							"\r",
+							"console.log('#########Create feature flag for validation END#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/GetFeatureFlag?id={{featureFlagId}}",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"GetFeatureFlag"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{featureFlagId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Varation - Target Individuals",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"console.log('#########Get Varation - Target Individuals STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = JSON.parse(responseBody);\r",
+							"var updateData = JSON.parse(pm.collectionVariables.get(\"dataSample0-update\"));\r",
+							"\r",
+							"// var groupIndex = -1;\r",
+							"// for (var i = 0; i < updateData.targetIndividuals.length; i++) {\r",
+							"//     var ti = updateData.targetIndividuals[0];\r",
+							"//     var ifInGroup = ti.individuals.some(p=> p.keyId === \"user-3@feature-flags.test\" );\r",
+							"//     if(ifInGroup){\r",
+							"//         groupIndex = i;\r",
+							"//     }\r",
+							"// }\r",
+							"\r",
+							"// console.log(groupIndex);\r",
+							"\r",
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    var ti = updateData.targetIndividuals[0];\r",
+							"    console.log(ti);\r",
+							"    pm.expect(responseData.localId).to.be.eq(ti.valueOption.localId);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Get Varation - Target Individuals END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-3\",\r\n    \"ffUserEmail\": \"nuser-3@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-3@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"property-0\",\r\n            \"value\": \"value-0\"\r\n        },\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"530\"\r\n        },\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"value-3\"\r\n        },\r\n        {\r\n            \"name\": \"property-4\",\r\n            \"value\": \"905\"\r\n        },\r\n        {\r\n            \"name\": \"property-5\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-6\",\r\n            \"value\": \"value-6\"\r\n        },\r\n        {\r\n            \"name\": \"property-7\",\r\n            \"value\": \"575\"\r\n        },\r\n        {\r\n            \"name\": \"property-8\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-9\",\r\n            \"value\": \"value-9\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"Variation",
+						"GetMultiOptionVariation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Varation - fftuwmtr - condition 0",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"console.log('#########Get Varation - fftuwmtr condition 0 STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = JSON.parse(responseBody);\r",
+							"var updateData = JSON.parse(pm.collectionVariables.get(\"dataSample0-update\"));\r",
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    var valueOptionsVariationRuleValues = updateData.fftuwmtr[0].valueOptionsVariationRuleValues;\r",
+							"    var localIds = [];\r",
+							"    for (var i = 0; i < valueOptionsVariationRuleValues.length; i++) {\r",
+							"        localIds.push(valueOptionsVariationRuleValues[i].valueOption.localId);\r",
+							"    }\r",
+							"\r",
+							"    pm.expect(localIds).to.include(responseData.localId);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Get Varation - fftuwmtr condition 0 END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-9\",\r\n    \"ffUserEmail\": \"nuser-9@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-9@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"property-0\",\r\n            \"value\": \"value-0\"\r\n        },\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"530\"\r\n        },\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"value-3\"\r\n        },\r\n        {\r\n            \"name\": \"property-4\",\r\n            \"value\": \"905\"\r\n        },\r\n        {\r\n            \"name\": \"property-5\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-6\",\r\n            \"value\": \"value-6\"\r\n        },\r\n        {\r\n            \"name\": \"property-7\",\r\n            \"value\": \"575\"\r\n        },\r\n        {\r\n            \"name\": \"property-8\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-9\",\r\n            \"value\": \"value-9\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"Variation",
+						"GetMultiOptionVariation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Varation - fftuwmtr - condition 1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"console.log('#########Get Varation - fftuwmtr condition 1 STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = JSON.parse(responseBody);\r",
+							"var updateData = JSON.parse(pm.collectionVariables.get(\"dataSample0-update\"));\r",
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    var valueOptionsVariationRuleValues = updateData.fftuwmtr[1].valueOptionsVariationRuleValues;\r",
+							"    var localIds = [];\r",
+							"    for (var i = 0; i < valueOptionsVariationRuleValues.length; i++) {\r",
+							"        localIds.push(valueOptionsVariationRuleValues[i].valueOption.localId);\r",
+							"    }\r",
+							"\r",
+							"    pm.expect(localIds).to.include(responseData.localId);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Get Varation - fftuwmtr condition 1 END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-10\",\r\n    \"ffUserEmail\": \"nuser-10@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-10@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"99\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"550\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"Variation",
+						"GetMultiOptionVariation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Varation - fftuwmtr - condition 2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"console.log('#########Get Varation - fftuwmtr condition 2 STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = JSON.parse(responseBody);\r",
+							"var updateData = JSON.parse(pm.collectionVariables.get(\"dataSample0-update\"));\r",
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    var valueOptionsVariationRuleValues = updateData.fftuwmtr[2].valueOptionsVariationRuleValues;\r",
+							"    var localIds = [];\r",
+							"    for (var i = 0; i < valueOptionsVariationRuleValues.length; i++) {\r",
+							"        localIds.push(valueOptionsVariationRuleValues[i].valueOption.localId);\r",
+							"    }\r",
+							"\r",
+							"    pm.expect(localIds).to.include(responseData.localId);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Get Varation - fftuwmtr condition 2 END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-11\",\r\n    \"ffUserEmail\": \"nuser-11@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-11@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"Variation",
+						"GetMultiOptionVariation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Varation - DefaultRulePercentageRollouts",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"console.log('#########Get Varation - DefaultRulePercentageRollouts STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = JSON.parse(responseBody);\r",
+							"var updateData = JSON.parse(pm.collectionVariables.get(\"dataSample0-update\"));\r",
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    var localIds = [];\r",
+							"    for (var i = 0; i < updateData.ff.defaultRulePercentageRollouts.length; i++) {\r",
+							"        localIds.push(updateData.ff.defaultRulePercentageRollouts[i].valueOption.localId);\r",
+							"    }\r",
+							"    pm.expect(localIds).to.include(responseData.localId);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Get Varation - DefaultRulePercentageRollouts END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-5\",\r\n    \"ffUserEmail\": \"nuser-5@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-5@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"Variation",
+						"GetMultiOptionVariation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Disable Feature Flag",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Disable Feature Flag STARTED#######');\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"console.log('#########Disable Feature Flag END#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"{{featureFlagId}}\",\r\n    \"status\": \"Disabled\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/SwitchFeatureFlag",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"SwitchFeatureFlag"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Varation - When Disabled",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"console.log('#########Get Varation - When Disabled STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = JSON.parse(responseBody);\r",
+							"var updateData = JSON.parse(pm.collectionVariables.get(\"dataSample0-update\"));\r",
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    pm.expect(responseData.localId).to.be.eq(updateData.ff.variationOptionWhenDisabled.localId);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Get Varation - When Disabled END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-5\",\r\n    \"ffUserEmail\": \"nuser-5@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-5@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"Variation",
+						"GetMultiOptionVariation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Single Variation - Basic",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"console.log('#########Get Single Variation - Basic STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    pm.expect(responseBody).to.be.eq(\"true\");\r",
+							"});\r",
+							"\r",
+							"console.log('#########Get Single Variation - Basic END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"2020年7月前旧版本真假状态表达测试用Flag\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"2020年7月前旧版本真假状态表达测试用Flag-匹配条件测试\",\r\n    \"ffUserEmail\": \"nuser-truefalse-0@feature-flags.test\",\r\n    \"ffUserKeyId\": \"2020年7月前旧版本真假状态表达测试用Flag-匹配条件测试\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"property-0\",\r\n            \"value\": \"value-0\"\r\n        },\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"530\"\r\n        },\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"value-3\"\r\n        },\r\n        {\r\n            \"name\": \"property-4\",\r\n            \"value\": \"905\"\r\n        },\r\n        {\r\n            \"name\": \"property-5\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-6\",\r\n            \"value\": \"value-6\"\r\n        },\r\n        {\r\n            \"name\": \"property-7\",\r\n            \"value\": \"575\"\r\n        },\r\n        {\r\n            \"name\": \"property-8\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-9\",\r\n            \"value\": \"value-9\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/Variation/GetUserVariationResult",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"Variation",
+						"GetUserVariationResult"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "apihost",
+			"value": "http://localhost:5001"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "environmentId",
+			"value": ""
+		},
+		{
+			"key": "projectId",
+			"value": ""
+		},
+		{
+			"key": "organizationId",
+			"value": ""
+		},
+		{
+			"key": "featureFlagId",
+			"value": ""
+		},
+		{
+			"key": "featureFlag",
+			"value": ""
+		},
+		{
+			"key": "featureFlagName",
+			"value": ""
+		},
+		{
+			"key": "featureFlagKeyName",
+			"value": ""
+		},
+		{
+			"key": "environmentSecret",
+			"value": ""
+		},
+		{
+			"key": "dataSample0-update",
+			"value": ""
+		},
+		{
+			"key": "dataSample0",
+			"value": ""
+		}
+	]
+}

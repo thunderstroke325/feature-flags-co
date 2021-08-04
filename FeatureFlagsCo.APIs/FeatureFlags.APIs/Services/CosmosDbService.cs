@@ -371,10 +371,6 @@ namespace FeatureFlags.APIs.Services
                     Properties = new List<string>() { "KeyId", "Name", "Email" }
                 };
             }
-            return new CosmosDBEnvironmentUserProperty()
-            {
-                Properties = new List<string>()
-            };
         }
 
 

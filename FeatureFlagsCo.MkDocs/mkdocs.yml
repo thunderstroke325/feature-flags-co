@@ -2,12 +2,14 @@ site_name: " "
 nav:
     - 案例&实践: 
       - 快速入门: index.md
-      - 使用者说: quickstart/feedback.md
-      - 案例-灵活的选择用户: quickstart/effects.md
-      - 案例-灰度发布: quickstart/mjkgvshd.md
-      - 案例-外包控制: quickstart/outsource.md
+      - 灰度发布: quickstart/mjkgvshd.md
+      - AB测试: quickstart/effects.md
+      - 多特征联动发布: quickstart/prequisites.md
+      - 外包控制: quickstart/outsource.md
       - Rollout百分比分配算法: quickstart/rollout-algo.md
       - 整合测试: quickstart/integration-test.md
+      - DevOps流水线: quickstart/devops-pipeline.md
+      - 使用者说: quickstart/feedback.md
     - 开源管理(SDK&云整合):
       - SDK: opensource/sdk.md
       - 云整合: opensource/integration.md

@@ -161,7 +161,7 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("VariationResultTest")]
-        public async Task<bool?> GetVariationTest([FromBody] GetUserVariationResultParam param)
+        public bool? GetVariationTest([FromBody] GetUserVariationResultParam param)
         {
             var ffIdVM = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
             var customizedTraceProperties = new Dictionary<string, object>()

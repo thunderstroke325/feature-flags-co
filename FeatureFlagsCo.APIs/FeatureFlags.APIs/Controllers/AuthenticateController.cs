@@ -227,7 +227,7 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpGet]
         [Route("Probe")]
-        public async Task<string> Probe()
+        public string Probe()
         {
             return "Good";
         }
