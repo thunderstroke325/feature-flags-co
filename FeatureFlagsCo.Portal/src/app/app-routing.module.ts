@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './auth.guard';
 import { LoginGuard } from './login.guard';
+import { AccountProjectEnvResolver } from './account-preject-env-resolver.service';
 
 const routes: Routes = [
   {
@@ -9,13 +10,12 @@ const routes: Routes = [
     canActivate: [LoginGuard],
     loadChildren: () => import("./pages/login/login.module").then(m => m.LoginModule)
   },{
-    path: 'main',
-    canActivate: [AuthGuard],
-    loadChildren: () => import("./pages/main/main.module").then(m => m.MainModule)
-  },{
     path: '',
-    redirectTo: '/login',
-    pathMatch: 'full'
+    canActivate: [AuthGuard],
+    loadChildren: () => import("./pages/main/main.module").then(m => m.MainModule),
+    resolve: {
+      _: AccountProjectEnvResolver // Ensure that the current account and project env are loaded before activate the main module
+    },
   }
 ];
 

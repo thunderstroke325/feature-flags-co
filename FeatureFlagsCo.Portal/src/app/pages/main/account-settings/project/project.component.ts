@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { IProject, IAccount, IEnvironment, IProjectEnv } from 'src/app/config/types';
+import { IProject, IEnvironment, IProjectEnv } from 'src/app/config/types';
 import { ProjectService } from 'src/app/services/project.service';
 import { AccountService } from 'src/app/services/account.service';
 import { EnvService } from 'src/app/services/env.service';
@@ -45,31 +45,9 @@ export class ProjectComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-      if (!!account) {
-        this.currentAccountId = account.id;
-        this.fetchList(this.currentAccountId);
-        this.projectService.getCurrentProjectAndEnv(this.currentAccountId).subscribe((projectEnv: IProjectEnv) => {
-          this.currentProjectEnv = projectEnv;
-        });
-      }
-    });
-
-    this.accountService.accountHasChanged$
-      .pipe()
-      .subscribe(
-        res => {
-          this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-            if (!!account) {
-              this.currentAccountId = account.id;
-              this.fetchList(this.currentAccountId);
-              this.projectService.getCurrentProjectAndEnv(this.currentAccountId).subscribe((projectEnv: IProjectEnv) => {
-                this.currentProjectEnv = projectEnv;
-              });
-            }
-          })
-        }
-      );
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    this.currentAccountId = currentAccountProjectEnv.account.id;
+    this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
   }
 
   isEnvDeleteBtnVisible(env: IEnvironment): boolean {

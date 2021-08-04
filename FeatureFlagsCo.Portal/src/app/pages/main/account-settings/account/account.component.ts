@@ -4,7 +4,6 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { getAuth } from 'src/app/utils';
 import { IAccount } from 'src/app/config/types';
 import { AccountService } from 'src/app/services/account.service';
-import { ProjectService } from 'src/app/services/project.service';
 
 @Component({
   selector: 'app-account',
@@ -23,52 +22,26 @@ export class AccountComponent implements OnInit {
 
   constructor(
     private accountService: AccountService,
-    private projectService: ProjectService,
     private message: NzMessageService
   ) {
   }
 
   ngOnInit(): void {
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    this.currentAccount = currentAccountProjectEnv.account;
+    this.allAccounts = this.accountService.accounts;
+
     this.initOrgForm();
   }
 
   initOrgForm() {
-    const orgNameCtrl = new FormControl('', [Validators.required])
-    this.accountService.getCurrentAccount().subscribe(
-      (account: IAccount) => {
-        if (!!account) {
-          this.currentAccount = account;
-          this.allAccounts = this.accountService.accounts;
-          orgNameCtrl.setValue(this.currentAccount.organizationName);
-        }
-      }
-    );
-
     this.validateOrgForm = new FormGroup({
-      organizationName: orgNameCtrl,
+      organizationName: new FormControl(this.currentAccount.organizationName, [Validators.required]),
     });
-
-    // register to account change
-    console.log('initorgform');
-    this.accountService.accountHasChanged$
-      .pipe()
-      .subscribe(
-        res => {
-          this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-            if (!!account) {
-              this.currentAccount = account;
-              this.allAccounts = this.accountService.accounts;
-              orgNameCtrl.setValue(this.currentAccount.organizationName);
-            }
-          })
-        }
-      );
   }
 
   onAccountChange() {
     this.accountService.changeAccount(this.currentAccount);
-    window.location.reload();
-    //this.projectService.resetCurrentProjectAndEnv(this.currentAccount.id);
   }
 
   submitOrgForm() {
@@ -87,13 +60,9 @@ export class AccountComponent implements OnInit {
       .pipe()
       .subscribe(
         res => {
-          this.accountService.changeAccount({ id, organizationName });
-          this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-            this.currentAccount = account
-            this.allAccounts = this.accountService.accounts;
-          });
           this.isLoading = false;
           this.message.success('更新信息成功！');
+          this.accountService.setAccountName({ id, organizationName });
         },
         err => {
           this.isLoading = false;

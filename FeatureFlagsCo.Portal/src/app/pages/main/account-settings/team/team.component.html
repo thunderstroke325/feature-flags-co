@@ -34,7 +34,7 @@
                               <tr>
                                   <td>{{ member.email }}</td>
                                   <td>{{ member.role }}</td>
-                                  <td>{{ member.initialPassword }}</td>
+                                  <td><span *ngIf="member.initialPassword?.length > 0" nz-typography nzCopyable nzCopyText="{{ member.initialPassword }}">{{ member.initialPassword }}</span></td>
                                   <td>
                                     <ng-container *ngIf="isMemberDeleteBtnVisible(member)">
                                       <a nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="onDeleteMemberClick(member)" [nzIcon]="iconTplMember">

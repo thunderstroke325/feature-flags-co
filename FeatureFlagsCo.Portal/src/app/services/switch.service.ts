@@ -1,14 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, of, Subject } from 'rxjs';
-import { takeUntil, debounceTime } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { btnsConfig } from '../pages/main/switch-manage/components/nav-btns/btns';
 import { CSwitchParams, IFfParams } from '../pages/main/switch-manage/types/switch-new';
-import { ProjectService } from './project.service';
 import { AccountService } from './account.service';
-import { IAccount, IProjectEnv } from '../config/types';
 
 @Injectable({
   providedIn: 'root'
@@ -25,41 +22,22 @@ export class SwitchService {
 
   constructor(
     private http: HttpClient,
-    private projectService: ProjectService,
     private accountService: AccountService,
     private router: Router
   ) {
     this.initEnvIds();
   }
 
-  // 监听工作区间 ID
-  public listenerEnvID(sub: Subject<any>) {
-    this.projectService.currentProjectEnvChanged$
-      .pipe(
-        takeUntil(sub),
-        debounceTime(200),
-      )
-      .subscribe(
-        res => {
-          this.initEnvIds();
-        }
-      );
-  }
-
   private initEnvIds() {
-    this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-      if (!!account) {
-        this.accountId = account.id;
-        this.projectService.getCurrentProjectAndEnv(account.id).subscribe((projectEnv: IProjectEnv) => {
-          this.projectId = projectEnv.projectId;
-          const envId = projectEnv.envId;
-          if (this.envId && envId !== this.envId) {
-            this.router.navigateByUrl("/main/switch-manage/index");
-          }
-          this.envId = envId;
-        });
-      }
-    });
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    this.accountId = currentAccountProjectEnv.account.id;
+    this.projectId = currentAccountProjectEnv.projectEnv.projectId;
+
+    const envId = currentAccountProjectEnv.projectEnv.envId;
+    if (this.envId && envId !== this.envId) {
+      this.router.navigateByUrl("/switch-manage");
+    }
+    this.envId = envId;
   }
 
   public setNavConfig(index: number) {
@@ -88,7 +66,6 @@ export class SwitchService {
 
   // 快速创建新的开关
   public createNewSwitch(name: string = 'demo1') {
-    console.log('createNewSwitch');
     const url = environment.url + '/FeatureFlags/CreateFeatureFlag';
     return this.http.post(url, {
       "name": name,

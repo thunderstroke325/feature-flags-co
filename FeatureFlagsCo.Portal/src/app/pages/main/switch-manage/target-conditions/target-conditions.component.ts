@@ -29,15 +29,10 @@ export class TargetConditionsComponent implements OnInit {
   public switchId: string;
   public isLoading: boolean = true;                          // 加载数据
 
-  private currentAccountId: number;
-
   constructor(
     private route:ActivatedRoute,
     private switchServe: SwitchService,
     private msg: NzMessageService,
-    private router: Router,
-    private projectService: ProjectService,
-    private accountService: AccountService
   ) {
     this.ListenerResolveData();
   }
@@ -46,31 +41,6 @@ export class TargetConditionsComponent implements OnInit {
     if(this.switchServe.envId) {
       this.initData();
     }
-
-    this.projectService.currentProjectEnvChanged$
-      .pipe(
-        takeUntil(this.destory$),
-        debounceTime(200),
-      )
-      .subscribe(
-        res => {
-          this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-            if (!!account) {
-              this.currentAccountId = account.id;
-              this.projectService.getCurrentProjectAndEnv(this.currentAccountId).subscribe((projectEnv: IProjectEnv) => {
-                const envId = projectEnv.envId;
-                if(this.switchServe.envId && envId !== this.switchServe.envId) {
-                  this.switchServe.envId = envId;
-                  this.router.navigateByUrl("/main/switch-manage/index");
-                } else {
-                  this.switchServe.envId = envId;
-                  this.initData();
-                }
-              });
-            }
-          });
-        }
-    );
   }
 
   private initData() {

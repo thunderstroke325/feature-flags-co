@@ -16,6 +16,7 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { FfcAngularSdkModule } from 'ffc-angular-sdk';
+import { AccountProjectEnvResolver } from './account-preject-env-resolver.service';
 
 registerLocaleData(zh);
 
@@ -36,6 +37,7 @@ registerLocaleData(zh);
     NzMenuModule
   ],
   providers: [
+    AccountProjectEnvResolver,
     { provide: NZ_I18N, useValue: zh_CN },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   ],

@@ -8,6 +8,11 @@ export interface IAccount {
   organizationName: string
 }
 
+export interface IAccountProjectEnv {
+  account: IAccount,
+  projectEnv: IProjectEnv
+}
+
 export interface IAccountUser {
   userId: string,
   email: string,

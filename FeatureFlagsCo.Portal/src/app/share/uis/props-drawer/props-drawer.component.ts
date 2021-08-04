@@ -20,7 +20,6 @@ export class PropsDrawerComponent implements OnInit {
 
   @Input()
   set visible(visible: boolean) {
-    console.log('visible');
     if (visible) {
       this.loading = true;
       this.userService.getUserProperties({ id: this.envId })

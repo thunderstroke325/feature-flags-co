@@ -12,7 +12,7 @@ export class ServeComponent implements OnInit {
 
   @Input('truePercentage')
   set dataTrue(data: number) {
-    if(data) {
+    if(data !== null) {
       this.truePercentage = Number((Number(data.toFixed(2)) * 100).toFixed(0));
       this.falsePercentage = 100 - this.truePercentage;
     } else {

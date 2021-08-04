@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '../config/types';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -52,11 +53,12 @@ export class ProjectService {
       );
   }
 
-  resetCurrentProjectAndEnv(accountId: number) {
-    localStorage.setItem('current-project', '');
-    this.getCurrentProjectAndEnv(accountId).subscribe();
-    this.currentProjectEnvChanged$.next();
-  }
+  // resetCurrentProjectAndEnv(accountId: number): Observable<any> {
+  //   localStorage.setItem('current-project', '');
+  //   return this.getCurrentProjectAndEnv(accountId).pipe(
+  //     map(() => this.currentProjectEnvChanged$.next())
+  //   );
+  // }
 
   changeCurrentProjectAndEnv(project: IProjectEnv) {
     localStorage.setItem('current-project', JSON.stringify(project));

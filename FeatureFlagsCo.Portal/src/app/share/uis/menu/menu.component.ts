@@ -4,6 +4,7 @@ import { IMenuItem } from './menu';
 import { getAuth } from 'src/app/utils';
 import { AccountService } from 'src/app/services/account.service';
 import { ProjectService } from 'src/app/services/project.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-menu',
@@ -28,6 +29,7 @@ export class MenuComponent implements OnInit {
   envModalVisible: boolean = false;
 
   constructor(
+    private router: Router,
     private accountService: AccountService,
     private projectService: ProjectService,
   ) {
@@ -39,46 +41,20 @@ export class MenuComponent implements OnInit {
       .pipe()
       .subscribe(
         res => {
-          this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-            if (!!account) {
-              this.currentAccount = account;
-              this.projectService.getCurrentProjectAndEnv(this.currentAccount.id).subscribe((projectEnv: IProjectEnv) => {
-                this.currentProjectEnv = projectEnv;
-                this.setSelectedProjectAndEnv(this.currentProjectEnv);
-              });
-            }
-          })
+          const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+          this.currentAccount = currentAccountProjectEnv.account;
+          this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
+          this.setSelectedProjectAndEnv();
         }
       );
 
-    this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-      if (!!account) {
-        this.currentAccount = account;
-        this.projectService.getCurrentProjectAndEnv(this.currentAccount.id).subscribe((projectEnv: IProjectEnv) => {
-          this.currentProjectEnv = projectEnv;
-          this.setSelectedProjectAndEnv(this.currentProjectEnv);
-        });
-      }
-    })
-
-    this.accountService.accountHasChanged$
-      .pipe()
-      .subscribe(
-        res => {
-          this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-            if (!!account) {
-              this.currentAccount = account;
-              this.projectService.getCurrentProjectAndEnv(this.currentAccount.id).subscribe((projectEnv: IProjectEnv) => {
-                this.currentProjectEnv = projectEnv;
-                this.setSelectedProjectAndEnv(this.currentProjectEnv);
-              });
-            }
-          })
-        }
-      );
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    this.currentAccount = currentAccountProjectEnv.account;
+    this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
+    this.setSelectedProjectAndEnv();
   }
 
-  private setSelectedProjectAndEnv(projectEnv: IProjectEnv) {
+  private setSelectedProjectAndEnv() {
     this.selectedProject = { id: this.currentProjectEnv.projectId, name: this.currentProjectEnv.projectName } as IProject;
     this.selectedEnv = { id: this.currentProjectEnv.envId, name: this.currentProjectEnv.envName } as IEnvironment;
   }
@@ -106,7 +82,12 @@ export class MenuComponent implements OnInit {
     this.projectService.changeCurrentProjectAndEnv(projectEnv);
     this.currentProjectEnv = projectEnv;
     this.envModalVisible = false;
-    window.location.reload();
+
+    if (this.router.url.indexOf("/switch-manage") > -1) {
+      this.router.navigateByUrl("/switch-manage");
+    }
+
+    setTimeout(() => window.location.reload(), 200);
   }
 
   onSelectProject(project: IProject) {

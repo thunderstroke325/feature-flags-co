@@ -12,7 +12,10 @@ const routes: Routes = [
     children: [
       {
         path: 'switch-manage',
-        loadChildren: () => import("./switch-manage/switch-manage.module").then(m => m.SwitchManageModule)
+        loadChildren: () => import("./switch-manage/switch-manage.module").then(m => m.SwitchManageModule),
+        data: {
+          breadcrumb: '开关管理'
+        },
       },
       {
         path: 'switch-user',
@@ -38,7 +41,7 @@ const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: '/main/switch-manage/index',
+        redirectTo: '/switch-manage',
         pathMatch: 'full'
       }
     ]

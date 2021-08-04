@@ -28,7 +28,6 @@ export class SwitchSettingComponent implements OnDestroy {
       .subscribe((result: CSwitchParams) => {
         this.currentSwitch = (new CSwitchParams(result)).getSwicthDetail();
       })
-    this.switchServe.listenerEnvID(this.destory$);
   }
 
   ngOnDestroy(): void {
@@ -58,7 +57,7 @@ export class SwitchSettingComponent implements OnDestroy {
           .subscribe(
             res => {
               this.msg.success('开关存档成功！');
-              this.router.navigateByUrl('/main/switch-archive');
+              this.router.navigateByUrl('/switch-archive');
             },
             err => {
               this.msg.error('开关存档失败，请稍后重试！');

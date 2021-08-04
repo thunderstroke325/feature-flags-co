@@ -6,7 +6,7 @@
 </section>
 
 <ng-template #conditionTemplate>
-    <ng-container *ngIf="!isLoading; else loadingTem;"> 
+    <ng-container *ngIf="!isLoading; else loadingTem;">
         <div class="detail-body">
             <button class="save"nz-button nzType="primary" (click)="onSaveSetting()">保存设置</button>
             <div class="item">
@@ -23,16 +23,16 @@
             <div class="item">
                 <p class="label">目标用户</p>
                 <div class="content">
-                    <target-user [type]="'true'" 
+                    <target-user [type]="'true'"
                                  [userList]="userList"
                                  [selectedUserDetailList]="targetUserSelectedListTrue"
                                  (search)="onSearchUser($event)"
                                  (onSelectedUserListChange)="onSelectedUserListChange($event, 'true')"></target-user>
                 </div>
                 <div class="content">
-                    <target-user [type]="'false'" 
-                                 [tipColor]="'#1E90FF'" 
-                                 [userList]="userList" 
+                    <target-user [type]="'false'"
+                                 [tipColor]="'#1E90FF'"
+                                 [userList]="userList"
                                  [selectedUserDetailList]="targetUserSelectedListFalse"
                                  (search)="onSearchUser($event)"
                                  (onSelectedUserListChange)="onSelectedUserListChange($event, 'false')"></target-user>
@@ -42,7 +42,7 @@
                 <p class="label">使用匹配条件找到目标用户</p>
                 <ng-container *ngFor="let condition of featureDetail?.getFftuwmtr(); let key=index;">
                     <div class="content">
-                        <find-rule [data]="condition" 
+                        <find-rule [data]="condition"
                                    [properties]="propertiesList"
                                    [index]="key"
                                    (deleteRule)="onDeleteCondition(key)"
@@ -61,7 +61,7 @@
             </div>
             <div class="item">
                 <div class="default">
-                    <span class="label">如果服务器关闭了，应返回</span>
+                    <span class="label">如果开关关闭了，应返回</span>
                     <div class="btn" (click)="switchBaseProperty()">
                         {{featureDetail?.getFFBasedProperty() ? featureDetail?.getFFBasedProperty(): false}}
                     </div>

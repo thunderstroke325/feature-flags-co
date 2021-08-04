@@ -2,7 +2,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { IJsonContent } from '../../../types/switch-new';
-import { ruleType, ruleValueConfig, findIndex } from '../ruleConfig';
+import { ruleType, ruleValueConfig, ruleValueConfigOutDated, findIndex } from '../ruleConfig';
+import { FfcAngularSdkService } from 'ffc-angular-sdk';
 
 @Component({
   selector: 'app-rule',
@@ -24,11 +25,14 @@ export class RuleComponent {
   @Output() deleteRule = new EventEmitter();                        // 删除条件
   @Output() ruleChange = new EventEmitter<IJsonContent>();       // 刷新数据
 
-  public ruleValueConfig: ruleType[] = ruleValueConfig;
+  public ruleValueConfig: ruleType[] = [];
 
   listOfTagOptions = [];
 
-  constructor() {
+  constructor(private ffcAngularSdkService: FfcAngularSdkService) {
+
+    this.ruleValueConfig = this.ffcAngularSdkService.variation('Rule-with-regex') ? ruleValueConfig : ruleValueConfigOutDated;
+
     this.inputs.pipe(
       debounceTime(500)
     ).subscribe(e => {

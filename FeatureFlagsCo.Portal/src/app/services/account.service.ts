@@ -2,7 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { IAccount } from '../config/types';
+import { IAccount, IProjectEnv, IAccountProjectEnv } from '../config/types';
+import { ProjectService } from './project.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,16 +14,14 @@ export class AccountService {
 
   accounts: IAccount[] = [];
 
-  accountHasChanged$: Subject<void> = new Subject();
-
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private projectService: ProjectService
   ) {
   }
 
   // 获取 account 列表
   getAccounts(): Observable<any> {
-    console.log('getAccounts');
     const url = this.baseUrl;
     return this.http.get(url);
   }
@@ -45,17 +44,6 @@ export class AccountService {
     return this.http.put(url, params);
   }
 
-  getAccountList() {
-    this.getAccounts()
-      .pipe()
-      .subscribe(
-        res => {
-          this.accounts = res as IAccount[];
-          this.accountHasChanged$.next();
-        }
-      );
-  }
-
   /*
     初始登录时，判断是否有 account
     无 => 创建一个
@@ -66,13 +54,7 @@ export class AccountService {
       .pipe()
       .subscribe(
         res => {
-          if (res.length) {
-            this.accounts = res;
-            this.getCurrentAccount().subscribe((account: IAccount) => {
-              this.changeAccount(account);
-            });
-
-          } else {
+          if (!res.length) {
             this.postCreateAccount({
               organizationName: 'Default'
             }).pipe()
@@ -95,7 +77,19 @@ export class AccountService {
       localStorage.setItem('current-account', '');
     }
 
-    this.accountHasChanged$.next();
+    window.location.reload();
+  }
+
+  setAccountName(account: IAccount) {
+    if (!!account) {
+      localStorage.setItem('current-account', JSON.stringify(account));
+      const currentAccount = this.accounts.find(ws => ws.id == account.id);
+      currentAccount.organizationName = account.organizationName;
+    } else {
+      localStorage.setItem('current-account', '');
+    }
+
+    this.projectService.currentProjectEnvChanged$.next();
   }
 
   // Promise version
@@ -136,5 +130,14 @@ export class AccountService {
         observer.next(this.accounts.find(ws => ws.id == JSON.parse(accountStr).id));
       }
     });
+  }
+
+  getCurrentAccountProjectEnv(): IAccountProjectEnv {
+    const account: IAccount = JSON.parse(localStorage.getItem('current-account'));
+    const projectEnv: IProjectEnv = JSON.parse(localStorage.getItem('current-project'));
+    return {
+      account: this.accounts.find(x => x.id === account.id),
+      projectEnv
+    };
   }
 }

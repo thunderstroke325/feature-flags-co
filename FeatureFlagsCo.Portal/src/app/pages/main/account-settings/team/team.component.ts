@@ -1,6 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { IAccount, IAuthProps } from 'src/app/config/types';
+import { IAuthProps } from 'src/app/config/types';
 import { IAccountUser } from 'src/app/config/types';
 import { TeamService } from 'src/app/services/team.service';
 import { AccountService } from 'src/app/services/account.service';
@@ -32,28 +32,10 @@ export class TeamComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('teamauth');
     this.auth = getAuth();
-    this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-      if (!!account) {
-        this.currentAccountId = account.id;
-        this.initTeamMembers(account.id);
-      }
-    })
-
-    // register to account change
-    this.accountService.accountHasChanged$
-      .pipe()
-      .subscribe(
-        res => {
-          this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-            if (!!account) {
-              this.currentAccountId = account.id;
-              this.initTeamMembers(account.id);
-            }
-          })
-        }
-      );
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    this.currentAccountId = currentAccountProjectEnv.account.id;
+    this.initTeamMembers(this.currentAccountId);
   }
 
   isMemberDeleteBtnVisible(member: IAccountUser): boolean {

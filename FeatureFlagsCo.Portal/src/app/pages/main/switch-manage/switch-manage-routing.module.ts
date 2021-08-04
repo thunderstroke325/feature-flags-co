@@ -7,7 +7,7 @@ import { TargetConditionsResolver } from './target-conditions/target-conditions-
 
 const routes: Routes = [
   {
-    path: 'index',
+    path: '',
     data: {
       breadcrumb: '开关管理'
     },
@@ -39,7 +39,7 @@ const routes: Routes = [
         }
       }, {
         path: '',
-        redirectTo: '/main/switch-manage/index'
+        redirectTo: '/switch-manage'
       }
     ]
   }

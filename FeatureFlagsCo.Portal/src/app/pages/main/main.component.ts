@@ -1,3 +1,5 @@
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { AngularPlugin } from '@microsoft/applicationinsights-angularplugin-js';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -11,6 +13,7 @@ import { AccountService } from 'src/app/services/account.service';
 import { getAuth } from 'src/app/utils';
 import { ProjectService } from 'src/app/services/project.service';
 import { SwitchService } from 'src/app/services/switch.service';
+import { FfcAngularSdkService } from 'ffc-angular-sdk';
 
 @Component({
   selector: 'app-main',
@@ -39,26 +42,26 @@ export class MainComponent implements OnInit, OnDestroy {
     private accountService: AccountService,
     private projectService: ProjectService,
     private switchService: SwitchService,
-    private userService: UserService
+    private userService: UserService,
+    private ffcAngularSdkService: FfcAngularSdkService,
   ) {
-    this.setMenus();
-    this.fetchList();
+      // setup the microsoft insights
+      var angularPlugin = new AngularPlugin();
+      const appInsights = new ApplicationInsights({ config: {
+      instrumentationKey: 'c706330b-e4e1-cf9b-9aef-ff26397502d7',
+      endpointUrl: 'https://dc.applicationinsights.azure.cn/v2/track', // this points to azure china, ref https://docs.microsoft.com/en-us/azure/azure-monitor/app/custom-endpoints?tabs=nodejs
+      extensions: [angularPlugin],
+      extensionConfig: {
+          [angularPlugin.identifier]: { router: this.router }
+      }
+      } });
+      appInsights.loadAppInsights();
+
+      this.setMenus();
   }
 
   ngOnInit(): void {
     this.auth = getAuth();
-    this.accountService.accountHasChanged$
-      .pipe(
-        takeUntil(this.destory$)
-      )
-      .subscribe(
-        res => {
-          this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-            this.currentAccount = account;
-            this.projectService.getCurrentProjectAndEnv(this.currentAccount.id).subscribe();
-          })
-        }
-      );
   }
 
   ngOnDestroy(): void {
@@ -73,15 +76,15 @@ export class MainComponent implements OnInit, OnDestroy {
       {
         level: 1,
         title: '开关管理',
-        path: '/main/switch-manage/index'
+        path: '/switch-manage'
       }, {
         level: 1,
         title: '开关用户管理',
-        path: '/main/switch-user'
+        path: '/switch-user'
       }, {
         level: 1,
         title: '开关存档',
-        path: '/main/switch-archive'
+        path: '/switch-archive'
       }, {
         level: 1,
         line: true
@@ -103,18 +106,13 @@ export class MainComponent implements OnInit, OnDestroy {
       }, {
       //   level: 1,
       //   title: 'Project 管理',
-      //   path: '/main/account-manage'
+      //   path: '/account-manage'
       // }, {
         level: 1,
         title: '账户管理',
-        path: '/main/account-settings'
+        path: '/account-settings'
       }
     ];
-  }
-
-  // 获取 account 列表
-  public fetchList() {
-    this.accountService.getAccountList();
   }
 
   // 跳转路由

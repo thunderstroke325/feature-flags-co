@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class LoginGuard implements CanActivate {
-  
+
   constructor(
     private router: Router
   ) {}
@@ -22,7 +22,7 @@ export class LoginGuard implements CanActivate {
   checkLogin(): true | UrlTree {
     const token = localStorage.getItem('token');
     if (!token) return true;
-    return this.router.parseUrl('/main');
+    return this.router.parseUrl('/');
   }
-  
+
 }

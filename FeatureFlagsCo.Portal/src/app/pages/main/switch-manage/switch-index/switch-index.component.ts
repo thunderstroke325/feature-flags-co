@@ -2,11 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
-import { IAccount, IProjectEnv } from 'src/app/config/types';
 import { SwitchService } from 'src/app/services/switch.service';
 import { IFfParams } from '../types/switch-new';
-import { ProjectService } from 'src/app/services/project.service';
 import { AccountService } from 'src/app/services/account.service';
 
 @Component({
@@ -34,36 +31,15 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
     private router: Router,
     public switchServe: SwitchService,
     private msg: NzMessageService,
-    private projectService: ProjectService,
     private accountService: AccountService
   ) {}
 
   ngOnInit(): void {
-    this.initEnvId();
-
-    this.projectService.currentProjectEnvChanged$
-      .pipe(
-        takeUntil(this.destory$),
-        debounceTime(200),
-      )
-      .subscribe(
-        res => {
-          this.initEnvId();
-        }
-    );
-  }
-
-  private initEnvId() {
-    this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-      if (!!account) {
-        this.currentAccountId = account.id;
-        this.projectService.getCurrentProjectAndEnv(this.currentAccountId).subscribe((projectEnv: IProjectEnv) => {
-          const envId = projectEnv.envId;
-          this.switchServe.envId = envId;
-          this.initSwitchList(envId)
-        });
-      }
-    });
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    this.currentAccountId = currentAccountProjectEnv.account.id;
+    const envId = currentAccountProjectEnv.projectEnv.envId;
+    this.switchServe.envId = envId;
+    this.initSwitchList(envId)
   }
 
   private initSwitchList(id: number) {
@@ -75,7 +51,7 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
         } else {
           //this.msg.info("当前 Project 没有开关，请添加!");
           this.switchLists = [];
-          this.createModalVisible = true;
+          //this.createModalVisible = true;
         }
     })
   }
@@ -139,7 +115,7 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
 
   // 路由跳转
   private toRouter(id: string) {
-    this.router.navigateByUrl("/main/switch-manage/index/condition/" + encodeURIComponent(id));
+    this.router.navigateByUrl("/switch-manage/condition/" + encodeURIComponent(id));
   }
 
   // 转换本地时间

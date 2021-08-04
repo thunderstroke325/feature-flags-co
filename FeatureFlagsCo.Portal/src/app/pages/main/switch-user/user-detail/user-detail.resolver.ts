@@ -21,13 +21,10 @@ export class SwitchUserResolver implements Resolve<boolean> {
 
   resolve(route: ActivatedRouteSnapshot): Observable<boolean> {
     const id: string = decodeURIComponent(route.params['id']);
-    console.log(id);
 
     return this.userService.getEnvUserDetail({ id })
       .pipe(
         map(res => {
-          console.log(res);
-
           this.userService.setCurrentUser(res);
           return res;
         })

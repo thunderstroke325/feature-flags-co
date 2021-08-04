@@ -17,9 +17,13 @@
                   <div nz-col [nzSpan]="21">
                     <nz-descriptions [nzColumn]="2">
                       <nz-descriptions-item nzTitle="环境名">{{env.name}}</nz-descriptions-item>
-                      <nz-descriptions-item nzTitle="Secret">{{env.secret}}</nz-descriptions-item>
+                      <nz-descriptions-item nzTitle="Secret">
+                        <span *ngIf="env.secret?.length > 0" nz-typography nzCopyable nzCopyText="{{ env.secret }}">{{ env.secret }}</span>
+                      </nz-descriptions-item>
                       <nz-descriptions-item nzTitle="描述">{{env.description}}</nz-descriptions-item>
-                      <nz-descriptions-item nzTitle="Mobile Secret">{{env.mobileSecret}}</nz-descriptions-item>
+                      <nz-descriptions-item nzTitle="Mobile Secret">
+                        <span *ngIf="env.mobileSecret?.length > 0" nz-typography nzCopyable nzCopyText="{{ env.mobileSecret }}">{{ env.mobileSecret }}</span>
+                      </nz-descriptions-item>
                     </nz-descriptions>
                   </div>
                   <div nz-col [nzSpan]="3">

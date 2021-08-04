@@ -2,12 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
 import { SwitchService } from 'src/app/services/switch.service';
 import { ISwitchArchive } from './types/switch-archive';
 import { ProjectService } from 'src/app/services/project.service';
 import { AccountService } from 'src/app/services/account.service';
-import { IAccount, IProjectEnv } from 'src/app/config/types';
 
 @Component({
   selector: 'app-switch-archive',
@@ -29,38 +27,16 @@ export class SwitchArchiveComponent implements OnInit, OnDestroy {
 
   constructor(
     private switchService: SwitchService,
-    private projectService: ProjectService,
     private accountService: AccountService,
     private modal: NzModalService,
     private msg: NzMessageService
   ) { }
 
   ngOnInit(): void {
-
-    this.initCurrentEnvId();
-
-    this.projectService.currentProjectEnvChanged$
-      .pipe(
-        takeUntil(this.destory$),
-        debounceTime(200),
-      )
-      .subscribe(
-        res => {
-          this.initCurrentEnvId();
-        }
-      );
-  }
-
-  private initCurrentEnvId() {
-    this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-      if (!!account) {
-        this.currentAccountId = account.id;
-        this.projectService.getCurrentProjectAndEnv(this.currentAccountId).subscribe((projectEnv: IProjectEnv) => {
-          this.currentEnvId = projectEnv.envId;
-          this.fetchArchiveSwitchs(this.currentEnvId);
-        });
-      }
-    });
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    this.currentAccountId = currentAccountProjectEnv.account.id;
+    this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
+    this.fetchArchiveSwitchs(this.currentEnvId);
   }
 
   ngOnDestroy(): void {

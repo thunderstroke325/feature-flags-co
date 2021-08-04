@@ -120,7 +120,6 @@ export class XuBreadCrumbComponent implements OnInit, OnDestroy {
 
   private getBreadcrumbs(route: ActivatedRoute, url: string = '', breadcrumbs: BreadcrumbOption[] = []): BreadcrumbOption[] {
     const children: ActivatedRoute[] = route.children;
-    console.log('getBreadcrumbs');
     // If there's no sub root, then stop the recurse and returns the generated breadcrumbs.
     if (children.length === 0) {
       return breadcrumbs;
@@ -130,7 +129,7 @@ export class XuBreadCrumbComponent implements OnInit, OnDestroy {
       if (child.outlet === PRIMARY_OUTLET) {
         // Only parse components in primary router-outlet (in another word, router-outlet without a specific name).
         // Parse this layer and generate a breadcrumb item.
-        console.log(child.snapshot.url);
+        // console.log(child.snapshot.url);
 
         const routeUrl: string = child.snapshot.url
           .map(segment => encodeURIComponent(segment.path))

@@ -23,7 +23,7 @@ export class AuthService {
       .subscribe(
         res => {
           localStorage.setItem('auth', JSON.stringify(res));
-          this.router.navigateByUrl(this.redirectUrl || '/main');
+          this.router.navigateByUrl(this.redirectUrl || '/');
         }
       );
   }

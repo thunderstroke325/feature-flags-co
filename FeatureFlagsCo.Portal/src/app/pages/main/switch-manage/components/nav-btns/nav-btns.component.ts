@@ -19,7 +19,7 @@ export class NavBtnsComponent {
   public navConfig = btnsConfig;
 
   onCheck(id: string) {
-    let url = `/main/switch-manage/index/${id}`;
+    let url = `/switch-manage/${id}`;
     if(this.id) {
       url = `${url}/${encodeURIComponent(this.id)}`;
     }

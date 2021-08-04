@@ -113,7 +113,7 @@ export class CSwitchParams {
         this.ff.defaultRuleValue = value.serve;
         let trueValue = value.serve !== 'null' ? null : value.T;
         this.ff.percentageRolloutForTrue = Number((trueValue / 100).toFixed(2));
-        this.ff.percentageRolloutForFalse = trueValue ? Number(((100 - trueValue) / 100).toFixed(2) ): trueValue;
+        this.ff.percentageRolloutForFalse = trueValue !== null ? 1 - this.ff.percentageRolloutForTrue : null;
     }
 
     // 设置 ff 字段的 defaultRuleValue 属性值
@@ -211,7 +211,7 @@ export class CSwitchParams {
         this.fftuwmtr[index].variationRuleValue = value.serve;
         let trueValue = value.serve !== 'null' ? null : value.T;
         this.fftuwmtr[index].percentageRolloutForTrue = Number((trueValue / 100).toFixed(2));
-        this.fftuwmtr[index].percentageRolloutForFalse = trueValue ? Number(((100 - trueValue) / 100).toFixed(2) ): trueValue;
+        this.fftuwmtr[index].percentageRolloutForFalse = trueValue !== null ? 1 - this.fftuwmtr[index].percentageRolloutForTrue : null;
     }
 
     // 设置字段信息

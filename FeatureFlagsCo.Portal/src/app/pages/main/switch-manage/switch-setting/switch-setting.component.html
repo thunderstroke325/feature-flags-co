@@ -7,9 +7,9 @@
                 <input class="name" nz-input placeholder="开关名称..." [(ngModel)]="currentSwitch.name" />
             </div>
             <div class="info-item">
-                <p>KeyName</p>
-                <div>
-                    <input nz-input class="key" [disabled]="true" placeholder="KeyName..." [(ngModel)]="currentSwitch.keyName" />
+                <p>Key Name</p>
+                <div nz-typography nzCopyable [nzCopyText]="currentSwitch.keyName">
+                  <input nz-input class="key" [disabled]="true" placeholder="KeyName..." [(ngModel)]="currentSwitch.keyName" />
                 </div>
             </div>
             <div class="info-item">

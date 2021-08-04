@@ -36,8 +36,6 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
     private datePipe: DatePipe
   ) {
     this.switchId = this.route.snapshot.params['id'];
-    this.switchServe.listenerEnvID(this.destory$);
-
   }
 
   @HostListener('window:resize', ['$event'])

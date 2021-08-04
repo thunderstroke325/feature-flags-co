@@ -2,11 +2,8 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { Router } from '@angular/router';
 import { NzTableQueryParams } from 'ng-zorro-antd/table';
 import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';;
 import { UserService } from 'src/app/services/user.service';
-import { ProjectService } from 'src/app/services/project.service';
 import { AccountService } from 'src/app/services/account.service';
-import { IAccount, IProjectEnv } from 'src/app/config/types';
 
 
 @Component({
@@ -34,38 +31,17 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   constructor(
     private userService: UserService,
-    private projectService: ProjectService,
     private accountService: AccountService,
     private router: Router
   ) {
   }
 
   ngOnInit(): void {
-    this.initEnvId();
 
-    this.projectService.currentProjectEnvChanged$
-      .pipe(
-        debounceTime(200),
-        takeUntil(this.destory$)
-      )
-      .subscribe(
-        res => {
-          this.initEnvId();
-        }
-      );
-
-  }
-
-  private initEnvId() {
-    this.accountService.getCurrentAccount().subscribe((account: IAccount) => {
-      if (!!account) {
-        this.currentAccountId = account.id;
-        this.projectService.getCurrentProjectAndEnv(this.currentAccountId).subscribe((projectEnv: IProjectEnv) => {
-          this.currentEnvId = projectEnv.envId;
-          this.fetchUserList();
-        });
-      }
-    });
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    this.currentAccountId = currentAccountProjectEnv.account.id;
+    this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
+    this.fetchUserList();
   }
 
   ngOnDestroy(): void {
@@ -106,7 +82,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   onRowClick(user) {
-    this.router.navigateByUrl(`/main/switch-user/detail/${encodeURIComponent(user.id)}`)
+    this.router.navigateByUrl(`/switch-user/${encodeURIComponent(user.id)}`)
   }
 
   onPropsSettingClick() {

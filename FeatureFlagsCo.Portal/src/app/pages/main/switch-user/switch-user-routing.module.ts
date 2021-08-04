@@ -9,7 +9,7 @@ const routes: Routes = [
     path: '',
     component: UserListComponent
   }, {
-    path: 'detail/:id',
+    path: ':id',
     component: UserDetailComponent,
     resolve: { userDetail: SwitchUserResolver },
     data: {

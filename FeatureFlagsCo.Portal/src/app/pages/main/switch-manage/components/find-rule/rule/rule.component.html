@@ -11,7 +11,7 @@
                 </ng-container>
             </nz-select>
         </div>
-        <div  class="select">
+        <div class="select">
             <nz-select [(ngModel)]="ruleContent.operation" (ngModelChange)="onSelectOption()">
                 <ng-container *ngFor="let rule of ruleValueConfig">
                     <nz-option [nzValue]="rule.value" [nzLabel]="rule.label"></nz-option>
@@ -25,7 +25,10 @@
                 <input nz-input [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" placeholder="Please enter the text"/>
             </ng-container>
             <ng-container *ngSwitchCase="'number'">
-                <input type="number" [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" nz-input placeholder="Please enter a number"/>
+                <input nz-input type="number" [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" placeholder="Please enter a number"/>
+            </ng-container>
+            <ng-container *ngSwitchCase="'regex'">
+                <input nz-input [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" placeholder="Eg. ^foo$"/>
             </ng-container>
             <ng-container *ngSwitchCase="'multi'">
                 <!-- <nz-select nzMode="tags"
