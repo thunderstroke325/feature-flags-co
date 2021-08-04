@@ -150,21 +150,21 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddTransient<IAppInsightsService, AppInsightsService>();
 
 
-            if (CurrentEnvironment.EnvironmentName != "Development")
-            {
-                Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
-                            = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
-                aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights").GetSection("InstrumentationKey").Value;
-                aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights").GetSection("ConnectionString").Value;
-                aiOptions.EnableAdaptiveSampling = false;
-                aiOptions.EnableDependencyTrackingTelemetryModule = false;
-                aiOptions.EnableAppServicesHeartbeatTelemetryModule = false;
-                aiOptions.EnablePerformanceCounterCollectionModule = false;
-                aiOptions.EnableEventCounterCollectionModule = false;
-                aiOptions.EnableRequestTrackingTelemetryModule = false;
-                services.AddApplicationInsightsTelemetry(aiOptions);
+            //if (CurrentEnvironment.EnvironmentName != "Development")
+            //{
+            Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
+                        = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
+            aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights").GetSection("InstrumentationKey").Value;
+            aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights").GetSection("ConnectionString").Value;
+            aiOptions.EnableAdaptiveSampling = false;
+            aiOptions.EnableDependencyTrackingTelemetryModule = false;
+            aiOptions.EnableAppServicesHeartbeatTelemetryModule = false;
+            aiOptions.EnablePerformanceCounterCollectionModule = false;
+            aiOptions.EnableEventCounterCollectionModule = false;
+            aiOptions.EnableRequestTrackingTelemetryModule = false;
+            services.AddApplicationInsightsTelemetry(aiOptions);
                 //services.AddTransient<RequestBodyLoggingMiddleware>();
-            }
+            //}
 
             if (CurrentEnvironment.EnvironmentName == "Development")
             {

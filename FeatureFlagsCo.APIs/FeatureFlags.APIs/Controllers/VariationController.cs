@@ -139,6 +139,8 @@ namespace FeatureFlags.APIs.Controllers
                     ["featureFlagKey"] = param.FeatureFlagKeyName,
                     ["userKey"] = param.FFUserKeyId,
                     ["readOnlyOperation"] = returnResult.Item2,
+                    ["variationValue"] = returnResult.Item1.VariationValue,
+                    ["featureFlagId"] = ffIdVM.FeatureFlagId
                 };
                 using (_logger.BeginScope(customizedTraceProperties))
                 {

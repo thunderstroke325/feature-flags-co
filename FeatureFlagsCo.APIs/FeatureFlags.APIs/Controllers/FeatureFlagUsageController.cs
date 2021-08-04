@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
@@ -22,13 +23,16 @@ namespace FeatureFlags.APIs.Controllers
     {
         private readonly IAppInsightsService _appInsightsService;
         private readonly ICosmosDbService _cosmosDbService;
+        private readonly ILogger<FeatureFlagUsageController> _logger;
 
         public FeatureFlagUsageController(
             IAppInsightsService appInsightsService,
-            ICosmosDbService cosmosDbService)
+            ICosmosDbService cosmosDbService,
+            ILogger<FeatureFlagUsageController> logger)
         {
             _appInsightsService = appInsightsService;
             _cosmosDbService = cosmosDbService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -44,8 +48,27 @@ namespace FeatureFlags.APIs.Controllers
             var returnModel = new FeatureFlagUsageViewModel();
             returnModel.TotalUsers = await _cosmosDbService.GetFeatureFlagTotalUsersAsync(featureFlagId);
             returnModel.HitUsers = await _cosmosDbService.GetFeatureFlagHitUsersAsync(featureFlagId);
-            returnModel.ChartData = await _appInsightsService.GetFFUsageChartDataAsync(featureFlagId, chartQueryTimeSpan);
+            returnModel.ChartData = _appInsightsService.GetFFUsageChartData(featureFlagId, chartQueryTimeSpan);
             return returnModel;
+        }
+
+        [HttpGet]
+        [Route("GetMultiOptionFeatureFlagUsageData")]
+        public JsonResult GetMultiOptionFeatureFlagUsageData(string featureFlagId, string chartQueryTimeSpan)
+        {
+            try
+            {
+                var returnModel = new FeatureFlagUsageViewModel();
+                returnModel.ChartData = _appInsightsService.GetFFUsageChartData(featureFlagId, chartQueryTimeSpan);
+                returnModel.UserDistribution = _appInsightsService.GetFFUserDistribution(featureFlagId, chartQueryTimeSpan);
+                return new JsonResult(returnModel);
+            }
+            catch(Exception exp)
+            {
+                _logger.LogError(exp, $"Get /FeatureFlagUsage/GetMultiOptionFeatureFlagUsageData ; featureFlagId: {featureFlagId}, chartQueryTimeSpan: {chartQueryTimeSpan} ");
+                Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                return new JsonResult(exp.Message);
+            }
         }
 
     }

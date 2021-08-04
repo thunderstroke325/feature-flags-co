@@ -16,8 +16,35 @@ namespace FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels
         [JsonProperty("chartData")]
         public FeatureFlagUsageChartDataViewModel ChartData { get; set; }
 
+        [JsonProperty("userDistribution")]
+        public FeatureFlagUerDistributionViewModel UserDistribution { get; set; }
+
     }
 
+
+    public class FeatureFlagUerDistributionViewModel
+    {
+        [JsonProperty("tables")]
+        public List<FeatureFlagUerDistributionItemViewModel> Tables { get; set; }
+    }
+
+    public class FeatureFlagUerDistributionItemViewModel
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        [JsonProperty("columns")]
+        public List<FeatureFlagUsageChartColumnViewModel> Columns { get; set; }
+        [JsonProperty("rows")]
+        public List<List<dynamic>> Rows { get; set; }
+    }
+
+    public class FeatureFlagUerDistributionItemColumnViewModel
+    {
+        [JsonProperty("variation")]
+        public string Variation { get; set; }
+        [JsonProperty("count")]
+        public int Count { get; set; }
+    }
 
     public class FeatureFlagUsageChartDataViewModel
     {
