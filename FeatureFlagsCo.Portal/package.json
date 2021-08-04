@@ -1,6 +1,6 @@
 {
   "name": "feature-flagsco-fontend",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open --host=0.0.0.0",
@@ -20,9 +20,11 @@
     "@angular/platform-browser": "^11.2.14",
     "@angular/platform-browser-dynamic": "^11.2.14",
     "@angular/router": "^11.2.14",
+    "@microsoft/applicationinsights-angularplugin-js": "^2.6.2",
+    "@microsoft/applicationinsights-web": "^2.6.3",
     "echarts": "^5.1.1",
-    "ffc-angular-sdk": "0.0.13",
-    "ffc-js-client-sdk": "0.0.11",
+    "ffc-angular-sdk": "0.0.15",
+    "ffc-js-client-sdk": "0.0.13",
     "ng-zorro-antd": "^11.4.1",
     "rxjs": "^6.6.7",
     "tslib": "^2.2.0",
