@@ -108,24 +108,75 @@ stages:
                   deploymentMethod: 'auto'
 
               
-              - task: DotNetCoreCLI@2
-                displayName: dotnet restore
-                inputs:
-                  command: restore
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet restore
+              #   inputs:
+              #     command: restore
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
 
-              - task: DotNetCoreCLI@2
-                displayName: dotnet build
-                inputs:
-                  command: 'build'
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet build
+              #   inputs:
+              #     command: 'build'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
 
-              - task: DotNetCoreCLI@2
-                displayName: dotnet test
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet test
+              #   inputs:
+              #     command: 'test'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+              - task: replacetokens@3
+                displayName: Replace tokens in all tfvars files
                 inputs:
-                  command: 'test'
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+                  rootDirectory: '$(Build.SourcesDirectory)/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests'
+                  targetFiles: '**/*.json'
+                  emptyValue: EMPTY
+                  tokenPrefix: '#{'
+                  tokenSuffix: '}#'
+                env:
+                  loginUserName: '$(Postman_Integration_Test_Login_Username)'
+                  loginPassword: '$(Postman_Integration_Test_Login_Password)'
+
+              - task: PowerShell@2
+                displayName: Replace Postman Setting
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests
+                    $pathToJson = "ffc-variation-random-test.json"
+                    $a = Get-Content $pathToJson | ConvertFrom-Json
             
+                    $a.variable[0].value = "$(API_URL_Dev)"
+
+                    ConvertTo-Json $a -depth 100  | set-content $pathToJson
+
+                    $pathToJsonCheck = "ffc-variation-random-test.json"
+                    $aCheck = Get-Content $pathToJson | ConvertFrom-Json
+                    Write-Host $a.variable[0].key
+                    Write-Host $a.variable[0].value
+              
+              - task: Bash@3
+                displayName: 'run newman'
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    ls
+                    cd FeatureFlagsCo.APIs
+                    ls
+                    cd FeatureFlagsCo.APIs.Tests
+                    ls 
+                    cd Postman.IntegrationTests
+                    ls
+                    npm install -g newman
+                    newman run ffc-variation-random-test.json --reporters cli,junit --reporter-junit-export junit-report.xml
+
+              - task: PublishTestResults@2
+                inputs:
+                  testResultsFormat: 'JUnit'
+                  testResultsFiles: '**/*.xml'
+                  mergeTestResults: true
+                  failTaskOnFailedTests: true
+                displayName: 'Publish Test Results'   
 
      
 
@@ -152,8 +203,8 @@ stages:
                   tokenPrefix: '#{'
                   tokenSuffix: '}#'
                 env:
-                  loginUserName: $(Postman_Integration_Test_Login_Username)
-                  loginPassword: $(Postman_Integration_Test_Login_Password)
+                  loginUserName: '$(Postman_Integration_Test_Login_Username)'
+                  loginPassword: '$(Postman_Integration_Test_Login_Password)'
 
               - task: PowerShell@2
                 displayName: Replace Postman Setting
