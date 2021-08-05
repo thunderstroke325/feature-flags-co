@@ -91,12 +91,14 @@ stages:
                 displayName: dotnet restore unit test
                 inputs:
                   command: restore
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+                  projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
+                  # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
               - task: DotNetCoreCLI@2
                 displayName: dotnet build unit test
                 inputs:
                   command: 'build'
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+                  projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
+                  # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
               - task: DotNetCoreCLI@2
                 displayName: dotnet unit test
                 inputs:
@@ -110,11 +112,11 @@ stages:
                 inputs:
                   command: restore
                   projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-              - task: DotNetCoreCLI@2
-                displayName: dotnet build api
-                inputs:
-                  command: 'build'
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet build api
+              #   inputs:
+              #     command: 'build'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
     
               
 
