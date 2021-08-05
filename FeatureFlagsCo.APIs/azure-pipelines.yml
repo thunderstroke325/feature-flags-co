@@ -16,7 +16,6 @@ variables:
   value: Release
 
 
-
 stages:
 
 - stage: 'Development'
@@ -82,23 +81,24 @@ stages:
                     Write-Host $aCheck.MySettings.AppInsightsApplicationId
                     Write-Host $aCheck.MySettings.AppInsightsApplicationApiSecret.
 
+              
               - task: DotNetCoreCLI@2
-                displayName: dotnet restore
+                displayName: dotnet restore api
                 inputs:
                   command: restore
                   projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
               - task: DotNetCoreCLI@2
+                displayName: dotnet build api
                 inputs:
                   command: 'build'
                   projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-    
+                  
               - task: DotNetCoreCLI@2
                 inputs:
                   command: publish
                   publishWebProjects: True
                   arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
                   zipAfterPublish: True
-
               - task: AzureWebApp@1
                 inputs:
                   azureSubscription: 'azure-china-devops'
@@ -106,7 +106,53 @@ stages:
                   appName: 'ffc-api-ce2-dev'
                   package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
                   deploymentMethod: 'auto'
-            
+
+              
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet restore
+              #   inputs:
+              #     command: restore
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet build
+              #   inputs:
+              #     command: 'build'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet test
+              #   inputs:
+              #     command: 'test'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+     
+
+- stage: 'DevelopmentIntegrationTest'
+  jobs:
+  - deployment: 'DevIntegrationTest'
+    environment: 'Approval_API_Dev'
+    condition: succeeded()
+    strategy:
+        runOnce:
+          deploy:
+            steps:
+              - script: |
+                  dir
+                  
+              - checkout: self
+
+              # - task: replacetokens@3
+              #   displayName: Replace tokens in all tfvars files
+              #   inputs:
+              #     rootDirectory: '$(Build.SourcesDirectory)/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests'
+              #     targetFiles: '**/*.json'
+              #     emptyValue: EMPTY
+              #     tokenPrefix: '#{'
+              #     tokenSuffix: '}#'
+              #   env:
+              #     loginUserName: '$(Postman_Integration_Test_Login_Username)'
+              #     loginPassword: '$(Postman_Integration_Test_Login_Password)'
+
               - task: PowerShell@2
                 displayName: Replace Postman Setting
                 inputs:
@@ -146,7 +192,7 @@ stages:
                   testResultsFiles: '**/*.xml'
                   mergeTestResults: true
                   failTaskOnFailedTests: true
-                displayName: 'Publish Test Results'        
+                displayName: 'Publish Test Results'   
 
 - stage: 'Production'
   condition: succeeded()
@@ -204,7 +250,7 @@ stages:
                 displayName: dotnet restore
                 inputs:
                   command: restore
-                  projects: '/FeatureFlagsCo.APIs'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
               - task: DotNetCoreCLI@2
                 inputs:
                   command: 'build'

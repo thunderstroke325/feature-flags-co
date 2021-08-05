@@ -6,6 +6,7 @@ nav:
       - AB测试: quickstart/effects.md
       - 多特征联动发布: quickstart/prequisites.md
       - 外包控制: quickstart/outsource.md
+      - Flag判断条件流程图: quickstart/flag-check-variation-flow.md
       - Rollout百分比分配算法: quickstart/rollout-algo.md
       - 整合测试: quickstart/integration-test.md
       - DevOps流水线: quickstart/devops-pipeline.md
