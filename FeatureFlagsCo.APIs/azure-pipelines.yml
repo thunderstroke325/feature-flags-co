@@ -81,11 +81,17 @@ stages:
                     Write-Host $aCheck.MySettings.AppInsightsApplicationId
                     Write-Host $aCheck.MySettings.AppInsightsApplicationApiSecret.
 
+              - script: |
+                  dir
+                  cd FeatureFlagsCo.APIs
+                  dir
+                  cd FeatureFlagsCo.APIs.Tests
+                  dir
               - task: DotNetCoreCLI@2
                 displayName: dotnet restore unit test
                 inputs:
                   command: restore
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
               - task: DotNetCoreCLI@2
                 displayName: dotnet build unit test
                 inputs:
