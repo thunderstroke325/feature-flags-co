@@ -82,38 +82,38 @@ stages:
                     Write-Host $aCheck.MySettings.AppInsightsApplicationApiSecret.
 
               
-              # - task: DotNetCoreCLI@2
-              #   displayName: dotnet restore api
-              #   inputs:
-              #     command: restore
-              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-              # - task: DotNetCoreCLI@2
-              #   displayName: dotnet build api
-              #   inputs:
-              #     command: 'build'
-              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-                  
               - task: DotNetCoreCLI@2
-                displayName: dotnet restore
+                displayName: dotnet restore api
                 inputs:
                   command: restore
-                  projects: | 
-                    '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-                    '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
               - task: DotNetCoreCLI@2
-                displayName: dotnet build
+                displayName: dotnet build api
                 inputs:
                   command: 'build'
-                  projects: | 
-                    '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-                    '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-              - task: DotNetCoreCLI@2
-                displayName: dotnet test xunit
-                inputs:
-                  command: 'test'
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-                  # arguments: '--configuration $(BuildConfiguration)'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet restore
+              #   inputs:
+              #     command: restore
+              #     projects: | 
+              #       '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+              #       '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet build
+              #   inputs:
+              #     command: 'build'
+              #     projects: | 
+              #       '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+              #       '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet test xunit
+              #   inputs:
+              #     command: 'test'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+            
 
                   
               - task: DotNetCoreCLI@2
