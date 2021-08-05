@@ -81,7 +81,18 @@ stages:
                     Write-Host $aCheck.MySettings.AppInsightsApplicationId
                     Write-Host $aCheck.MySettings.AppInsightsApplicationApiSecret.
 
-
+              
+              - task: DotNetCoreCLI@2
+                displayName: dotnet restore api
+                inputs:
+                  command: restore
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+              - task: DotNetCoreCLI@2
+                displayName: dotnet build api
+                inputs:
+                  command: 'build'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+                  
               - task: DotNetCoreCLI@2
                 displayName: dotnet restore xunit
                 inputs:
@@ -100,16 +111,6 @@ stages:
                   # arguments: '--configuration $(BuildConfiguration)'
 
                   
-              - task: DotNetCoreCLI@2
-                displayName: dotnet restore api
-                inputs:
-                  command: restore
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-              - task: DotNetCoreCLI@2
-                displayName: dotnet build api
-                inputs:
-                  command: 'build'
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
               - task: DotNetCoreCLI@2
                 inputs:
                   command: publish
