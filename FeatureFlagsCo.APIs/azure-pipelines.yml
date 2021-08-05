@@ -96,7 +96,7 @@ stages:
                 displayName: dotnet build unit test
                 inputs:
                   command: 'build'
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
               - task: VSTest@2
                 inputs:
                   testSelector: 'testAssemblies'
@@ -104,7 +104,7 @@ stages:
                     **\*test*.dll
                     !**\*TestAdapter.dll
                     !**\obj\**
-                  searchFolder: '$(System.DefaultWorkingDirectory)\FeatureFlagsCo.APIs\FeatureFlags.APIs.Tests'
+                  searchFolder: '$(System.DefaultWorkingDirectory)\FeatureFlagsCo.APIs\FeatureFlagsCo.APIs.Tests'
 
               - task: DotNetCoreCLI@2
                 displayName: dotnet restore api
@@ -148,6 +148,29 @@ stages:
                   dir
                   
               - checkout: self
+
+              - task: replacetokens@3
+                inputs:
+                  rootDirectory: '$(Build.SourcesDirectory)/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests'
+                  targetFiles: '**/*.json'
+                  encoding: 'auto'
+                  writeBOM: true
+                  actionOnMissing: 'fail'
+                  keepToken: false
+                  tokenPrefix: '#{'
+                  tokenSuffix: '}#'
+
+              - task: replacetokens@3
+                displayName: Replace tokens in all tfvars files
+                inputs:
+                  rootDirectory: '$(Build.SourcesDirectory)/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests'
+                  targetFiles: '**/*.json'
+                  emptyValue: EMPTY
+                  tokenPrefix: '#{'
+                  tokenSuffix: '}#'
+                env:
+                  loginUserName: $(Postman_Integration_Test_Login_Username)
+                  loginPassword: $(Postman_Integration_Test_Login_Password)
 
               - task: PowerShell@2
                 displayName: Replace Postman Setting
