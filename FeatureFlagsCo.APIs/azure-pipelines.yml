@@ -83,47 +83,39 @@ stages:
 
 
               - task: DotNetCoreCLI@2
-                displayName: dotnet restore
+                displayName: dotnet restore xunit
                 inputs:
                   command: restore
-                  projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
-                  # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
               - task: DotNetCoreCLI@2
-                displayName: dotnet build
+                displayName: dotnet build xunit
                 inputs:
                   command: 'build'
-                  projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
-                  # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-              - script: |
-                  dir
-                  dotnet --info
-                  dotnet test FeatureFlagsCo.APIs\FeatureFlagsCo.APIs.Tests
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
               - task: DotNetCoreCLI@2
+                displayName: dotnet test xunit
                 inputs:
-                  command: 'custom'
-                  custom: 'dotnet test ''**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests'''
+                  command: 'test'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+                  # arguments: '--configuration $(BuildConfiguration)'
 
                   
-              # - task: DotNetCoreCLI@2
-              #   displayName: dotnet restore api
-              #   inputs:
-              #     command: restore
-              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-              # - task: DotNetCoreCLI@2
-              #   displayName: dotnet build api
-              #   inputs:
-              #     command: 'build'
-              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-    
-              
-
+              - task: DotNetCoreCLI@2
+                displayName: dotnet restore api
+                inputs:
+                  command: restore
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+              - task: DotNetCoreCLI@2
+                displayName: dotnet build api
+                inputs:
+                  command: 'build'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
               - task: DotNetCoreCLI@2
                 inputs:
                   command: publish
                   publishWebProjects: True
                   arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
                   zipAfterPublish: True
-
               - task: AzureWebApp@1
                 inputs:
                   azureSubscription: 'azure-china-devops'
