@@ -108,23 +108,23 @@ stages:
                   deploymentMethod: 'auto'
 
               
-              - task: DotNetCoreCLI@2
-                displayName: dotnet restore
-                inputs:
-                  command: restore
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet restore
+              #   inputs:
+              #     command: restore
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
 
-              - task: DotNetCoreCLI@2
-                displayName: dotnet build
-                inputs:
-                  command: 'build'
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet build
+              #   inputs:
+              #     command: 'build'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
 
-              - task: DotNetCoreCLI@2
-                displayName: dotnet test
-                inputs:
-                  command: 'test'
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet test
+              #   inputs:
+              #     command: 'test'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
             
 
      
