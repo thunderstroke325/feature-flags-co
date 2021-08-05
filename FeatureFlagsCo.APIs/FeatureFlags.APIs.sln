@@ -17,8 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs", "Featur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs.Tests", "FeatureFlagsCo.APIs.Tests\FeatureFlags.APIs.Tests.csproj", "{DD752E1F-1CD8-4D0C-88EF-44D8A9B37844}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlags.APIsTests", "FeatureFlags.APIsTests\FeatureFlags.APIsTests.csproj", "{77A24E3F-ED89-46B5-978E-9FC578F16C52}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,10 +35,6 @@ Global
 		{DD752E1F-1CD8-4D0C-88EF-44D8A9B37844}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD752E1F-1CD8-4D0C-88EF-44D8A9B37844}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD752E1F-1CD8-4D0C-88EF-44D8A9B37844}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77A24E3F-ED89-46B5-978E-9FC578F16C52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77A24E3F-ED89-46B5-978E-9FC578F16C52}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77A24E3F-ED89-46B5-978E-9FC578F16C52}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77A24E3F-ED89-46B5-978E-9FC578F16C52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
