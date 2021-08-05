@@ -376,7 +376,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"#{Postman_Integration_Test_Login_Username}#\",\r\n  \"password\": \"#{Postman_Integration_Test_Login_Password}#\"\r\n}",
+					"raw": "{\r\n  \"email\": \"test@feature-flags.co\",\r\n  \"password\": \"NGNiNjgwMzAt\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1234,7 +1234,8 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"\r",
+							"var responseData = JSON.parse(responseBody);\r",
+							"console.log(responseData);\r",
 							"pm.test(\"Successful POST request\", function () {\r",
 							"    pm.expect(responseBody).to.be.eq(\"true\");\r",
 							"});\r",
