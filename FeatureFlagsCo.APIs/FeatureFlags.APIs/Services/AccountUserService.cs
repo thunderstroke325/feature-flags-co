@@ -55,6 +55,8 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<List<AccountUserViewModel>> GetAccountMembersAsync(string currentUserId, int accountId)
         {
+            var includeInitialPassword = IsInAccountUserRoles(accountId, currentUserId, new List<AccountUserRoleEnum> { AccountUserRoleEnum.Owner });
+
             IQueryable<AccountUserViewModel> query = from aum in _dbContext.AccountUserMappings
                                                      join user in _dbContext.Users on aum.UserId equals user.Id // inner join
                                                      join invit in _dbContext.UserInvitations on user.Id equals invit.UserId into invits
@@ -65,7 +67,7 @@ namespace FeatureFlags.APIs.Services
                                                          UserId = user.Id,
                                                          Email = user.Email,
                                                          Role = aum.Role,
-                                                         InitialPassword = currentUserId.Equals(aum.InvitorUserId) ? invit.InitialPassword : null
+                                                         InitialPassword = includeInitialPassword || currentUserId.Equals(aum.InvitorUserId) ? invit.InitialPassword : null
                                                      };
 
             return await query.ToListAsync();
