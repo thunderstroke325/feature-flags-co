@@ -99,21 +99,18 @@ stages:
                   command: 'build'
                   projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
                   # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-              - task: DotNetCoreCLI@2
+              - task: VSTest@2
                 inputs:
-                  command: test
-                  projects: '**/*Tests/*.csproj'
-                  arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
-              # - task: VSTest@2
-              #   displayName: 'VsTest - Unit Tests'
-              #   inputs:
-              #     testAssemblyVer2: |
-              #       **\FeatureFlagsCo.APIs\FeatureFlagsCo.APIs.Tests\**\FeatureFlags.APIs.Tests.dll
-              #       !**\*xunit.runner*.dll
-              #       !**\obj\**
-              #       codeCoverageEnabled: true
-              #       diagnosticsEnabled: true
-              #       rerunFailedTests: true
+                  testSelector: 'testAssemblies'
+                  testAssemblyVer2: |
+                    **\*Tests*.dll
+                    !**\*TestAdapter.dll
+                    !**\obj\**
+                  searchFolder: '$(System.DefaultWorkingDirectory)\FeatureFlagsCo.APIs'
+                  codeCoverageEnabled: true
+                  diagnosticsEnabled: true
+                  collectDumpOn: 'always'
+                  rerunFailedTests: false
               
 
                   
