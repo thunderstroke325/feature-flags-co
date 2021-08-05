@@ -376,7 +376,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"#{loginUserName}#\",\r\n  \"password\": \"#{loginPassword}#\"\r\n}",
+					"raw": "{\r\n  \"email\": \"#{Postman_Integration_Test_Login_Username}#\",\r\n  \"password\": \"#{Postman_Integration_Test_Login_Password}#\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1299,7 +1299,7 @@
 	"variable": [
 		{
 			"key": "apihost",
-			"value": "http://localhost:5001"
+			"value": "https://ffc-api-ce2-dev.chinacloudsites.cn\n"
 		},
 		{
 			"key": "token",
