@@ -102,8 +102,8 @@ stages:
                 inputs:
                   command: test
                   projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-                  arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
-           
+                  arguments: '--collect "Code coverage"'
+
                   
               - task: DotNetCoreCLI@2
                 displayName: dotnet restore api
