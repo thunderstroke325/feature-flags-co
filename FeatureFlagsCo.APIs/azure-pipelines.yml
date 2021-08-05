@@ -92,29 +92,6 @@ stages:
                 inputs:
                   command: 'build'
                   projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-
-              # - task: DotNetCoreCLI@2
-              #   displayName: dotnet restore
-              #   inputs:
-              #     command: restore
-              #     projects: | 
-              #       '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-              #       '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-
-              # - task: DotNetCoreCLI@2
-              #   displayName: dotnet build
-              #   inputs:
-              #     command: 'build'
-              #     projects: | 
-              #       '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-              #       '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-              # - task: DotNetCoreCLI@2
-              #   displayName: dotnet test xunit
-              #   inputs:
-              #     command: 'test'
-              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-            
-
                   
               - task: DotNetCoreCLI@2
                 inputs:
@@ -129,6 +106,27 @@ stages:
                   appName: 'ffc-api-ce2-dev'
                   package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
                   deploymentMethod: 'auto'
+
+              
+              - task: DotNetCoreCLI@2
+                displayName: dotnet restore
+                inputs:
+                  command: restore
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+
+              - task: DotNetCoreCLI@2
+                displayName: dotnet build
+                inputs:
+                  command: 'build'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+
+              - task: DotNetCoreCLI@2
+                displayName: dotnet test
+                inputs:
+                  command: 'test'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+            
+
      
 
 - stage: 'DevelopmentIntegrationTest'
