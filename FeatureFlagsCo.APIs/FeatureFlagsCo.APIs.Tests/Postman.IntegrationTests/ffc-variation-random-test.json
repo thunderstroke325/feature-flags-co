@@ -376,7 +376,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"hu-beau@outlook.com\",\r\n  \"password\": \"@nlc0ccmb\"\r\n}",
+					"raw": "{\r\n  \"email\": \"#{loginUserName}#\",\r\n  \"password\": \"#{loginPassword}#\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
