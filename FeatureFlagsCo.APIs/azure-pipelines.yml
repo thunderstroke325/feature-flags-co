@@ -88,13 +88,13 @@ stages:
                   cd FeatureFlagsCo.APIs.Tests
                   dir
               - task: DotNetCoreCLI@2
-                displayName: dotnet restore unit test
+                displayName: dotnet restore
                 inputs:
                   command: restore
                   projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
                   # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
               - task: DotNetCoreCLI@2
-                displayName: dotnet build unit test
+                displayName: dotnet build
                 inputs:
                   command: 'build'
                   projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
