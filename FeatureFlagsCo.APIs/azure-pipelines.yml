@@ -85,7 +85,7 @@ stages:
                 displayName: dotnet restore unit test
                 inputs:
                   command: restore
-                  projects: '**FeatureFlags.APIs.Tests.csproj'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
               - task: DotNetCoreCLI@2
                 displayName: dotnet build unit test
                 inputs:
