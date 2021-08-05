@@ -99,31 +99,29 @@ stages:
                   command: 'build'
                   projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
                   # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-              # - task: DotNetCoreCLI@2
-              #   displayName: dotnet unit test
-              #   inputs:
-              #     command: test
-              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-              #     arguments: '--collect "Code coverage"'
-              #     buildProperties: 
-              - task: VSTest@2
-                displayName: 'VsTest - Unit Tests'
+              - task: DotNetCoreCLI@2
                 inputs:
-                  testAssemblyVer2: |
-                    **\FeatureFlagsCo.APIs\FeatureFlagsCo.APIs.Tests\**\FeatureFlags.APIs.Tests.dll
-                    !**\*xunit.runner*.dll
-                    !**\obj\**
-                    codeCoverageEnabled: true
-                    diagnosticsEnabled: true
-                    rerunFailedTests: true
+                  command: test
+                  projects: '**/*Tests/*.csproj'
+                  arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
+              # - task: VSTest@2
+              #   displayName: 'VsTest - Unit Tests'
+              #   inputs:
+              #     testAssemblyVer2: |
+              #       **\FeatureFlagsCo.APIs\FeatureFlagsCo.APIs.Tests\**\FeatureFlags.APIs.Tests.dll
+              #       !**\*xunit.runner*.dll
+              #       !**\obj\**
+              #       codeCoverageEnabled: true
+              #       diagnosticsEnabled: true
+              #       rerunFailedTests: true
               
 
                   
-              - task: DotNetCoreCLI@2
-                displayName: dotnet restore api
-                inputs:
-                  command: restore
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet restore api
+              #   inputs:
+              #     command: restore
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
               # - task: DotNetCoreCLI@2
               #   displayName: dotnet build api
               #   inputs:
