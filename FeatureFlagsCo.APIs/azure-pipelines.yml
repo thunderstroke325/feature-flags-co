@@ -96,7 +96,7 @@ stages:
                 displayName: dotnet build unit test
                 inputs:
                   command: 'build'
-                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
               - task: VSTest@2
                 inputs:
                   testSelector: 'testAssemblies'
@@ -104,7 +104,7 @@ stages:
                     **\*test*.dll
                     !**\*TestAdapter.dll
                     !**\obj\**
-                  searchFolder: '$(System.DefaultWorkingDirectory)\FeatureFlagsCo.APIs\FeatureFlags.APIs.Tests'
+                  searchFolder: '$(System.DefaultWorkingDirectory)\FeatureFlagsCo.APIs\FeatureFlagsCo.APIs.Tests'
 
               - task: DotNetCoreCLI@2
                 displayName: dotnet restore api
@@ -148,6 +148,7 @@ stages:
                   dir
                   
               - checkout: self
+
 
               - task: PowerShell@2
                 displayName: Replace Postman Setting
