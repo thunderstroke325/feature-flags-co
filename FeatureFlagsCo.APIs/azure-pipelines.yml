@@ -105,7 +105,11 @@ stages:
                     !**\*TestAdapter.dll
                     !**\obj\**
                   searchFolder: '$(System.DefaultWorkingDirectory)\FeatureFlagsCo.APIs\FeatureFlagsCo.APIs.Tests'
-
+                  codeCoverageEnabled: true
+                  testRunTitle: 'Unit Test'
+                  diagnosticsEnabled: true
+                  collectDumpOn: 'always'
+                  
               - task: DotNetCoreCLI@2
                 displayName: dotnet restore api
                 inputs:
