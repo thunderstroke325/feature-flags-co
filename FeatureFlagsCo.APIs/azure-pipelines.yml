@@ -81,59 +81,47 @@ stages:
                     Write-Host $aCheck.MySettings.AppInsightsApplicationId
                     Write-Host $aCheck.MySettings.AppInsightsApplicationApiSecret.
 
-              - script: |
-                  dir
-                  cd FeatureFlagsCo.APIs
-                  dir
-                  cd FeatureFlagsCo.APIs.Tests
-                  dir
+              
               - task: DotNetCoreCLI@2
-                displayName: dotnet restore
+                displayName: dotnet restore api
                 inputs:
                   command: restore
-                  projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
-                  # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
               - task: DotNetCoreCLI@2
-                displayName: dotnet build
+                displayName: dotnet build api
                 inputs:
                   command: 'build'
-                  projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
-                  # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-              - task: VSTest@2
-                inputs:
-                  testSelector: 'testAssemblies'
-                  testAssemblyVer2: |
-                    **\*Tests*.dll
-                    !**\*TestAdapter.dll
-                    !**\obj\**
-                  searchFolder: '$(System.DefaultWorkingDirectory)\FeatureFlagsCo.APIs'
-                  codeCoverageEnabled: true
-                  diagnosticsEnabled: true
-                  collectDumpOn: 'always'
-                  rerunFailedTests: false
-              
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
 
-                  
               # - task: DotNetCoreCLI@2
-              #   displayName: dotnet restore api
+              #   displayName: dotnet restore
               #   inputs:
               #     command: restore
-              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+              #     projects: | 
+              #       '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+              #       '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+
               # - task: DotNetCoreCLI@2
-              #   displayName: dotnet build api
+              #   displayName: dotnet build
               #   inputs:
               #     command: 'build'
-              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
-    
-              
+              #     projects: | 
+              #       '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+              #       '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet test xunit
+              #   inputs:
+              #     command: 'test'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+            
 
+                  
               - task: DotNetCoreCLI@2
                 inputs:
                   command: publish
                   publishWebProjects: True
                   arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
                   zipAfterPublish: True
-
               - task: AzureWebApp@1
                 inputs:
                   azureSubscription: 'azure-china-devops'
