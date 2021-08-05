@@ -16,5 +16,7 @@ https://docs.feature-flags.co/
 
 使用文档中不仅包含了使用手册，同时对测试用例、核心算法也有相关描述。
 
+## 发布信息
 
+https://github.com/feature-flags-co/feature-flags-co/blob/main/release-history.md
 
