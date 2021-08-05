@@ -97,18 +97,13 @@ stages:
                 inputs:
                   command: 'build'
                   projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-              - task: VSTest@2
+              - task: DotNetCoreCLI@2
+                displayName: dotnet unit test
                 inputs:
-                  testSelector: 'testAssemblies'
-                  testAssemblyVer2: |
-                    **\*test*.dll
-                    !**\*TestAdapter.dll
-                    !**\obj\**
-                  searchFolder: '$(System.DefaultWorkingDirectory)\FeatureFlagsCo.APIs\FeatureFlagsCo.APIs.Tests'
-                  codeCoverageEnabled: true
-                  testRunTitle: 'Unit Test'
-                  diagnosticsEnabled: true
-                  collectDumpOn: 'always'
+                  command: test
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+                  arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
+           
                   
               - task: DotNetCoreCLI@2
                 displayName: dotnet restore api
