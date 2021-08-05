@@ -203,8 +203,8 @@ stages:
                   tokenPrefix: '#{'
                   tokenSuffix: '}#'
                 env:
-                  loginUserName: $(Postman_Integration_Test_Login_Username)
-                  loginPassword: $(Postman_Integration_Test_Login_Password)
+                  loginUserName: '$(Postman_Integration_Test_Login_Username)'
+                  loginPassword: '$(Postman_Integration_Test_Login_Password)'
 
               - task: PowerShell@2
                 displayName: Replace Postman Setting
