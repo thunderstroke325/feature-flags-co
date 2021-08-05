@@ -46,9 +46,8 @@ namespace FeatureFlags.APIs.Controllers
         public async Task<List<AccountUserViewModel>> GetAccountMembers(int accountId)
         {
            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
-           var includeInitialPassword = _accountUserService.IsInAccountUserRoles(accountId, currentUserId, new List<AccountUserRoleEnum> { AccountUserRoleEnum.Owner, AccountUserRoleEnum.Admin });
 
-           return await _accountUserService.GetAccountMembersAsync(accountId, includeInitialPassword);
+           return await _accountUserService.GetAccountMembersAsync(currentUserId, accountId);
         }
 
 

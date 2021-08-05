@@ -26,7 +26,7 @@ namespace FeatureFlags.APIs.Services
 
         public bool IsAccountMember(int accountId, string userId);
 
-        public Task<List<AccountUserViewModel>> GetAccountMembersAsync(int accountId, bool includeInitialPassword);
+        public Task<List<AccountUserViewModel>> GetAccountMembersAsync(string currentUserId, int accountId);
 
     }
 
@@ -53,38 +53,20 @@ namespace FeatureFlags.APIs.Services
                     .FirstOrDefaultAsync(x => x.UserId == userId && x.Role == AccountUserRoleEnum.Owner.ToString());
         }
 
-        public async Task<List<AccountUserViewModel>> GetAccountMembersAsync(int accountId, bool includeInitialPassword)
+        public async Task<List<AccountUserViewModel>> GetAccountMembersAsync(string currentUserId, int accountId)
         {
-            IQueryable<AccountUserViewModel> query;
-
-            if (includeInitialPassword)
-            {
-                query = from aum in _dbContext.AccountUserMappings
-                        join user in _dbContext.Users on aum.UserId equals user.Id // inner join
-                        join invit in _dbContext.UserInvitations on user.Id equals invit.UserId into invits
-                        from invit in invits.DefaultIfEmpty() // left join
-                        where aum.AccountId == accountId 
-                        select new AccountUserViewModel
-                        {
-                            UserId = user.Id,
-                            Email = user.Email,
-                            Role = aum.Role,
-                            InitialPassword = invit.InitialPassword
-                        };
-            }
-            else 
-            {
-                query = from aum in _dbContext.AccountUserMappings
-                        join user in _dbContext.Users
-                        on aum.UserId equals user.Id
-                        where aum.AccountId == accountId
-                        select new AccountUserViewModel
-                        {
-                            UserId = user.Id,
-                            Email = user.Email,
-                            Role = aum.Role
-                        };
-            }
+            IQueryable<AccountUserViewModel> query = from aum in _dbContext.AccountUserMappings
+                                                     join user in _dbContext.Users on aum.UserId equals user.Id // inner join
+                                                     join invit in _dbContext.UserInvitations on user.Id equals invit.UserId into invits
+                                                     from invit in invits.DefaultIfEmpty() // left join
+                                                     where aum.AccountId == accountId
+                                                     select new AccountUserViewModel
+                                                     {
+                                                         UserId = user.Id,
+                                                         Email = user.Email,
+                                                         Role = aum.Role,
+                                                         InitialPassword = currentUserId.Equals(aum.InvitorUserId) ? invit.InitialPassword : null
+                                                     };
 
             return await query.ToListAsync();
         }
