@@ -129,7 +129,7 @@ stages:
                   deploymentMethod: 'auto'
      
 
-- stage: 'Dev Integration Test'
+- stage: 'DevelopmentIntegrationTest'
   jobs:
   - deployment: 'DevIntegrationTest'
     environment: 'Approval_API_Dev'
