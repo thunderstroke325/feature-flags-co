@@ -154,17 +154,6 @@ stages:
               - checkout: self
 
               - task: replacetokens@3
-                inputs:
-                  rootDirectory: '$(Build.SourcesDirectory)/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests'
-                  targetFiles: '**/*.json'
-                  encoding: 'auto'
-                  writeBOM: true
-                  actionOnMissing: 'fail'
-                  keepToken: false
-                  tokenPrefix: '#{'
-                  tokenSuffix: '}#'
-
-              - task: replacetokens@3
                 displayName: Replace tokens in all tfvars files
                 inputs:
                   rootDirectory: '$(Build.SourcesDirectory)/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests'
