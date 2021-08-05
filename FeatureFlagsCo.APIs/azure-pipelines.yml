@@ -88,21 +88,16 @@ stages:
                   command: restore
                   projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
                   # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
-              # - task: DotNetCoreCLI@2
-              #   displayName: dotnet build
-              #   inputs:
-              #     command: 'build'
-              #     projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
-              #     # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
+              - task: DotNetCoreCLI@2
+                displayName: dotnet build
+                inputs:
+                  command: 'build'
+                  projects: '**/FeatureFlagsCo.APIs/**/*.csproj'
+                  # projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/FeatureFlags.APIs.Tests.csproj'
               - script: |
-                  # dir
-                  # cd FeatureFlagsCo.APIs
-                  # dir
-                  # cd FeatureFlagsCo.APIs.Tests
                   dir
                   dotnet --info
                   dotnet test FeatureFlagsCo.APIs\FeatureFlagsCo.APIs.Tests
-                  
               - task: DotNetCoreCLI@2
                 inputs:
                   command: 'custom'
