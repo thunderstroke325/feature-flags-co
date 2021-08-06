@@ -1,0 +1,1217 @@
+{
+	"info": {
+		"_postman_id": "1411554c-ee95-4d92-9d07-06e34de5b8a1",
+		"name": "ffc-multi-variation-ffp-test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Data Initialization",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var environmentSecret = \"MzkwLWZlYjctNCUyMDIxMDczMTExNDkwNV9fNF9fMl9fNF9fZGVmYXVsdF9hNGIyYQ==\";\r",
+							"var environmentId = 4;\r",
+							"\r",
+							"\r",
+							"pm.collectionVariables.set(\"environmentId\", environmentId);\r",
+							"pm.collectionVariables.set(\"projectId\", 2);\r",
+							"pm.collectionVariables.set(\"organizationId\", 4);\r",
+							"pm.collectionVariables.set(\"organizationId\", 4);\r",
+							"pm.collectionVariables.set(\"environmentSecret\", environmentSecret)\r",
+							"\r",
+							"var variationOptions = generateVariationOptions(5);\r",
+							"\r",
+							"\r",
+							"var defaultRulePercentageRollouts = [\r",
+							"    {\r",
+							"        \"rolloutPercentage\": [0, 0.7],\r",
+							"        \"valueOption\": {\r",
+							"            \"localId\": 2,\r",
+							"            \"displayOrder\": 2,\r",
+							"            \"variationValue\": \"A\"\r",
+							"        }\r",
+							"    },\r",
+							"    {\r",
+							"        \"rolloutPercentage\": [0.7, 1],\r",
+							"        \"valueOption\": {\r",
+							"            \"localId\": 3,\r",
+							"            \"displayOrder\": 3,\r",
+							"            \"variationValue\": \"B\"\r",
+							"        }\r",
+							"    }\r",
+							"];\r",
+							"var variationOptionWhenDisabled = randomGetVariationOption(variationOptions);\r",
+							"var targetIndividuals = [];\r",
+							"var fftuwmtr = [\r",
+							"    {\r",
+							"        \"RuleId\": uuidv4(),\r",
+							"        \"RuleName\": \"rule-0\",\r",
+							"        \"RuleJsonContent\": [\r",
+							"            {\r",
+							"                \"property\": \"groups\",\r",
+							"                \"operation\": \"IsOneOf\",\r",
+							"                \"value\": \"[\\\"1\\\",\\\"2\\\"]\"\r",
+							"            },\r",
+							"            {\r",
+							"                \"property\": \"version\",\r",
+							"                \"operation\": \"StartsWith\",\r",
+							"                \"value\": \"1.\"\r",
+							"            }\r",
+							"        ],\r",
+							"        \"valueOptionsVariationRuleValues\": [\r",
+							"            {\r",
+							"                \"rolloutPercentage\": [0, 0.7],\r",
+							"                \"valueOption\": {\r",
+							"                    \"localId\": 0,\r",
+							"                    \"displayOrder\": 0,\r",
+							"                    \"variationValue\": \"Green\"\r",
+							"                }\r",
+							"            },\r",
+							"            {\r",
+							"                \"rolloutPercentage\": [0.7, 1],\r",
+							"                \"valueOption\": {\r",
+							"                    \"localId\": 1,\r",
+							"                    \"displayOrder\": 1,\r",
+							"                    \"variationValue\": \"Blue\"\r",
+							"                }\r",
+							"            }\r",
+							"        ]\r",
+							"    }\r",
+							"];\r",
+							"var testData1 = {\r",
+							"    \"id\": \"##{featureFlagId1}##\",\r",
+							"    \"environmentId\": environmentId,\r",
+							"    \"objectType\": \"FeatureFlag\",\r",
+							"    \"ff\": {\r",
+							"        \"id\": \"##{featureFlagId1}##\",\r",
+							"        \"name\": \"##{featureFlagName1}##\",\r",
+							"        \"keyName\": \"##{featureFlagKeyName1}##\",\r",
+							"        \"environmentId\": environmentId,\r",
+							"        \"status\": \"Enabled\",\r",
+							"        \"defaultRulePercentageRollouts\": defaultRulePercentageRollouts,\r",
+							"        \"variationOptionWhenDisabled\": variationOptionWhenDisabled\r",
+							"    },\r",
+							"    \"ffp\": [\r",
+							"    ],\r",
+							"    \"fftuwmtr\": fftuwmtr,\r",
+							"    \"targetIndividuals\": targetIndividuals,\r",
+							"    \"variationOptions\": variationOptions,\r",
+							"    \"isMultiOptionMode\": true\r",
+							"}\r",
+							"var testData2 = {\r",
+							"    \"id\": \"##{featureFlagId2}##\",\r",
+							"    \"environmentId\": environmentId,\r",
+							"    \"objectType\": \"FeatureFlag\",\r",
+							"    \"ff\": {\r",
+							"        \"id\": \"##{featureFlagId2}##\",\r",
+							"        \"name\": \"##{featureFlagName2}##\",\r",
+							"        \"keyName\": \"##{featureFlagKeyName2}##\",\r",
+							"        \"environmentId\": environmentId,\r",
+							"        \"status\": \"Enabled\",\r",
+							"        \"defaultRulePercentageRollouts\": defaultRulePercentageRollouts,\r",
+							"        \"variationOptionWhenDisabled\": variationOptionWhenDisabled\r",
+							"    },\r",
+							"    \"ffp\": [\r",
+							"    ],\r",
+							"    \"fftuwmtr\": fftuwmtr,\r",
+							"    \"targetIndividuals\": targetIndividuals,\r",
+							"    \"variationOptions\": variationOptions,\r",
+							"    \"isMultiOptionMode\": true\r",
+							"}\r",
+							"\r",
+							"var testData3 = {\r",
+							"    \"id\": \"##{featureFlagId3}##\",\r",
+							"    \"environmentId\": environmentId,\r",
+							"    \"objectType\": \"FeatureFlag\",\r",
+							"    \"ff\": {\r",
+							"        \"id\": \"##{featureFlagId3}##\",\r",
+							"        \"name\": \"##{featureFlagName3}##\",\r",
+							"        \"keyName\": \"##{featureFlagKeyName3}##\",\r",
+							"        \"environmentId\": environmentId,\r",
+							"        \"status\": \"Enabled\",\r",
+							"        \"defaultRulePercentageRollouts\": defaultRulePercentageRollouts,\r",
+							"        \"variationOptionWhenDisabled\": variationOptionWhenDisabled\r",
+							"    },\r",
+							"    \"ffp\": [\r",
+							"        {\r",
+							"            \"prerequisiteFeatureFlagId\": \"##{featureFlagId1}##\",\r",
+							"            \"valueOptionsVariationValue\": {\r",
+							"                \"localId\": 0,\r",
+							"                \"displayOrder\": 0,\r",
+							"                \"variationValue\": \"Green\"\r",
+							"            }\r",
+							"        },\r",
+							"        {\r",
+							"            \"prerequisiteFeatureFlagId\": \"##{featureFlagId2}##\",\r",
+							"            \"valueOptionsVariationValue\": {\r",
+							"                \"localId\": 0,\r",
+							"                \"displayOrder\": 0,\r",
+							"                \"variationValue\": \"Green\"\r",
+							"            }\r",
+							"        }\r",
+							"    ],\r",
+							"    \"fftuwmtr\": fftuwmtr,\r",
+							"    \"targetIndividuals\": targetIndividuals,\r",
+							"    \"variationOptions\": variationOptions,\r",
+							"    \"isMultiOptionMode\": true\r",
+							"}\r",
+							"\r",
+							"\r",
+							"pm.collectionVariables.set(\"testData1\", JSON.stringify(testData1));\r",
+							"pm.collectionVariables.set(\"testData2\", JSON.stringify(testData2));\r",
+							"pm.collectionVariables.set(\"testData3\", JSON.stringify(testData3));\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"// ======================== ==============================================\r",
+							"\r",
+							"\r",
+							"function getRandomInt(min, max) {\r",
+							"    min = Math.ceil(min);\r",
+							"    max = Math.floor(max);\r",
+							"    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive\r",
+							"}\r",
+							"\r",
+							"function arraySum(arr, stopIndex) {\r",
+							"    var sum = 0;\r",
+							"    for (let i = 0; i < stopIndex; i++) {\r",
+							"        sum += arr[i];\r",
+							"    }\r",
+							"    return sum;\r",
+							"}\r",
+							"function randomGetVariationOption(vops) {\r",
+							"    return vops[getRandomInt(0, vops.length - 1)];\r",
+							"}\r",
+							"\r",
+							"\r",
+							"function generateVariationOptions(variationOptionCount) {\r",
+							"    var variationOptions = [];\r",
+							"    variationOptions.push({\r",
+							"        \"localId\": 0,\r",
+							"        \"displayOrder\": 0,\r",
+							"        \"variationValue\": \"Green\"\r",
+							"    });\r",
+							"    variationOptions.push({\r",
+							"        \"localId\": 0,\r",
+							"        \"displayOrder\": 0,\r",
+							"        \"variationValue\": \"Blue\"\r",
+							"    });\r",
+							"    variationOptions.push({\r",
+							"        \"localId\": 0,\r",
+							"        \"displayOrder\": 0,\r",
+							"        \"variationValue\": \"A\"\r",
+							"    });\r",
+							"    variationOptions.push({\r",
+							"        \"localId\": 0,\r",
+							"        \"displayOrder\": 0,\r",
+							"        \"variationValue\": \"B\"\r",
+							"    });\r",
+							"    return variationOptions;\r",
+							"}\r",
+							"\r",
+							"function getRandomElementsFromArray(arr, n) {\r",
+							"    var result = new Array(n),\r",
+							"        len = arr.length,\r",
+							"        taken = new Array(len);\r",
+							"    if (n > len)\r",
+							"        throw new RangeError(\"getRandom: more elements taken than available\");\r",
+							"    while (n--) {\r",
+							"        var x = Math.floor(Math.random() * len);\r",
+							"        result[n] = arr[x in taken ? taken[x] : x];\r",
+							"        taken[x] = --len in taken ? taken[len] : len;\r",
+							"    }\r",
+							"    return result;\r",
+							"}\r",
+							"function uuidv4() {\r",
+							"    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {\r",
+							"        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);\r",
+							"        return v.toString(16);\r",
+							"    });\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apihost}}/api/Authenticate/Probe",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"api",
+						"Authenticate",
+						"Probe"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"pm.collectionVariables.set(\"token\", jsonData.token);\r",
+							"\r",
+							"console.log(jsonData);\r",
+							"tests[\"name = \" + jsonData.token] = true;\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"token\");\r",
+							"});\r",
+							"\r",
+							"console.log('#########LOGIN END#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########LOGIN STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"test@feature-flags.co\",\r\n  \"password\": \"NGNiNjgwMzAt\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/api/Authenticate/login",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"api",
+						"Authenticate",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Feature Flag 1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Create feature flag 1 STARTED#######');\r",
+							"\r",
+							"\r",
+							"var flagName = \"ffc-multi-variation-ffp-test-data1-\" + new Date().getTime();\r",
+							"pm.environment.set(\"flag-name1\", flagName);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"console.log(jsonData);\r",
+							"pm.collectionVariables.set(\"featureFlagId1\", jsonData.id);\r",
+							"\r",
+							"console.log('#########Create feature flag 1 END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"{{flag-name1}}\",\r\n  \"environmentId\": {{environmentId}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/CreateFeatureFlag",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"CreateFeatureFlag"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Feature Flag 1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Get feature flag 1 STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"pm.test(\"Successful Get request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);\r",
+							"});\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"console.log(jsonData);\r",
+							"\r",
+							"pm.collectionVariables.set(\"featureFlagName1\", jsonData.ff.name);\r",
+							"pm.collectionVariables.set(\"featureFlagKeyName1\", jsonData.ff.keyName);\r",
+							"\r",
+							"\r",
+							"console.log('#########Create feature flag 1 END#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/GetFeatureFlag?id={{featureFlagId1}}",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"GetFeatureFlag"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{featureFlagId1}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Feature Flag 1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Update feature flag 1 STARTED#######');\r",
+							"var testData1Str = pm.collectionVariables.get(\"testData1\");\r",
+							"\r",
+							"testData1Str = testData1Str.replace('##{featureFlagId1}##', pm.variables.get(\"featureFlagId1\"));\r",
+							"testData1Str = testData1Str.replace('##{featureFlagId1}##', pm.variables.get(\"featureFlagId1\"));\r",
+							"testData1Str = testData1Str.replace('##{featureFlagName1}##', pm.variables.get(\"featureFlagName1\"));\r",
+							"testData1Str = testData1Str.replace('##{featureFlagKeyName1}##', pm.variables.get(\"featureFlagKeyName1\"));\r",
+							"\r",
+							"console.log(JSON.parse(testData1Str));\r",
+							"\r",
+							"pm.collectionVariables.set(\"testData1-update\", testData1Str);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"pm.test(\"Successful PUT request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Update feature flag 1 END#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{testData1-update}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/UpdateFeatureFlag",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"UpdateFeatureFlag"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Feature Flag 2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Create feature flag 2 STARTED#######');\r",
+							"\r",
+							"\r",
+							"var flagName = \"ffc-multi-variation-ffp-test-data2-\" + new Date().getTime();\r",
+							"pm.environment.set(\"flag-name2\", flagName);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"console.log(jsonData);\r",
+							"pm.collectionVariables.set(\"featureFlagId2\", jsonData.id);\r",
+							"\r",
+							"console.log('#########Create feature flag 2 END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"{{flag-name2}}\",\r\n  \"environmentId\": {{environmentId}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/CreateFeatureFlag",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"CreateFeatureFlag"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Feature Flag 2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Get feature flag 2 STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"pm.test(\"Successful Get request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);\r",
+							"});\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"console.log(jsonData);\r",
+							"\r",
+							"pm.collectionVariables.set(\"featureFlagName2\", jsonData.ff.name);\r",
+							"pm.collectionVariables.set(\"featureFlagKeyName2\", jsonData.ff.keyName);\r",
+							"\r",
+							"\r",
+							"console.log('#########Create feature flag 2 END#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/GetFeatureFlag?id={{featureFlagId2}}",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"GetFeatureFlag"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{featureFlagId2}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Feature Flag 2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Update feature flag 2 STARTED#######');\r",
+							"var testData2Str = pm.collectionVariables.get(\"testData2\");\r",
+							"\r",
+							"testData2Str = testData2Str.replace('##{featureFlagId2}##', pm.variables.get(\"featureFlagId2\"));\r",
+							"testData2Str = testData2Str.replace('##{featureFlagId2}##', pm.variables.get(\"featureFlagId2\"));\r",
+							"testData2Str = testData2Str.replace('##{featureFlagName2}##', pm.variables.get(\"featureFlagName2\"));\r",
+							"testData2Str = testData2Str.replace('##{featureFlagKeyName2}##', pm.variables.get(\"featureFlagKeyName2\"));\r",
+							"\r",
+							"console.log(JSON.parse(testData2Str));\r",
+							"\r",
+							"pm.collectionVariables.set(\"testData2-update\", testData2Str);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"pm.test(\"Successful PUT request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Update feature flag 2 END#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{testData2-update}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/UpdateFeatureFlag",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"UpdateFeatureFlag"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Feature Flag 3",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Create feature flag 3 STARTED#######');\r",
+							"\r",
+							"\r",
+							"var flagName = \"ffc-multi-variation-ffp-test-data3-\" + new Date().getTime();\r",
+							"pm.environment.set(\"flag-name3\", flagName);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"console.log(jsonData);\r",
+							"pm.collectionVariables.set(\"featureFlagId3\", jsonData.id);\r",
+							"\r",
+							"console.log('#########Create feature flag 3 END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"{{flag-name3}}\",\r\n  \"environmentId\": {{environmentId}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/CreateFeatureFlag",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"CreateFeatureFlag"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Feature Flag 3",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Get feature flag 3 STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"pm.test(\"Successful Get request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);\r",
+							"});\r",
+							"\r",
+							"var jsonData = JSON.parse(responseBody);\r",
+							"console.log(jsonData);\r",
+							"\r",
+							"pm.collectionVariables.set(\"featureFlagName3\", jsonData.ff.name);\r",
+							"pm.collectionVariables.set(\"featureFlagKeyName3\", jsonData.ff.keyName);\r",
+							"\r",
+							"\r",
+							"console.log('#########Create feature flag 3 END#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/GetFeatureFlag?id={{featureFlagId3}}",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"GetFeatureFlag"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{featureFlagId3}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Feature Flag 3",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log('#########Update feature flag 3 STARTED#######');\r",
+							"var testData3Str = pm.collectionVariables.get(\"testData3\");\r",
+							"\r",
+							"\r",
+							"testData3Str = testData3Str.replace('##{featureFlagId1}##', pm.variables.get(\"featureFlagId1\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagId2}##', pm.variables.get(\"featureFlagId2\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagId3}##', pm.variables.get(\"featureFlagId3\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagId3}##', pm.variables.get(\"featureFlagId3\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagName3}##', pm.variables.get(\"featureFlagName3\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagKeyName3}##', pm.variables.get(\"featureFlagKeyName3\"));\r",
+							"\r",
+							"console.log(JSON.parse(testData3Str));\r",
+							"\r",
+							"pm.collectionVariables.set(\"testData3-update\", testData3Str);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"pm.test(\"Successful PUT request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Update feature flag 3 END#######');"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{testData3-update}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/FeatureFlags/UpdateFeatureFlag",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"FeatureFlags",
+						"UpdateFeatureFlag"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Varation",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"console.log('#########Get Varation STARTED#######');"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    var responseData = JSON.parse(responseBody);\r",
+							"    pm.expect(responseData.localId).to.be.equal(0);\r",
+							"});\r",
+							"\r",
+							"console.log('#########Get Varation END#######');\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName3}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"hu-beau\",\r\n    \"ffUserEmail\": \"hu-beau@outlook.com\",\r\n    \"ffUserKeyId\": \"hu-beau@outlook.com\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"groups\",\r\n            \"value\": \"1\"\r\n        },\r\n        {\r\n            \"name\": \"version\",\r\n            \"value\": \"1.0.x\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"host": [
+						"{{apihost}}"
+					],
+					"path": [
+						"Variation",
+						"GetMultiOptionVariation"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "apihost",
+			"value": "http://localhost:5001"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "environmentId",
+			"value": ""
+		},
+		{
+			"key": "projectId",
+			"value": ""
+		},
+		{
+			"key": "organizationId",
+			"value": ""
+		},
+		{
+			"key": "featureFlagId",
+			"value": ""
+		},
+		{
+			"key": "featureFlag",
+			"value": ""
+		},
+		{
+			"key": "featureFlagName",
+			"value": ""
+		},
+		{
+			"key": "featureFlagKeyName",
+			"value": ""
+		},
+		{
+			"key": "environmentSecret",
+			"value": ""
+		},
+		{
+			"key": "dataSample0-update",
+			"value": ""
+		},
+		{
+			"key": "dataSample0",
+			"value": ""
+		},
+		{
+			"key": "testData1",
+			"value": ""
+		},
+		{
+			"key": "testData2",
+			"value": ""
+		},
+		{
+			"key": "testData3",
+			"value": ""
+		},
+		{
+			"key": "featureFlagId1",
+			"value": ""
+		},
+		{
+			"key": "featureFlagName1",
+			"value": ""
+		},
+		{
+			"key": "featureFlagKeyName1",
+			"value": ""
+		},
+		{
+			"key": "testData1-update",
+			"value": ""
+		},
+		{
+			"key": "featureFlagId2",
+			"value": ""
+		},
+		{
+			"key": "featureFlagName2",
+			"value": ""
+		},
+		{
+			"key": "featureFlagKeyName2",
+			"value": ""
+		},
+		{
+			"key": "testData2-update",
+			"value": ""
+		},
+		{
+			"key": "featureFlagId3",
+			"value": ""
+		},
+		{
+			"key": "featureFlagName3",
+			"value": ""
+		},
+		{
+			"key": "featureFlagKeyName3",
+			"value": ""
+		},
+		{
+			"key": "testData3-update",
+			"value": ""
+		}
+	]
+}

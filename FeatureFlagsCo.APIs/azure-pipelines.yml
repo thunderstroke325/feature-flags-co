@@ -159,17 +159,24 @@ stages:
                   targetType: 'inline'
                   script: |
                     cd FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests
+                    
                     $pathToJson = "ffc-variation-random-test.json"
                     $a = Get-Content $pathToJson | ConvertFrom-Json
-            
                     $a.variable[0].value = "$(API_URL_Dev)"
-
                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
-
+                    
                     $pathToJsonCheck = "ffc-variation-random-test.json"
                     $aCheck = Get-Content $pathToJson | ConvertFrom-Json
-                    Write-Host $a.variable[0].key
-                    Write-Host $a.variable[0].value
+                    Write-Host $aCheck.variable[0].value
+                    
+                    $pathToJson2 = "ffc-multi-variation-ffp-test.json"
+                    $a2 = Get-Content $pathToJson | ConvertFrom-Json
+                    $a2.variable[0].value = "$(API_URL_Dev)"
+                    ConvertTo-Json $a2 -depth 100  | set-content $pathToJson
+                    
+                    $pathToJsonCheck2 = "ffc-multi-variation-ffp-test.json"
+                    $aCheck2 = Get-Content $pathToJson | ConvertFrom-Json
+                    Write-Host $aCheck2.variable[0].value
               
               - task: Bash@3
                 displayName: 'run newman'
