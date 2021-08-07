@@ -170,28 +170,55 @@ stages:
                     Write-Host $aCheck.variable[0].value
                     
                     $pathToJson2 = "ffc-multi-variation-ffp-test.json"
-                    $a2 = Get-Content $pathToJson | ConvertFrom-Json
+                    $a2 = Get-Content $pathToJson2 | ConvertFrom-Json
                     $a2.variable[0].value = "$(API_URL_Dev)"
-                    ConvertTo-Json $a2 -depth 100  | set-content $pathToJson
+                    ConvertTo-Json $a2 -depth 100  | set-content $pathToJson2
                     
                     $pathToJsonCheck2 = "ffc-multi-variation-ffp-test.json"
-                    $aCheck2 = Get-Content $pathToJson | ConvertFrom-Json
+                    $aCheck2 = Get-Content $pathToJson2 | ConvertFrom-Json
                     Write-Host $aCheck2.variable[0].value
+                    
+                    $pathToJson3 = "ffc-multi-variation-cache-test.json"
+                    $a3 = Get-Content $pathToJson3 | ConvertFrom-Json
+                    $a3.variable[0].value = "$(API_URL_Dev)"
+                    ConvertTo-Json $a3 -depth 100  | set-content $pathToJson3
+                    
+                    $pathToJsonCheck3 = "ffc-multi-variation-cache-test.json"
+                    $aCheck3 = Get-Content $pathToJson3 | ConvertFrom-Json
+                    Write-Host $aCheck3.variable[0].value
               
               - task: Bash@3
                 displayName: 'run newman'
                 inputs:
                   targetType: 'inline'
                   script: |
-                    ls
                     cd FeatureFlagsCo.APIs
-                    ls
                     cd FeatureFlagsCo.APIs.Tests
-                    ls 
                     cd Postman.IntegrationTests
-                    ls
                     npm install -g newman
                     newman run ffc-variation-random-test.json --reporters cli,junit --reporter-junit-export junit-report.xml
+              
+              - task: Bash@3
+                displayName: 'run newman'
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs
+                    cd FeatureFlagsCo.APIs.Tests
+                    cd Postman.IntegrationTests
+                    npm install -g newman
+                    newman run ffc-multi-variation-ffp-test.json --reporters cli,junit --reporter-junit-export junit-report2.xml
+
+              - task: Bash@3
+                displayName: 'run newman'
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs
+                    cd FeatureFlagsCo.APIs.Tests
+                    cd Postman.IntegrationTests
+                    npm install -g newman
+                    newman run ffc-multi-variation-cache-test.json --reporters cli,junit --reporter-junit-export junit-report3.xml
 
               - task: PublishTestResults@2
                 inputs:

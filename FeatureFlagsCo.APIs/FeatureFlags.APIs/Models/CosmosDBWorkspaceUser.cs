@@ -42,5 +42,6 @@ namespace FeatureFlags.APIs.Models
         public string PercentageRolloutBasedRuleId { get; set; }
 
         public VariationOption VariationOptionResultValue { get; set; }
+        public CosmosDBEnvironmentUser UserInfo { get; set; }
     }
 }

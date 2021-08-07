@@ -699,17 +699,29 @@ namespace FeatureFlags.APIs.Repositories
 
             if (!string.IsNullOrWhiteSpace(featureFlagsUserMappingString))
             {
-                cosmosDBFeatureFlagsUser = JsonConvert.DeserializeObject<CosmosDBEnvironmentFeatureFlagUser>(featureFlagsUserMappingString);
+                cosmosDBFeatureFlagsUser = JsonConvert.DeserializeObject<CosmosDBEnvironmentFeatureFlagUser>(featureFlagsUserMappingString);                
+
                 if (featureFlag.FF.LastUpdatedTime != null && cosmosDBFeatureFlagsUser.LastUpdatedTime != null &&
                     featureFlag.FF.LastUpdatedTime.Value.CompareTo(cosmosDBFeatureFlagsUser.LastUpdatedTime.Value) <= 0)
                 {
-                    return new Tuple<VariationOption, bool>(cosmosDBFeatureFlagsUser.VariationOptionResultValue, readOnlyOperation);
+                    if (cosmosDBFeatureFlagsUser.UserInfo != null)
+                    {
+                        var userInfo = cosmosDBFeatureFlagsUser.UserInfo;
+                        if ((environmentUser.CustomizedProperties == userInfo.CustomizedProperties ||
+                            JsonConvert.SerializeObject(environmentUser.CustomizedProperties).Trim() == JsonConvert.SerializeObject(userInfo.CustomizedProperties).Trim()) &&
+                            environmentUser.Name == userInfo.Name)
+                        {
+                            return new Tuple<VariationOption, bool>(cosmosDBFeatureFlagsUser.VariationOptionResultValue, readOnlyOperation);
+                        }
+                    }
                 }
             }
 
             cosmosDBFeatureFlagsUser = await MultiOptionRedoMatchingAndUpdateToRedisCacheAsync(
                 featureFlagId, featureFlagUserMappingId, featureFlag,
                 environmentUser, environmentSecret, ffIdVM);
+
+            cosmosDBFeatureFlagsUser.UserInfo = environmentUser;
             await _redisCache.SetStringAsync(featureFlagUserMappingId, JsonConvert.SerializeObject(cosmosDBFeatureFlagsUser));
 
             await UpsertEnvironmentUserAsync(environmentUser, environmentId);
