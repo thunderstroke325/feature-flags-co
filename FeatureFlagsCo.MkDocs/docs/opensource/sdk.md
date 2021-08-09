@@ -8,6 +8,9 @@
 ### Python SDK
 [https://github.com/feature-flags-co/ffc-python-sdk](https://github.com/feature-flags-co/ffc-python-sdk)
 
+### 微信小程序SDK
+[https://github.com/feature-flags-co/ffc-sdk-wechat-miniprogram](https://github.com/feature-flags-co/ffc-sdk-wechat-miniprogram)
+
 ### Csharp
 即将到来，敬请期待
 

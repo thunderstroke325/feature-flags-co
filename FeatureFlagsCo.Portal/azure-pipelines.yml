@@ -25,12 +25,14 @@ stages:
                 inputs:
                   versionSpec: '14.x'
                 displayName: 'Install Node.js'
+              
 
               - task: Bash@3
                 inputs:
                   targetType: 'inline'
                   script: |
-                    cd '$(System.DefaultWorkingDirectory)'
+                    cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
+                    
                     npm install -g @angular/cli
                     npm install
                     ng build
