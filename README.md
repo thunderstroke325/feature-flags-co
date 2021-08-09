@@ -1,22 +1,27 @@
 # feature-flags-co
 
-官网 [敏捷开关 https://www.feature-flags.co](https://www.feature-flags.co)
 
-一款开源的产品级功能标记神器
+Official Website: [https://www.feature-flags.co](https://www.feature-flags.co)
 
-- 高频/精细的发布产品功能
-- 安全/无忧的推进社会前进
+An open source product-level feature flags plateform
 
-让功能的发布/下线/回退 精细化到每个市场用户、每一个模块、每一分钟、每一种技术环境、每一个实用场景、每一个运营环节、每一个工作人员
+High-frequency/Secured release/rollback/offiline product features. Rest easy!
+
+Make feature refined to each market user, each module, each minute, each technical environment, each practical scenario, each operational link, each staff member.
 
 
-## 使用文档
+## Docs
 
 https://docs.feature-flags.co/
 
-使用文档中不仅包含了使用手册，同时对测试用例、核心算法也有相关描述。
+The documentation contains not only the manual, but also a description of the test cases and core algorithms.
 
-## 发布信息
+The documentation is currently only available in Chinese, please look forward to other language versions.
+
+
+
+## Release History
 
 https://github.com/feature-flags-co/feature-flags-co/blob/main/release-history.md
+
 
