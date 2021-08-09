@@ -64,7 +64,7 @@
                                    (percentageChange)="onPercentageChange($event, key)"
                                    (ruleConfigChange)="onRuleConfigChange($event, key)"
                                    [variationOptions]="variationOptions"
-                                   [rulePercentageRollouts]="featureDetail?.getFFDefaultRulePercentageRollouts()"
+                                   [rulePercentageRollouts]="condition?.valueOptionsVariationRuleValues"
                                    (onPercentageChangeMultistates)="onPercentageChangeMultistates($event, key)"></find-rule>
                     </div>
                 </ng-container>

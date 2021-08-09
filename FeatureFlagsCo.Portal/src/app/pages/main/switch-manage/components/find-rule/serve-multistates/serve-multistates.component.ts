@@ -27,7 +27,7 @@ export class ServeMultistatesComponent implements OnInit {
   ngOnInit(): void {
 
     if (this.isNotPercentageRollout()) {
-      this.selectedValueOptionId = this.rulePercentageRollouts[0]?.valueOption.localId;
+      this.selectedValueOptionId = this.rulePercentageRollouts[0]?.valueOption.localId || this.variationOptions[0].localId;
       this.rulePercentageRolloutValues = this.variationOptions.map((v, idx) => ({
         rolloutPercentage: [0, idx === 0 ? 1 : 0],
         valueOption: Object.assign({}, v),
@@ -57,7 +57,7 @@ export class ServeMultistatesComponent implements OnInit {
   }
 
   private isNotPercentageRollout() : boolean {
-    return this.rulePercentageRollouts.length === 1 && this.rulePercentageRollouts[0].rolloutPercentage.length === 2 && this.rulePercentageRollouts[0].rolloutPercentage[0] === 0 && this.rulePercentageRollouts[0].rolloutPercentage[1] === 1;
+    return this.rulePercentageRollouts.length === 0 || (this.rulePercentageRollouts.length === 1 && this.rulePercentageRollouts[0].rolloutPercentage.length === 2 && this.rulePercentageRollouts[0].rolloutPercentage[0] === 0 && this.rulePercentageRollouts[0].rolloutPercentage[1] === 1);
   }
 
   public modelChange() {
