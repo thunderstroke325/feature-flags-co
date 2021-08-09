@@ -332,7 +332,7 @@ export class CSwitchParams {
       let fftuwmrPercentage = 1;
       this.fftuwmtr.forEach((item: IFftuwmtrParams) => {
           const percentage = item.valueOptionsVariationRuleValues?.reduce((acc, curr: IRulePercentageRollout) => {
-              return acc + curr.rolloutPercentage[0] + curr.rolloutPercentage[1];
+              return acc + curr.rolloutPercentage[1] - curr.rolloutPercentage[0];
           }, 0);
 
           if (percentage !== 1) {
