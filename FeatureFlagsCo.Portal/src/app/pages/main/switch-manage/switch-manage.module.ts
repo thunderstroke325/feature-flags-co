@@ -9,7 +9,7 @@ import { SwitchManageComponent } from './switch-manage.component';
     SwitchManageComponent
   ],
   imports: [
-    CommonModule, 
+    CommonModule,
     SwitchManageRoutingModule
   ],
   providers: [

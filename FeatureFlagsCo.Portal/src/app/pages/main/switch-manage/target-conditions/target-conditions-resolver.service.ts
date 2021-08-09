@@ -16,10 +16,7 @@ export class TargetConditionsResolver implements Resolve<CSwitchParams> {
     const id: string = decodeURIComponent(route.params['id']);
     return this.switchServe.getSwitchDetail(id)
       .pipe(
-        map(res => {
-          this.switchServe.setCurrentSwitch(res.ff);
-          return res;
-        })
+        map(res => res)
       );
   }
 }

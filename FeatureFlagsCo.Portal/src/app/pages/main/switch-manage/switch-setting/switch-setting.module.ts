@@ -8,6 +8,11 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { FormsModule } from '@angular/forms';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';;
 
 @NgModule({
   declarations: [
@@ -19,6 +24,11 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
     NzInputModule,
     NzMessageModule,
     NzTypographyModule,
+    NzDividerModule,
+    NzTableModule,
+    NzIconModule,
+    DragDropModule,
+    NzPopconfirmModule,
     FormsModule,
     ComponentsModule,
     SwitchSettingRoutingModule

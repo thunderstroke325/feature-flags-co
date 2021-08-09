@@ -48,6 +48,12 @@ namespace FeatureFlags.APIs.Models
         public List<VariationOptionPercentageRollout> DefaultRulePercentageRollouts { get; set; }
         public VariationOption VariationOptionWhenDisabled { get; set; }
     }
+
+    public class FeatureFlagSettings : CosmosDBFeatureFlagBasicInfo
+    {
+        public List<VariationOption> VariationOptions { get; set; }
+    }
+
     public class CosmosDBFeatureFlagPrerequisite
     {
         public string PrerequisiteFeatureFlagId { get; set; }

@@ -96,6 +96,7 @@ namespace FeatureFlags.APIs.Controllers
             return ff;
         }
 
+        // The multi state FF is supported
         [HttpPost]
         [Route("CreateFeatureFlag")]
         public async Task<CreateFeatureFlagViewModel> CreateFeatureFlag([FromBody] CreateFeatureFlagViewModel param)
@@ -119,14 +120,20 @@ namespace FeatureFlags.APIs.Controllers
             // 修改开关时，可以提示是否重新更新已有用户，如果是则异步的后台操作一次(这里有机会减少服务器负载量和云成本)，如果否则保持原有纪录不更新-只等待新用户-此时更新提示的timestamp保持不变)
         }
 
+        // The multi state FF is supported
         [HttpPut]
         [Route("UpdateFeatureFlagSetting")]
-        public async Task<CosmosDBFeatureFlagBasicInfo> UpdateFeatureFlagSetting([FromBody] CosmosDBFeatureFlagBasicInfo param)
+        public async Task<FeatureFlagSettings> UpdateFeatureFlagSetting([FromBody] FeatureFlagSettings param)
         {
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             CosmosDBFeatureFlag ff = await _cosmosDbService.GetFeatureFlagAsync(param.Id);
             ff.FF.LastUpdatedTime = DateTime.UtcNow;
             ff.FF.Name = param.Name;
+            if (ff.IsMultiOptionMode.HasValue && ff.IsMultiOptionMode.Value) 
+            {
+                ff.VariationOptions = param.VariationOptions;
+            }
+            
             await _cosmosDbService.UpdateCosmosDBFeatureFlagAsync(ff);
             param.LastUpdatedTime = ff.FF.LastUpdatedTime;
             param.KeyName = ff.FF.KeyName;
@@ -161,6 +168,15 @@ namespace FeatureFlags.APIs.Controllers
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvironmentId))
             {
+                if (await _cosmosDbService.GetCosmosDBFeatureFlagAsync(param.Id) == null)
+                {
+                    return new ReturnJsonModel<CosmosDBFeatureFlag>()
+                    {
+                        StatusCode = 404,
+                        Error = new Exception("Not Found")
+                    };
+                }
+
                 var returnOBj = await _cosmosDbService.UpdateMultiValueOptionSupportedFeatureFlagAsync(param);
                 if (returnOBj.StatusCode == 200)
                 {

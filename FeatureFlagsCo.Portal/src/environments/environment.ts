@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  projectEnvKey: '',
+  projectEnvKey: '',
   url: 'https://ffc-api-ce2-dev.chinacloudsites.cn'
 };
 

@@ -1,0 +1,37 @@
+<section class="body">
+    <div class="tip" *ngIf="!isSingle">SERVE</div>
+    <div class="select" [class.single-select]="isSingle">
+        <nz-select [(ngModel)]="selectedValueOptionId" (ngModelChange)="modelChange()">
+            <nz-option *ngFor="let variationOption of variationOptions; let i = index" nzCustomContent [nzValue]="variationOption.localId" [nzLabel]="variationOption.variationValue">
+                <i class="tip-{{i % 10}}" nz-icon nzType="border" nzTheme="outline"></i> {{variationOption.variationValue}}
+            </nz-option>
+            <nz-option *ngIf="variationOptions.length > 1" [nzValue]="-1" [nzLabel]="'Percentage rollout'"></nz-option>
+        </nz-select>
+
+        <div class="percentage-body" *ngIf="selectedValueOptionId === -1">
+            <div class="percentage">
+                <div class="item" *ngFor="let rule of rulePercentageRolloutValues; let i = index">
+                    <span>
+                        <i class="tip-{{i % 10}}" nz-icon nzType="border" nzTheme="outline"></i> {{rule.valueOption.variationValue}}
+                    </span>
+                    <div class="percentage-number">
+                        <input type="number" [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()" nz-input/>%
+                    </div>
+                </div>
+                <div class="item">
+                    <span></span>
+                    <span>100%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<ng-template #multipleTemplate let-selected>
+    <div class="ant-select-selection-item-content">
+        <ng-container *ngIf="['true', 'false'].includes(selected.nzValue)">
+            <i [ngClass]="selected.nzValue == 'true' ? 'true-tip' : 'false-tip'" nz-icon nzType="border" nzTheme="outline"></i>
+        </ng-container>
+        {{ selected.nzLabel }}
+    </div>
+</ng-template>

@@ -1,13 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { forkJoin, Subject } from 'rxjs';
-import { debounceTime, map, takeUntil } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { SwitchService } from 'src/app/services/switch.service';
-import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType } from '../types/switch-new';
-import { ProjectService } from 'src/app/services/project.service';
-import { AccountService } from 'src/app/services/account.service';
-import { IAccount, IProjectEnv } from 'src/app/config/types';
+import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType, IVariationOption, IFftiuParams, IRulePercentageRollout } from '../types/switch-new';
+import { FfcAngularSdkService } from 'ffc-angular-sdk';
 
 @Component({
   selector: 'conditions',
@@ -18,6 +16,7 @@ export class TargetConditionsComponent implements OnInit {
 
   private destory$: Subject<void> = new Subject();
 
+  public multistateEnabled: boolean = false;
   public switchStatus: 'Enabled' | 'Disabled' = 'Enabled';  // 开关状态
   public propertiesList: string[] = [];                     // 用户配置列表
   public featureList: IFfParams[] = [];                     // 开关列表
@@ -27,13 +26,18 @@ export class TargetConditionsComponent implements OnInit {
   public targetUserSelectedListTrue: IUserType[] = [];       // 状态为 true 的目标用户
   public targetUserSelectedListFalse: IUserType[] = [];      // 状态为 false 的目标用户
   public switchId: string;
-  public isLoading: boolean = true;                          // 加载数据
+  public isLoading: boolean = true;
+  public variationOptions: IVariationOption[] = [];                         // multi state
+  public targetIndividuals: {[key: string]: IFftiuParams[]}  = {}; // multi state
 
   constructor(
     private route:ActivatedRoute,
     private switchServe: SwitchService,
     private msg: NzMessageService,
+    private ffcAngularSdkService: FfcAngularSdkService
   ) {
+    this.multistateEnabled = this.ffcAngularSdkService.variation('Multistate-enabled');
+
     this.ListenerResolveData();
   }
 
@@ -73,6 +77,16 @@ export class TargetConditionsComponent implements OnInit {
     this.route.data.pipe(map(res => res.switchInfo))
     .subscribe((result: CSwitchParams) => {
       this.featureDetail = new CSwitchParams(result);
+      this.multistateEnabled = this.multistateEnabled && this.featureDetail.getIsMultiOptionMode();
+      if (this.multistateEnabled) {
+        this.variationOptions = this.featureDetail.getVariationOptions();
+
+        this.targetIndividuals = this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
+          acc[cur.localId] = this.featureDetail.getTargetIndividuals().find(ti => ti.valueOption.localId === cur.localId) || [];
+          return acc;
+        }, {});
+      }
+
       const detail: IFfParams = this.featureDetail.getSwicthDetail();
       this.switchServe.setCurrentSwitch(detail);
       this.switchId = detail.id;
@@ -115,6 +129,7 @@ export class TargetConditionsComponent implements OnInit {
 
   // 目标用户发生改变
   public onSelectedUserListChange(data: IUserType[], type: 'true' | 'false') {
+    console.log('onSelectedUserListChange');
     if(type === 'true') {
       this.targetUserSelectedListTrue = [...data];
     } else {
@@ -139,6 +154,10 @@ export class TargetConditionsComponent implements OnInit {
       baseProperty = !baseProperty;
     }
     this.featureDetail.setFFBasedProperty(baseProperty);
+  }
+
+  public onVariationOptionWhenDisabledChange(option: IVariationOption) {
+    this.featureDetail.setFFVariationOptionWhenDisabled(option);
   }
 
   // 默认返回值配置
@@ -175,11 +194,41 @@ export class TargetConditionsComponent implements OnInit {
 
     this.featureDetail.onSortoutSubmitData();
 
-    this.switchServe.updateSwitch(this.featureDetail)
+    this.switchServe.updateSwitch(this.featureDetail, false)
       .subscribe((result) => {
         this.msg.success("修改成功!");
     }, error => {
       this.msg.error("修改失败!");
     })
+  }
+
+  /****multi state* */
+  // 默认返回值配置
+  public onDefaultRulePercentageRolloutsChange(value: IRulePercentageRollout[]) {
+    this.featureDetail.setFFDefaultRulePercentageRollouts(value);
+  }
+
+  public onSaveSettingMultistates() {
+
+    // TODO check percentage === 100%
+    const validationErrs = this.featureDetail.checkMultistatesPercentage();
+
+    if (validationErrs.length > 0) {
+      this.msg.error(validationErrs[0]); // TODO display all messages by multiple lines
+      return false;
+    }
+
+    this.featureDetail.onSortoutSubmitData();
+
+    this.switchServe.updateSwitch(this.featureDetail, true)
+      .subscribe((result) => {
+        this.msg.success("修改成功!");
+    }, error => {
+      this.msg.error("修改失败!");
+    })
+  }
+
+  public onPercentageChangeMultistates(value: IRulePercentageRollout[], index: number) {
+    this.featureDetail.setRuleValueOptionsVariationRuleValues(value, index);
   }
 }

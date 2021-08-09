@@ -20,6 +20,7 @@ export class TargetUserComponent {
   };
 
   @Input() type: string = '';
+  @Input() tipIdx: number = 0;
   @Input() tipColor: string = '#7FFFD4';
   @Input() selectedUserDetailList: IUserType[];
 
@@ -52,6 +53,7 @@ export class TargetUserComponent {
 
   // 选择发生改变
   public onSelectChange() {
+    console.log('onSelectChange');
     this.onSelectedUserListChange.next(this.selectedUserDetailList);
   }
 }

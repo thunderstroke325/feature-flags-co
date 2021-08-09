@@ -23,6 +23,15 @@ export interface IFfParams {
     percentageRolloutBasedProperty: boolean;
     valueWhenDisabled: boolean;
     lastUpdatedTime: string;
+    // multi states
+    variationOptionWhenDisabled: IVariationOption;
+    defaultRulePercentageRollouts: IRulePercentageRollout[];
+}
+
+export interface IFfSettingParams {
+  id: string;
+  name: string;
+  variationOptions?: IVariationOption[] // not null only for nulti state feature flag
 }
 
 export interface IFfpParams {
@@ -54,6 +63,23 @@ export interface IFftuwmtrParams {
     percentageRolloutForTrue: number;
     percentageRolloutForFalse: number;
     percentageRolloutBasedProperty: string;
+    valueOptionsVariationRuleValues: IRulePercentageRollout[];
+}
+
+export interface IVariationOption {
+  localId: number;
+  displayOrder: number;
+  variationValue: string;
+}
+
+export interface ITargetIndividualForVariationOption {
+  individuals: IFftiuParams[];
+  valueOption: IVariationOption;
+}
+
+export interface IRulePercentageRollout {
+  rolloutPercentage: number[]; // only two elements, start and end
+  valueOption: IVariationOption;
 }
 
 export class CSwitchParams {
@@ -66,6 +92,9 @@ export class CSwitchParams {
     private fftiuForFalse: IFftiuParams[];
     private fftiuForTrue: IFftiuParams[];
     private fftuwmtr: IFftuwmtrParams[];
+    private targetIndividuals: ITargetIndividualForVariationOption[];
+    private variationOptions: IVariationOption[];
+    private isMultiOptionMode: boolean;
 
     constructor(data: CSwitchParams) {
 
@@ -78,6 +107,10 @@ export class CSwitchParams {
         this.fftiuForFalse = data.fftiuForFalse;
         this.fftiuForTrue = data.fftiuForTrue;
         this.fftuwmtr = data.fftuwmtr;
+
+        this.variationOptions = data.variationOptions?.sort((a, b) => a.displayOrder - b.displayOrder); // multistate
+        this.targetIndividuals = data.targetIndividuals; // multistate
+        this.isMultiOptionMode = data.isMultiOptionMode; // multistate
 
         this.initFFNullString();
         this.initFFTuwmtrNullString();
@@ -188,6 +221,10 @@ export class CSwitchParams {
         return this.fftuwmtr;
     }
 
+    public getIsMultiOptionMode(): boolean {
+      return !!this.isMultiOptionMode;
+    }
+
     // 删除匹配规则
     public deleteFftuwmtr(index: number) {
         this.fftuwmtr.splice(index, 1);
@@ -202,7 +239,8 @@ export class CSwitchParams {
             variationRuleValue: null,
             percentageRolloutForTrue: null,
             percentageRolloutForFalse: null,
-            percentageRolloutBasedProperty: null
+            percentageRolloutBasedProperty: null,
+            valueOptionsVariationRuleValues: [],
         })
     }
 
@@ -227,7 +265,7 @@ export class CSwitchParams {
         // this.ff.defaultRuleValue = this.ff.defaultRuleValue === "null" ? null : this.ff.defaultRuleValue;
 
         this.fftuwmtr.forEach((item: IFftuwmtrParams) => {
-            item.variationRuleValue = item.variationRuleValue === 'null' ? null : item.variationRuleValue;
+            item.variationRuleValue = item.variationRuleValue === 'null' ? null : item.variationRuleValue; // not useful for multi states
 
             item.ruleJsonContent.forEach((rule: IJsonContent) => {
                 if(rule.type === 'multi') {
@@ -242,6 +280,67 @@ export class CSwitchParams {
 
     // 获取开关详情
     public getSwicthDetail(): IFfParams {
-        return this.ff;
+      return this.ff;
     }
+
+    // *************************** multi states ********************************************
+    public getVariationOptions(): IVariationOption[] {
+      return this.variationOptions || [];
+    }
+
+    public getTargetIndividuals(): ITargetIndividualForVariationOption[] {
+      return this.targetIndividuals || [];
+    }
+
+    public getFFVariationOptionWhenDisabled(): IVariationOption {
+      return this.ff.variationOptionWhenDisabled || this.variationOptions[0];
+    }
+
+    public setFFVariationOptionWhenDisabled(value: IVariationOption) {
+        this.ff.variationOptionWhenDisabled = value;
+    }
+
+    public getFFDefaultRulePercentageRollouts() {
+      return this.ff.defaultRulePercentageRollouts || [];
+    }
+
+    public setFFDefaultRulePercentageRollouts(value: IRulePercentageRollout[]) {
+      this.ff.defaultRulePercentageRollouts = Array.from(value);
+    }
+
+    public setRuleValueOptionsVariationRuleValues(value: IRulePercentageRollout[], index: number) {
+      this.fftuwmtr[index].valueOptionsVariationRuleValues = Array.from(value);
+    }
+
+    public checkMultistatesPercentage(): string[]  {
+      const validatonErrs = [];
+
+      // default value
+      if (this.ff.defaultRulePercentageRollouts === null || this.ff.defaultRulePercentageRollouts.length === 0) {
+        validatonErrs.push('默认返回值不能为空!');
+      }
+
+      const defaultRulePercentage = this.ff.defaultRulePercentageRollouts?.reduce((acc, curr: IRulePercentageRollout) => {
+        return acc + curr.rolloutPercentage[1] - curr.rolloutPercentage[0];
+      }, 0);
+
+      if (defaultRulePercentage !== undefined && defaultRulePercentage !== 1) {
+        validatonErrs.push('请确认默认返回值的总百分比必须为100%！');
+      }
+
+      // fftuwmtr
+      let fftuwmrPercentage = 1;
+      this.fftuwmtr.forEach((item: IFftuwmtrParams) => {
+          const percentage = item.valueOptionsVariationRuleValues?.reduce((acc, curr: IRulePercentageRollout) => {
+              return acc + curr.rolloutPercentage[0] + curr.rolloutPercentage[1];
+          }, 0);
+
+          if (percentage !== 1) {
+            validatonErrs.push('请确认匹配条件中每条规则的总百分比必须为100%！');
+            return false;
+          }
+      })
+
+      return validatonErrs;
+   }
 }

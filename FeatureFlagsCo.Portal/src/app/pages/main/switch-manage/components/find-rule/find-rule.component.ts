@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output, } from '@angular/core';
-import { IFftuwmtrParams, IJsonContent, IUserType } from '../../types/switch-new';
+import { IFftuwmtrParams, IJsonContent, IUserType, IVariationOption, IRulePercentageRollout } from '../../types/switch-new';
 import { ruleType, ruleValueConfig } from './ruleConfig';
 
 @Component({
@@ -52,6 +52,7 @@ export class FindRuleComponent {
     }
   }
 
+  @Input() multistateEnabled: boolean = false;
   @Input() properties: string[] = [];                 // 字段配置
   @Input() index: number = 0;
 
@@ -112,5 +113,9 @@ export class FindRuleComponent {
   public confirm() {
     this.onDeleteRule();
   }
+
+  /**************Multi states */
+  @Output() onPercentageChangeMultistates = new EventEmitter<IRulePercentageRollout[]>();
+  @Input() variationOptions: IVariationOption[] = [];
+  @Input() rulePercentageRollouts: IRulePercentageRollout[] = [];
 }
- 

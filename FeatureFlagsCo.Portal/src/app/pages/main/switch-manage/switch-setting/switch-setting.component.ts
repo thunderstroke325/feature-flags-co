@@ -5,7 +5,9 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SwitchService } from 'src/app/services/switch.service';
-import { CSwitchParams, IFfParams } from '../types/switch-new';
+import { CSwitchParams, IFfParams, IVariationOption, IFfSettingParams } from '../types/switch-new';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { FfcAngularSdkService } from 'ffc-angular-sdk';
 
 @Component({
   selector: 'setting',
@@ -15,18 +17,30 @@ import { CSwitchParams, IFfParams } from '../types/switch-new';
 export class SwitchSettingComponent implements OnDestroy {
 
   private destory$: Subject<void> = new Subject();
+  public multistateEnabled: boolean = false;
   public currentSwitch: IFfParams = null;
+  public variationOptions: IVariationOption[];
+  public variationOptionEditId: number | null = null;
+  private temporaryStateId: number = -1;
 
   constructor(
     private route: ActivatedRoute,
     private switchServe: SwitchService,
     private msg: NzMessageService,
     private modal: NzModalService,
-    private router: Router
+    private router: Router,
+    private ffcAngularSdkService: FfcAngularSdkService
   ) {
+    this.multistateEnabled = this.ffcAngularSdkService.variation('Multistate-enabled');
+
     this.route.data.pipe(map(res => res.switchInfo))
       .subscribe((result: CSwitchParams) => {
-        this.currentSwitch = (new CSwitchParams(result)).getSwicthDetail();
+        const switchParams = new CSwitchParams(result);
+        this.multistateEnabled = this.multistateEnabled && switchParams.getIsMultiOptionMode();
+        if (this.multistateEnabled) {
+          this.variationOptions = switchParams.getVariationOptions();
+        }
+        this.currentSwitch = switchParams.getSwicthDetail();
       })
   }
 
@@ -35,9 +49,61 @@ export class SwitchSettingComponent implements OnDestroy {
     this.destory$.complete();
   }
 
+  drop(event: CdkDragDrop<string[]>): void {
+    moveItemInArray(this.variationOptions, event.previousIndex, event.currentIndex);
+  }
+
+  startEditVariationOption(id: number): void {
+    this.variationOptionEditId = id;
+  }
+
+  stopEditVariationOption(): void {
+    this.variationOptionEditId = null;
+  }
+
+  addVariationOptionRow(): void {
+    this.variationOptions = [
+      ...this.variationOptions,
+      {
+        localId: this.temporaryStateId,
+        displayOrder: null,
+        variationValue: null
+      }
+    ];
+
+    this.temporaryStateId -= 1;
+  }
+
+  deleteVariationOptionRow(id: number): void {
+    this.variationOptions = this.variationOptions.filter(d => d.localId !== id);
+  }
+
   // 更新开关名字
-  onCreateSwitch() {
-    this.switchServe.updateSwitchName(this.currentSwitch.id, this.currentSwitch.name)
+  onSaveSwitch() {
+    const { id, name } = this.currentSwitch;
+    const data: IFfSettingParams = {id, name};
+
+    if (this.multistateEnabled) {
+      if (this.variationOptions.filter(v => v.variationValue === null || v.variationValue === '').length > 0) { // states with no values exist in the array
+        this.msg.warning("请确保所有返回状态都设置了值！");
+        return;
+      }
+
+      // reset multistate id and order
+      let maxId = Math.max(...this.variationOptions.map(x => x.localId));
+      this.variationOptions.forEach((e, i) => {
+        if (e.localId < 0) {
+          maxId += 1;
+          e.localId = maxId;
+        }
+
+        e.displayOrder = i + 1;
+      });
+
+      data.variationOptions = this.variationOptions;
+    }
+
+    this.switchServe.updateSwitchSetting(data)
       .subscribe((result: IFfParams) => {
         this.currentSwitch = result;
         this.switchServe.setCurrentSwitch(result);

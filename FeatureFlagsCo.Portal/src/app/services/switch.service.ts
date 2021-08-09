@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { btnsConfig } from '../pages/main/switch-manage/components/nav-btns/btns';
-import { CSwitchParams, IFfParams } from '../pages/main/switch-manage/types/switch-new';
+import { CSwitchParams, IFfParams, IFfSettingParams } from '../pages/main/switch-manage/types/switch-new';
 import { AccountService } from './account.service';
 
 @Injectable({
@@ -68,9 +68,9 @@ export class SwitchService {
   public createNewSwitch(name: string = 'demo1') {
     const url = environment.url + '/FeatureFlags/CreateFeatureFlag';
     return this.http.post(url, {
-      "name": name,
-      "environmentId": this.envId,
-      "status": 'Enabled'
+      name: name,
+      environmentId: this.envId,
+      status: 'Enabled'
     })
   }
 
@@ -85,12 +85,9 @@ export class SwitchService {
   }
 
   // 更新开关名字
-  public updateSwitchName(id: string, name: string): Observable<any> {
+  public updateSwitchSetting(param: IFfSettingParams): Observable<any> {
     const url = environment.url + '/FeatureFlags/UpdateFeatureFlagSetting';
-    return this.http.put(url, {
-      "id": id,
-      "name": name
-    })
+    return this.http.put(url, param);
   }
 
   // 获取开关详情
@@ -119,10 +116,11 @@ export class SwitchService {
   }
 
   // 修改开关
-  public updateSwitch(param: CSwitchParams): Observable<any> {
-    let defaultRuleValue = param.getSwicthDetail().defaultRuleValue === 'null' ? null : param.getSwicthDetail().defaultRuleValue;
-    const url = environment.url + `/FeatureFlags/UpdateFeatureFlag`;
-    return this.http.put(url, { ...param, ff: { ...param.getSwicthDetail(), defaultRuleValue } });
+  public updateSwitch(param: CSwitchParams, multistateEnabled: boolean = false): Observable<any> {
+    const switchDetail = param.getSwicthDetail();
+    let defaultRuleValue = switchDetail.defaultRuleValue === 'null' ? null : switchDetail.defaultRuleValue;
+    const url = multistateEnabled && param.getIsMultiOptionMode() ? environment.url + `/FeatureFlags/UpdateMultiOptionSupportedFeatureFlag` : environment.url + `/FeatureFlags/UpdateFeatureFlag`;
+    return this.http.put(url, { ...param, ff: { ...switchDetail, defaultRuleValue } });
   }
 
   // 存档开关

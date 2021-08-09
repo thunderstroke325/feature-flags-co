@@ -15,6 +15,7 @@ import { TargetUserComponent } from './target-user/target-user.component';
 import { FindRuleComponent } from './find-rule/find-rule.component';
 import { RuleComponent } from './find-rule/rule/rule.component';
 import { ServeComponent } from './find-rule/serve/serve.component';
+import { ServeMultistatesComponent } from './find-rule/serve-multistates/serve-multistates.component';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 
 @NgModule({
@@ -22,10 +23,11 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
     NavBtnsComponent,
     LayoutComponent,
     UpperSwitchComponent,
-    TargetUserComponent, 
-    FindRuleComponent, 
+    TargetUserComponent,
+    FindRuleComponent,
     RuleComponent,
-    ServeComponent 
+    ServeComponent ,
+    ServeMultistatesComponent
   ],
   imports: [
     CommonModule,
@@ -45,7 +47,8 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
     UpperSwitchComponent,
     TargetUserComponent,
     FindRuleComponent,
-    ServeComponent 
+    ServeComponent,
+    ServeMultistatesComponent
   ]
 })
 export class ComponentsModule { }

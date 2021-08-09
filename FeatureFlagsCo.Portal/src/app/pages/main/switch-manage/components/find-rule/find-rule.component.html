@@ -5,20 +5,29 @@
            nz-popconfirm
            nzPopconfirmTitle="确认删除该规则吗?"
            nzPopconfirmPlacement="left"
-           nzType="delete" 
+           nzType="delete"
            nzTheme="outline"
            (nzOnConfirm)="confirm()"></i>
     </div>
     <ng-container *ngFor="let ruleContent of ruleContentList; let key=index; let first=first; let last=last;">
-        <app-rule [ruleContent]="ruleContent" 
-                  [isFirst]="first" 
+        <app-rule [ruleContent]="ruleContent"
+                  [isFirst]="first"
                   [isLast]="last"
                   [properties]="properties"
                   (addRule)="onAddRule()"
                   (deleteRule)="onDeleteRuleItem(key)"
                   (ruleChange)="onRuleChange($event, key)"></app-rule>
     </ng-container>
-    <app-serve [variationRuleValue]="variationRuleValue"
-               [truePercentage]="percentageRolloutForTrue || 0"
-               (onPercentageChange)="onPercentageChange($event)"></app-serve>
-</section> 
+    <ng-container *ngIf="!multistateEnabled">
+      <app-serve [variationRuleValue]="variationRuleValue"
+        [truePercentage]="percentageRolloutForTrue || 0"
+        (onPercentageChange)="onPercentageChange($event)"></app-serve>
+    </ng-container>
+
+    <ng-container *ngIf="multistateEnabled">
+      <app-serve-multistates [isSingle]="true"
+                  [variationOptions]="variationOptions"
+                  [rulePercentageRollouts]="rulePercentageRollouts"
+                  (onPercentageChange)="onPercentageChangeMultistates.next($event)"></app-serve-multistates>
+  </ng-container>
+</section>

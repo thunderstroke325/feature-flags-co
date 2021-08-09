@@ -183,7 +183,8 @@ namespace FeatureFlags.APIs.Services
                         LocalId = 2,
                         VariationValue = "false"
                     },
-                }
+                },
+                IsMultiOptionMode = true
             };
             return await _container.CreateItemAsync<CosmosDBFeatureFlag>(newFeatureFlag);
         }
@@ -193,11 +194,6 @@ namespace FeatureFlags.APIs.Services
         {
             try
             {
-                var originFF = await this.GetCosmosDBFeatureFlagAsync(param.Id);
-                param.EnvironmentId = param.FF.EnvironmentId;
-                param.Id = param.FF.Id;
-                param.FF.LastUpdatedTime = DateTime.UtcNow;
-
                 if (param.FF.DefaultRulePercentageRollouts == null || param.FF.DefaultRulePercentageRollouts.Count == 0)
                     return new ReturnJsonModel<CosmosDBFeatureFlag>()
                     {
@@ -235,9 +231,11 @@ namespace FeatureFlags.APIs.Services
                         Error = new Exception("In Multi Option supported mode, ValueOption in TargetIndividual shouldn't be empty")
                     };
 
+                param.EnvironmentId = param.FF.EnvironmentId;
+                param.Id = param.FF.Id;
+                param.FF.LastUpdatedTime = DateTime.UtcNow;
                 param.FF.DefaultRuleValue = null;
                 param.FF.ValueWhenDisabled = null;
-                param.IsMultiOptionMode = true;
 
 
                 if (param.FFTUWMTR != null && param.FFTUWMTR.Count > 0)
