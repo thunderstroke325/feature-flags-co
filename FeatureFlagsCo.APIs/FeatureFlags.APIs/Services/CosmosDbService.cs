@@ -393,6 +393,9 @@ namespace FeatureFlags.APIs.Services
                     Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
                     foreach (var item in response)
                     {
+                        CosmosDBFeatureFlagBasicInfo ff = item.ToObject<CosmosDBFeatureFlag>().FF;
+                        if (string.IsNullOrWhiteSpace(ff.Status))
+                            ff.Status = FeatureFlagStatutEnum.Enabled.ToString();
                         returnResult.Add(item.ToObject<CosmosDBFeatureFlag>().FF);
                     }
                 }
