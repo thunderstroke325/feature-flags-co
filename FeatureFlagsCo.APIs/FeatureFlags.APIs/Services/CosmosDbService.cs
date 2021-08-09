@@ -396,7 +396,7 @@ namespace FeatureFlags.APIs.Services
                         CosmosDBFeatureFlagBasicInfo ff = item.ToObject<CosmosDBFeatureFlag>().FF;
                         if (string.IsNullOrWhiteSpace(ff.Status))
                             ff.Status = FeatureFlagStatutEnum.Enabled.ToString();
-                        returnResult.Add(item.ToObject<CosmosDBFeatureFlag>().FF);
+                        returnResult.Add(ff);
                     }
                 }
             }
