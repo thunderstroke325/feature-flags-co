@@ -170,23 +170,23 @@ stages:
                     $aCheck = Get-Content $pathToJson | ConvertFrom-Json
                     Write-Host $aCheck.variable[0].value
                     
-                    # $pathToJson2 = "ffc-multi-variation-ffp-test.json"
-                    # $a2 = Get-Content $pathToJson2 | ConvertFrom-Json
-                    # $a2.variable[0].value = "$(API_URL_Dev)"
-                    # ConvertTo-Json $a2 -depth 100  | set-content $pathToJson2
+                    $pathToJson2 = "ffc-multi-variation-ffp-test.json"
+                    $a2 = Get-Content $pathToJson2 | ConvertFrom-Json
+                    $a2.variable[0].value = "$(API_URL_Dev)"
+                    ConvertTo-Json $a2 -depth 100  | set-content $pathToJson2
                     
-                    # $pathToJsonCheck2 = "ffc-multi-variation-ffp-test.json"
-                    # $aCheck2 = Get-Content $pathToJson2 | ConvertFrom-Json
-                    # Write-Host $aCheck2.variable[0].value
+                    $pathToJsonCheck2 = "ffc-multi-variation-ffp-test.json"
+                    $aCheck2 = Get-Content $pathToJson2 | ConvertFrom-Json
+                    Write-Host $aCheck2.variable[0].value
                     
-                    # $pathToJson3 = "ffc-multi-variation-cache-test.json"
-                    # $a3 = Get-Content $pathToJson3 | ConvertFrom-Json
-                    # $a3.variable[0].value = "$(API_URL_Dev)"
-                    # ConvertTo-Json $a3 -depth 100  | set-content $pathToJson3
+                    $pathToJson3 = "ffc-multi-variation-cache-test.json"
+                    $a3 = Get-Content $pathToJson3 | ConvertFrom-Json
+                    $a3.variable[0].value = "$(API_URL_Dev)"
+                    ConvertTo-Json $a3 -depth 100  | set-content $pathToJson3
                     
-                    # $pathToJsonCheck3 = "ffc-multi-variation-cache-test.json"
-                    # $aCheck3 = Get-Content $pathToJson3 | ConvertFrom-Json
-                    # Write-Host $aCheck3.variable[0].value
+                    $pathToJsonCheck3 = "ffc-multi-variation-cache-test.json"
+                    $aCheck3 = Get-Content $pathToJson3 | ConvertFrom-Json
+                    Write-Host $aCheck3.variable[0].value
               
               - task: Bash@3
                 displayName: 'run newman'
