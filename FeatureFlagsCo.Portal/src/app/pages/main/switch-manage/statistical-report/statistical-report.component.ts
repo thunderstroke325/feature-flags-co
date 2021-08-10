@@ -24,6 +24,7 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
 
   public totalUsers: number = 0;
   public hitUsers: number = 0;
+  public userUsageStr: string = '';
 
   private xname: string = '';
   private yname: string = '';
@@ -70,6 +71,23 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
         map(res => {
           this.totalUsers = res.totalUsers || 0;
           this.hitUsers = res.hitUsers || 0;
+          let userUsageStr = `共有${res.totalUsers || 0}用户被标记，其中${res.hitUsers || 0}人使用此功能`;
+          if (this.totalUsers === 0 && this.hitUsers === 0)
+            userUsageStr = "";
+          if (this.totalUsers === 0 && this.hitUsers === 0 && res.userDistribution && res.userDistribution !== null &&
+            res.userDistribution.tables && res.userDistribution.tables !== null && res.userDistribution.tables.length > 0) {
+            for (let i = 0; i < res.userDistribution.tables.length; i++) {
+              let usage = res.userDistribution.tables[0];
+              if (usage && usage.rows && usage.rows.length > 0) {
+                userUsageStr = '';
+                for (let j = 0; j < usage.rows.length; j++) {
+                  userUsageStr += `${usage.rows[j][0]}: ${usage.rows[j][1]}个用户; `
+                }
+              }
+            }
+          }
+          this.userUsageStr = userUsageStr;
+
           return res['chartData'] || {};
         })
       )

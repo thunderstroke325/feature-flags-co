@@ -22,7 +22,7 @@ namespace FeatureFlags.APIs.Services
         // The currentUser must be the owner/admin of the account, or owner/admin of the project, must be checked before calling this method
         public Task RemoveEnvAsync(int environmentId);
 
-        public Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param);
+        public Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param, int accountId);
 
         Task<bool> CheckIfUserHasRightToReadEnvAsync(string userId, int envId);
     }
@@ -85,7 +85,7 @@ namespace FeatureFlags.APIs.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param) 
+        public async Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param, int accountId) 
         {
             var prodEnv = await _repository.CreateAsync<Environment>(new Environment
             {
@@ -93,7 +93,7 @@ namespace FeatureFlags.APIs.Services
                 Description = param.Description,
                 MobileSecret = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(System.Guid.NewGuid().ToString())),
                 Name = param.Name,
-                Secret = FeatureFlagKeyExtension.GenerateEnvironmentKey(param.Id)
+                Secret = FeatureFlagKeyExtension.GenerateEnvironmentKey(param.Id, accountId, param.ProjectId)
             });
 
             return new EnvironmentViewModel

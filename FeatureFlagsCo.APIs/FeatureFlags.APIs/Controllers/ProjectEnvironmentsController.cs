@@ -77,7 +77,7 @@ namespace FeatureFlags.APIs.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "Bad request" });
             }
 
-            return await _environmentService.CreateEnvAsync(param);
+            return await _environmentService.CreateEnvAsync(param, accountId);
         }
 
         [HttpPut]

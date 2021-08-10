@@ -148,7 +148,7 @@ export class SwitchService {
   }
 
   public getReport(featureFlagId: string, chartQueryTimeSpan: string): Observable<any> {
-    const url = environment.url + `/FeatureFlagUsage/GetFeatureFlagUsageData`;
+    const url = environment.url + `/FeatureFlagUsage/GetMultiOptionFeatureFlagUsageData`;
     return this.http.get(url, {
       params: {
         featureFlagId,

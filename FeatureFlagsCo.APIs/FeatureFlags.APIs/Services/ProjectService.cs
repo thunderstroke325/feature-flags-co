@@ -137,7 +137,7 @@ namespace FeatureFlags.APIs.Services
                 ProjectId = newProject.Id,
                 Description = "production",
                 Name = "Production"
-            });
+            }, accountId);
             envs.Add(prodEnv);
 
             var testEnv = await _environmentService.CreateEnvAsync(new EnvironmentViewModel
@@ -145,7 +145,7 @@ namespace FeatureFlags.APIs.Services
                 ProjectId = newProject.Id,
                 Description = "test",
                 Name = "Test"
-            });
+            }, accountId);
 
             envs.Add(testEnv);
 

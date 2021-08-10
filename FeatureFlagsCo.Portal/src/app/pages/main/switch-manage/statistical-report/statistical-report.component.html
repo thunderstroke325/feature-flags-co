@@ -3,18 +3,23 @@
         <app-nav-btns name="header" [routeUrl]="'report'" [id]="switchId"></app-nav-btns>
         <div class="content-body" name="detail">
             <ng-container>
-                <h2>共有{{totalUsers}}用户被标记，其中{{hitUsers}}人使用此功能</h2>
+                <!-- <h2>共有{{totalUsers}}用户被标记，其中{{hitUsers}}人使用此功能</h2> -->
+                <h2>{{userUsageStr}}</h2>
                 <div class="report-echarts" #reportEcharts [style.height]="height">
 
                 </div>
                 <section>
-                    <button nz-button [nzType]="timeSpan === 'P7D' ? 'primary' : 'default'" (click)="onTimeSpanClcik('P7D')">查看最近7天</button>
-                    <button nz-button [nzType]="timeSpan === 'P1D' ? 'primary' : 'default'" (click)="onTimeSpanClcik('P1D')">查看最近24小时</button>
-                    <button nz-button [nzType]="timeSpan === 'PT2H' ? 'primary' : 'default'" (click)="onTimeSpanClcik('PT2H')">查看最近2小时</button>
-                    <button nz-button [nzType]="timeSpan === 'PT30M' ? 'primary' : 'default'" (click)="onTimeSpanClcik('PT30M')">查看最近30分钟</button>
+                    <button nz-button [nzType]="timeSpan === 'P7D' ? 'primary' : 'default'"
+                        (click)="onTimeSpanClcik('P7D')">查看最近7天</button>
+                    <button nz-button [nzType]="timeSpan === 'P1D' ? 'primary' : 'default'"
+                        (click)="onTimeSpanClcik('P1D')">查看最近24小时</button>
+                    <button nz-button [nzType]="timeSpan === 'PT2H' ? 'primary' : 'default'"
+                        (click)="onTimeSpanClcik('PT2H')">查看最近2小时</button>
+                    <button nz-button [nzType]="timeSpan === 'PT30M' ? 'primary' : 'default'"
+                        (click)="onTimeSpanClcik('PT30M')">查看最近30分钟</button>
                 </section>
                 <div class="mask" *ngIf="isLoading">
-                    <nz-spin nzSimple ></nz-spin>
+                    <nz-spin nzSimple></nz-spin>
                 </div>
             </ng-container>
         </div>
