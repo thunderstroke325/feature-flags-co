@@ -22,6 +22,7 @@ export class SwitchSettingComponent implements OnDestroy {
   public variationOptions: IVariationOption[];
   public variationOptionEditId: number | null = null;
   private temporaryStateId: number = -1;
+  public featureDetail: CSwitchParams;                      // 开关详情
 
   constructor(
     private route: ActivatedRoute,
@@ -35,12 +36,12 @@ export class SwitchSettingComponent implements OnDestroy {
 
     this.route.data.pipe(map(res => res.switchInfo))
       .subscribe((result: CSwitchParams) => {
-        const switchParams = new CSwitchParams(result);
-        this.multistateEnabled = this.multistateEnabled && switchParams.getIsMultiOptionMode();
+        this.featureDetail = new CSwitchParams(result);
+        this.multistateEnabled = this.multistateEnabled && this.featureDetail.getIsMultiOptionMode();
         if (this.multistateEnabled) {
-          this.variationOptions = switchParams.getVariationOptions();
+          this.variationOptions = this.featureDetail.getVariationOptions();
         }
-        this.currentSwitch = switchParams.getSwicthDetail();
+        this.currentSwitch = this.featureDetail.getSwicthDetail();
       })
   }
 
@@ -75,6 +76,26 @@ export class SwitchSettingComponent implements OnDestroy {
   }
 
   deleteVariationOptionRow(id: number): void {
+    if(this.featureDetail.getTargetIndividuals().find(x => x.valueOption.localId === id).individuals.length > 0) {
+      this.msg.warning("该状态已经在目标用户中被使用，移除后方可删除！");
+      return;
+    }
+
+    if(this.featureDetail.getFftuwmtr().length > 0 && this.featureDetail.getFftuwmtr().find(x => x.valueOptionsVariationRuleValues.find(y => y.valueOption.localId === id))) {
+      this.msg.warning("该状态已经在匹配条件的规则中被使用，移除后方可删除！");
+      return;
+    }
+
+    if(this.featureDetail.getFFDefaultRulePercentageRollouts().length > 0 && this.featureDetail.getFFDefaultRulePercentageRollouts().find(x => x.valueOption.localId === id)) {
+      this.msg.warning("该状态已经在默认返回值中被使用，移除后方可删除！");
+      return;
+    }
+
+    if(this.featureDetail.getFFVariationOptionWhenDisabled() !== null && this.featureDetail.getFFVariationOptionWhenDisabled().localId === id) {
+      this.msg.warning("该状态已经在开关关闭后的返回值中被使用，移除后方可删除！");
+      return;
+    }
+
     this.variationOptions = this.variationOptions.filter(d => d.localId !== id);
   }
 

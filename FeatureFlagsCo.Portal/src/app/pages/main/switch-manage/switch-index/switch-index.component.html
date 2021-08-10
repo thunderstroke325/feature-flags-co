@@ -23,7 +23,7 @@
             </div>
             <div class="switch-list" #listRef>
               <div *ngFor="let switch of switchLists" class="switch" (click)="onIntoSwitchDetail(switch)">
-                <ng-container *ngIf="switch.name.includes(nameSearchValue) && switch.status.includes(showType)">
+                <ng-container *ngIf="switch.name.includes(nameSearchValue) && switch.status?.includes(showType)">
                   <section>
                     <div class="title">
                         {{switch.name}}

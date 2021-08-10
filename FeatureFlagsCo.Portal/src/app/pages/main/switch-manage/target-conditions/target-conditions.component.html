@@ -48,7 +48,7 @@
                                  [userList]="userList"
                                  [selectedUserDetailList]="targetIndividuals[variationOption.localId]"
                                  (search)="onSearchUser($event)"
-                                 (onSelectedUserListChange)="onSelectedUserListChange($event, variationOption.variationValue)"></target-user>
+                                 (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)"></target-user>
                   </div>
                 </ng-container>
             </div>
@@ -91,7 +91,7 @@
                 <div class="default">
                   <span class="label">如果开关关闭了，应返回</span>
                   <button style="margin-left:10px" nz-button nz-dropdown nzTrigger="click" [nzDropdownMenu]="ddm">
-                    {{featureDetail?.getFFVariationOptionWhenDisabled().variationValue}}
+                    {{featureDetail?.getFFVariationOptionWhenDisabled()?.variationValue}}
                     <i nz-icon nzType="down"></i>
                   </button>
                 </div>

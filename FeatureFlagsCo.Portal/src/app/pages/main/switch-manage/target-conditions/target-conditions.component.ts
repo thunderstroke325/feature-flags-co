@@ -28,7 +28,7 @@ export class TargetConditionsComponent implements OnInit {
   public switchId: string;
   public isLoading: boolean = true;
   public variationOptions: IVariationOption[] = [];                         // multi state
-  public targetIndividuals: {[key: string]: IFftiuParams[]}  = {}; // multi state
+  public targetIndividuals: {[key: string]: IUserType[]}  = {}; // multi state
 
   constructor(
     private route:ActivatedRoute,
@@ -81,10 +81,23 @@ export class TargetConditionsComponent implements OnInit {
       if (this.multistateEnabled) {
         this.variationOptions = this.featureDetail.getVariationOptions();
 
-        this.targetIndividuals = this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
-          acc[cur.localId] = this.featureDetail.getTargetIndividuals().find(ti => ti.valueOption.localId === cur.localId) || [];
+        this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
+          acc[cur.localId] = this.featureDetail.getTargetIndividuals().find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
           return acc;
         }, {});
+
+        if (this.featureDetail.getFFDefaultRulePercentageRollouts().length === 0) {
+          this.featureDetail.setFFDefaultRulePercentageRollouts([
+            {
+              rolloutPercentage: [0, 1],
+              valueOption: this.variationOptions[0]
+            }
+          ]);
+        }
+
+        if (!this.featureDetail.getFFVariationOptionWhenDisabled()) {
+          this.featureDetail.setFFVariationOptionWhenDisabled(this.variationOptions[0]);
+        }
       }
 
       const detail: IFfParams = this.featureDetail.getSwicthDetail();
@@ -129,7 +142,6 @@ export class TargetConditionsComponent implements OnInit {
 
   // 目标用户发生改变
   public onSelectedUserListChange(data: IUserType[], type: 'true' | 'false') {
-    console.log('onSelectedUserListChange');
     if(type === 'true') {
       this.targetUserSelectedListTrue = [...data];
     } else {
@@ -203,6 +215,12 @@ export class TargetConditionsComponent implements OnInit {
   }
 
   /****multi state* */
+
+  public onMultistatesSelectedUserListChange(data: IUserType[], variationOptionId: number) {
+    this.targetIndividuals[variationOptionId] = [...data];
+  }
+
+
   // 默认返回值配置
   public onDefaultRulePercentageRolloutsChange(value: IRulePercentageRollout[]) {
     this.featureDetail.setFFDefaultRulePercentageRollouts(value);
@@ -217,6 +235,8 @@ export class TargetConditionsComponent implements OnInit {
       this.msg.error(validationErrs[0]); // TODO display all messages by multiple lines
       return false;
     }
+
+    this.featureDetail.setTargetIndividuals(this.targetIndividuals);
 
     this.featureDetail.onSortoutSubmitData();
 

@@ -293,14 +293,14 @@ export class CSwitchParams {
     }
 
     public getFFVariationOptionWhenDisabled(): IVariationOption {
-      return this.ff.variationOptionWhenDisabled || this.variationOptions[0];
+      return this.ff.variationOptionWhenDisabled;// || this.variationOptions[0];
     }
 
     public setFFVariationOptionWhenDisabled(value: IVariationOption) {
         this.ff.variationOptionWhenDisabled = value;
     }
 
-    public getFFDefaultRulePercentageRollouts() {
+    public getFFDefaultRulePercentageRollouts() : IRulePercentageRollout[]{
       return this.ff.defaultRulePercentageRollouts || [];
     }
 
@@ -318,6 +318,11 @@ export class CSwitchParams {
       // default value
       if (this.ff.defaultRulePercentageRollouts === null || this.ff.defaultRulePercentageRollouts.length === 0) {
         validatonErrs.push('默认返回值不能为空!');
+      }
+
+      // variationOptionWhenDisabled
+      if (this.ff.variationOptionWhenDisabled === null || this.ff.defaultRulePercentageRollouts.length === 0) {
+        validatonErrs.push('开关关闭后的返回值不能为空!');
       }
 
       const defaultRulePercentage = this.ff.defaultRulePercentageRollouts?.reduce((acc, curr: IRulePercentageRollout) => {
@@ -343,4 +348,17 @@ export class CSwitchParams {
 
       return validatonErrs;
    }
+
+  // 设置目标用户
+  public setTargetIndividuals(data: {[key: string]: IUserType[]}) {
+    const targetIndividuals = [];
+    for (const property in data) {
+      targetIndividuals.push({
+        valueOption: this.variationOptions.find(x => x.localId === parseInt(property)),
+        individuals: data[property]
+      });
+    }
+
+    this.targetIndividuals = targetIndividuals;
+  }
 }
