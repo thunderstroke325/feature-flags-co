@@ -177,7 +177,7 @@ namespace FeatureFlags.APIs.Services
                     {
                         new VariationOptionPercentageRollout
                         {
-                            RolloutPercentage = [0, 100],
+                            RolloutPercentage = new double[2]{ 0, 100},
                             ValueOption = new VariationOption() {
                                 DisplayOrder = 1,
                                 LocalId = 1,
