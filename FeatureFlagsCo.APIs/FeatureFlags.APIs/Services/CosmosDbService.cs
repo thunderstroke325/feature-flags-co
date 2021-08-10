@@ -166,7 +166,25 @@ namespace FeatureFlags.APIs.Services
                     EnvironmentId = param.EnvironmentId,
                     CreatorUserId = currentUserId,
                     Name = param.Name,
-                    Status = param.Status
+                    Status = param.Status,
+                    VariationOptionWhenDisabled = new VariationOption()
+                    {
+                        DisplayOrder = 1,
+                        LocalId = 1,
+                        VariationValue = "true"
+                    },
+                    DefaultRulePercentageRollouts = new List<VariationOptionPercentageRollout>()
+                    {
+                        new VariationOptionPercentageRollout
+                        {
+                            RolloutPercentage = [0, 100],
+                            ValueOption = new VariationOption() {
+                                DisplayOrder = 1,
+                                LocalId = 1,
+                                VariationValue = "true"
+                            }
+                        }
+                    }
                 },
                 FFP = new List<CosmosDBFeatureFlagPrerequisite>(),
                 FFTIUForFalse = new List<CosmosDBFeatureFlagTargetIndividualUser>(),

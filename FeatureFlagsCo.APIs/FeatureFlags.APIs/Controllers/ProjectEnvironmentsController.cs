@@ -78,7 +78,12 @@ namespace FeatureFlags.APIs.Controllers
             }
 
             var newEnv = await _environmentService.CreateEnvAsync(param, accountId);
-            return await UpdateEnv(accountId, projectId, newEnv);
+            EnvKeyViewModel envKeyViewModel = await RegenerateEnvKey(accountId, projectId, newEnv.Id, new EnvKeyViewModel
+            {
+                KeyName = "Secret"
+            });
+            newEnv.Secret = envKeyViewModel.KeyValue;
+            return newEnv;
         }
 
         [HttpPut]
