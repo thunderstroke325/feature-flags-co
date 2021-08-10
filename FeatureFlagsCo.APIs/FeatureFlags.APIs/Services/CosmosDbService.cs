@@ -184,7 +184,8 @@ namespace FeatureFlags.APIs.Services
                         VariationValue = "false"
                     },
                 },
-                IsMultiOptionMode = true
+                IsMultiOptionMode = true,
+                TargetIndividuals = new List<TargetIndividualForVariationOption>()
             };
             return await _container.CreateItemAsync<CosmosDBFeatureFlag>(newFeatureFlag);
         }
