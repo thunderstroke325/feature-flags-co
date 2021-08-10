@@ -76,7 +76,7 @@ export class SwitchSettingComponent implements OnDestroy {
   }
 
   deleteVariationOptionRow(id: number): void {
-    if(this.featureDetail.getTargetIndividuals().find(x => x.valueOption.localId === id).individuals.length > 0) {
+    if(this.featureDetail.getTargetIndividuals()?.find(x => x.valueOption.localId === id)?.individuals?.length > 0) {
       this.msg.warning("该状态已经在目标用户中被使用，移除后方可删除！");
       return;
     }
