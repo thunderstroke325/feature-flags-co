@@ -20,8 +20,8 @@ The documentation is currently only available in Chinese, please look forward to
 
 
 
-## Release History
+## Release Announcement
 
-https://github.com/feature-flags-co/feature-flags-co/blob/main/release-history.md
+https://github.com/feature-flags-co/feature-flags-co/releases
 
 
