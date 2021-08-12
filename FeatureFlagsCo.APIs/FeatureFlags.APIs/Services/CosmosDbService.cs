@@ -30,6 +30,9 @@ namespace FeatureFlags.APIs.Services
         Task UpdateItemAsync(string id, dynamic item);
         Task DeleteItemAsync(string id);
         Task<List<CosmosDBFeatureFlagBasicInfo>> GetEnvironmentFeatureFlagBasicInfoItemsAsync(int environmentId, int pageIndex = 0, int pageSize = 100);
+
+        Task<List<PrequisiteFeatureFlagViewModel>> SearchPrequisiteFeatureFlagsAsync(int environmentId, string searchText = "", int pageIndex = 0, int pageSize = 20);
+
         Task<List<CosmosDBFeatureFlagBasicInfo>> GetEnvironmentArchivedFeatureFlagBasicInfoItemsAsync(int environmentId, int pageIndex = 0, int pageSize = 100);
 
         Task<CosmosDBFeatureFlag> GetCosmosDBFeatureFlagAsync(string id);
@@ -629,6 +632,52 @@ namespace FeatureFlags.APIs.Services
                     FeatureFlags = ffs
                 });
             }
+        }
+
+        public async Task<List<PrequisiteFeatureFlagViewModel>> SearchPrequisiteFeatureFlagsAsync(int environmentId, string searchText = "", int pageIndex = 0, int pageSize = 20)
+        {
+            pageSize = pageSize > 1000 ? 1000 : (pageSize < 1 ? 1 : pageSize);
+
+            var returnResult = new List<PrequisiteFeatureFlagViewModel>();
+            QueryDefinition queryDefinition = null;
+            if (string.IsNullOrWhiteSpace((searchText ?? "").Trim()))
+            {
+                queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.IsArchived != true and f.ObjectType = 'FeatureFlag' offset @offsetNumber limit @pageSize")
+                    .WithParameter("@environmentId", environmentId)
+                    .WithParameter("@offsetNumber", pageIndex * pageSize)
+                    .WithParameter("@pageSize", pageSize);
+               
+            }
+            else
+            {
+                queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.IsArchived != true and f.ObjectType = 'FeatureFlag' and f.FF.Name like '%" + searchText + "%'  offset @offsetNumber limit @pageSize")
+                    .WithParameter("@environmentId", environmentId)
+                    .WithParameter("@offsetNumber", pageIndex * pageSize)
+                    .WithParameter("@pageSize", pageSize)
+                    .WithParameter("@searchText", searchText);
+            }
+            using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
+            {
+                while (feedIterator.HasMoreResults)
+                {
+                    Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
+                    foreach (var item in response)
+                    {
+                        CosmosDBFeatureFlag ff = item.ToObject<CosmosDBFeatureFlag>();
+                        returnResult.Add(new PrequisiteFeatureFlagViewModel()
+                        {
+                            EnvironmentId = environmentId,
+                            Id = ff.Id,
+                            KeyName = ff.FF.KeyName,
+                            Name = ff.FF.Name,
+                            VariationOptions = ff.VariationOptions
+                        });
+                    }
+                }
+            }
+
+
+            return returnResult;
         }
     }
 }
