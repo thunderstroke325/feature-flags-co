@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { IJsonContent } from '../../../types/switch-new';
-import { ruleType, ruleValueConfig, ruleValueConfigOutDated, findIndex } from '../ruleConfig';
+import { ruleType, ruleValueConfig, findIndex } from '../ruleConfig';
 import { FfcAngularSdkService } from 'ffc-angular-sdk';
 
 @Component({
@@ -29,9 +29,9 @@ export class RuleComponent {
 
   listOfTagOptions = [];
 
-  constructor(private ffcAngularSdkService: FfcAngularSdkService) {
+  constructor() {
 
-    this.ruleValueConfig = this.ffcAngularSdkService.variation('Rule-with-regex') ? ruleValueConfig : ruleValueConfigOutDated;
+    this.ruleValueConfig = ruleValueConfig;
 
     this.inputs.pipe(
       debounceTime(500)

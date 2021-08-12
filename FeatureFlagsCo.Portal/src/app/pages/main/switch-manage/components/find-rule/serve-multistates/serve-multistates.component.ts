@@ -27,7 +27,7 @@ export class ServeMultistatesComponent implements OnInit {
   ngOnInit(): void {
 
     if (this.isNotPercentageRollout()) {
-      this.selectedValueOptionId = this.rulePercentageRollouts[0]?.valueOption.localId || this.variationOptions[0].localId;
+      this.selectedValueOptionId = this.rulePercentageRollouts[0]?.valueOption.localId || null;
       this.rulePercentageRolloutValues = this.variationOptions.map((v, idx) => ({
         rolloutPercentage: [0, idx === 0 ? 1 : 0],
         valueOption: Object.assign({}, v),

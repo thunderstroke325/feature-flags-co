@@ -264,6 +264,7 @@ export class CSwitchParams {
 
         // this.ff.defaultRuleValue = this.ff.defaultRuleValue === "null" ? null : this.ff.defaultRuleValue;
 
+        this.fftuwmtr = this.fftuwmtr.filter(f => f.ruleJsonContent.length > 0);
         this.fftuwmtr.forEach((item: IFftuwmtrParams) => {
             item.variationRuleValue = item.variationRuleValue === 'null' ? null : item.variationRuleValue; // not useful for multi states
 
@@ -334,9 +335,8 @@ export class CSwitchParams {
       }
 
       // fftuwmtr
-      let fftuwmrPercentage = 1;
-      this.fftuwmtr.forEach((item: IFftuwmtrParams) => {
-          const percentage = item.valueOptionsVariationRuleValues?.reduce((acc, curr: IRulePercentageRollout) => {
+      this.fftuwmtr.filter(f => f.ruleJsonContent.length > 0).forEach((item: IFftuwmtrParams) => {
+          const percentage = item.valueOptionsVariationRuleValues.reduce((acc, curr: IRulePercentageRollout) => {
               return acc + curr.rolloutPercentage[1] - curr.rolloutPercentage[0];
           }, 0);
 
