@@ -12,6 +12,8 @@ import { AccountService } from 'src/app/services/account.service';
 })
 export class AccountComponent implements OnInit {
 
+  creatAccountFormVisible: boolean = false;
+
   validateOrgForm!: FormGroup;
 
   auth = getAuth();
@@ -38,6 +40,16 @@ export class AccountComponent implements OnInit {
     this.validateOrgForm = new FormGroup({
       organizationName: new FormControl(this.currentAccount.organizationName, [Validators.required]),
     });
+  }
+
+  onCreateAccountClick() {
+    this.creatAccountFormVisible = true;
+  }
+
+  onCreateAccountClosed(account: IAccount) {
+    this.creatAccountFormVisible = false;
+    this.accountService.accounts = [...this.accountService.accounts, account];
+    this.accountService.changeAccount(account);
   }
 
   onAccountChange() {

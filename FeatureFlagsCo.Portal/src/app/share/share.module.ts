@@ -12,6 +12,7 @@ import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { ProjectDrawerComponent } from './uis/project-drawer/project-drawer.component';
 import { EnvDrawerComponent } from './uis/env-drawer/env-drawer.component';
 import { MemberDrawerComponent } from './uis/member-drawer/member-drawer.component';
+import { AccountDrawerComponent } from './uis/account-drawer/account-drawer.component';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -31,7 +32,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 
 
 @NgModule({
-  declarations: [MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent],
+  declarations: [MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -67,7 +68,8 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
     PropsDrawerComponent,
     ProjectDrawerComponent,
     EnvDrawerComponent,
-    MemberDrawerComponent
+    MemberDrawerComponent,
+    AccountDrawerComponent
   ]
 })
 export class ShareModule { }
