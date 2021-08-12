@@ -52,6 +52,14 @@ namespace FeatureFlags.APIs.Controllers
         }
 
         [HttpGet]
+        [Route("SearchPrequisiteFeatureFlags")]
+        public async Task<List<PrequisiteFeatureFlagViewModel>> SearchPrequisiteFeatureFlags(int environmentId, string searchText = "", int pageIndex = 0, int pageSize = 20)
+        {
+            return await _cosmosDbService.SearchPrequisiteFeatureFlagsAsync(environmentId, searchText, pageIndex, pageSize);
+        }
+
+
+        [HttpGet]
         [Route("GetEnvironmentArchivedFeatureFlags/{environmentId}")]
         public async Task<List<CosmosDBFeatureFlagBasicInfo>> GetEnvironmentArchivedFeatureFlags(int environmentId)
         {
