@@ -829,7 +829,10 @@ namespace FeatureFlags.APIs.Repositories
                 {
                     foreach (var rule in rules)
                     {
-                        var ffUCProperty = ffUser.CustomizedProperties.FirstOrDefault(p => p.Name == rule.Property);
+                        var customizedProperties = ffUser.CustomizedProperties;
+                        if (ffUser.CustomizedProperties == null)
+                            customizedProperties = new List<FeatureFlagUserCustomizedProperty>();
+                        var ffUCProperty = customizedProperties.FirstOrDefault(p => p.Name == rule.Property);
                         if (ffUCProperty == null)
                             ffUCProperty = new FeatureFlagUserCustomizedProperty();
                         if (rule.Operation.Contains("Than") && ffUCProperty != null)
