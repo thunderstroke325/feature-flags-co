@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { btnsConfig } from '../pages/main/switch-manage/components/nav-btns/btns';
-import { CSwitchParams, IFfParams, IFfSettingParams } from '../pages/main/switch-manage/types/switch-new';
+import { CSwitchParams, IFfParams, IFfSettingParams, IPrequisiteFeatureFlag } from '../pages/main/switch-manage/types/switch-new';
 import { AccountService } from './account.service';
 
 @Injectable({
@@ -108,6 +108,19 @@ export class SwitchService {
     return this.http.get(url, {
       params: {
         "searchText": username.toString(),
+        "environmentId": `${this.envId}`,
+        "pageIndex": index.toString(),
+        "pageSize": size.toString()
+      }
+    });
+  }
+
+  // 搜索用户
+  public queryPrequisiteFeatureFlags(name: string = '', index: number = 0, size: number = 20): Observable<IPrequisiteFeatureFlag[]> {
+    const url = environment.url + `/FeatureFlags/SearchPrequisiteFeatureFlags`;
+    return this.http.get<IPrequisiteFeatureFlag[]>(url, {
+      params: {
+        "searchText": name.toString(),
         "environmentId": `${this.envId}`,
         "pageIndex": index.toString(),
         "pageSize": size.toString()

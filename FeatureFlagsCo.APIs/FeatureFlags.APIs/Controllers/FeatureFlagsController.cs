@@ -55,7 +55,14 @@ namespace FeatureFlags.APIs.Controllers
         [Route("SearchPrequisiteFeatureFlags")]
         public async Task<List<PrequisiteFeatureFlagViewModel>> SearchPrequisiteFeatureFlags(int environmentId, string searchText = "", int pageIndex = 0, int pageSize = 20)
         {
-            return await _cosmosDbService.SearchPrequisiteFeatureFlagsAsync(environmentId, searchText, pageIndex, pageSize);
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, environmentId))
+            {
+                pageSize = Math.Min(pageSize < 1 ? 20 : pageSize, 20);
+                return await _cosmosDbService.SearchPrequisiteFeatureFlagsAsync(environmentId, searchText, pageIndex, pageSize);
+            }
+
+            return new List<PrequisiteFeatureFlagViewModel>();
         }
 
 

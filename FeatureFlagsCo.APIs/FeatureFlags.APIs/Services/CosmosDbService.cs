@@ -636,7 +636,6 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<List<PrequisiteFeatureFlagViewModel>> SearchPrequisiteFeatureFlagsAsync(int environmentId, string searchText = "", int pageIndex = 0, int pageSize = 20)
         {
-            pageSize = pageSize > 1000 ? 1000 : (pageSize < 1 ? 1 : pageSize);
 
             var returnResult = new List<PrequisiteFeatureFlagViewModel>();
             QueryDefinition queryDefinition = null;

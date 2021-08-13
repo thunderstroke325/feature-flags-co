@@ -2,16 +2,26 @@
     <ng-container *ngFor="let item of upperFeatures; let key=index;">
         <div class="switch-item">
             <div class="select">
-                <nz-select [(ngModel)]="item.prerequisiteFeatureFlagId" (ngModelChange)="onSelectChange($event)">
-                    <ng-container *ngFor="let switch of featureList">
-                        <nz-option [nzValue]="switch.id" [nzDisabled]="selectedSwitchID.includes(switch.id)" [nzLabel]="switch.name"></nz-option>
-                    </ng-container>
-                </nz-select>
+              <nz-select
+               nzPlaceHolder="Select feature flag"
+               nzAllowClear
+               nzShowSearch
+               nzServerSearch
+               [compareWith]="compareWithPrequisiteFeatureFlag"
+               [(ngModel)]="item.selectedFeatureFlag"
+               (ngModelChange)="onSelectChange(item)"
+               (nzOnSearch)="onSearch($event)">
+                <ng-container *ngFor="let feature of featureList">
+                    <nz-option *ngIf="!isLoading" nzCustomContent [nzDisabled]="selectedFeatureFlagIDs.includes(feature.id)" [nzValue]="feature" [nzLabel]="feature.name">{{feature.name}}</nz-option>
+                </ng-container>
+                <nz-option *ngIf="isLoading" nzDisabled nzCustomContent>
+                    <i nz-icon nzType="loading" class="loading-icon"></i> Loading Data...
+                </nz-option>
+              </nz-select>
             </div>
             <div class="select">
-                <nz-select [(ngModel)]="item.variationValue" (onModelChange)="onVariationValueChange()">
-                    <nz-option [nzValue]="true" nzLabel="True"></nz-option>
-                    <nz-option [nzValue]="false" nzLabel="False"></nz-option>
+                <nz-select [(ngModel)]="item.valueOptionsVariationValue" [compareWith]="compareWithVariationOption" (ngModelChange)="onVariationValueChange()">
+                    <nz-option *ngFor="let option of item.selectedFeatureFlag?.variationOptions" [nzValue]="option" [nzLabel]="option.variationValue"></nz-option>
                 </nz-select>
             </div>
             <i nz-icon nzType="delete" nzTheme="outline" (click)="onDeleteSwitch(key)"></i>

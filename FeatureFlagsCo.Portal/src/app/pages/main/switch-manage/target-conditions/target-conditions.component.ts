@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { forkJoin, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SwitchService } from 'src/app/services/switch.service';
-import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType, IVariationOption, IFftiuParams, IRulePercentageRollout } from '../types/switch-new';
+import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType, IVariationOption, IFftiuParams, IRulePercentageRollout, IPrequisiteFeatureFlag } from '../types/switch-new';
 import { FfcAngularSdkService } from 'ffc-angular-sdk';
 
 @Component({
@@ -19,7 +19,7 @@ export class TargetConditionsComponent implements OnInit {
   public multistateEnabled: boolean = false;
   public switchStatus: 'Enabled' | 'Disabled' = 'Enabled';  // 开关状态
   public propertiesList: string[] = [];                     // 用户配置列表
-  public featureList: IFfParams[] = [];                     // 开关列表
+  public featureList: IPrequisiteFeatureFlag[] = [];                     // 开关列表
   public featureDetail: CSwitchParams;                      // 开关详情
   public upperFeatures: IFfpParams[] = [];                  // 上游开关列表
   public userList: IUserType[] = [];                        // 用户列表
@@ -51,11 +51,11 @@ export class TargetConditionsComponent implements OnInit {
     this.isLoading = true;
     forkJoin([
       this.switchServe.getEnvUserProperties(),
-      this.switchServe.getSwitchList(this.switchServe.envId)
+      //this.switchServe.getSwitchList(this.switchServe.envId)
     ]).subscribe((result) => {
       if(result) {
         this.propertiesList = result[0];
-        this.featureList = result[1];
+        //this.featureList = result[1];
 
         this.initSwitchStatus();
         this.initUpperSwitch();
@@ -63,6 +63,7 @@ export class TargetConditionsComponent implements OnInit {
         this.initTargetUserListForFalse();
 
         this.onSearchUser();
+        this.onSearchPrequisiteFeatureFlags();
 
         this.switchServe.setCurrentSwitch( this.featureDetail.getSwicthDetail());
         this.isLoading = false;
@@ -154,6 +155,14 @@ export class TargetConditionsComponent implements OnInit {
     this.switchServe.queryUsers(value)
       .subscribe((result) => {
         this.userList = [...result['users']];
+      })
+  }
+
+    // 搜索用户
+  public onSearchPrequisiteFeatureFlags(value: string = '') {
+    this.switchServe.queryPrequisiteFeatureFlags(value)
+      .subscribe((result: IPrequisiteFeatureFlag[]) => {
+        this.featureList = [...result.filter(r => r.id !== this.featureDetail.getSwicthDetail().id)];
       })
   }
 

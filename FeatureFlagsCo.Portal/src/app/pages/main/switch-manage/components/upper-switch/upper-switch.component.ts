@@ -1,5 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IFfParams, IFfpParams } from '../../types/switch-new';
+import { IFfParams, IFfpParams, IPrequisiteFeatureFlag, IVariationOption } from '../../types/switch-new';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'upper-switch',
@@ -8,41 +10,79 @@ import { IFfParams, IFfpParams } from '../../types/switch-new';
 })
 export class UpperSwitchComponent {
 
-  @Input() featureList: IFfParams[];
+  private searchSubject = new Subject<any>();
+  public compareWithPrequisiteFeatureFlag: (obj1: IPrequisiteFeatureFlag, obj2: IPrequisiteFeatureFlag) => boolean = (obj1: IPrequisiteFeatureFlag, obj2: IPrequisiteFeatureFlag) => {
+    if(obj1 && obj2) {
+      return obj1.id === obj2.id;
+    } else {
+      return false;
+    }
+  };
+
+  public compareWithVariationOption: (obj1: IVariationOption, obj2: IVariationOption) => boolean = (obj1: IVariationOption, obj2: IVariationOption) => {
+    if(obj1 && obj2) {
+      return obj1.localId === obj2.localId;
+    } else {
+      return false;
+    }
+  };
+
+  @Input("featureList")
+  set list(data: IPrequisiteFeatureFlag[]) {
+    this.isLoading = false;
+    this.upperFeatures.forEach(u => {
+      u.selectedFeatureFlag = data.find(d => d.id === u.prerequisiteFeatureFlagId);
+    });
+    this.featureList = [...data];
+  }
+
   @Input("upperFeatures")
   set data(value: IFfpParams[]){
     this.upperFeatures = [...value];
-    this.selectedSwitchID = [];
-    value.forEach((item: IFfpParams) => {
-      this.selectedSwitchID.push(item.prerequisiteFeatureFlagId);
-    })
+    this.sortoutSelectedID();
   };
-  
 
-  @Output() onUpperSwicthChange = new EventEmitter<IFfpParams[]>();         // 修改设置
-
-  public selectedSwitchID: string[] = [];
+  public isLoading = false;
+  public featureList: IPrequisiteFeatureFlag[] = [];
+  public selectedFeatureFlagIDs: string[] = [];
   public upperFeatures: IFfpParams[] = [];
+
+  constructor() {
+    this.searchSubject.pipe(
+      debounceTime(100),
+      //distinctUntilChanged()
+    ).subscribe(e => {
+      this.search.next(e);
+    });
+  }
+
+  public onSearch(value: string = '') {
+    this.isLoading = true;
+    this.searchSubject.next(value);
+  }
+
+  @Output() search = new EventEmitter<string>();
+  @Output() onUpperSwicthChange = new EventEmitter<IFfpParams[]>();         // 修改设置
 
   // 添加上游开关
   onAddUpperSwitch() {
     this.upperFeatures.push({
       prerequisiteFeatureFlagId: null,
-      variationValue: null
+      selectedFeatureFlag: null,
+      valueOptionsVariationValue: null
     });
-    this.onOutputResult();
   }
 
   // 删除开关
   onDeleteSwitch(index: number) {
     this.upperFeatures.splice(index, 1);
-    this.selectedSwitchID = [...this.sortoutSelectedID()];
+    this.sortoutSelectedID();
     this.onOutputResult();
   }
 
-  onSelectChange() {
-    this.selectedSwitchID = [...this.sortoutSelectedID()];
-    this.onOutputResult();
+  onSelectChange(currentUpperFeature: IFfpParams) {
+    this.sortoutSelectedID();
+    currentUpperFeature.prerequisiteFeatureFlagId = currentUpperFeature.selectedFeatureFlag.id;
   }
 
   // 数据发生改变
@@ -55,7 +95,7 @@ export class UpperSwitchComponent {
   }
 
   // 筛选选中的开关 ID
-  private sortoutSelectedID(): string[] {
-    return this.upperFeatures.map(item => item.prerequisiteFeatureFlagId);
+  private sortoutSelectedID(): void {
+    this.selectedFeatureFlagIDs = [...this.upperFeatures.map(item => item.prerequisiteFeatureFlagId)];
   }
 }

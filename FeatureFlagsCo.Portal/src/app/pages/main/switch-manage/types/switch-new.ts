@@ -10,6 +10,14 @@ export interface IUserType {
     country?: string;
 }
 
+export interface IPrequisiteFeatureFlag {
+  id: string;
+  name: string;
+  keyName: string;
+  environmentId: number;
+  variationOptions: IVariationOption[]
+}
+
 export interface IFfParams {
     id: string;
     name: string;
@@ -31,12 +39,14 @@ export interface IFfParams {
 export interface IFfSettingParams {
   id: string;
   name: string;
-  variationOptions?: IVariationOption[] // not null only for nulti state feature flag
+  variationOptions?: IVariationOption[] // not null only when nulti state feature flag
 }
 
 export interface IFfpParams {
     prerequisiteFeatureFlagId: string;
-    variationValue: boolean;
+    variationValue?: boolean;
+    valueOptionsVariationValue?: IVariationOption;
+    selectedFeatureFlag?: IPrequisiteFeatureFlag;
 }
 
 export interface IFftiuParams {

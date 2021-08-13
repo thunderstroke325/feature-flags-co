@@ -53,7 +53,6 @@ export class TargetUserComponent {
 
   // 选择发生改变
   public onSelectChange() {
-    console.log('onSelectChange');
     this.onSelectedUserListChange.next(this.selectedUserDetailList);
   }
 }
