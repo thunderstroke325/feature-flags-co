@@ -33,11 +33,8 @@ export class TargetConditionsComponent implements OnInit {
   constructor(
     private route:ActivatedRoute,
     private switchServe: SwitchService,
-    private msg: NzMessageService,
-    private ffcAngularSdkService: FfcAngularSdkService
+    private msg: NzMessageService
   ) {
-    this.multistateEnabled = this.ffcAngularSdkService.variation('Multistate-enabled');
-
     this.ListenerResolveData();
   }
 
@@ -78,7 +75,7 @@ export class TargetConditionsComponent implements OnInit {
     this.route.data.pipe(map(res => res.switchInfo))
     .subscribe((result: CSwitchParams) => {
       this.featureDetail = new CSwitchParams(result);
-      this.multistateEnabled = this.multistateEnabled && this.featureDetail.getIsMultiOptionMode();
+      this.multistateEnabled =this.featureDetail.getIsMultiOptionMode();
       if (this.multistateEnabled) {
         this.variationOptions = this.featureDetail.getVariationOptions();
 

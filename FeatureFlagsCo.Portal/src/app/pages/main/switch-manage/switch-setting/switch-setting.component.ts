@@ -29,15 +29,12 @@ export class SwitchSettingComponent implements OnDestroy {
     private switchServe: SwitchService,
     private msg: NzMessageService,
     private modal: NzModalService,
-    private router: Router,
-    private ffcAngularSdkService: FfcAngularSdkService
+    private router: Router
   ) {
-    this.multistateEnabled = this.ffcAngularSdkService.variation('Multistate-enabled');
-
     this.route.data.pipe(map(res => res.switchInfo))
       .subscribe((result: CSwitchParams) => {
         this.featureDetail = new CSwitchParams(result);
-        this.multistateEnabled = this.multistateEnabled && this.featureDetail.getIsMultiOptionMode();
+        this.multistateEnabled = this.featureDetail.getIsMultiOptionMode();
         if (this.multistateEnabled) {
           this.variationOptions = this.featureDetail.getVariationOptions();
         }
