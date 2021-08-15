@@ -21,6 +21,14 @@ namespace FeatureFlags.APIs.ViewModels
         public string AppInsightsApplicationId { get; set; }
         public string AppInsightsApplicationApiSecret { get; set; }
 
+        public string InsightsRabbitMqUrl { get; set; }
 
+        public string HostingType { get; set; }
+    }
+
+    public enum HostingTypeEnum
+    {
+        Local,
+        Azure
     }
 }

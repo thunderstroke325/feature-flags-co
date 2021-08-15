@@ -26,14 +26,14 @@ namespace FeatureFlags.APIs.Repositories
         private readonly IGenericRepository _repository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IDistributedCache _redisCache;
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly INoSqlService _cosmosDbService;
 
         public FeatureFlagsService(
             ApplicationDbContext context,
             IGenericRepository repository,
             UserManager<ApplicationUser> userManager,
             IDistributedCache redisCache,
-            ICosmosDbService cosmosDbService)
+            INoSqlService cosmosDbService)
         {
             _dbContext = context;
             _repository = repository;

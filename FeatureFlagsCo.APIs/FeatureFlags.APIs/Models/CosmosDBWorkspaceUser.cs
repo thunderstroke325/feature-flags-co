@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,10 +8,13 @@ using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Models
 {
-    public class CosmosDBEnvironmentUser
+    public class EnvironmentUser
     {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string _Id { get; set; }
         [JsonProperty("id")]
-        public string id { get; set; }
+        public string Id { get; set; }
         public int EnvironmentId { get; set; }
         public string ObjectType { get { return "EnvironmentUser"; } set { value = "EnvironmentUser"; } }
         public string Name { get; set; }
@@ -30,7 +35,7 @@ namespace FeatureFlags.APIs.Models
 
 
 
-    public class CosmosDBEnvironmentFeatureFlagUser
+    public class EnvironmentFeatureFlagUser
     {
         [JsonProperty("id")]
         public string id { get; set; }
@@ -42,6 +47,6 @@ namespace FeatureFlags.APIs.Models
         public string PercentageRolloutBasedRuleId { get; set; }
 
         public VariationOption VariationOptionResultValue { get; set; }
-        public CosmosDBEnvironmentUser UserInfo { get; set; }
+        public EnvironmentUser UserInfo { get; set; }
     }
 }

@@ -22,7 +22,7 @@ namespace FeatureFlagsCo.APIs.Tests
         [Fact]
         public void IfHashedValueIsFixed()
         {
-            var _variationService = new VariationService(null, null, null);
+            var _variationService = new VariationService(null, null);
 
             var result = _variationService.IfBelongRolloutPercentage("hu-beau@outlook.com", new double[] { 0.683, 0.685 });
 
@@ -32,7 +32,7 @@ namespace FeatureFlagsCo.APIs.Tests
         [Fact]
         public void IfBelongRolloutPercentage()
         {
-            var _variationService = new VariationService(null, null, null);
+            var _variationService = new VariationService(null, null);
             
             for (int k = 0; k < 10; k++)
             {

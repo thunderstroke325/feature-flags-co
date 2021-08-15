@@ -1,20 +1,36 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+guest guest
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+wget https://raw.githubusercontent.com/grafana/loki/v2.3.0/production/docker-compose.yaml -O docker-compose.yaml
+docker-compose -f docker-compose.yaml up
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+admin admin
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+
+
+
+
+count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])
+
+sum(count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])) by (userName)
+
+// 下面这个可以看到, 当variation为某个值时，使用的用户数量
+count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[1d])))
+
+// 下面这个可以看到, 不管variation时，使用的用户数量
+count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1"}[1d])))
+
+// 某个ff，某个状态下的调用情况
+{featureFlagId="ff__2__3__a1",varaition="false"}
+
+// 很奇怪的图片
+sum(count_over_time({featureFlagId="ff__2__3__a1"}[3h])) without(userName, varaition) 
+
+
+
+
+
+1629006198000000000
+1570818238000000000
+1629009161000000000

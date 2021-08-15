@@ -22,11 +22,11 @@ namespace FeatureFlags.APIs.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ICosmosDbService _cosmosdbService;
+        private readonly INoSqlService _cosmosdbService;
         //private readonly ILaunchDarklyService _ldService;
 
         public CosmosDBPerformanceTestController(
-            ICosmosDbService cosmosdbService)
+            INoSqlService cosmosdbService)
             //ILaunchDarklyService ldService)
         {
             _cosmosdbService = cosmosdbService;

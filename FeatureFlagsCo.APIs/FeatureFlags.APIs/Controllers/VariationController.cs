@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using FeatureFlags.APIs.Authentication;
-using FeatureFlags.APIs.Models;
+﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
-using FeatureFlags.APIs.ViewModels.Environment;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Controllers
 {
@@ -24,24 +20,28 @@ namespace FeatureFlags.APIs.Controllers
     [Route("[controller]")]
     public class VariationController : ControllerBase
     {
-        private readonly IGenericRepository _repository;
         private readonly ILogger<VariationController> _logger;
         private readonly IDistributedCache _redisCache;
         private readonly IVariationService _variationService;
+        private readonly IOptions<MySettings> _mySettings;
+        private readonly IInsighstRabbitMqService _rabbitmqInsightsService;
 
         public VariationController(
             ILogger<VariationController> logger, 
-            IGenericRepository repository,
             IDistributedCache redisCache,
-            IVariationService variationService)
+            IVariationService variationService,
+            IOptions<MySettings> mySettings,
+            IInsighstRabbitMqService rabbitmqInsightsService)
         {
             _logger = logger;
-            _repository = repository;
             _redisCache = redisCache;
             _variationService = variationService;
+            _mySettings = mySettings;
+            _rabbitmqInsightsService = rabbitmqInsightsService;
         }
 
 
+        #region old version of true/false status variation
         [HttpPost]
         [Route("GetUserVariationResult")]
         public async Task<bool?> GetVariation([FromBody] GetUserVariationResultParam param)
@@ -55,8 +55,8 @@ namespace FeatureFlags.APIs.Controllers
         private async Task<Tuple<bool?, bool>> GetVariationCore(GetUserVariationResultParam param)
         {
             var ffIdVM = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
-            var returnResult = await _variationService.CheckVariableAsync(param.EnvironmentSecret, param.FeatureFlagKeyName,
-                new CosmosDBEnvironmentUser()
+            var returnResult = await _variationService.TrueFalseStatusCheckVariableAsync(param.EnvironmentSecret, param.FeatureFlagKeyName,
+                new EnvironmentUser()
                 {
                     Country = param.FFUserCountry,
                     CustomizedProperties = param.FFUserCustomizedProperties,
@@ -93,6 +93,7 @@ namespace FeatureFlags.APIs.Controllers
                 VariationResult = returnResult.Item1
             };
         }
+        #endregion
 
         [HttpPost]
         [Route("GetMultiOptionVariation")]
@@ -122,7 +123,7 @@ namespace FeatureFlags.APIs.Controllers
             {
                 var ffIdVM = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
                 var returnResult = await _variationService.CheckMultiOptionVariationAsync(param.EnvironmentSecret, param.FeatureFlagKeyName,
-                    new CosmosDBEnvironmentUser()
+                    new EnvironmentUser()
                     {
                         Country = param.FFUserCountry,
                         CustomizedProperties = param.FFUserCustomizedProperties,
@@ -131,20 +132,15 @@ namespace FeatureFlags.APIs.Controllers
                         Name = param.FFUserName
                     },
                     ffIdVM);
-                var customizedTraceProperties = new Dictionary<string, object>()
+
+
+                if(_mySettings.Value.HostingType == HostingTypeEnum.Local.ToString())
                 {
-                    ["envId"] = ffIdVM.EnvId,
-                    ["accountId"] = ffIdVM.AccountId,
-                    ["projectId"] = ffIdVM.ProjectId,
-                    ["featureFlagKey"] = param.FeatureFlagKeyName,
-                    ["userKey"] = param.FFUserKeyId,
-                    ["readOnlyOperation"] = returnResult.Item2,
-                    ["variationValue"] = returnResult.Item1.VariationValue,
-                    ["featureFlagId"] = ffIdVM.FeatureFlagId
-                };
-                using (_logger.BeginScope(customizedTraceProperties))
+                    SendToRabbitMqThenGrafana(param, ffIdVM, returnResult);
+                }
+                else if (_mySettings.Value.HostingType == HostingTypeEnum.Azure.ToString())
                 {
-                    _logger.LogInformation("variation-request");
+                    SendToApplicationInsights(param, ffIdVM, returnResult);
                 }
 
                 return new JsonResult(returnResult.Item1);
@@ -157,49 +153,96 @@ namespace FeatureFlags.APIs.Controllers
             }
         }
 
-        
-
-        [HttpPost]
-        [Route("VariationResultTest")]
-        public bool? GetVariationTest([FromBody] GetUserVariationResultParam param)
+        private void SendToApplicationInsights(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, Tuple<VariationOption, bool> returnResult)
         {
-            var ffIdVM = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
             var customizedTraceProperties = new Dictionary<string, object>()
             {
                 ["envId"] = ffIdVM.EnvId,
                 ["accountId"] = ffIdVM.AccountId,
                 ["projectId"] = ffIdVM.ProjectId,
                 ["featureFlagKey"] = param.FeatureFlagKeyName,
-                ["userKey"] = param.FFUserKeyId
+                ["userKey"] = param.FFUserKeyId,
+                ["readOnlyOperation"] = returnResult.Item2,
+                ["variationValue"] = returnResult.Item1.VariationValue,
+                ["featureFlagId"] = ffIdVM.FeatureFlagId
             };
             using (_logger.BeginScope(customizedTraceProperties))
             {
                 _logger.LogInformation("variation-request");
             }
-
-            return true;
         }
 
-        [HttpGet]
-        [Route("GetUserVariationResultPerformanceTest")]
-        public async Task<bool?> GetVariationPerformance()
+        private void SendToRabbitMqThenGrafana(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, Tuple<VariationOption, bool> returnResult)
         {
-            var key = "FakeUser-" + Guid.NewGuid().ToString();
-            return await GetVariation(new GetUserVariationResultParam
+            var labels = new List<FeatureFlagsCo.RabbitMqModels.MessageLabel>()
+                         {
+                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              {
+                                   LabelName = "RequestPath",
+                                    LabelValue = "/Variation/GetMultiOptionVariation"
+                              },
+                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              {
+                                  LabelName = "FeatureFlagId",
+                                  LabelValue = ffIdVM.FeatureFlagId
+                              },
+                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              {
+                                  LabelName = "EnvId",
+                                  LabelValue = ffIdVM.EnvId
+                              },
+                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              {
+                                  LabelName = "AccountId",
+                                  LabelValue = ffIdVM.AccountId
+                              },
+                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              {
+                                  LabelName = "ProjectId",
+                                  LabelValue = ffIdVM.ProjectId
+                              },
+                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              {
+                                  LabelName = "FeatureFlagKeyName",
+                                  LabelValue = param.FeatureFlagKeyName
+                              },
+                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              {
+                                  LabelName = "UserKeyId",
+                                  LabelValue = param.FFUserKeyId
+                              },
+                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              {
+                                  LabelName = "FFUserName",
+                                  LabelValue = param.FFUserName
+                              },
+                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              {
+                                  LabelName = "VariationLocalId",
+                                  LabelValue = returnResult.Item1.LocalId.ToString()
+                              },
+                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              {
+                                  LabelName = "VariationValue",
+                                  LabelValue = returnResult.Item1.VariationValue
+                              }
+                        };
+            if(param.FFUserCustomizedProperties != null && param.FFUserCustomizedProperties.Count > 0)
             {
-                FeatureFlagKeyName = "MQ==__cosmosdb-feature",
-                FFUserCountry = "",
-                FFUserCustomizedProperties = new List<FeatureFlagUserCustomizedProperty>() { 
-                    new FeatureFlagUserCustomizedProperty
+                foreach (var item in param.FFUserCustomizedProperties)
+                {
+                    labels.Add(new FeatureFlagsCo.RabbitMqModels.MessageLabel
                     {
-                        Name =  "TestProperty",
-                        Value = key
-                    }
-                },
-                FFUserEmail = key + "@user.co",
-                FFUserKeyId = key,
-                FFUserName = key,
-                EnvironmentSecret = "ZGQ4NTkzM2ItNjRhNy00MDAwLTg2YTYtNTE4ZmY5YjgzYzUz"
+                        LabelName = item.Name,
+                        LabelValue = item.Value
+                    });
+                }
+            }
+            _rabbitmqInsightsService.SendMessage(new FeatureFlagsCo.RabbitMqModels.MessageModel
+            {
+                SendDateTime = DateTime.UtcNow,
+                Labels = labels,
+                Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam())
             });
         }
     }

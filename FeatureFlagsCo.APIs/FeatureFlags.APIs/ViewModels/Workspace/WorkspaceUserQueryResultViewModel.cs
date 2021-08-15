@@ -9,6 +9,6 @@ namespace FeatureFlags.APIs.Models
     public class EnvironmentUserQueryResultViewModel
     {
         public int Count { get; set; }
-        public List<CosmosDBEnvironmentUser> Users { get; set; }
+        public List<EnvironmentUser> Users { get; set; }
     }
 }

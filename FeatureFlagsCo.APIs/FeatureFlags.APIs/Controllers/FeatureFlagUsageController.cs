@@ -22,12 +22,12 @@ namespace FeatureFlags.APIs.Controllers
     public class FeatureFlagUsageController : ControllerBase
     {
         private readonly IAppInsightsService _appInsightsService;
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly INoSqlService _cosmosDbService;
         private readonly ILogger<FeatureFlagUsageController> _logger;
 
         public FeatureFlagUsageController(
             IAppInsightsService appInsightsService,
-            ICosmosDbService cosmosDbService,
+            INoSqlService cosmosDbService,
             ILogger<FeatureFlagUsageController> logger)
         {
             _appInsightsService = appInsightsService;
@@ -46,8 +46,8 @@ namespace FeatureFlags.APIs.Controllers
         public async Task<FeatureFlagUsageViewModel> GetFeatureFlagUsageData(string featureFlagId, string chartQueryTimeSpan)
         {
             var returnModel = new FeatureFlagUsageViewModel();
-            returnModel.TotalUsers = await _cosmosDbService.GetFeatureFlagTotalUsersAsync(featureFlagId);
-            returnModel.HitUsers = await _cosmosDbService.GetFeatureFlagHitUsersAsync(featureFlagId);
+            returnModel.TotalUsers = await _cosmosDbService.TrueFalseStatusGetFeatureFlagTotalUsersAsync(featureFlagId);
+            returnModel.HitUsers = await _cosmosDbService.TrueFalseStatusGetFeatureFlagHitUsersAsync(featureFlagId);
             returnModel.ChartData = _appInsightsService.GetFFUsageChartData(featureFlagId, chartQueryTimeSpan);
             return returnModel;
         }

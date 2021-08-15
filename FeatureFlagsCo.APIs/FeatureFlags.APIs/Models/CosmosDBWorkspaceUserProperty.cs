@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Models
 {
-    public class CosmosDBEnvironmentUserProperty
+    public class EnvironmentUserProperty
     {
         [JsonProperty("id")]
         public string Id { get; set; }

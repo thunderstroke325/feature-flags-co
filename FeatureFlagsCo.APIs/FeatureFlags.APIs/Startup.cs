@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
@@ -127,8 +128,7 @@ namespace FeatureFlags.AdminWebAPIs
                             },
                             Scheme = "oauth2",
                             Name = "Bearer",
-                            In = ParameterLocation.Header,
-
+                            In = ParameterLocation.Header
                         },
                         new List<string>()
                         }
@@ -149,6 +149,7 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddScoped<IVariationService, VariationService>();
             services.AddTransient<IAppInsightsService, AppInsightsService>();
 
+            services.AddSingleton<IInsighstRabbitMqService, InsighstRabbitMqService>();
 
             //if (CurrentEnvironment.EnvironmentName != "Development")
             //{
@@ -163,9 +164,10 @@ namespace FeatureFlags.AdminWebAPIs
             aiOptions.EnableEventCounterCollectionModule = false;
             aiOptions.EnableRequestTrackingTelemetryModule = false;
             services.AddApplicationInsightsTelemetry(aiOptions);
-                //services.AddTransient<RequestBodyLoggingMiddleware>();
+            //services.AddTransient<RequestBodyLoggingMiddleware>();
             //}
 
+            //if (this.Configuration.GetSection("MySettings").GetSection("IDistributedCacheName").Value == "IMemory")
             if (CurrentEnvironment.EnvironmentName == "Development")
             {
                 services.AddDistributedMemoryCache();
@@ -178,18 +180,6 @@ namespace FeatureFlags.AdminWebAPIs
                     options.InstanceName = "feature-flags-users";
                 });
             }
-            //if (this.Configuration.GetSection("MySettings").GetSection("IDistributedCacheName").Value == "IMemory")
-            //{
-            //    services.AddDistributedMemoryCache();
-            //}
-            //else
-            //{
-            //    services.AddStackExchangeRedisCache(options =>
-            //    {
-            //        options.Configuration = this.Configuration.GetConnectionString("RedisServerUrl");
-            //        options.InstanceName = "feature-flags-users";
-            //    });
-            //}
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -204,8 +194,22 @@ namespace FeatureFlags.AdminWebAPIs
 
             services.Configure<MySettings>(options => Configuration.GetSection("MySettings").Bind(options));
 
-            services.AddSingleton<ICosmosDbService>(
-                InitializeCosmosClientInstanceAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
+
+            var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
+
+            if (hostingType == HostingTypeEnum.Azure.ToString())
+                services.AddSingleton<INoSqlService>(
+                    InitializeCosmosClientInstanceAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
+            else
+            {
+                services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
+                services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
+                services.AddSingleton<MongoDbFeatureFlagService>();
+                services.AddSingleton<MongoDbEnvironmentUserService>();
+                services.AddSingleton<MongoDbEnvironmentUserPropertyService>();
+                services.AddSingleton<INoSqlService, MongoDbService>();
+            }
+  
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

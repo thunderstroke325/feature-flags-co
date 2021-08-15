@@ -14,28 +14,28 @@ namespace FeatureFlags.APIs.Repositories
     public interface IEnvironmentUserPropertyService
     {
 
-        Task<CosmosDBEnvironmentUserProperty> GetCosmosDBEnvironmentUserPropertiesForCRUDAsync(int environmentId);
-        Task CreateOrUpdateCosmosDBEnvironmentUserPropertiesForCRUDAsync(CosmosDBEnvironmentUserProperty param);
+        Task<EnvironmentUserProperty> GetCosmosDBEnvironmentUserPropertiesForCRUDAsync(int environmentId);
+        Task CreateOrUpdateCosmosDBEnvironmentUserPropertiesForCRUDAsync(EnvironmentUserProperty param);
     }
 
     public class EnvironmentUserPropertyService : IEnvironmentUserPropertyService
     {
-        private readonly ICosmosDbService _cosmosdbService;
+        private readonly INoSqlService _cosmosdbService;
 
         public EnvironmentUserPropertyService(
-            ICosmosDbService cosmosdbService)
+            INoSqlService cosmosdbService)
         {
             _cosmosdbService = cosmosdbService;
         }
 
-        public async Task<CosmosDBEnvironmentUserProperty> GetCosmosDBEnvironmentUserPropertiesForCRUDAsync(int environmentId)
+        public async Task<EnvironmentUserProperty> GetCosmosDBEnvironmentUserPropertiesForCRUDAsync(int environmentId)
         {
-            return await _cosmosdbService.GetCosmosDBEnvironmentUserPropertiesForCRUDAsync(environmentId);
+            return await _cosmosdbService.GetEnvironmentUserPropertiesForCRUDAsync(environmentId);
         }
 
-        public async Task CreateOrUpdateCosmosDBEnvironmentUserPropertiesForCRUDAsync(CosmosDBEnvironmentUserProperty param)
+        public async Task CreateOrUpdateCosmosDBEnvironmentUserPropertiesForCRUDAsync(EnvironmentUserProperty param)
         {
-            await _cosmosdbService.CreateOrUpdateCosmosDBEnvironmentUserPropertiesForCRUDAsync(param);
+            await _cosmosdbService.CreateOrUpdateEnvironmentUserPropertiesForCRUDAsync(param);
         }
     }
 

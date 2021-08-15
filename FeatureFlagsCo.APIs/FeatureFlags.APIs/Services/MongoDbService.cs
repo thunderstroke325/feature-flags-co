@@ -2,6 +2,7 @@
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
 using Microsoft.Azure.Cosmos;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,112 +10,71 @@ using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
 {
-    public class CosmosDbService: INoSqlService
+    public class MongoDbService: INoSqlService
     {
-        private Container _container;
+        private readonly MongoDbFeatureFlagService _mongoFeatureFlagsService;
+        private readonly MongoDbEnvironmentUserService _mongoEnvironmentUsersService;
+        private readonly MongoDbEnvironmentUserPropertyService _mongoEnvironmentUserPropertiesService;
 
-        public CosmosDbService(
-            CosmosClient dbClient,
-            string databaseName,
-            string containerName)
+        public MongoDbService(
+            MongoDbFeatureFlagService mongoFeatureFlagsService,
+            MongoDbEnvironmentUserService mongoEnvironmentUsersService,
+            MongoDbEnvironmentUserPropertyService mongoEnvironmentUserPropertiesService)
         {
-            this._container = dbClient.GetContainer(databaseName, containerName);
+            _mongoFeatureFlagsService = mongoFeatureFlagsService;
+            _mongoEnvironmentUsersService = mongoEnvironmentUsersService;
+            _mongoEnvironmentUserPropertiesService = mongoEnvironmentUserPropertiesService;
         }
 
 
         #region old version true false status functions
         public async Task TrueFalseStatusUpdateItemAsync(string id, dynamic item)
         {
-            await this._container.UpsertItemAsync<dynamic>(item, new PartitionKey(id));
         }
         public async Task<dynamic> TrueFalseStatusGetItemAsync(string id)
         {
-            try
-            {
-                return await this._container.ReadItemAsync<dynamic>(id, new PartitionKey(id));
-            }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return null;
-            }
+            return null;
         }
         public async Task<EnvironmentFeatureFlagUser> TrueFalseStatusAddEnvironmentFeatureFlagUserAsync(EnvironmentFeatureFlagUser item)
         {
-            var newItem = await this._container.CreateItemAsync<EnvironmentFeatureFlagUser>(item, new PartitionKey(item.id), new ItemRequestOptions());
-            return newItem;
+            return null;
         }
         public async Task<EnvironmentFeatureFlagUser> TrueFalseStatusGetEnvironmentFeatureFlagUserAsync(string id)
         {
-            try
-            {
-                return await this._container.ReadItemAsync<EnvironmentFeatureFlagUser>(id, new PartitionKey(id));
-            }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return null;
-            }
+            return null;
         }
         public async Task<int> TrueFalseStatusGetFeatureFlagTotalUsersAsync(string featureFlagId)
         {
-            int envId = FeatureFlagKeyExtension.GetEnvIdByFeautreFlagId(featureFlagId);
-            QueryDefinition queryDefinition = new QueryDefinition("select value count(1) from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentFFUser'")
-              .WithParameter("@environmentId", envId);
-            using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
-            {
-                while (feedIterator.HasMoreResults)
-                {
-                    Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                    foreach (var item in response)
-                    {
-                        return (int)item;
-                    }
-                }
-            }
             return 0;
         }
         public async Task<int> TrueFalseStatusGetFeatureFlagHitUsersAsync(string featureFlagId)
         {
-            int envId = FeatureFlagKeyExtension.GetEnvIdByFeautreFlagId(featureFlagId);
-            QueryDefinition queryDefinition = new QueryDefinition("select value count(1) from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentFFUser' and f.ResultValue = true")
-              .WithParameter("@environmentId", envId);
-            using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
-            {
-                while (feedIterator.HasMoreResults)
-                {
-                    Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                    foreach (var item in response)
-                    {
-                        return (int)item;
-                    }
-                }
-            }
             return 0;
         }
         #endregion
 
+
         public async Task<EnvironmentUser> AddEnvironmentUserAsync(EnvironmentUser item)
         {
-            var newItem = await this._container.CreateItemAsync<EnvironmentUser>(item, new PartitionKey(item.Id), new ItemRequestOptions());
+            var newItem = await _mongoEnvironmentUsersService.CreateAsync(item);
             return newItem;
         }
 
-
         public async Task<FeatureFlag> GetFeatureFlagAsync(string id)
         {
-            return await this._container.ReadItemAsync<FeatureFlag>(id, new PartitionKey(id));
+            return await _mongoFeatureFlagsService.GetAsync(id);
         }
         public async Task<EnvironmentUser> GetEnvironmentUserAsync(string id)
         {
             try
             {
-                return await this._container.ReadItemAsync<EnvironmentUser>(id, new PartitionKey(id));
+                return await _mongoEnvironmentUsersService.GetAsync(id);
             }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (MongoException ex)
             {
                 return null;
             }
         }
-
 
         public async Task<FeatureFlag> CreateFeatureFlagAsync(CreateFeatureFlagViewModel param, string currentUserId, int projectId, int accountId)
         {
@@ -171,7 +131,7 @@ namespace FeatureFlags.APIs.Services
                 IsMultiOptionMode = true,
                 TargetIndividuals = new List<TargetIndividualForVariationOption>()
             };
-            return await _container.CreateItemAsync<FeatureFlag>(newFeatureFlag);
+            return await _mongoFeatureFlagsService.CreateAsync(newFeatureFlag);
         }
 
 
@@ -234,7 +194,7 @@ namespace FeatureFlags.APIs.Services
                     }
                 }
 
-                await this._container.UpsertItemAsync<FeatureFlag>(param);
+                await _mongoFeatureFlagsService.UpdateAsync(param.Id, param);
 
                 return new ReturnJsonModel<FeatureFlag>
                 {
@@ -284,7 +244,11 @@ namespace FeatureFlags.APIs.Services
                 param.FF.PercentageRolloutForFalseNumber = originFF.FF.PercentageRolloutForFalseNumber;
                 param.FF.PercentageRolloutForTrueNumber = originFF.FF.PercentageRolloutForTrueNumber;
             }
-            return await this._container.UpsertItemAsync<FeatureFlag>(param);
+
+            param._Id = originFF._Id;
+            await _mongoFeatureFlagsService.UpdateAsync(param.Id, param);
+
+            return param;
         }
 
         public async Task<FeatureFlag> ArchiveEnvironmentdFeatureFlagAsync(FeatureFlagArchiveParam param)
@@ -294,7 +258,8 @@ namespace FeatureFlags.APIs.Services
             originFF.IsArchived = true;
             originFF.FF.Status = FeatureFlagStatutEnum.Disabled.ToString();
 
-            return await this._container.UpsertItemAsync<FeatureFlag>(originFF);
+            await _mongoFeatureFlagsService.UpdateAsync(originFF.Id, originFF);
+            return originFF;
         }
 
         public async Task<FeatureFlag> UnarchiveEnvironmentdFeatureFlagAsync(FeatureFlagArchiveParam param)
@@ -303,7 +268,8 @@ namespace FeatureFlags.APIs.Services
             originFF.FF.LastUpdatedTime = DateTime.UtcNow;
             originFF.IsArchived = false;
 
-            return await this._container.UpsertItemAsync<FeatureFlag>(originFF);
+            await _mongoFeatureFlagsService.UpdateAsync(originFF.Id, originFF);
+            return originFF;
         }
 
         public async Task<EnvironmentUserProperty> UpdateEnvironmentUserPropertiesAsync(int environmentId, List<string> propertyName)
@@ -312,7 +278,7 @@ namespace FeatureFlags.APIs.Services
             EnvironmentUserProperty environmentUserProperty = null;
             try
             {
-                environmentUserProperty = await this._container.ReadItemAsync<EnvironmentUserProperty>(id, new PartitionKey(id));
+                environmentUserProperty = await _mongoEnvironmentUserPropertiesService.GetAsync(id);
                 if (propertyName != null && propertyName.Count > 0)
                 {
                     foreach (var name in propertyName)
@@ -321,11 +287,11 @@ namespace FeatureFlags.APIs.Services
                     }
                 }
                 environmentUserProperty.Properties = environmentUserProperty.Properties.Distinct().ToList();
-                environmentUserProperty = await this._container.UpsertItemAsync<EnvironmentUserProperty>(environmentUserProperty);
+                await _mongoEnvironmentUserPropertiesService.UpdateAsync(environmentUserProperty.Id, environmentUserProperty);
             }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (MongoException ex)
             {
-                environmentUserProperty = (await this._container.CreateItemAsync<EnvironmentUserProperty>(
+                environmentUserProperty = (await _mongoEnvironmentUserPropertiesService.CreateAsync(
                     new EnvironmentUserProperty
                     {
                         Id = id,
@@ -341,17 +307,16 @@ namespace FeatureFlags.APIs.Services
             string id = FeatureFlagKeyExtension.GetEnvironmentUserPropertyId(environmentId);
             try
             {
-                EnvironmentUserProperty returnModel = await this._container.ReadItemAsync<EnvironmentUserProperty>(id, new PartitionKey(id));
+                EnvironmentUserProperty returnModel = await _mongoEnvironmentUserPropertiesService.GetAsync(id);
                 returnModel.Properties.Add("KeyId");
                 returnModel.Properties.Add("Name");
                 returnModel.Properties.Add("Email");
                 return returnModel;
             }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (MongoException ex)
             {
-                return new EnvironmentUserProperty()
-                {
-                    Properties = new List<string>() { "KeyId", "Name", "Email" }
+                return new EnvironmentUserProperty() { 
+                    Properties = new List<string>()
                 };
             }
         }
@@ -359,30 +324,20 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<FeatureFlag> GetFlagAsync(string id)
         {
-            return await this._container.ReadItemAsync<FeatureFlag>(id, new PartitionKey(id));
+            return await _mongoFeatureFlagsService.GetAsync(id);
         }
 
         public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentFeatureFlagBasicInfoItemsAsync(int environmentId, int pageIndex = 0, int pageSize = 100)
         {
             var returnResult = new List<FeatureFlagBasicInfo>();
-                var results = new List<FeatureFlag>();
-            QueryDefinition queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.IsArchived != true and f.ObjectType = 'FeatureFlag' offset @offsetNumber limit @pageSize")
-                .WithParameter("@environmentId", environmentId)
-                .WithParameter("@offsetNumber", pageIndex * pageSize)
-                .WithParameter("@pageSize", pageSize);
-            //using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>("select * from f where f.EnvironmentId = 1 and f.ObjectType = 'FeatureFlag'"))
-            using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
+            var ffs = (await _mongoFeatureFlagsService.SearchAsync(null, environmentId, pageIndex, pageSize));
+            foreach (var ff in ffs)
             {
-                while (feedIterator.HasMoreResults)
+                var ffb = ff.FF;
+                if (ffb != null)
                 {
-                    Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                    foreach (var item in response)
-                    {
-                        FeatureFlagBasicInfo ff = item.ToObject<FeatureFlag>().FF;
-                        if (string.IsNullOrWhiteSpace(ff.Status))
-                            ff.Status = FeatureFlagStatutEnum.Enabled.ToString();
-                        returnResult.Add(ff);
-                    }
+                    ffb.Status = string.IsNullOrWhiteSpace(ffb.Status) ? FeatureFlagStatutEnum.Enabled.ToString() : ffb.Status;
+                    returnResult.Add(ffb);
                 }
             }
             return returnResult;
@@ -391,21 +346,14 @@ namespace FeatureFlags.APIs.Services
         public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentArchivedFeatureFlagBasicInfoItemsAsync(int environmentId, int pageIndex = 0, int pageSize = 100)
         {
             var returnResult = new List<FeatureFlagBasicInfo>();
-            var results = new List<FeatureFlag>();
-            QueryDefinition queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.IsArchived = true and f.ObjectType = 'FeatureFlag' offset @offsetNumber limit @pageSize")
-                .WithParameter("@environmentId", environmentId)
-                .WithParameter("@offsetNumber", pageIndex * pageSize)
-                .WithParameter("@pageSize", pageSize);
-            //using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>("select * from f where f.EnvironmentId = 1 and f.ObjectType = 'FeatureFlag'"))
-            using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
+            var ffs = (await _mongoFeatureFlagsService.SearchArchivedAsync(environmentId, pageIndex, pageSize));
+            foreach (var ff in ffs)
             {
-                while (feedIterator.HasMoreResults)
+                var ffb = ff.FF;
+                if (ffb != null)
                 {
-                    Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                    foreach (var item in response)
-                    {
-                        returnResult.Add(item.ToObject<FeatureFlag>().FF);
-                    }
+                    ffb.Status = string.IsNullOrWhiteSpace(ffb.Status) ? FeatureFlagStatutEnum.Enabled.ToString() : ffb.Status;
+                    returnResult.Add(ffb);
                 }
             }
             return returnResult;
@@ -415,165 +363,68 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<int> QueryEnvironmentUsersCountAsync(string searchText, int environmentId, int pageIndex, int pageSize)
         {
-            if (string.IsNullOrWhiteSpace((searchText ?? "").Trim()))
-            {
-                QueryDefinition queryDefinition = new QueryDefinition("select value count(1) from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentUser'")
-                  .WithParameter("@environmentId", environmentId);
-                using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
-                {
-                    while (feedIterator.HasMoreResults)
-                    {
-                        Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                        foreach (var item in response)
-                        {
-                            return (int)item;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                QueryDefinition queryDefinition = new QueryDefinition("select value count(1) from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentUser' and (f.Name like '%" + searchText + "%' or f.KeyId like '%" + searchText + "')")
-                    .WithParameter("@environmentId", environmentId)
-                    .WithParameter("@searchText", searchText);
-                using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
-                {
-                    while (feedIterator.HasMoreResults)
-                    {
-                        Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                        foreach (var item in response)
-                        {
-                            return (int)item;
-                        }
-                    }
-                }
-            }
-
-            return 0;
+            return await _mongoEnvironmentUsersService.CountAsync(searchText, environmentId);
         }
 
 
 
         public async Task<List<EnvironmentUser>> QueryEnvironmentUsersAsync(string searchText, int environmentId, int pageIndex, int pageSize)
         {
-            List<EnvironmentUser> returnResult = new List<EnvironmentUser>();
-            if (string.IsNullOrWhiteSpace((searchText ?? "").Trim()))
-            {
-                QueryDefinition queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentUser' offset @offsetNumber limit @pageSize")
-                  .WithParameter("@environmentId", environmentId)
-                  .WithParameter("@offsetNumber", pageIndex * pageSize)
-                  .WithParameter("@pageSize", pageSize);
-                using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
-                {
-                    while (feedIterator.HasMoreResults)
-                    {
-                        Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                        foreach (var item in response)
-                        {
-                            returnResult.Add(item.ToObject<EnvironmentUser>());
-                        }
-                    }
-                }
-                return returnResult;
-            }
-            else
-            {
-                QueryDefinition queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentUser' and (f.Name like '%" + searchText + "%' or f.KeyId like '%" + searchText + "')")
-                    .WithParameter("@environmentId", environmentId)
-                    .WithParameter("@searchText", searchText);
-                using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
-                {
-                    while (feedIterator.HasMoreResults)
-                    {
-                        Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                        foreach (var item in response)
-                        {
-                            returnResult.Add(item.ToObject<EnvironmentUser>());
-                        }
-                    }
-                }
-                return returnResult;
-            }
+            return await _mongoEnvironmentUsersService.SearchAsync(searchText, environmentId, pageIndex, pageSize);
         }
 
         public async Task<EnvironmentUserProperty> GetEnvironmentUserPropertiesForCRUDAsync(int environmentId)
         {
-            string id = FeatureFlagKeyExtension.GetEnvironmentUserPropertyId(environmentId);
             try
             {
-                return await this._container.ReadItemAsync<EnvironmentUserProperty>(id, new PartitionKey(id));
+                return await _mongoEnvironmentUserPropertiesService.GetByEnvironmentIdAsync(environmentId);
             }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (MongoException ex)
             {
-                return new EnvironmentUserProperty()
-                {
-                    EnvironmentId = environmentId,
-                    Id = id,
-                    Properties = new List<string>()
-                };
+                return null;
             }
         }
 
         public async Task CreateOrUpdateEnvironmentUserPropertiesForCRUDAsync(EnvironmentUserProperty param)
         {
             string id = FeatureFlagKeyExtension.GetEnvironmentUserPropertyId(param.EnvironmentId);
-            await this._container.UpsertItemAsync<EnvironmentUserProperty>(new EnvironmentUserProperty
+            await _mongoEnvironmentUserPropertiesService.UpdateAsync(id, new EnvironmentUserProperty
             {
                 Id = id,
                 EnvironmentId = param.EnvironmentId,
                 Properties = param.Properties,
                 ObjectType = param.ObjectType
             });
+            //await this._container.UpsertItemAsync<EnvironmentUserProperty>(new EnvironmentUserProperty
+            //{
+            //    Id = id,
+            //    EnvironmentId = param.EnvironmentId,
+            //    Properties = param.Properties,
+            //    ObjectType = param.ObjectType
+            //});
         }
 
         public async Task UpsertEnvironmentUserAsync(EnvironmentUser param)
         {
-            await this._container.UpsertItemAsync<EnvironmentUser>(param);
+            await _mongoEnvironmentUsersService.UpsertAsync(param);
         }
 
 
         public async Task<List<PrequisiteFeatureFlagViewModel>> SearchPrequisiteFeatureFlagsAsync(int environmentId, string searchText = "", int pageIndex = 0, int pageSize = 20)
         {
-
             var returnResult = new List<PrequisiteFeatureFlagViewModel>();
-            QueryDefinition queryDefinition = null;
-            if (string.IsNullOrWhiteSpace((searchText ?? "").Trim()))
+            var ffs = await _mongoFeatureFlagsService.SearchAsync(searchText, environmentId, pageIndex, pageSize);
+            foreach(var ff in ffs)
             {
-                queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.IsArchived != true and f.ObjectType = 'FeatureFlag' offset @offsetNumber limit @pageSize")
-                    .WithParameter("@environmentId", environmentId)
-                    .WithParameter("@offsetNumber", pageIndex * pageSize)
-                    .WithParameter("@pageSize", pageSize);
-               
-            }
-            else
-            {
-                queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.IsArchived != true and f.ObjectType = 'FeatureFlag' and f.FF.Name like '%" + searchText + "%'  offset @offsetNumber limit @pageSize")
-                    .WithParameter("@environmentId", environmentId)
-                    .WithParameter("@offsetNumber", pageIndex * pageSize)
-                    .WithParameter("@pageSize", pageSize)
-                    .WithParameter("@searchText", searchText);
-            }
-            using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
-            {
-                while (feedIterator.HasMoreResults)
+                returnResult.Add(new PrequisiteFeatureFlagViewModel()
                 {
-                    Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                    foreach (var item in response)
-                    {
-                        FeatureFlag ff = item.ToObject<FeatureFlag>();
-                        returnResult.Add(new PrequisiteFeatureFlagViewModel()
-                        {
-                            EnvironmentId = environmentId,
-                            Id = ff.Id,
-                            KeyName = ff.FF.KeyName,
-                            Name = ff.FF.Name,
-                            VariationOptions = ff.VariationOptions
-                        });
-                    }
-                }
+                    EnvironmentId = environmentId,
+                    Id = ff.Id,
+                    KeyName = ff.FF.KeyName,
+                    Name = ff.FF.Name,
+                    VariationOptions = ff.VariationOptions
+                });
             }
-
-
             return returnResult;
         }
     }

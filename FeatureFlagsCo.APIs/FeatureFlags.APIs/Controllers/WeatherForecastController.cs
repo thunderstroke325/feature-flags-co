@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
+using FeatureFlags.APIs.Services;
+using FeatureFlags.APIs.ViewModels;
 using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,34 +30,47 @@ namespace FeatureFlags.APIs.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly IDistributedCache _redisCache;
-
+        private readonly IInsighstRabbitMqService _rabbitmqInsightsService;
+        private readonly INoSqlService _noSqlService;
 
         //private readonly ILaunchDarklyService _ldService;
 
         public WeatherForecastController(ILogger<WeatherForecastController> logger,
-            IDistributedCache redisCache)
+            IDistributedCache redisCache,
+            IInsighstRabbitMqService rabbitmqInsightsService,
+            INoSqlService noSqlService)
             //ILaunchDarklyService ldService)
         {
             _logger = logger;
             _redisCache = redisCache;
-            //_ldService = ldService;
+            _rabbitmqInsightsService = rabbitmqInsightsService;
+            _noSqlService = noSqlService;
         }
 
-        //[HttpGet]
-        //public IEnumerable<WeatherForecast> Get()
-        //{
-        //    var a= _redisCache.GetString("a");
-        //    _redisCache.SetString("a", "cccefeg");
-        //    a = _redisCache.GetString("a");
-        //    var rng = new Random();
-        //    return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        //    {
-        //        Date = DateTime.Now.AddDays(index),
-        //        TemperatureC = rng.Next(-20, 55),
-        //        Summary = Summaries[rng.Next(Summaries.Length)]
-        //    })
-        //    .ToArray();
-        //}
+        [HttpGet]
+        [Route("CreateMockMongoFeatureFlag")]
+        public async Task<JsonResult> CreateMockMongoFeatureFlag()
+        {
+            var guid = Guid.NewGuid().ToString();
+            FeatureFlag newFF = null;
+            try
+            {
+                newFF = await _noSqlService.CreateFeatureFlagAsync(new CreateFeatureFlagViewModel
+                {
+                    CreatorUserId = "",
+                    EnvironmentId = -1,
+                    KeyName = guid,
+                    Name = guid,
+                    Status = FeatureFlagStatutEnum.Enabled.ToString(),
+                    Id = FeatureFlagKeyExtension.GetFeatureFlagId(guid, "-1")
+                }, "", -1, -1);
+            }
+            catch(Exception exp)
+            {
+
+            }
+            return new JsonResult(newFF);
+        }
 
         [HttpPost]
         [Route("redistest")]
@@ -91,7 +106,27 @@ namespace FeatureFlags.APIs.Controllers
         [Route("ReturnTest200")]
         public JsonResult ReturnTest200()
         {
+            var date = Guid.NewGuid().ToString();
+            var customizedTraceProperties = new Dictionary<string, object>()
+            {
+                ["envId"] = "param.FeatureFlagKeyName",
+                ["accountId"] = "param.FeatureFlagKeyName",
+                ["projectId"] = "param.FeatureFlagKeyName",
+                ["userKeyName"] = "param.FeatureFlagKeyName",
+                ["serializedParam"] = "serializedParam"
+            };
+            _redisCache.SetString(date, JsonConvert.SerializeObject(customizedTraceProperties));
+            _redisCache.GetString(date);
             Response.StatusCode = 200;
+            _rabbitmqInsightsService.SendMessage(new FeatureFlagsCo.RabbitMqModels.MessageModel
+            {
+                Labels = new List<FeatureFlagsCo.RabbitMqModels.MessageLabel>()
+                 {
+                     new FeatureFlagsCo.RabbitMqModels.MessageLabel{ LabelName = "email", LabelValue = "hu-beau@outlook.com"},
+                     new FeatureFlagsCo.RabbitMqModels.MessageLabel{ LabelName = "timestamp", LabelValue = DateTime.UtcNow.ToLongDateString()}
+                 },
+                Message = "Very very Very very Very very Very very Very very Very very long message."
+            });
             return new JsonResult(new VariationOption());
         }
 
@@ -110,13 +145,6 @@ namespace FeatureFlags.APIs.Controllers
             return "true";
         }
 
-
-        //[HttpGet]
-        //[Route("ldtest")]
-        //public bool LDTest()
-        //{
-        //    return _ldService.GetVariation("new-feature");
-        //}
 
         [HttpGet]
         [Route("probe")]

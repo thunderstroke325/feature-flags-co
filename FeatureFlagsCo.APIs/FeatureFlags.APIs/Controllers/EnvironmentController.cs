@@ -36,7 +36,7 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpGet]
         [Route("GetEnvironmentUserProperties/{environmentId}")]
-        public async Task<CosmosDBEnvironmentUserProperty> GetCosmosDBEnvironmentUserPropertiesForCRUDAsync(int environmentId)
+        public async Task<EnvironmentUserProperty> GetCosmosDBEnvironmentUserPropertiesForCRUDAsync(int environmentId)
         {
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, environmentId))
@@ -48,7 +48,7 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("CreateOrUpdateCosmosDBEnvironmentUserProperties")]
-        public async Task CreateOrUpdateCosmosDBEnvironmentUserPropertiesForCRUDAsync([FromBody]CosmosDBEnvironmentUserProperty param)
+        public async Task CreateOrUpdateCosmosDBEnvironmentUserPropertiesForCRUDAsync([FromBody]EnvironmentUserProperty param)
         {
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvironmentId))

@@ -8,7 +8,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevOps", "DevOps", "{56DC81
 		.dockerignore = .dockerignore
 		azure-pipelines-kubernetes.yml = azure-pipelines-kubernetes.yml
 		azure-pipelines.yml = azure-pipelines.yml
+		docker-compose.yaml = docker-compose.yaml
 		Dockerfile = Dockerfile
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFs.SDKs", "FFs.SDKs.CSharp\FFs.SDKs.csproj", "{8694A02D-B811-40F2-9BFC-47966C86E9C5}"
@@ -16,6 +18,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs", "FeatureFlags.APIs\FeatureFlags.APIs.csproj", "{DB0AA70E-2760-4AAC-8832-CB6E2337324C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs.Tests", "FeatureFlagsCo.APIs.Tests\FeatureFlags.APIs.Tests.csproj", "{DD752E1F-1CD8-4D0C-88EF-44D8A9B37844}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlagsCo.RabbitMQToGrafanaLoki", "FeatureFlagsCo.RabbitMQToGrafanaLoki\FeatureFlagsCo.RabbitMQToGrafanaLoki.csproj", "{384BCC44-8BE0-4F0B-A50A-CBF4A5CC925F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlagsCo.RabbitMqModels", "FeatureFlagsCo.RabbitMqModels\FeatureFlagsCo.RabbitMqModels.csproj", "{8556E1A2-D2ED-44E6-98E8-78D813F1E094}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +41,14 @@ Global
 		{DD752E1F-1CD8-4D0C-88EF-44D8A9B37844}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD752E1F-1CD8-4D0C-88EF-44D8A9B37844}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD752E1F-1CD8-4D0C-88EF-44D8A9B37844}.Release|Any CPU.Build.0 = Release|Any CPU
+		{384BCC44-8BE0-4F0B-A50A-CBF4A5CC925F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{384BCC44-8BE0-4F0B-A50A-CBF4A5CC925F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{384BCC44-8BE0-4F0B-A50A-CBF4A5CC925F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{384BCC44-8BE0-4F0B-A50A-CBF4A5CC925F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8556E1A2-D2ED-44E6-98E8-78D813F1E094}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8556E1A2-D2ED-44E6-98E8-78D813F1E094}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8556E1A2-D2ED-44E6-98E8-78D813F1E094}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8556E1A2-D2ED-44E6-98E8-78D813F1E094}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

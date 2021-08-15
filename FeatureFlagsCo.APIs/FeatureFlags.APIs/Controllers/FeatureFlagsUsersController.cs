@@ -24,7 +24,7 @@ namespace FeatureFlags.APIs.Controllers
         private readonly ILogger<FeatureFlagsUsersController> _logger;
         private readonly IDistributedCache _redisCache;
         private readonly IFeatureFlagsService _ffService;
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly INoSqlService _nosqlDBService;
         private readonly IEnvironmentService _envService;
 
         public FeatureFlagsUsersController(
@@ -32,14 +32,14 @@ namespace FeatureFlags.APIs.Controllers
             IGenericRepository repository,
             IDistributedCache redisCache,
             IFeatureFlagsService ffService,
-            ICosmosDbService cosmosDbService,
+            INoSqlService cosmosDbService,
             IEnvironmentService envService)
         {
             _logger = logger;
             _repository = repository;
             _redisCache = redisCache;
             _ffService = ffService;
-            _cosmosDbService = cosmosDbService;
+            _nosqlDBService = cosmosDbService;
             _envService = envService;
         }
 
@@ -58,25 +58,16 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpGet]
         [Route("GetFeatureFlagUser/{id}")]
-        public async Task<CosmosDBEnvironmentFeatureFlagUser> GetFeatureFlagUser(string id)
+        public async Task<EnvironmentFeatureFlagUser> GetFeatureFlagUser(string id)
         {
-            return await _cosmosDbService.GetEnvironmentFeatureFlagUserAsync(id);
+            return await _nosqlDBService.TrueFalseStatusGetEnvironmentFeatureFlagUserAsync(id);
         }
 
         [HttpGet]
         [Route("GetEnvironmentUser/{id}")]
-        public async Task<CosmosDBEnvironmentUser> GetEnvironmentUser(string id)
+        public async Task<EnvironmentUser> GetEnvironmentUser(string id)
         {
-            return await _cosmosDbService.GetEnvironmentUserAsync(id);
-        }
-
-
-        [HttpGet]
-        [AllowAnonymous]
-        [Route("CreateEnvironmentUsers")]
-        public async Task CreateEnvironmentUsers()
-        {
-            await _cosmosDbService.CreateEnvrionmentUserForPerformanceTest();
+            return await _nosqlDBService.GetEnvironmentUserAsync(id);
         }
     }
 }

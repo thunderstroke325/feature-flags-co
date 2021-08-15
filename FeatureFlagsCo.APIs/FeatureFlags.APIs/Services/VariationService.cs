@@ -20,10 +20,10 @@ namespace FeatureFlags.APIs.Repositories
 {
     public interface IVariationService
     {
-        Task<Tuple<bool?, bool>> CheckVariableAsync(string environmentSecret, string featureFlagKeyName, CosmosDBEnvironmentUser ffUser,
+        Task<Tuple<bool?, bool>> TrueFalseStatusCheckVariableAsync(string environmentSecret, string featureFlagKeyName, EnvironmentUser ffUser,
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVM);
 
-        Task<Tuple<VariationOption, bool>> CheckMultiOptionVariationAsync(string environmentSecret, string featureFlagKeyName, CosmosDBEnvironmentUser ffUser,
+        Task<Tuple<VariationOption, bool>> CheckMultiOptionVariationAsync(string environmentSecret, string featureFlagKeyName, EnvironmentUser ffUser,
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVM);
 
         bool IfBelongRolloutPercentage(string userFFKeyId, double[] rolloutPercentageRange);
@@ -32,37 +32,36 @@ namespace FeatureFlags.APIs.Repositories
     public class VariationService : IVariationService
     {
         private readonly IDistributedCache _redisCache;
-        private readonly ICosmosDbService _cosmosDbService;
+        private readonly INoSqlService _nosqlDbService;
 
         public VariationService(
-            IGenericRepository repository,
             IDistributedCache redisCache,
-            ICosmosDbService cosmosDbService)
+            INoSqlService nosqlDbService)
         {
             _redisCache = redisCache;
-            _cosmosDbService = cosmosDbService;
+            _nosqlDbService = nosqlDbService;
         }
 
         #region true false variation
-        public async Task<Tuple<bool?, bool>> CheckVariableAsync(string environmentSecret, string featureFlagKeyName, CosmosDBEnvironmentUser environmentUser,
+        public async Task<Tuple<bool?, bool>> TrueFalseStatusCheckVariableAsync(string environmentSecret, string featureFlagKeyName, EnvironmentUser environmentUser,
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
         {
             string featureFlagId = ffIdVM.FeatureFlagId;
 
             int environmentId = Convert.ToInt32(ffIdVM.EnvId);
             environmentUser.EnvironmentId = environmentId;
-            environmentUser.id = FeatureFlagKeyExtension.GetEnvironmentUserId(environmentId, environmentUser.KeyId);
+            environmentUser.Id = FeatureFlagKeyExtension.GetEnvironmentUserId(environmentId, environmentUser.KeyId);
 
             bool readOnlyOperation = true;
 
             // get feature flag info
             var featureFlagString = await _redisCache.GetStringAsync(featureFlagId);
-            CosmosDBFeatureFlag featureFlag = null;
+            FeatureFlag featureFlag = null;
             if (!string.IsNullOrWhiteSpace(featureFlagString))
-                featureFlag = JsonConvert.DeserializeObject<CosmosDBFeatureFlag>(featureFlagString);
+                featureFlag = JsonConvert.DeserializeObject<FeatureFlag>(featureFlagString);
             else
             {
-                featureFlag = await _cosmosDbService.GetFeatureFlagAsync(featureFlagId);
+                featureFlag = await _nosqlDbService.GetFeatureFlagAsync(featureFlagId);
                 await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
                 readOnlyOperation = false;
             }
@@ -70,16 +69,16 @@ namespace FeatureFlags.APIs.Repositories
             // get environment feature flag user info
             var featureFlagUserMappingId = FeatureFlagKeyExtension.GetFeatureFlagUserId(featureFlagId, environmentUser.KeyId);
             var featureFlagsUserMappingString = await _redisCache.GetStringAsync(featureFlagUserMappingId);
-            CosmosDBEnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = null;
+            EnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = null;
 
             if (!string.IsNullOrWhiteSpace(featureFlagsUserMappingString))
             {
-                cosmosDBFeatureFlagsUser = JsonConvert.DeserializeObject<CosmosDBEnvironmentFeatureFlagUser>(featureFlagsUserMappingString);
+                cosmosDBFeatureFlagsUser = JsonConvert.DeserializeObject<EnvironmentFeatureFlagUser>(featureFlagsUserMappingString);
                 if (featureFlag.FF.LastUpdatedTime == null || cosmosDBFeatureFlagsUser.LastUpdatedTime == null ||
                 featureFlag.FF.LastUpdatedTime.Value.CompareTo(cosmosDBFeatureFlagsUser.LastUpdatedTime.Value) > 0)
                 {
                     // comosdb 4000 - 处理425个请求 / 秒 - 在RedoMatchingAndUpdateToRedisCacheAsync之前
-                    cosmosDBFeatureFlagsUser = await RedoVariationServiceAsync(
+                    cosmosDBFeatureFlagsUser = await TrueFalseStatusRedoVariationServiceAsync(
                                                         environmentUser,
                                                         featureFlagId,
                                                         featureFlagUserMappingId,
@@ -92,11 +91,11 @@ namespace FeatureFlags.APIs.Repositories
             {
                 if (!string.IsNullOrWhiteSpace(featureFlagString))
                 {
-                    featureFlag = await _cosmosDbService.GetFeatureFlagAsync(featureFlagId);
+                    featureFlag = await _nosqlDbService.GetFeatureFlagAsync(featureFlagId);
                     await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
                 }
 
-                cosmosDBFeatureFlagsUser = await RedoVariationServiceAsync(
+                cosmosDBFeatureFlagsUser = await TrueFalseStatusRedoVariationServiceAsync(
                                                     environmentUser,
                                                     featureFlagId,
                                                     featureFlagUserMappingId,
@@ -110,30 +109,30 @@ namespace FeatureFlags.APIs.Repositories
             return new Tuple<bool?, bool>(cosmosDBFeatureFlagsUser.ResultValue, false);
         }
 
-        public async Task<CosmosDBEnvironmentFeatureFlagUser> RedoVariationServiceAsync(
-            CosmosDBEnvironmentUser environmentUser,
+        public async Task<EnvironmentFeatureFlagUser> TrueFalseStatusRedoVariationServiceAsync(
+            EnvironmentUser environmentUser,
             string featureFlagId,
             string featureFlagUserMappingId,
-            CosmosDBFeatureFlag featureFlag)
+            FeatureFlag featureFlag)
         {
-            CosmosDBEnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = await RedoMatchingAndUpdateToRedisCacheAsync(
+            EnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = await TrueFalseStatusRedoMatchingAndUpdateToRedisCacheAsync(
                 featureFlagId, featureFlagUserMappingId, featureFlag, environmentUser);
 
-            await _cosmosDbService.UpdateCosmosDBFeatureFlagAsync(featureFlag);
+            await _nosqlDbService.UpdateFeatureFlagAsync(featureFlag);
 
             return cosmosDBFeatureFlagsUser;
         }
 
-        private async Task<CosmosDBEnvironmentFeatureFlagUser> RedoMatchingAndUpdateToRedisCacheAsync(
+        private async Task<EnvironmentFeatureFlagUser> TrueFalseStatusRedoMatchingAndUpdateToRedisCacheAsync(
             string featureFlagId,
             string environmentFeatureFlagUserId,
-            CosmosDBFeatureFlag featureFlag,
-            CosmosDBEnvironmentUser environmentUser)
+            FeatureFlag featureFlag,
+            EnvironmentUser environmentUser)
         {
-            CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser = await _cosmosDbService.GetEnvironmentFeatureFlagUserAsync(environmentFeatureFlagUserId);
+            EnvironmentFeatureFlagUser environmentFeatureFlagUser = await _nosqlDbService.TrueFalseStatusGetEnvironmentFeatureFlagUserAsync(environmentFeatureFlagUserId);
             if (environmentFeatureFlagUser == null)
             {
-                environmentFeatureFlagUser = new CosmosDBEnvironmentFeatureFlagUser
+                environmentFeatureFlagUser = new EnvironmentFeatureFlagUser
                 {
                     FeatureFlagId = featureFlagId,
                     EnvironmentId = environmentUser.EnvironmentId,
@@ -141,27 +140,22 @@ namespace FeatureFlags.APIs.Repositories
                 };
                 environmentFeatureFlagUser.LastUpdatedTime = DateTime.UtcNow;
                 environmentFeatureFlagUser.ResultValue = await GetUserVariationResultAsync(featureFlag, environmentUser, environmentFeatureFlagUser);
-                await _cosmosDbService.AddCosmosDBEnvironmentFeatureFlagUserAsync(environmentFeatureFlagUser);
+                await _nosqlDbService.TrueFalseStatusAddEnvironmentFeatureFlagUserAsync(environmentFeatureFlagUser);
             }
             else
             {
                 environmentFeatureFlagUser.LastUpdatedTime = DateTime.UtcNow;
                 environmentFeatureFlagUser.ResultValue = await GetUserVariationResultAsync(featureFlag, environmentUser, environmentFeatureFlagUser);
-                await _cosmosDbService.UpdateItemAsync(environmentFeatureFlagUser.id, environmentFeatureFlagUser);
+                await _nosqlDbService.TrueFalseStatusUpdateItemAsync(environmentFeatureFlagUser.id, environmentFeatureFlagUser);
             }
 
             await _redisCache.SetStringAsync(environmentFeatureFlagUserId, JsonConvert.SerializeObject(environmentFeatureFlagUser));
             return environmentFeatureFlagUser;
         }
 
-        private async Task<CosmosDBEnvironmentUser> UpsertEnvironmentUserAsync(CosmosDBEnvironmentUser wsUser, int environmentId)
-        {
-            await _cosmosDbService.UpsertEnvironmentUserAsync(wsUser);
-            return wsUser;
-        }
 
-        public async Task<bool?> GetUserVariationResultAsync(CosmosDBFeatureFlag cosmosDBFeatureFlag, CosmosDBEnvironmentUser featureFlagsUser,
-            CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser)
+        public async Task<bool?> GetUserVariationResultAsync(FeatureFlag cosmosDBFeatureFlag, EnvironmentUser featureFlagsUser,
+            EnvironmentFeatureFlagUser environmentFeatureFlagUser)
         {
             var wsId = cosmosDBFeatureFlag.EnvironmentId;
             //var environment = await _dbContext.Environments.FirstOrDefaultAsync(p => p.Id == wsId);
@@ -174,7 +168,7 @@ namespace FeatureFlags.APIs.Repositories
             {
                 if (ffPItem.PrerequisiteFeatureFlagId != cosmosDBFeatureFlag.FF.Id)
                 {
-                    var newFF = await _cosmosDbService.GetItemAsync(ffPItem.PrerequisiteFeatureFlagId);
+                    var newFF = await _nosqlDbService.TrueFalseStatusGetItemAsync(ffPItem.PrerequisiteFeatureFlagId);
                     var ffPResult = await GetUserVariationResultAsync(newFF, featureFlagsUser, environmentFeatureFlagUser);
                     if (ffPResult.Value != ffPItem.VariationValue)
                         return cosmosDBFeatureFlag.FF.ValueWhenDisabled ?? false;
@@ -191,7 +185,7 @@ namespace FeatureFlags.APIs.Repositories
 
             // 判断Match Rules
             var ffUserCustomizedProperties = featureFlagsUser.CustomizedProperties ?? new List<FeatureFlagUserCustomizedProperty>();
-            var ffTargetUsersWhoMatchRules = cosmosDBFeatureFlag.FFTUWMTR ?? new List<CosmosDBFeatureFlagTargetUsersWhoMatchTheseRuleParam>();
+            var ffTargetUsersWhoMatchRules = cosmosDBFeatureFlag.FFTUWMTR ?? new List<FeatureFlagTargetUsersWhoMatchTheseRuleParam>();
             var ruleMatchResult = GetUserVariationRuleMatchResult(
                 cosmosDBFeatureFlag,
                 featureFlagsUser, 
@@ -213,9 +207,9 @@ namespace FeatureFlags.APIs.Repositories
         }
 
         private bool? GetUserVariationRuleMatchResult(
-            CosmosDBFeatureFlag cosmosDBFeatureFlag,
-            CosmosDBEnvironmentUser ffUser, 
-            CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser)
+            FeatureFlag cosmosDBFeatureFlag,
+            EnvironmentUser ffUser, 
+            EnvironmentFeatureFlagUser environmentFeatureFlagUser)
         {
             foreach (var ffTUWMRItem in cosmosDBFeatureFlag.FFTUWMTR)
             {
@@ -556,7 +550,7 @@ namespace FeatureFlags.APIs.Repositories
             return null;
         }
 
-        private void SetPercentageAndResultWhenTrue(CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser, CosmosDBFeatureFlagTargetUsersWhoMatchTheseRuleParam ffTUWMRItem)
+        private void SetPercentageAndResultWhenTrue(EnvironmentFeatureFlagUser environmentFeatureFlagUser, FeatureFlagTargetUsersWhoMatchTheseRuleParam ffTUWMRItem)
         {
             if (environmentFeatureFlagUser.ResultValue == false &&
                 environmentFeatureFlagUser.PercentageRolloutBasedRuleId == ffTUWMRItem.RuleId)
@@ -579,7 +573,7 @@ namespace FeatureFlags.APIs.Repositories
             }
         }
 
-        private void SetPercentageAndResultWhenFalse(CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser, CosmosDBFeatureFlagTargetUsersWhoMatchTheseRuleParam ffTUWMRItem)
+        private void SetPercentageAndResultWhenFalse(EnvironmentFeatureFlagUser environmentFeatureFlagUser, FeatureFlagTargetUsersWhoMatchTheseRuleParam ffTUWMRItem)
         {
             if (environmentFeatureFlagUser.ResultValue == true &&
                 environmentFeatureFlagUser.PercentageRolloutBasedRuleId == ffTUWMRItem.RuleId)
@@ -603,8 +597,8 @@ namespace FeatureFlags.APIs.Repositories
         }
 
         private bool? GetUserVariationDefaultRulePercentageResult(
-            CosmosDBFeatureFlag ffParam, CosmosDBEnvironmentUser featureFlagsUser,
-            CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser)
+            FeatureFlag ffParam, EnvironmentUser featureFlagsUser,
+            EnvironmentFeatureFlagUser environmentFeatureFlagUser)
         {
             if (ffParam.FF.PercentageRolloutForFalse != null && ffParam.FF.PercentageRolloutForTrue != null)
             {
@@ -670,24 +664,24 @@ namespace FeatureFlags.APIs.Repositories
 
         #region Multi Options
         public async Task<Tuple<VariationOption, bool>> CheckMultiOptionVariationAsync(
-            string environmentSecret, string featureFlagKeyName, CosmosDBEnvironmentUser environmentUser, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
+            string environmentSecret, string featureFlagKeyName, EnvironmentUser environmentUser, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
         {
             string featureFlagId = ffIdVM.FeatureFlagId;
 
             int environmentId = Convert.ToInt32(ffIdVM.EnvId);
             environmentUser.EnvironmentId = environmentId;
-            environmentUser.id = FeatureFlagKeyExtension.GetEnvironmentUserId(environmentId, environmentUser.KeyId);
+            environmentUser.Id = FeatureFlagKeyExtension.GetEnvironmentUserId(environmentId, environmentUser.KeyId);
 
             bool readOnlyOperation = true;
 
             // get feature flag info
             var featureFlagString = await _redisCache.GetStringAsync(featureFlagId);
-            CosmosDBFeatureFlag featureFlag = null;
+            FeatureFlag featureFlag = null;
             if (!string.IsNullOrWhiteSpace(featureFlagString))
-                featureFlag = JsonConvert.DeserializeObject<CosmosDBFeatureFlag>(featureFlagString);
+                featureFlag = JsonConvert.DeserializeObject<FeatureFlag>(featureFlagString);
             else
             {
-                featureFlag = await _cosmosDbService.GetFeatureFlagAsync(featureFlagId);
+                featureFlag = await _nosqlDbService.GetFeatureFlagAsync(featureFlagId);
                 await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
                 readOnlyOperation = false;
             }
@@ -695,11 +689,11 @@ namespace FeatureFlags.APIs.Repositories
             // get environment feature flag user info
             var featureFlagUserMappingId = FeatureFlagKeyExtension.GetFeatureFlagUserId(featureFlagId, environmentUser.KeyId);
             var featureFlagsUserMappingString = await _redisCache.GetStringAsync(featureFlagUserMappingId);
-            CosmosDBEnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = null;
+            EnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = null;
 
             if (!string.IsNullOrWhiteSpace(featureFlagsUserMappingString))
             {
-                cosmosDBFeatureFlagsUser = JsonConvert.DeserializeObject<CosmosDBEnvironmentFeatureFlagUser>(featureFlagsUserMappingString);                
+                cosmosDBFeatureFlagsUser = JsonConvert.DeserializeObject<EnvironmentFeatureFlagUser>(featureFlagsUserMappingString);                
 
                 if (featureFlag.FF.LastUpdatedTime != null && cosmosDBFeatureFlagsUser.LastUpdatedTime != null &&
                     featureFlag.FF.LastUpdatedTime.Value.CompareTo(cosmosDBFeatureFlagsUser.LastUpdatedTime.Value) <= 0)
@@ -729,15 +723,15 @@ namespace FeatureFlags.APIs.Repositories
             return new Tuple<VariationOption, bool>(cosmosDBFeatureFlagsUser.VariationOptionResultValue, false);
         }
 
-        private async Task<CosmosDBEnvironmentFeatureFlagUser> MultiOptionRedoMatchingAndUpdateToRedisCacheAsync(
+        private async Task<EnvironmentFeatureFlagUser> MultiOptionRedoMatchingAndUpdateToRedisCacheAsync(
            string featureFlagId,
            string environmentFeatureFlagUserId,
-           CosmosDBFeatureFlag featureFlag,
-           CosmosDBEnvironmentUser environmentUser,
+           FeatureFlag featureFlag,
+           EnvironmentUser environmentUser,
            string environmentSecret,
            FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
         {
-            CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser = new CosmosDBEnvironmentFeatureFlagUser
+            EnvironmentFeatureFlagUser environmentFeatureFlagUser = new EnvironmentFeatureFlagUser
                 {
                     FeatureFlagId = featureFlagId,
                     EnvironmentId = environmentUser.EnvironmentId,
@@ -751,9 +745,9 @@ namespace FeatureFlags.APIs.Repositories
         }
 
         public async Task<VariationOption> MultiOptionGetUserVariationResultAsync(
-            CosmosDBFeatureFlag cosmosDBFeatureFlag, 
-            CosmosDBEnvironmentUser environmentUser,
-            CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser,
+            FeatureFlag cosmosDBFeatureFlag, 
+            EnvironmentUser environmentUser,
+            EnvironmentFeatureFlagUser environmentFeatureFlagUser,
             string environmentSecret,
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
         {
@@ -794,7 +788,7 @@ namespace FeatureFlags.APIs.Repositories
 
             // 判断Match Rules
             var ffUserCustomizedProperties = environmentUser.CustomizedProperties ?? new List<FeatureFlagUserCustomizedProperty>();
-            var ffTargetUsersWhoMatchRules = cosmosDBFeatureFlag.FFTUWMTR ?? new List<CosmosDBFeatureFlagTargetUsersWhoMatchTheseRuleParam>();
+            var ffTargetUsersWhoMatchRules = cosmosDBFeatureFlag.FFTUWMTR ?? new List<FeatureFlagTargetUsersWhoMatchTheseRuleParam>();
             var ruleMatchResult = MultiOptionGetUserVariationRuleMatchResult(
                 cosmosDBFeatureFlag,
                 environmentUser,
@@ -816,9 +810,9 @@ namespace FeatureFlags.APIs.Repositories
         }
 
         private VariationOption MultiOptionGetUserVariationRuleMatchResult(
-          CosmosDBFeatureFlag cosmosDBFeatureFlag,
-          CosmosDBEnvironmentUser ffUser,
-          CosmosDBEnvironmentFeatureFlagUser environmentFeatureFlagUser)
+          FeatureFlag cosmosDBFeatureFlag,
+          EnvironmentUser ffUser,
+          EnvironmentFeatureFlagUser environmentFeatureFlagUser)
         {
             foreach (var ffTUWMRItem in cosmosDBFeatureFlag.FFTUWMTR)
             {
@@ -1108,6 +1102,18 @@ namespace FeatureFlags.APIs.Repositories
         }
 
         #endregion
+
+
+        private async Task<EnvironmentUser> UpsertEnvironmentUserAsync(EnvironmentUser wsUser, int environmentId)
+        {
+            var oldWsUser = await _nosqlDbService.GetEnvironmentUserAsync(wsUser.Id);
+            if (oldWsUser != null && !string.IsNullOrWhiteSpace(oldWsUser._Id))
+            {
+                wsUser._Id = oldWsUser._Id;
+            }
+            await _nosqlDbService.UpsertEnvironmentUserAsync(wsUser);
+            return wsUser;
+        }
     }
 
 }
