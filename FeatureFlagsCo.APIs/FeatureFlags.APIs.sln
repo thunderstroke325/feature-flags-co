@@ -27,7 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{F6D7B3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-entrypoint-initdb.d", "docker-entrypoint-initdb.d", "{79688975-7633-45ED-BE06-67CA0E63E86F}"
 	ProjectSection(SolutionItems) = preProject
-		Docker\docker-entrypoint-initdb.d\mongo-init.js = Docker\docker-entrypoint-initdb.d\mongo-init.js
+		FeatureFlags.Docker\docker-entrypoint-initdb.d\mongo-init.js = FeatureFlags.Docker\docker-entrypoint-initdb.d\mongo-init.js
 	EndProjectSection
 EndProject
 Global
