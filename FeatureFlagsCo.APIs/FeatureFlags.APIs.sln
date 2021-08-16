@@ -5,10 +5,7 @@ VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevOps", "DevOps", "{56DC8120-F7DB-46B9-AF69-191037C1D42D}"
 	ProjectSection(SolutionItems) = preProject
-		.dockerignore = .dockerignore
-		azure-pipelines-kubernetes.yml = azure-pipelines-kubernetes.yml
 		azure-pipelines.yml = azure-pipelines.yml
-		docker-compose.yaml = docker-compose.yaml
 		Dockerfile = Dockerfile
 		README.md = README.md
 	EndProjectSection
@@ -19,9 +16,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs", "Featur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs.Tests", "FeatureFlagsCo.APIs.Tests\FeatureFlags.APIs.Tests.csproj", "{DD752E1F-1CD8-4D0C-88EF-44D8A9B37844}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlagsCo.RabbitMQToGrafanaLoki", "FeatureFlagsCo.RabbitMQToGrafanaLoki\FeatureFlagsCo.RabbitMQToGrafanaLoki.csproj", "{384BCC44-8BE0-4F0B-A50A-CBF4A5CC925F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.RabbitMQToGrafanaLoki", "FeatureFlagsCo.RabbitMQToGrafanaLoki\FeatureFlagsCo.RabbitMQToGrafanaLoki.csproj", "{384BCC44-8BE0-4F0B-A50A-CBF4A5CC925F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlagsCo.RabbitMqModels", "FeatureFlagsCo.RabbitMqModels\FeatureFlagsCo.RabbitMqModels.csproj", "{8556E1A2-D2ED-44E6-98E8-78D813F1E094}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.RabbitMqModels", "FeatureFlagsCo.RabbitMqModels\FeatureFlagsCo.RabbitMqModels.csproj", "{8556E1A2-D2ED-44E6-98E8-78D813F1E094}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{F6D7B3C0-BA14-4CD7-954D-4E3992461D37}"
+	ProjectSection(SolutionItems) = preProject
+		Docker\docker-compose.yaml = Docker\docker-compose.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-entrypoint-initdb.d", "docker-entrypoint-initdb.d", "{79688975-7633-45ED-BE06-67CA0E63E86F}"
+	ProjectSection(SolutionItems) = preProject
+		Docker\docker-entrypoint-initdb.d\mongo-init.js = Docker\docker-entrypoint-initdb.d\mongo-init.js
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +59,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F6D7B3C0-BA14-4CD7-954D-4E3992461D37} = {56DC8120-F7DB-46B9-AF69-191037C1D42D}
+		{79688975-7633-45ED-BE06-67CA0E63E86F} = {F6D7B3C0-BA14-4CD7-954D-4E3992461D37}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D9438C6D-E691-4012-A07F-96471322805E}
