@@ -1,8 +1,21 @@
 
-
-
-
+# Run Feature-Flags.co as a Product with Docker Compose
 docker-compose -f docker-compose.yaml up
+
+
+## Docker stack (working in progress)
+init stack
+`docker swarm init`
+
+run stack
+`SQL_PWD='YourSTRONG!Passw0rd' MONGODB_USER=admin MONGODB_PWD=password docker stack deploy --compose-file docker-compose.yaml feature-flags-co`
+
+remove stack
+`docker stack rm feature-flags-co`
+
+check published info
+`docker ps`
+docker service inspect --pretty 
 
 ## mongodb 
 ### Account:
@@ -30,14 +43,14 @@ count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])
 
 sum(count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])) by (userName)
 
-// ÏÂÃæÕâ¸ö¿ÉÒÔ¿´µ½, µ±variationÎªÄ³¸öÖµÊ±£¬Ê¹ÓÃµÄÓÃ»§ÊıÁ¿
+// ä¸‹é¢è¿™ä¸ªå¯ä»¥çœ‹åˆ°, å½“variationä¸ºæŸä¸ªå€¼æ—¶ï¼Œä½¿ç”¨çš„ç”¨æˆ·æ•°é‡
 count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[1d])))
 
-// ÏÂÃæÕâ¸ö¿ÉÒÔ¿´µ½, ²»¹ÜvariationÊ±£¬Ê¹ÓÃµÄÓÃ»§ÊıÁ¿
+// ä¸‹é¢è¿™ä¸ªå¯ä»¥çœ‹åˆ°, ä¸ç®¡variationæ—¶ï¼Œä½¿ç”¨çš„ç”¨æˆ·æ•°é‡
 count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1"}[1d])))
 
-// Ä³¸öff£¬Ä³¸ö×´Ì¬ÏÂµÄµ÷ÓÃÇé¿ö
+// æŸä¸ªffï¼ŒæŸä¸ªçŠ¶æ€ä¸‹çš„è°ƒç”¨æƒ…å†µ
 {featureFlagId="ff__2__3__a1",varaition="false"}
 
-// ºÜÆæ¹ÖµÄÍ¼Æ¬
+// å¾ˆå¥‡æ€ªçš„å›¾ç‰‡
 sum(count_over_time({featureFlagId="ff__2__3__a1"}[3h])) without(userName, varaition) 

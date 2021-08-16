@@ -73,11 +73,6 @@
     <Build Include="dbo\Tables\Workspaces.sql" />
     <Build Include="dbo\Tables\WorkspaceUserMappings.sql" />
     <Build Include="dbo\Tables\FeatureFlags.sql" />
-    <Build Include="dbo\Tables\FeatureFlagsUsers.sql" />
-    <Build Include="dbo\Tables\FeatureFlagTargetIndividualUsers.sql" />
-    <Build Include="dbo\Tables\FeatureFlagPrerequisites.sql" />
-    <Build Include="dbo\Tables\FeatureFlagTargetUsersWhoMatchTheseRules.sql" />
-    <Build Include="dbo\Tables\FeatureFlagUserPercentageRecords.sql" />
     <Build Include="dbo\Tables\Accounts.sql" />
     <Build Include="dbo\Tables\AccountUserMappings.sql" />
     <Build Include="dbo\Tables\Projects.sql" />

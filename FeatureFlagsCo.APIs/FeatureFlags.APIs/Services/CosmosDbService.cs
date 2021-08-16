@@ -433,7 +433,7 @@ namespace FeatureFlags.APIs.Services
             }
             else
             {
-                QueryDefinition queryDefinition = new QueryDefinition("select value count(1) from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentUser' and (f.Name like '%" + searchText + "%' or f.KeyId like '%" + searchText + "')")
+                QueryDefinition queryDefinition = new QueryDefinition("select value count(1) from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentUser' and (f.Name like '%@searchText%' or f.KeyId like '%@searchText%')")
                     .WithParameter("@environmentId", environmentId)
                     .WithParameter("@searchText", searchText);
                 using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
@@ -478,7 +478,7 @@ namespace FeatureFlags.APIs.Services
             }
             else
             {
-                QueryDefinition queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentUser' and (f.Name like '%" + searchText + "%' or f.KeyId like '%" + searchText + "')")
+                QueryDefinition queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentUser' and (f.Name like '%@searchText%' or f.KeyId like '%@searchText%')")
                     .WithParameter("@environmentId", environmentId)
                     .WithParameter("@searchText", searchText);
                 using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
@@ -547,7 +547,7 @@ namespace FeatureFlags.APIs.Services
             }
             else
             {
-                queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.IsArchived != true and f.ObjectType = 'FeatureFlag' and f.FF.Name like '%" + searchText + "%'  offset @offsetNumber limit @pageSize")
+                queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.IsArchived != true and f.ObjectType = 'FeatureFlag' and f.FF.Name like '%@searchText%'  offset @offsetNumber limit @pageSize")
                     .WithParameter("@environmentId", environmentId)
                     .WithParameter("@offsetNumber", pageIndex * pageSize)
                     .WithParameter("@pageSize", pageSize)

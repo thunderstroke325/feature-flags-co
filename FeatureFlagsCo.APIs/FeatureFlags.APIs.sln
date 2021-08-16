@@ -20,16 +20,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.RabbitMQToGr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.RabbitMqModels", "FeatureFlagsCo.RabbitMqModels\FeatureFlagsCo.RabbitMqModels.csproj", "{8556E1A2-D2ED-44E6-98E8-78D813F1E094}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{F6D7B3C0-BA14-4CD7-954D-4E3992461D37}"
-	ProjectSection(SolutionItems) = preProject
-		Docker\docker-compose.yaml = Docker\docker-compose.yaml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker-entrypoint-initdb.d", "docker-entrypoint-initdb.d", "{79688975-7633-45ED-BE06-67CA0E63E86F}"
-	ProjectSection(SolutionItems) = preProject
-		FeatureFlags.Docker\docker-entrypoint-initdb.d\mongo-init.js = FeatureFlags.Docker\docker-entrypoint-initdb.d\mongo-init.js
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,10 +49,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{F6D7B3C0-BA14-4CD7-954D-4E3992461D37} = {56DC8120-F7DB-46B9-AF69-191037C1D42D}
-		{79688975-7633-45ED-BE06-67CA0E63E86F} = {F6D7B3C0-BA14-4CD7-954D-4E3992461D37}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D9438C6D-E691-4012-A07F-96471322805E}
