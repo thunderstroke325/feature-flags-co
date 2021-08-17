@@ -5,8 +5,9 @@ Commands to execute:
 
     // docker-compose --env-file .env.dev config 
     // docker-compose --env-file .env config 
-    docker-compose config
-    docker-compose -f docker-compose.yaml up
+1. In project FeatureFlags.APIs, set `ASPNETCORE_ENVIRONMENT` to `Local`. Right click on project "FeatureFlags.APIs" -> click on "Properties" -> choose tab "Debug" -> In "Environment variables" section, set `ASPNETCORE_ENVIRONMENT` to `Local` -> Save
+2. `docker-compose config`
+3. `docker-compose -f docker-compose.yaml up`
 
 
 https://docs.docker.com/compose/environment-variables/
