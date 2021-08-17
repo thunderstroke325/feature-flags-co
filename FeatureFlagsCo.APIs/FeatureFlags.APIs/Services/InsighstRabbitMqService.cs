@@ -25,18 +25,21 @@ namespace FeatureFlags.APIs.Services
         public InsighstRabbitMqService(IOptions<MySettings> mySettings)
         {
             _mySettings = mySettings;
-            _connectionFactory = new ConnectionFactory() { HostName = _mySettings.Value.InsightsRabbitMqUrl };
-            _connection = _connectionFactory.CreateConnection();
-            _connection.CallbackException += Connection_CallbackException;
-            _connection.ConnectionShutdown += Connection_ConnectionShutdown;
-            _connection.ConnectionBlocked += Connection_ConnectionBlocked;
-            _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "hello",
-                                    durable: false,
-                                    exclusive: false,
-                                    autoDelete: false,
-                                    arguments: null);
-            _channel.CallbackException += Channel_CallbackException;
+            if(_mySettings.Value.HostingType == HostingTypeEnum.Local.ToString())
+            {
+                _connectionFactory = new ConnectionFactory() { HostName = _mySettings.Value.InsightsRabbitMqUrl };
+                _connection = _connectionFactory.CreateConnection();
+                _connection.CallbackException += Connection_CallbackException;
+                _connection.ConnectionShutdown += Connection_ConnectionShutdown;
+                _connection.ConnectionBlocked += Connection_ConnectionBlocked;
+                _channel = _connection.CreateModel();
+                _channel.QueueDeclare(queue: "hello",
+                                        durable: false,
+                                        exclusive: false,
+                                        autoDelete: false,
+                                        arguments: null);
+                _channel.CallbackException += Channel_CallbackException;
+            }
         }
 
         private void Channel_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)

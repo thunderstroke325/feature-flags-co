@@ -28,6 +28,9 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
     networks:
       - loki
 
@@ -35,12 +38,13 @@ services:
     image: rabbitmq:3.9-management
     container_name: rabbitmq
     restart: always
-    hostname: myRabbitmq
+    hostname: rabbitmq
     ports:
       - 15672:15672
       - 5672:5672
     volumes:
       - ./data:/var/lib/rabbitmq
+      # - ./docker-entrypoint-initdb.d/rabbitmq.conf:/var/lib/rabbitmq/rabbitmq.conf
 
   mongodb:
     image: mongo
@@ -48,19 +52,19 @@ services:
     ports:
       - 27017:27017
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_ADMINUSERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_ADMINPASSWORD}
       - MONGO_INITDB_DATABASE=featureflagsco
     volumes:
-      - ./mongodb/mongo-init.js:/mongodb/mongo-init.js:ro
+      - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
   mongo-express:
     image: mongo-express
     container_name: mongo-express
     ports:
       - 8081:8081
     environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGODB_ADMINUSERNAME}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGODB_ADMINPASSWORD}
       - ME_CONFIG_MONGODB_SERVER=mongodb
     restart: unless-stopped
 
@@ -73,12 +77,12 @@ services:
     volumes:
       - /var/opt/mssql
       # we copy our scripts onto the container
-      - ./sql:/usr/src/app 
+      - ./docker-entrypoint-initdb.d/sql:/usr/src/app 
     # bash will be executed from that path, our scripts folder
     working_dir: /usr/src/app 
     # run the entrypoint.sh that will import the data AND sqlserver
     command: sh -c ' chmod +x ./entrypoint.sh; ./entrypoint.sh & /opt/mssql/bin/sqlservr;'
     environment:
-      - SA_PASSWORD=YourSTRONG!Passw0rd
+      - SA_PASSWORD=${SQL_SA_PASSWORD}
       - ACCEPT_EULA=Y
       - MSSQL_PID=Express

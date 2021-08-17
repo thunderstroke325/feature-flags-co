@@ -149,7 +149,6 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddScoped<IVariationService, VariationService>();
             services.AddTransient<IAppInsightsService, AppInsightsService>();
 
-            services.AddSingleton<IInsighstRabbitMqService, InsighstRabbitMqService>();
 
             //if (CurrentEnvironment.EnvironmentName != "Development")
             //{
@@ -208,8 +207,11 @@ namespace FeatureFlags.AdminWebAPIs
                 services.AddSingleton<MongoDbEnvironmentUserService>();
                 services.AddSingleton<MongoDbEnvironmentUserPropertyService>();
                 services.AddSingleton<INoSqlService, MongoDbService>();
+
+
             }
-  
+
+            services.AddSingleton<IInsighstRabbitMqService, InsighstRabbitMqService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

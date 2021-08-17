@@ -1,23 +1,18 @@
 
 # Run Feature-Flags.co as a Product with Docker Compose
-docker-compose -f docker-compose.yaml up
+
+Commands to execute:
+
+    // docker-compose --env-file .env.dev config 
+    // docker-compose --env-file .env config 
+    docker-compose config
+    docker-compose -f docker-compose.yaml up
 
 
-## Docker stack (working in progress)
-init stack
-`docker swarm init`
-
-run stack
-`SQL_PWD='YourSTRONG!Passw0rd' MONGODB_USER=admin MONGODB_PWD=password docker stack deploy --compose-file docker-compose.yaml feature-flags-co`
-
-remove stack
-`docker stack rm feature-flags-co`
-
-check published info
-`docker ps`
-docker service inspect --pretty 
+https://docs.docker.com/compose/environment-variables/
 
 ## mongodb 
+https://newbedev.com/how-to-create-a-db-for-mongodb-container-on-start-up
 ### Account:
 admin secret
 ### Installation
