@@ -14,6 +14,7 @@ import { getAuth } from 'src/app/utils';
 import { ProjectService } from 'src/app/services/project.service';
 import { SwitchService } from 'src/app/services/switch.service';
 import { FfcAngularSdkService } from 'ffc-angular-sdk';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-main',
@@ -45,6 +46,8 @@ export class MainComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private ffcAngularSdkService: FfcAngularSdkService,
   ) {
+
+    if (environment.name === 'Production') {
       // setup the microsoft insights
       var angularPlugin = new AngularPlugin();
       const appInsights = new ApplicationInsights({ config: {
@@ -56,8 +59,9 @@ export class MainComponent implements OnInit, OnDestroy {
       }
       } });
       appInsights.loadAppInsights();
+    }
 
-      this.setMenus();
+    this.setMenus();
   }
 
   ngOnInit(): void {

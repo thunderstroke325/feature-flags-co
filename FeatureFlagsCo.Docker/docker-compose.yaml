@@ -86,3 +86,12 @@ services:
       - ACCEPT_EULA=Y
       - MSSQL_PID=Express
       - SA_PASSWORD=YourSTRONG@Passw0rd
+
+  portal:
+    build:
+      context: ../FeatureFlagsCo.Portal
+      dockerfile: Dockerfile
+    container_name: portal
+    ports:
+      - 80:80
+    restart: unless-stopped
