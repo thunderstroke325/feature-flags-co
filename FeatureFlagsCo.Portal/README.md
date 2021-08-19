@@ -1,20 +1,24 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# feature-flags-co Frontend
+This is the admin site of [https://www.feature-flags.co](https://www.feature-flags.co) website, this project is used to configure your account and all the feature flags.
+
+# Built With
+- Angular
+- Node
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+These instructions will get you a copy of the project front end up and running on your local machine for development and testing purposes.
 
 # Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+Make sure you have a API instance started then modify the file **src/environments/environment.ts** by pointing the **url** property to the API.
+The **projectEnvKey** property can be ommitted, we use it to point to our SaaS platform to control our features.
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+```
+  npm install
+  npm run start
+```
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+To launch a standalone version of the whole project, including the API, Portal, Databases and analytic tools, you can use docker-compose to launch all the services. For details, please go to the FeatureFlagsCo.Docker folder under the root path of the repository and read the instructions there.
+
+# Resources
+- [Website](https://www.feature-flags.co)
+- [Documentation](https://docs.feature-flags.co/)
