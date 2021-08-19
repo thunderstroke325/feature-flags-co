@@ -48,8 +48,10 @@ export class AccountComponent implements OnInit {
 
   onCreateAccountClosed(account: IAccount) {
     this.creatAccountFormVisible = false;
-    this.accountService.accounts = [...this.accountService.accounts, account];
-    this.accountService.changeAccount(account);
+    if (account) {
+      this.accountService.accounts = [...this.accountService.accounts, account];
+      this.accountService.changeAccount(account);
+    }
   }
 
   onAccountChange() {
