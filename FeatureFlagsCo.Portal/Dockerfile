@@ -11,14 +11,19 @@
 
 FROM nginx:1.21.1-alpine
 
+ARG API_URL https://api.feature-flags.co
+
 RUN apk add --update nodejs npm
 
 # Above is for using alpine
 
+# The following code is common for both nginx:latest and alpine
 RUN npm install -g @angular/cli
 
 # Bundle app source
 COPY . /src
+
+RUN sed -i "s|#{API_URL}#|${API_URL}|g" /src/src/environments/environment.standalone.ts
 
 RUN cd /src; npm install; ng build --configuration standalone
 

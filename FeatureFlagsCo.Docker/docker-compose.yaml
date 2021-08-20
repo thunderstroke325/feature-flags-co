@@ -91,6 +91,9 @@ services:
     build:
       context: ../FeatureFlagsCo.Portal
       dockerfile: Dockerfile
+      args:
+        API_URL: THE_BACK_END_URL
+    image: ffc-portal
     container_name: portal
     ports:
       - 80:80
