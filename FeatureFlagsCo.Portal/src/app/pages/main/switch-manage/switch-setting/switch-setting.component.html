@@ -4,39 +4,40 @@
         <div class="setting-body" name="detail" *ngIf="currentSwitch">
             <div class="info-item">
                 <p>名称</p>
-                <input class="name" nz-input placeholder="开关名称..." [(ngModel)]="currentSwitch.name" />
+                <input class="name half" nz-input placeholder="开关名称..." [(ngModel)]="currentSwitch.name" />
             </div>
             <div class="info-item">
                 <p>Key Name</p>
                 <div nz-typography nzCopyable [nzCopyText]="currentSwitch.keyName">
-                  <input nz-input class="key" [disabled]="true" placeholder="KeyName..." [(ngModel)]="currentSwitch.keyName" />
+                  <input nz-input class="key half" [disabled]="true" placeholder="KeyName..." [(ngModel)]="currentSwitch.keyName" />
                 </div>
             </div>
             <nz-divider></nz-divider>
             <div class="info-item" *ngIf='multistateEnabled'>
-              <p>多返回状态管理</p>
+              <p>返回状态管理</p>
               <div nz-row>
                 <div class="wrap-right" nz-col nzSpan="24">
                   <button nz-button nzType="primary" (click)="addVariationOptionRow()">
                     <i nz-icon nzType="plus" nzTheme="outline"></i>
-                    添加返回状态
+                    添加状态
                   </button>
                 </div>
               </div>
-              <nz-table id="multistatetable" [nzScroll]="{ y: '200px' }" #editRowTable [nzData]="variationOptions" nzBordered [nzFrontPagination]="false" [nzSize]="'small'" [nzShowPagination]="false">
+              <nz-table id="multistatetable" #editRowTable [nzData]="variationOptions" nzBordered [nzFrontPagination]="false" [nzSize]="'small'" [nzShowPagination]="false">
                 <thead>
                   <tr>
-                    <th [nzAlign]="'center'" [nzWidth]="'550px'">返回值</th>
-                    <th [nzAlign]="'center'">Action</th>
+                    <th [nzAlign]="'center'">返回值</th>
+                    <th [nzAlign]="'center'"></th>
                   </tr>
                 </thead>
                 <tbody cdkDropList (cdkDropListDropped)="drop($event)">
                   <tr *ngFor="let variationOption of variationOptions" cdkDrag class="editable-row">
                     <td>
-                      <div class="editable-cell" [hidden]="variationOptionEditId === variationOption.localId" (click)="startEditVariationOption(variationOption.localId)">
+                      <!-- <div class="editable-cell" [hidden]="variationOptionEditId === variationOption.localId" (click)="startEditVariationOption(variationOption.localId)">
                         {{ variationOption.variationValue || 'Click to edit' }}
                       </div>
-                      <input [hidden]="variationOptionEditId !== variationOption.localId" type="text" nz-input [(ngModel)]="variationOption.variationValue" (blur)="stopEditVariationOption()" />
+                      <input [hidden]="variationOptionEditId !== variationOption.localId" type="text" nz-input [(ngModel)]="variationOption.variationValue" (blur)="stopEditVariationOption()" /> -->
+                      <input type="text" nz-input [(ngModel)]="variationOption.variationValue" (blur)="stopEditVariationOption()" />
                     </td>
                     <td [nzAlign]="'center'">
                       <a nz-popconfirm nzPopconfirmTitle="确定删除吗? 删除后将不可恢复！" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariationOptionRow(variationOption.localId)"><i nz-icon nzType="delete" nzTheme="fill"></i></a>

@@ -9,7 +9,7 @@
     <ng-container *ngIf="!isLoading; else loadingTem;">
         <div class="detail-body">
             <button *ngIf="!multistateEnabled" class="save"nz-button nzType="primary" (click)="onSaveSetting()">保存设置</button>
-            <button *ngIf="multistateEnabled" class="save"nz-button nzType="primary" (click)="onSaveSettingMultistates()">保存设置1</button>
+            <button *ngIf="multistateEnabled" class="save"nz-button nzType="primary" (click)="onSaveSettingMultistates()">保存设置</button>
             <div class="item">
                 <p class="label">开启或关闭开关</p>
                 <nz-button-group>
