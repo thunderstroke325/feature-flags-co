@@ -1,7 +1,7 @@
 <section class="body">
     <app-layout>
         <app-nav-btns name="header" [routeUrl]="'report'" [id]="switchId"></app-nav-btns>
-        <div class="content-body" name="detail">
+        <div class="content-body" name="detail" *ngIf="!hideContent">
             <ng-container>
                 <!-- <h2>共有{{totalUsers}}用户被标记，其中{{hitUsers}}人使用此功能</h2> -->
                 <h2>{{userUsageStr}}</h2>

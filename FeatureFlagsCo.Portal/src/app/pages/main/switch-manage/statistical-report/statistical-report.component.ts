@@ -5,6 +5,9 @@ import { SwitchService } from 'src/app/services/switch.service';
 import * as echarts from 'echarts';
 import { map } from 'rxjs/operators';
 import { DatePipe, formatDate } from '@angular/common';
+import { environment } from './../../../../../environments/environment';
+import { AccountService } from 'src/app/services/account.service';
+import { CSwitchParams } from '../types/switch-new';
 
 @Component({
   selector: 'report',
@@ -25,6 +28,7 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
   public totalUsers: number = 0;
   public hitUsers: number = 0;
   public userUsageStr: string = '';
+  public hideContent: boolean = false;
 
   private xname: string = '';
   private yname: string = '';
@@ -34,6 +38,7 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
   constructor(
     private route: ActivatedRoute,
     private switchServe: SwitchService,
+    private accountService: AccountService,
     private datePipe: DatePipe
   ) {
     this.switchId = this.route.snapshot.params['id'];
@@ -46,15 +51,28 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   ngOnInit(): void {
+    if (environment.name === 'Standalone') {
+      this.hideContent = true;
+      const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+
+      if (environment.statisticUrl[environment.statisticUrl.length - 1] === '/') {
+        environment.statisticUrl = environment.statisticUrl.slice(0, environment.statisticUrl.length - 1);
+      }
+
+      const url = environment.statisticUrl + `/explore?left=["now-2d","now","Loki",{"expr":"{EnvId=\\"${currentAccountProjectEnv.projectEnv.envId}\\",FeatureFlagKeyName=\\"${this.switchServe.getCurrentSwitch().keyName}\\"}"}]`;
+      window.open(url, "_blank");
+    }
   }
 
   ngAfterViewInit(): void {
-    window.setTimeout(() => {
-      this.height = this.echartsRef.nativeElement.offsetHeight;
-      this.width = this.echartsRef.nativeElement.offsetWidth;
-    });
-    this.myChart = echarts.init(this.echartsRef.nativeElement);
-    this.getFeatureFlagUsage();
+    if (!this.hideContent) {
+      window.setTimeout(() => {
+        this.height = this.echartsRef.nativeElement.offsetHeight;
+        this.width = this.echartsRef.nativeElement.offsetWidth;
+      });
+      this.myChart = echarts.init(this.echartsRef.nativeElement);
+      this.getFeatureFlagUsage();
+    }
   }
 
   ngOnDestroy(): void {

@@ -124,6 +124,7 @@ services:
       dockerfile: Dockerfile
       args:
         API_URL: http://localhost:5001
+        STATISTIC_URL: http://localhost:3000
     image: ffc-portal
     container_name: portal
     ports:

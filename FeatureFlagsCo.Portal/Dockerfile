@@ -12,6 +12,7 @@
 FROM nginx:1.21.1-alpine
 
 ARG API_URL https://api.feature-flags.co
+ARG STATISTIC_URL http://localhost:3000
 
 RUN apk add --update nodejs npm
 
@@ -24,6 +25,7 @@ RUN npm install -g @angular/cli
 COPY . /src
 
 RUN sed -i "s|#{API_URL}#|${API_URL}|g" /src/src/environments/environment.standalone.ts
+RUN sed -i "s|#{STATISTIC_URL}#|${STATISTIC_URL}|g" /src/src/environments/environment.standalone.ts
 
 RUN cd /src; npm install; ng build --configuration standalone
 
