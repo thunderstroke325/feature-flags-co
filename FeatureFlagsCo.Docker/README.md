@@ -9,6 +9,8 @@ Commands to execute:
 2. `docker-compose config`
 3. `docker-compose -f docker-compose.yaml up`
 
+docker rm -f $(docker ps -a -q)
+docker volume rm $(docker volume ls -q)
 
 https://docs.docker.com/compose/environment-variables/
 
@@ -18,10 +20,6 @@ https://newbedev.com/how-to-create-a-db-for-mongodb-container-on-start-up
 admin secret
 ### Installation
 http://swarm-ip:8081, http://localhost:8081, or http://host-ip:8081
-
-## sqlserver 2019 express
-### Account
-sa YourSTRONG!Passw0rd
 
 ## rabbitmq
 ### Account:
@@ -39,14 +37,35 @@ count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])
 
 sum(count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])) by (userName)
 
-// 下面这个可以看到, 当variation为某个值时，使用的用户数量
 count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[1d])))
 
-// 下面这个可以看到, 不管variation时，使用的用户数量
 count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1"}[1d])))
 
-// 某个ff，某个状态下的调用情况
 {featureFlagId="ff__2__3__a1",varaition="false"}
 
-// 很奇怪的图片
-sum(count_over_time({featureFlagId="ff__2__3__a1"}[3h])) without(userName, varaition) 
+
+## Sql Server
+
+https://cardano.github.io/blog/2017/11/15/mssql-docker-container
+
+If you encounter probleme like ".entrypoint.sh" not found. Please change file format from CRLF to LF. Because file will be executed in Ubuntu but we edited in windows. (https://stackoverflow.com/questions/29140377/sh-file-not-found)
+
+### Account
+sa YourSTRONG@Passw0rd
+
+
+## Asp.Net Core
+docker build -t featureflagscoapi .
+docker run -d -p 5001:5001 --name featureflagscoapi featureflagscoapi
+
+## RabbitMQToGrafanaLoki
+docker build -t rabbitmq2grafanaloki -f Dockerfile-R2G .
+
+
+# How to Do a Clean Restart of a Docker InstanceProcedure
+
+Stop the container(s) using the following command: docker-compose down.
+Delete all containers using the following command: docker rm -f $(docker ps -a -q)
+Delete all volumes using the following command: docker volume rm $(docker volume ls -q)
+Restart the containers using the following command: docker-compose up -d
+

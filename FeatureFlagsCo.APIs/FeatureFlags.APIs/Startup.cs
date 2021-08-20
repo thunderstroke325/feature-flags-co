@@ -2,6 +2,7 @@ using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
+using FeatureFlagsCo.RabbitMQToGrafanaLoki;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -20,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FeatureFlags.AdminWebAPIs
@@ -203,10 +205,15 @@ namespace FeatureFlags.AdminWebAPIs
                 services.AddSingleton<MongoDbEnvironmentUserPropertyService>();
                 services.AddSingleton<INoSqlService, MongoDbService>();
 
+                Thread.Sleep(120 * 1000);
 
+                services.AddSingleton<IInsighstRabbitMqService, InsighstRabbitMqService>();
+
+                var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
+                var grafanaLokiUrl = this.Configuration.GetSection("MySettings").GetSection("GrafanaLokiUrl").Value;
+                services.AddSingleton<IRabbitMq2GrafanaLokiService>(new RabbitMq2GrafanaLokiService(insightsRabbitMqUrl, grafanaLokiUrl));
             }
 
-            services.AddSingleton<IInsighstRabbitMqService, InsighstRabbitMqService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

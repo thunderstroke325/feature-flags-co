@@ -123,9 +123,10 @@ namespace FeatureFlags.APIs.Controllers
                 Labels = new List<FeatureFlagsCo.RabbitMqModels.MessageLabel>()
                  {
                      new FeatureFlagsCo.RabbitMqModels.MessageLabel{ LabelName = "email", LabelValue = "hu-beau@outlook.com"},
-                     new FeatureFlagsCo.RabbitMqModels.MessageLabel{ LabelName = "timestamp", LabelValue = DateTime.UtcNow.ToLongDateString()}
+                     new FeatureFlagsCo.RabbitMqModels.MessageLabel{ LabelName = "timestamp", LabelValue = DateTime.UtcNow.ToString()}
                  },
-                Message = "Very very Very very Very very Very very Very very Very very long message."
+                Message = "Very very Very very Very very Very very Very very Very very long message.",
+                SendDateTime = DateTime.UtcNow
             });
             return new JsonResult(new VariationOption());
         }

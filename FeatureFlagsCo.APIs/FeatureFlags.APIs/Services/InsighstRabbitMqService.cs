@@ -38,6 +38,12 @@ namespace FeatureFlags.APIs.Services
                                         exclusive: false,
                                         autoDelete: false,
                                         arguments: null);
+                this.SendMessage(new MessageModel
+                {
+                    Labels = new List<MessageLabel> { new MessageLabel { LabelName = "API Init", LabelValue = DateTime.UtcNow.ToLongDateString() } },
+                    Message = "InsighstRabbitMqService Connected",
+                    SendDateTime = DateTime.UtcNow
+                });
                 _channel.CallbackException += Channel_CallbackException;
             }
         }

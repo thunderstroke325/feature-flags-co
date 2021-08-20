@@ -1,2 +1,6 @@
 
 data
+
+docker-entrypoint-initdb.d/sql/.system
+docker-entrypoint-initdb.d/sql/log
+docker-entrypoint-initdb.d/sql/secrets

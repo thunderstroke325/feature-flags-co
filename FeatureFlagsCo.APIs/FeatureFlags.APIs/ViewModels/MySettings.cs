@@ -22,7 +22,7 @@ namespace FeatureFlags.APIs.ViewModels
         public string AppInsightsApplicationApiSecret { get; set; }
 
         public string InsightsRabbitMqUrl { get; set; }
-
+        public string GrafanaLokiUrl { get; set; }
         public string HostingType { get; set; }
     }
 

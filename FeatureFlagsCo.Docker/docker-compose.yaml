@@ -2,37 +2,40 @@ version: "3.2"
 
 
 networks:
-  loki:
+  ffc:
 
 services:
   loki:
     image: grafana/loki:2.3.0
     container_name: grafana-loki
+    restart: always
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     networks:
-      - loki
+      - ffc
 
   promtail:
     image: grafana/promtail:2.3.0
     container_name: grafana-promtail
+    restart: always
     volumes:
       - /var/log:/var/log
     command: -config.file=/etc/promtail/config.yml
     networks:
-      - loki
+      - ffc
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    restart: always
     ports:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
     networks:
-      - loki
+      - ffc
 
   rabbitmq:
     image: rabbitmq:3.9-management
@@ -45,10 +48,13 @@ services:
     volumes:
       - ./data:/var/lib/rabbitmq
       # - ./docker-entrypoint-initdb.d/rabbitmq.conf:/var/lib/rabbitmq/rabbitmq.conf
+    networks:
+      - ffc
 
   mongodb:
     image: mongo
     container_name: mongodb
+    restart: always
     ports:
       - 27017:27017
     environment:
@@ -57,6 +63,8 @@ services:
       - MONGO_INITDB_DATABASE=featureflagsco
     volumes:
       - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - ffc
   mongo-express:
     image: mongo-express
     container_name: mongo-express
@@ -67,34 +75,57 @@ services:
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password
       - ME_CONFIG_MONGODB_SERVER=mongodb
     restart: unless-stopped
+    networks:
+      - ffc
 
-  # https://cardano.github.io/blog/2017/11/15/mssql-docker-container
-  mssqldb:
-    image: "mcr.microsoft.com/mssql/server:2019-latest"
+
+  # mssqldata:
+  #   image: "mcr.microsoft.com/mssql/server:2019-latest"
+  #   entrypoint: /bin/bash
+  mssql:
+    image: "mcr.microsoft.com/mssql/server:2017-latest"
     container_name: sqldb
+    restart: always
     ports:
       - 1433:1433
     volumes:
       - /var/opt/mssql
       # we copy our scripts onto the container
-      - ./docker-entrypoint-initdb.d/sql:/usr/src/app 
-    # bash will be executed from that path, our scripts folder
-    working_dir: /usr/src/app
+      - ./docker-entrypoint-initdb.d/sql:/usr/src/app
+    working_dir: /usr/src/app 
     # run the entrypoint.sh that will import the data AND sqlserver
     command: sh -c ' chmod +x ./entrypoint.sh; ./entrypoint.sh & /opt/mssql/bin/sqlservr;'
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_PID=Express
       - SA_PASSWORD=YourSTRONG@Passw0rd
+      - MSSQL_PID=Express
+    networks:
+      - ffc
+    # # don't use this if you don't want to persit data between docker up and down
+    # volumes_from:
+    #   - mssqldata
 
+  api:
+    build:
+      context: ../FeatureFlagsCo.APIs
+      dockerfile: Dockerfile
+    image: ffc-api
+    container_name: api
+    ports:
+      - 5001:5001
+    # restart: unless-stopped
+    networks:
+      - ffc
+
+  
   portal:
     build:
       context: ../FeatureFlagsCo.Portal
       dockerfile: Dockerfile
       args:
-        API_URL: THE_BACK_END_URL
+        API_URL: http://localhost:5001
     image: ffc-portal
     container_name: portal
     ports:
-      - 80:80
+      - 4200:80
     restart: unless-stopped

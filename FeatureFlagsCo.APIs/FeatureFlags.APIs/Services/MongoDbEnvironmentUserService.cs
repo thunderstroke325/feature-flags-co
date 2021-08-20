@@ -50,7 +50,7 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<int> CountAsync(string searchText, int environmentId)
         {
-            if(string.IsNullOrWhiteSpace(searchText.Trim()))
+            if(string.IsNullOrWhiteSpace(searchText))
                 return (int)await _environmentUsers.CountDocumentsAsync(p => p.EnvironmentId == environmentId);
             else
                 return (int)await _environmentUsers.CountDocumentsAsync(p => p.EnvironmentId == environmentId && p.Name.Contains(searchText));
@@ -58,7 +58,7 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<List<EnvironmentUser>> SearchAsync(string searchText, int environmentId, int pageIndex, int pageSize)
         {
-            if (string.IsNullOrWhiteSpace(searchText.Trim()))
+            if (string.IsNullOrWhiteSpace(searchText))
                 return await _environmentUsers.Find(p => p.EnvironmentId == environmentId).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
             else
                 return await _environmentUsers.Find(p => p.EnvironmentId == environmentId && p.Name.Contains(searchText)).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();

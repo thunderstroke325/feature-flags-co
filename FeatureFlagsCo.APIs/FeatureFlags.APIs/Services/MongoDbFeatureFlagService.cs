@@ -24,12 +24,10 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<List<FeatureFlag>> SearchAsync(string searchText, int environmentId, int pageIndex, int pageSize)
         {
-            if (string.IsNullOrWhiteSpace(searchText.Trim()))
+            if (string.IsNullOrWhiteSpace(searchText))
                 return await _featureFlags.Find(p => p.EnvironmentId == environmentId).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
             else
                 return await _featureFlags.Find(p => p.EnvironmentId == environmentId && p.FF.Name.Contains(searchText)).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
-
-            
         }
 
         public async Task<List<FeatureFlag>> SearchArchivedAsync(int environmentId, int pageIndex, int pageSize)

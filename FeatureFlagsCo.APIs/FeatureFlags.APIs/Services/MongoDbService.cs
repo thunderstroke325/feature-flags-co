@@ -194,6 +194,11 @@ namespace FeatureFlags.APIs.Services
                     }
                 }
 
+                if (string.IsNullOrWhiteSpace(param._Id))
+                {
+                    var ffInDb = await _mongoFeatureFlagsService.GetAsync(param.Id);
+                    param._Id = ffInDb._Id;
+                }
                 await _mongoFeatureFlagsService.UpdateAsync(param.Id, param);
 
                 return new ReturnJsonModel<FeatureFlag>
@@ -308,6 +313,12 @@ namespace FeatureFlags.APIs.Services
             try
             {
                 EnvironmentUserProperty returnModel = await _mongoEnvironmentUserPropertiesService.GetAsync(id);
+                if (returnModel == null)
+                    returnModel = new EnvironmentUserProperty()
+                    {
+                        EnvironmentId = environmentId,
+                        Properties = new List<string>()
+                    };
                 returnModel.Properties.Add("KeyId");
                 returnModel.Properties.Add("Name");
                 returnModel.Properties.Add("Email");

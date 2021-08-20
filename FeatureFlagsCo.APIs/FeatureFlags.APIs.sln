@@ -7,10 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevOps", "DevOps", "{56DC81
 	ProjectSection(SolutionItems) = preProject
 		azure-pipelines.yml = azure-pipelines.yml
 		Dockerfile = Dockerfile
-		README.md = README.md
+		Dockerfile-R2G = Dockerfile-R2G
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFs.SDKs", "FFs.SDKs.CSharp\FFs.SDKs.csproj", "{8694A02D-B811-40F2-9BFC-47966C86E9C5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs", "FeatureFlags.APIs\FeatureFlags.APIs.csproj", "{DB0AA70E-2760-4AAC-8832-CB6E2337324C}"
 EndProject
@@ -26,10 +24,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8694A02D-B811-40F2-9BFC-47966C86E9C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8694A02D-B811-40F2-9BFC-47966C86E9C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8694A02D-B811-40F2-9BFC-47966C86E9C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8694A02D-B811-40F2-9BFC-47966C86E9C5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DB0AA70E-2760-4AAC-8832-CB6E2337324C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DB0AA70E-2760-4AAC-8832-CB6E2337324C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB0AA70E-2760-4AAC-8832-CB6E2337324C}.Release|Any CPU.ActiveCfg = Release|Any CPU
