@@ -29,8 +29,8 @@ We currently provide two types of product:
 
 ### What are the technical differences between the Docker-compose version and the SaaS version?
 
-- SaaS version uses advanced technics provided by Azure which is better in security, Operations and Maintenance, data analytics, devops and iteration, etc. 
-- Docker-compose version is a full open-source version which can be better controlled and used locally. 
+- SaaS version uses advanced technics provided by Azure which is better in security, Operations and Maintenance, data analytics, High-availability, Scalability, devops and iteration, etc. 
+- Docker-compose version is a full open-source version which can be better controlled and used locally. This is also a free version which can be easily and quickly handled by small teams (and also earlier stage products).
 
 ## Release Announcement
 
