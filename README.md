@@ -27,6 +27,10 @@ We currently provide two types of product:
 1. `feature-flags.co`, a SaaS platform service based on Azure cloud infrastructure. We currently only support Chinese users in China.
 2. Run on a single machine built using the Docker compose file. Tested under a i7-1065G7 CPU @ 1.30GHz 1.50 GHz laptop, it can support 4000 concurrent requests per second.
 
+### What are the technical differences between the Docker-compose version and the SaaS version?
+
+- SaaS version uses advanced technics provided by Azure which is better in security, Operations and Maintenance, data analytics, devops and iteration, etc. 
+- Docker-compose version is a full open-source version which can be better controlled and used locally. 
 
 ## Release Announcement
 
