@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +10,9 @@ namespace FeatureFlags.APIs.Models
 {
     public class EnvironmentUserProperty
     {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string _Id { get; set; }
         [JsonProperty("id")]
         public string Id { get; set; }
         public int EnvironmentId { get; set; }

@@ -386,33 +386,41 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<EnvironmentUserProperty> GetEnvironmentUserPropertiesForCRUDAsync(int environmentId)
         {
-            try
-            {
-                return await _mongoEnvironmentUserPropertiesService.GetByEnvironmentIdAsync(environmentId);
-            }
-            catch (MongoException ex)
-            {
-                return null;
-            }
+            var eup = await _mongoEnvironmentUserPropertiesService.GetByEnvironmentIdAsync(environmentId);
+            if (eup == null)
+                eup = new EnvironmentUserProperty
+                {
+                    EnvironmentId = environmentId,
+                    Properties = new List<string>()
+                };
+            return eup;
         }
 
         public async Task CreateOrUpdateEnvironmentUserPropertiesForCRUDAsync(EnvironmentUserProperty param)
         {
             string id = FeatureFlagKeyExtension.GetEnvironmentUserPropertyId(param.EnvironmentId);
-            await _mongoEnvironmentUserPropertiesService.UpdateAsync(id, new EnvironmentUserProperty
+            var eup = await this.GetEnvironmentUserPropertiesAsync(param.EnvironmentId);
+            if (string.IsNullOrWhiteSpace(eup._Id))
             {
-                Id = id,
-                EnvironmentId = param.EnvironmentId,
-                Properties = param.Properties,
-                ObjectType = param.ObjectType
-            });
-            //await this._container.UpsertItemAsync<EnvironmentUserProperty>(new EnvironmentUserProperty
-            //{
-            //    Id = id,
-            //    EnvironmentId = param.EnvironmentId,
-            //    Properties = param.Properties,
-            //    ObjectType = param.ObjectType
-            //});
+                await _mongoEnvironmentUserPropertiesService.CreateAsync(new EnvironmentUserProperty
+                {
+                    Id = id,
+                    EnvironmentId = param.EnvironmentId,
+                    Properties = param.Properties,
+                    ObjectType = param.ObjectType
+                });
+            }
+            else
+            {
+                await _mongoEnvironmentUserPropertiesService.UpdateAsync(id, new EnvironmentUserProperty
+                {
+                    _Id = eup._Id,
+                    Id = id,
+                    EnvironmentId = param.EnvironmentId,
+                    Properties = param.Properties,
+                    ObjectType = param.ObjectType
+                });
+            }
         }
 
         public async Task UpsertEnvironmentUserAsync(EnvironmentUser param)

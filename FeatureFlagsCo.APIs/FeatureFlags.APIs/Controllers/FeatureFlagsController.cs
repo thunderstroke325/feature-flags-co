@@ -107,7 +107,10 @@ namespace FeatureFlags.APIs.Controllers
         {
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             FeatureFlag ff = await _cosmosDbService.GetFlagAsync(id);
-           
+            if (ff.FFTIUForTrue == null)
+                ff.FFTIUForTrue = new List<FeatureFlagTargetIndividualUser>();
+            if (ff.FFTIUForFalse == null)
+                ff.FFTIUForFalse = new List<FeatureFlagTargetIndividualUser>();
             return ff;
         }
 

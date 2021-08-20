@@ -95,6 +95,12 @@ namespace FeatureFlags.APIs.Services
                 Name = param.Name,
                 Secret = FeatureFlagKeyExtension.GenerateEnvironmentKey(param.Id, accountId, param.ProjectId)
             });
+            if(param.Id <= 0)
+            {
+                prodEnv.Secret = FeatureFlagKeyExtension.GenerateEnvironmentKey(prodEnv.Id, accountId, param.ProjectId);
+                prodEnv.MobileSecret = FeatureFlagKeyExtension.GenerateEnvironmentKey(prodEnv.Id, accountId, param.ProjectId);
+                await _repository.UpdateAsync<Environment>(prodEnv);
+            }
 
             return new EnvironmentViewModel
             {

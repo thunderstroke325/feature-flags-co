@@ -196,7 +196,7 @@ namespace FeatureFlags.AdminWebAPIs
             if (hostingType == HostingTypeEnum.Azure.ToString())
                 services.AddSingleton<INoSqlService>(
                     InitializeCosmosClientInstanceAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
-            else
+            else if (hostingType == HostingTypeEnum.Local.ToString())
             {
                 services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
                 services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
@@ -205,7 +205,8 @@ namespace FeatureFlags.AdminWebAPIs
                 services.AddSingleton<MongoDbEnvironmentUserPropertyService>();
                 services.AddSingleton<INoSqlService, MongoDbService>();
 
-                Thread.Sleep(120 * 1000);
+               var StartSleepTimeStr = this.Configuration.GetSection("MySettings").GetSection("StartSleepTime").Value;
+                Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
 
                 services.AddSingleton<IInsighstRabbitMqService, InsighstRabbitMqService>();
 
