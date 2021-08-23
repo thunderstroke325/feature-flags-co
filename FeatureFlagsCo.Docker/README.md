@@ -6,13 +6,15 @@
 
 # Run Feature-Flags.co as a Product with Docker Compose
 
-Commands to execute:
+You can also run the entire feature-flags-co with Docker by running the following commands:
 
-    // docker-compose --env-file .env.dev config 
-    // docker-compose --env-file .env config 
+    cd FeatureFlagsCo.Docker
+    docker-compose -f docker-compose.yaml up
+
+Before running commands above, please make sure you have configured projects as a Docker version.
+
 1. In project FeatureFlags.APIs, set `ASPNETCORE_ENVIRONMENT` to `Local`. Right click on project "FeatureFlags.APIs" -> click on "Properties" -> choose tab "Debug" -> In "Environment variables" section, set `ASPNETCORE_ENVIRONMENT` to `Local` -> Save
-2. `docker-compose config`
-3. `docker-compose -f docker-compose.yaml up`
+2. In project FeatureFlagsCo.Portal, 
 
 docker rm -f $(docker ps -a -q)
 docker volume rm $(docker volume ls -q)
