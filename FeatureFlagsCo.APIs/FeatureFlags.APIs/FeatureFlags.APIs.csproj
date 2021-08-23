@@ -33,7 +33,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FeatureFlagsCo.MQ.DirectExporter\FeatureFlagsCo.MQ.DirectExporter.csproj" />
-    <ProjectReference Include="..\FeatureFlagsCo.RabbitMqModels\FeatureFlagsCo.MQ.csproj" />
+    <ProjectReference Include="..\FeatureFlagsCo.MQ\FeatureFlagsCo.MQ.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.RabbitMQToGrafanaLoki\FeatureFlagsCo.RabbitMQToGrafanaLoki.csproj" />
   </ItemGroup>
 
