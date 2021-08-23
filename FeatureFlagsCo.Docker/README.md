@@ -61,8 +61,6 @@ Restart the containers using the following command: docker-compose up -d
 
 ## Minimum requirements
 
-https://docs.contrastsecurity.com/en/-net-core-system-requirements.html
-
 
 |             | vCPU        | Memory |  Disk    |
 | Minimum     | 2 * 1.4Ghz | 4GB    |  128GB   |
