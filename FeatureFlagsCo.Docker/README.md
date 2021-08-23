@@ -26,32 +26,19 @@ Here is an example (running in local) of configuration of file `FeatureFlagsCo.P
       statisticUrl: 'http://localhost:3000'   // url of grafana service
     };
 
-Commands for remove and clearning your docker service:
+After docker compose started, please wait 2-3 minutes untill all services have been successfully etablished. RabbitMQ take more times than other services, API services will run after the RabbitMQ started.
 
-    docker-compose -f docker-compose.yaml down
-    docker rm -f $(docker ps -a -q)
-    docker volume rm $(docker volume ls -q)
+## Initial values
 
+1. Portal Url: `http://localhost:4200`
+2. API Url: `http://localhost:5001/swagger`
+3. RabbitMQL Url: `http://localhost:15672/`. Default Username: `guest `, Default password: `guest`
+4. Grafana Url: `http://localhost:3000`.  Default Username: `admin `, Default password: `admin`
+5. Grafana Loki Url: `http://localhost:3100`.
+6. Sql Server Express Url: `tcp://localhost,1433`. Default Username: `sa `, Default password: `YourSTRONG@Passw0rd`
+7. MongoDB url: `mongodb://admin:password@localhost:27017/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false`
 
-## mongodb 
-https://newbedev.com/how-to-create-a-db-for-mongodb-container-on-start-up
-### Account:
-admin secret
-### Installation
-http://swarm-ip:8081, http://localhost:8081, or http://host-ip:8081
-
-## rabbitmq
-### Account:
-guest guest
-### Installation
-docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
-
-## grafana 
-### Account:
-admin admin
-### Installation
-wget https://raw.githubusercontent.com/grafana/loki/v2.3.0/production/docker-compose.yaml -O docker-compose.yaml
-### Some instruments
+### Some instruments in Grafana
 count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])
 
 sum(count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])) by (userName)
@@ -63,23 +50,9 @@ count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1"}[1d])))
 {featureFlagId="ff__2__3__a1",varaition="false"}
 
 
-## Sql Server
-
-https://cardano.github.io/blog/2017/11/15/mssql-docker-container
+## Sql Server initilized issues
 
 If you encounter probleme like ".entrypoint.sh" not found. Please change file format from CRLF to LF. Because file will be executed in Ubuntu but we edited in windows. (https://stackoverflow.com/questions/29140377/sh-file-not-found)
-
-### Account
-sa YourSTRONG@Passw0rd
-
-
-## Asp.Net Core
-docker build -t featureflagscoapi .
-docker run -d -p 5001:5001 --name featureflagscoapi featureflagscoapi
-
-## RabbitMQToGrafanaLoki
-docker build -t rabbitmq2grafanaloki -f Dockerfile-R2G .
-
 
 # How to Do a Clean Restart of a Docker InstanceProcedure
 
