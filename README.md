@@ -38,8 +38,8 @@ SaaS version uses advanced technics provided by Azure which is better in securit
 
 You can also run the entire feature-flags-co with Docker by running the following commands:
   
-  cd FeatureFlagsCo.Docker
-  docker-compose -f docker-compose.yaml up
+    cd FeatureFlagsCo.Docker
+    docker-compose -f docker-compose.yaml up
   
 For more docker-compose information, you can track page: https://github.com/feature-flags-co/feature-flags-co/tree/main/FeatureFlagsCo.Docker
 
