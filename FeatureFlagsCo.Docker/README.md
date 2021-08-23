@@ -57,20 +57,13 @@ Delete all containers using the following command: docker rm -f $(docker ps -a -
 Delete all volumes using the following command: docker volume rm $(docker volume ls -q)
 Restart the containers using the following command: docker-compose up -d
 
-# Import Docker Compose Container to VM (ubuntu 18.04)
+# Requirements
 
-Run commands
+## Minimum requirements
 
-    // https://docs.docker.com/engine/install/ubuntu/
-    sudo apt-get update
-    sudo apt-get install apt-transport-https ca-certificates curl gnupg lsb-release
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    echo \
-        "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update
-    sudo apt-get install docker-ce docker-ce-cli containerd.io
+https://docs.contrastsecurity.com/en/-net-core-system-requirements.html
 
 
-
-docker stats --all
+|             | vCPU        | Memory |  Disk    |
+| Minimum     | 2 * 1.4Ghz | 4GB    |  128GB   |
+| Recommended | 4 * 1.4Ghz | 16GB   |  256GB   |
