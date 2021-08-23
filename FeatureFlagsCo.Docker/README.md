@@ -59,10 +59,9 @@ Restart the containers using the following command: docker-compose up -d
 
 # Requirements
 
-## Minimum requirements
-
-
-|             | CPU        | Memory |  Disk    | Ssytem                             |
-| Minimum     | 1.30Ghz    | 3GB    |  64GB    | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
-| Recommended | 4 * 1.3Ghz | 16GB   |  256GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
+|                  | CPU          | Memory |  Disk    | Ssytem                             |
+| Minimum          | 1.50Ghz      | 3GB    |  64GB    | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
+| Cost-effective   | 2 * 1.30Ghz  | 4GB    |  128GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
+| Recommended      | 4 * 1.3Ghz   | 16GB   |  256GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
+| High Performance | X * 4.2Ghz   | 32GB+  |  512GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
 
