@@ -39,16 +39,12 @@ After docker compose started, please wait 2-3 minutes untill all services have b
 7. MongoDB url: `mongodb://admin:password@localhost:27017/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false`
 
 ### Some instruments in Grafana
-count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])
 
-sum(count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])) by (userName)
-
-count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[1d])))
-
-count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1"}[1d])))
-
-{featureFlagId="ff__2__3__a1",varaition="false"}
-
+    count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])
+    sum(count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])) by (userName)
+    count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[1d])))
+    count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1"}[1d])))
+    {featureFlagId="ff__2__3__a1",varaition="false"}
 
 ## Sql Server initilized issues
 
