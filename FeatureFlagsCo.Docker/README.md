@@ -14,12 +14,23 @@ You can also run the entire feature-flags-co with Docker by running the followin
 Before running commands above, please make sure you have configured projects as a Docker version.
 
 1. In project FeatureFlags.APIs, set `ASPNETCORE_ENVIRONMENT` to `Local`. Right click on project "FeatureFlags.APIs" -> click on "Properties" -> choose tab "Debug" -> In "Environment variables" section, set `ASPNETCORE_ENVIRONMENT` to `Local` -> Save
-2. In project FeatureFlagsCo.Portal, 
+2. In file `FeatureFlagsCo.Portal/src/environments/environment.standalone.ts`, make sure you have configured with values you desired. Here is an example (running in local) of configuration:
 
-docker rm -f $(docker ps -a -q)
-docker volume rm $(docker volume ls -q)
+    export const environment = {
+      production: false,  
+      projectEnvKey: '',  
+      url: 'http://localhost:5001',  // url of api service
+      name: 'Standalone',
+      statisticUrl: 'http://localhost:3000'   // url of grafana service
+    };
 
-https://docs.docker.com/compose/environment-variables/
+
+Commands for remove and clearning your docker service:
+
+    docker-compose -f docker-compose.yaml down
+    docker rm -f $(docker ps -a -q)
+    docker volume rm $(docker volume ls -q)
+
 
 ## mongodb 
 https://newbedev.com/how-to-create-a-db-for-mongodb-container-on-start-up
