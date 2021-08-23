@@ -25,11 +25,17 @@ namespace FeatureFlags.APIs.ViewModels
         public string GrafanaLokiUrl { get; set; }
         public string StartSleepTime { get; set; }
         public string HostingType { get; set; }
+        public string MQProvider { get; set; }
     }
 
     public enum HostingTypeEnum
     {
         Local,
         Azure
+    }
+    public enum MQProviderEnum
+    {
+        Rabbit,
+        Direct
     }
 }

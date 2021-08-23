@@ -1,5 +1,5 @@
 ﻿using FeatureFlags.APIs.ViewModels;
-using FeatureFlagsCo.RabbitMqModels;
+using FeatureFlagsCo.MQ;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
@@ -11,12 +11,8 @@ using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
 {
-    public interface IInsighstRabbitMqService
-    {
-        void SendMessage(MessageModel message);
-    }
 
-    public class InsighstRabbitMqService : IInsighstRabbitMqService
+    public class InsighstRabbitMqService : IInsighstMqService
     {
         private readonly ConnectionFactory _connectionFactory;
         private readonly IOptions<MySettings> _mySettings;

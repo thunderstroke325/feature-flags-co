@@ -1,5 +1,5 @@
 ﻿
-using FeatureFlagsCo.RabbitMqModels;
+using FeatureFlagsCo.MQ;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using RabbitMQ.Client;

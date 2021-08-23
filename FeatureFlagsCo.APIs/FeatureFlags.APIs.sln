@@ -7,7 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevOps", "DevOps", "{56DC81
 	ProjectSection(SolutionItems) = preProject
 		azure-pipelines.yml = azure-pipelines.yml
 		Dockerfile = Dockerfile
-		Dockerfile-R2G = Dockerfile-R2G
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs", "FeatureFlags.APIs\FeatureFlags.APIs.csproj", "{DB0AA70E-2760-4AAC-8832-CB6E2337324C}"
@@ -16,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.RabbitMQToGrafanaLoki", "FeatureFlagsCo.RabbitMQToGrafanaLoki\FeatureFlagsCo.RabbitMQToGrafanaLoki.csproj", "{384BCC44-8BE0-4F0B-A50A-CBF4A5CC925F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.RabbitMqModels", "FeatureFlagsCo.RabbitMqModels\FeatureFlagsCo.RabbitMqModels.csproj", "{8556E1A2-D2ED-44E6-98E8-78D813F1E094}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.MQ", "FeatureFlagsCo.RabbitMqModels\FeatureFlagsCo.MQ.csproj", "{8556E1A2-D2ED-44E6-98E8-78D813F1E094}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlagsCo.MQ.DirectExporter", "FeatureFlagsCo.MQ.DirectExporter\FeatureFlagsCo.MQ.DirectExporter.csproj", "{55A037D1-53DB-4859-B16B-5A2BE75F42C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +41,10 @@ Global
 		{8556E1A2-D2ED-44E6-98E8-78D813F1E094}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8556E1A2-D2ED-44E6-98E8-78D813F1E094}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8556E1A2-D2ED-44E6-98E8-78D813F1E094}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55A037D1-53DB-4859-B16B-5A2BE75F42C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55A037D1-53DB-4859-B16B-5A2BE75F42C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55A037D1-53DB-4859-B16B-5A2BE75F42C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55A037D1-53DB-4859-B16B-5A2BE75F42C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

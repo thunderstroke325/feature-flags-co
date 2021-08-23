@@ -2,6 +2,7 @@
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
+using FeatureFlagsCo.MQ;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -24,20 +25,20 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IDistributedCache _redisCache;
         private readonly IVariationService _variationService;
         private readonly IOptions<MySettings> _mySettings;
-        private readonly IInsighstRabbitMqService _rabbitmqInsightsService;
+        private readonly IInsighstMqService _insightsService;
 
         public VariationController(
             ILogger<VariationController> logger, 
             IDistributedCache redisCache,
             IVariationService variationService,
             IOptions<MySettings> mySettings,
-            IInsighstRabbitMqService rabbitmqInsightsService)
+            IInsighstMqService insightsService)
         {
             _logger = logger;
             _redisCache = redisCache;
             _variationService = variationService;
             _mySettings = mySettings;
-            _rabbitmqInsightsService = rabbitmqInsightsService;
+            _insightsService = insightsService;
         }
 
 
@@ -174,54 +175,54 @@ namespace FeatureFlags.APIs.Controllers
 
         private void SendToRabbitMqThenGrafana(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, Tuple<VariationOption, bool> returnResult)
         {
-            var labels = new List<FeatureFlagsCo.RabbitMqModels.MessageLabel>()
+            var labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
                          {
-                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              new FeatureFlagsCo.MQ.MessageLabel
                               {
                                    LabelName = "RequestPath",
                                     LabelValue = "/Variation/GetMultiOptionVariation"
                               },
-                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "FeatureFlagId",
                                   LabelValue = ffIdVM.FeatureFlagId
                               },
-                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "EnvId",
                                   LabelValue = ffIdVM.EnvId
                               },
-                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "AccountId",
                                   LabelValue = ffIdVM.AccountId
                               },
-                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "ProjectId",
                                   LabelValue = ffIdVM.ProjectId
                               },
-                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "FeatureFlagKeyName",
                                   LabelValue = param.FeatureFlagKeyName
                               },
-                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "UserKeyId",
                                   LabelValue = param.FFUserKeyId
                               },
-                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "FFUserName",
                                   LabelValue = param.FFUserName
                               },
-                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "VariationLocalId",
                                   LabelValue = returnResult.Item1.LocalId.ToString()
                               },
-                              new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                              new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "VariationValue",
                                   LabelValue = returnResult.Item1.VariationValue
@@ -231,14 +232,14 @@ namespace FeatureFlags.APIs.Controllers
             {
                 foreach (var item in param.FFUserCustomizedProperties)
                 {
-                    labels.Add(new FeatureFlagsCo.RabbitMqModels.MessageLabel
+                    labels.Add(new FeatureFlagsCo.MQ.MessageLabel
                     {
                         LabelName = item.Name,
                         LabelValue = item.Value
                     });
                 }
             }
-            _rabbitmqInsightsService.SendMessage(new FeatureFlagsCo.RabbitMqModels.MessageModel
+            _insightsService.SendMessage(new FeatureFlagsCo.MQ.MessageModel
             {
                 SendDateTime = DateTime.UtcNow,
                 Labels = labels,

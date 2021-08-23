@@ -2,6 +2,8 @@ using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
+using FeatureFlagsCo.MQ;
+using FeatureFlagsCo.MQ.DirectExporter;
 using FeatureFlagsCo.RabbitMQToGrafanaLoki;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -205,14 +207,22 @@ namespace FeatureFlags.AdminWebAPIs
                 services.AddSingleton<MongoDbEnvironmentUserPropertyService>();
                 services.AddSingleton<INoSqlService, MongoDbService>();
 
-               var StartSleepTimeStr = this.Configuration.GetSection("MySettings").GetSection("StartSleepTime").Value;
-                Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
-
-                services.AddSingleton<IInsighstRabbitMqService, InsighstRabbitMqService>();
-
-                var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
+                var mqProviderStr = this.Configuration.GetSection("MySettings").GetSection("MQProvider").Value;
                 var grafanaLokiUrl = this.Configuration.GetSection("MySettings").GetSection("GrafanaLokiUrl").Value;
-                services.AddSingleton<IRabbitMq2GrafanaLokiService>(new RabbitMq2GrafanaLokiService(insightsRabbitMqUrl, grafanaLokiUrl));
+                if (mqProviderStr == MQProviderEnum.Rabbit.ToString())
+                {
+                    var StartSleepTimeStr = this.Configuration.GetSection("MySettings").GetSection("StartSleepTime").Value;
+                    Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
+
+                    services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
+
+                    var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
+                    services.AddSingleton<IRabbitMq2GrafanaLokiService>(new RabbitMq2GrafanaLokiService(insightsRabbitMqUrl, grafanaLokiUrl));
+                }
+                else if (mqProviderStr == MQProviderEnum.Direct.ToString())
+                {
+                    services.AddSingleton<IInsighstMqService>(new InsightsDirectExporter(grafanaLokiUrl));
+                }
             }
 
         }

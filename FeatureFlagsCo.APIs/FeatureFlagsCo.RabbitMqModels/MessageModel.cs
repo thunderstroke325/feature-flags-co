@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FeatureFlagsCo.RabbitMqModels
+namespace FeatureFlagsCo.MQ
 {
     public class MessageModel
     {

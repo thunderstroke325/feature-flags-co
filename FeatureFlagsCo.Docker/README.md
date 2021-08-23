@@ -50,10 +50,27 @@ After docker compose started, please wait 2-3 minutes untill all services have b
 
 If you encounter probleme like ".entrypoint.sh" not found. Please change file format from CRLF to LF. Because file will be executed in Ubuntu but we edited in windows. (https://stackoverflow.com/questions/29140377/sh-file-not-found)
 
-# How to Do a Clean Restart of a Docker InstanceProcedure
+## How to Do a Clean Restart of a Docker InstanceProcedure
 
 Stop the container(s) using the following command: docker-compose down.
 Delete all containers using the following command: docker rm -f $(docker ps -a -q)
 Delete all volumes using the following command: docker volume rm $(docker volume ls -q)
 Restart the containers using the following command: docker-compose up -d
 
+# Import Docker Compose Container to VM (ubuntu 18.04)
+
+Run commands
+
+    // https://docs.docker.com/engine/install/ubuntu/
+    sudo apt-get update
+    sudo apt-get install apt-transport-https ca-certificates curl gnupg lsb-release
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo \
+        "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update
+    sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+
+
+docker stats --all

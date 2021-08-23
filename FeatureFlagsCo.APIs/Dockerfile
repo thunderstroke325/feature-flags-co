@@ -5,14 +5,16 @@ WORKDIR /source
 # copy csproj and restore as distinct layers
 COPY *.sln .
 COPY FeatureFlags.APIs/*.csproj ./FeatureFlags.APIs/
-COPY FeatureFlagsCo.RabbitMqModels/*.csproj ./FeatureFlagsCo.RabbitMqModels/
+COPY FeatureFlagsCo.MQ/*.csproj ./FeatureFlagsCo.MQ/
+COPY FeatureFlagsCo.MQ.DirectExporter/*.csproj ./FeatureFlagsCo.MQ.DirectExporter/
 COPY FeatureFlagsCo.APIs.Tests/*.csproj ./FeatureFlagsCo.APIs.Tests/
 COPY FeatureFlagsCo.RabbitMQToGrafanaLoki/*.csproj ./FeatureFlagsCo.RabbitMQToGrafanaLoki/
 RUN dotnet restore
 
 # copy everything else and build app
 COPY FeatureFlags.APIs/. ./FeatureFlags.APIs/
-COPY FeatureFlagsCo.RabbitMqModels/. ./FeatureFlagsCo.RabbitMqModels/
+COPY FeatureFlagsCo.MQ/. ./FeatureFlagsCo.MQ/
+COPY FeatureFlagsCo.MQ.DirectExporter/. ./FeatureFlagsCo.MQ.DirectExporter/
 COPY FeatureFlagsCo.APIs.Tests/. ./FeatureFlagsCo.APIs.Tests/
 COPY FeatureFlagsCo.RabbitMQToGrafanaLoki/. ./FeatureFlagsCo.RabbitMQToGrafanaLoki/
 WORKDIR /source/FeatureFlags.APIs
