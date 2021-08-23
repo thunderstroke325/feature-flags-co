@@ -1,3 +1,8 @@
+# Architecture
+
+![architecture](https://user-images.githubusercontent.com/68597908/130388173-dbdafb6f-49e5-4225-9f02-e1327bdcfde5.png)
+
+
 
 # Run Feature-Flags.co as a Product with Docker Compose
 
