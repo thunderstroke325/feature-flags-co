@@ -27,6 +27,11 @@ We currently provide two types of product:
 1. SaaS version run on Azure.
 2. Docker version run on a single machine.
 
+### Docker
+  
+For more docker-compose information, you can track page: https://github.com/feature-flags-co/feature-flags-co/tree/main/FeatureFlagsCo.Docker
+
+This version is a fullly open-sourced (almost) version which can be better controlled and used locally. This is also a free version which can be easily and quickly handled by small teams (and also earlier stage products).
 
 ### Azure 
 
@@ -34,17 +39,6 @@ You can try our online version in https://feature-flags.co. This version provide
 
 SaaS version uses advanced technics provided by Azure which is better in security, Operations and Maintenance, data analytics, High-availability, Scalability, devops and iteration, etc. 
 
-### Docker
-
-You can also run the entire feature-flags-co with Docker by running the following commands:
-  
-    cd FeatureFlagsCo.Docker
-    docker-compose -f docker-compose.yaml up
-  
-For more docker-compose information, you can track page: https://github.com/feature-flags-co/feature-flags-co/tree/main/FeatureFlagsCo.Docker
-
-This version is a fullly open-sourced version which can be better controlled and used locally. This is also a free version which can be easily and quickly handled by small teams (and also earlier stage products).
-  
 
 ## Release Announcement
 
