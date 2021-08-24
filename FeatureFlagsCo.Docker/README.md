@@ -3,30 +3,71 @@
 ![architecture](https://user-images.githubusercontent.com/68597908/130388173-dbdafb6f-49e5-4225-9f02-e1327bdcfde5.png)
 
 
+# Requirements of docker hosted system
 
-# Run Feature-Flags.co as a Product with Docker Compose
+|                  | CPU          | Memory |  Disk    | Ssytem                             |
+| Cost-effective   | 2 * 1.30Ghz  | 4GB    |  128GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
+| Recommended      | 4 * 1.3Ghz   | 16GB   |  256GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
+| High Performance | X * 4.2Ghz   | 32GB+  |  512GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
 
-You can also run the entire feature-flags-co with Docker by running the following commands:
+Run different docker commands for different case:
+
+- Run Docker for Cost-effective solution
+- Run Docker for Recommended solution
+- Run Docker for local development
+- Run Docker for local development (portal only)
+- Run Docker for local development (API only)
+
+## Run Docker for Cost-effective solution
+
+Cost-effective solution provide an product level system. It means you can play with feature-flags-co without coding. This version use a async telemetry collector, this allows system can be running with low computing resources. Disadvantage is this version has doesn't support high concurrent requests.
+
+You can run the entire feature-flags-co service with Docker by running the following commands:
 
     cd FeatureFlagsCo.Docker
-    docker-compose -f docker-compose.yaml up
+    docker-compose --profile costeffective up
 
-Before running commands above, please make sure you have configured projects as a Docker version.
 
-1. In project FeatureFlags.APIs, set `ASPNETCORE_ENVIRONMENT` to `Local`. Right click on project "FeatureFlags.APIs" -> click on "Properties" -> choose tab "Debug" -> In "Environment variables" section, set `ASPNETCORE_ENVIRONMENT` to `Local` -> Save
-2. In file `FeatureFlagsCo.Portal/src/environments/environment.standalone.ts`, make sure you have configured with values you desired. 
+After docker compose started, please wait 30-50 secondes untill all services have been successfully etablished.
 
-Here is an example (running in local) of configuration of file `FeatureFlagsCo.Portal/src/environments/environment.standalone.ts`
+## Run Docker for Recommended solution
 
-    export const environment = {
-      production: false,  
-      projectEnvKey: '',  
-      url: 'http://localhost:5001',  // url of api service
-      name: 'Standalone',
-      statisticUrl: 'http://localhost:3000'   // url of grafana service
-    };
+Recommended solution provide an product level system. This use an "InsightsExporter" to collect data and send data to a message queue instead of save directly to file/database.
+
+You can run the entire feature-flags-co service with Docker by running the following commands:
+
+    cd FeatureFlagsCo.Docker
+    docker-compose --profile recommended up
+
 
 After docker compose started, please wait 2-3 minutes untill all services have been successfully etablished. RabbitMQ take more times than other services, API services will run after the RabbitMQ started.
+
+## Development on local
+
+This solution will start all services except api, portal and rabbitmq.
+
+You can run by following commands:
+
+    cd FeatureFlagsCo.Docker
+    docker-compose --profile development up
+
+If you want to just develop app frontend portal, you can run by following commands:
+
+    cd FeatureFlagsCo.Docker
+    docker-compose --profile developmentportal up
+
+This will start all services except portal and rabbitmq.
+
+If you want to just develop api, you can run by following commands:
+
+    cd FeatureFlagsCo.Docker
+    docker-compose --profile developmentapi up
+
+This will start all services except api and rabbitmq.
+
+
+After docker compose started, please wait 30-50 secondes untill all services have been successfully etablished.
+
 
 ## Initial values
 
@@ -57,11 +98,4 @@ Delete all containers using the following command: docker rm -f $(docker ps -a -
 Delete all volumes using the following command: docker volume rm $(docker volume ls -q)
 Restart the containers using the following command: docker-compose up -d
 
-# Requirements
-
-|                  | CPU          | Memory |  Disk    | Ssytem                             |
-| Minimum          | 1.50Ghz      | 3GB    |  64GB    | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
-| Cost-effective   | 2 * 1.30Ghz  | 4GB    |  128GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
-| Recommended      | 4 * 1.3Ghz   | 16GB   |  256GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
-| High Performance | X * 4.2Ghz   | 32GB+  |  512GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
 

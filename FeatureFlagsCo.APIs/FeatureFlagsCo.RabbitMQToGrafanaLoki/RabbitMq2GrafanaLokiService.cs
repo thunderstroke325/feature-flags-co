@@ -81,7 +81,7 @@ namespace FeatureFlagsCo.RabbitMQToGrafanaLoki
                             message = Encoding.UTF8.GetString(body);
                             Console.WriteLine(message);
                             var messageModel = JsonConvert.DeserializeObject<MessageModel>(message);
-                            await WriteToGrafanaLokiAsync(messageModel);
+                            await WriteToGrafanaLokiAsync(messageModel, _lokiHostName);
                         }
                         catch (AggregateException aexp)
                         {
@@ -111,7 +111,7 @@ namespace FeatureFlagsCo.RabbitMQToGrafanaLoki
             }
         }
 
-        private async Task WriteToGrafanaLokiAsync(MessageModel message)
+        private async Task WriteToGrafanaLokiAsync(MessageModel message, string lokiHostName)
         {
             Console.WriteLine("WriteToGrafanaLokiAsync");
             var streams = new ExpandoObject();
@@ -146,17 +146,25 @@ namespace FeatureFlagsCo.RabbitMQToGrafanaLoki
                 Console.WriteLine("Sending message to loki service");
                 using (var client = new HttpClient())
                 {
-                    client.DefaultRequestHeaders.Accept.TryParseAdd("application/json");
-                    HttpContent content = new StringContent(JsonConvert.SerializeObject(body));
-                    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-                    //由HttpClient发出异步Post请求
-                    HttpResponseMessage res = await client.PostAsync($"http://{_lokiHostName}:3100/loki/api/v1/push", content);
-                    if (res.StatusCode == System.Net.HttpStatusCode.NoContent)
+                    try
                     {
-                        Console.WriteLine("Message Sent.");
-                        break;
+                        client.DefaultRequestHeaders.Accept.TryParseAdd("application/json");
+                        HttpContent content = new StringContent(JsonConvert.SerializeObject(body));
+                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                        //由HttpClient发出异步Post请求
+                        HttpResponseMessage res = await client.PostAsync($"http://{lokiHostName}:3100/loki/api/v1/push", content);
+                        Console.WriteLine("Code:" + res.StatusCode.ToString());
+                        if (res.StatusCode == System.Net.HttpStatusCode.NoContent)
+                        {
+                            Console.WriteLine("Message Sent.");
+                            break;
+                        }
+                        await Task.Delay(500);
                     }
-                    await Task.Delay(500);
+                    catch(Exception exp)
+                    {
+                        Console.WriteLine(exp.Message);
+                    }
                 }
                 i++;
             }

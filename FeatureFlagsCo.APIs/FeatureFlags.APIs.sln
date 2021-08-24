@@ -6,7 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevOps", "DevOps", "{56DC8120-F7DB-46B9-AF69-191037C1D42D}"
 	ProjectSection(SolutionItems) = preProject
 		azure-pipelines.yml = azure-pipelines.yml
-		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs", "FeatureFlags.APIs\FeatureFlags.APIs.csproj", "{DB0AA70E-2760-4AAC-8832-CB6E2337324C}"
@@ -15,9 +14,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlags.APIs.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.RabbitMQToGrafanaLoki", "FeatureFlagsCo.RabbitMQToGrafanaLoki\FeatureFlagsCo.RabbitMQToGrafanaLoki.csproj", "{384BCC44-8BE0-4F0B-A50A-CBF4A5CC925F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlagsCo.MQ.DirectExporter", "FeatureFlagsCo.MQ.DirectExporter\FeatureFlagsCo.MQ.DirectExporter.csproj", "{55A037D1-53DB-4859-B16B-5A2BE75F42C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.MQ.DirectExporter", "FeatureFlagsCo.MQ.DirectExporter\FeatureFlagsCo.MQ.DirectExporter.csproj", "{55A037D1-53DB-4859-B16B-5A2BE75F42C6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.MQ", "FeatureFlagsCo.MQ\FeatureFlagsCo.MQ.csproj", "{315089A5-55D7-4D75-B072-7396A3053789}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Recommended", "Recommended", "{8E8806B6-1948-4B56-9064-95E400ABB0A2}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfiles\Recommended\Dockerfile = Dockerfiles\Recommended\Dockerfile
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CostEffective", "CostEffective", "{A352CC7F-77CF-433F-8DEA-35D4551AD3AC}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfiles\CostEffective\Dockerfile = Dockerfiles\CostEffective\Dockerfile
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +57,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8E8806B6-1948-4B56-9064-95E400ABB0A2} = {56DC8120-F7DB-46B9-AF69-191037C1D42D}
+		{A352CC7F-77CF-433F-8DEA-35D4551AD3AC} = {56DC8120-F7DB-46B9-AF69-191037C1D42D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D9438C6D-E691-4012-A07F-96471322805E}

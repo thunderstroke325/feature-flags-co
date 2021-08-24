@@ -105,7 +105,7 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpGet]
         [Route("ReturnTest200")]
-        public JsonResult ReturnTest200()
+        public async Task<JsonResult> ReturnTest200()
         {
             var date = Guid.NewGuid().ToString();
             var customizedTraceProperties = new Dictionary<string, object>()
@@ -119,7 +119,7 @@ namespace FeatureFlags.APIs.Controllers
             _redisCache.SetString(date, JsonConvert.SerializeObject(customizedTraceProperties));
             _redisCache.GetString(date);
             Response.StatusCode = 200;
-            _rabbitmqInsightsService.SendMessage(new FeatureFlagsCo.MQ.MessageModel
+            await _rabbitmqInsightsService.SendMessageAsync(new FeatureFlagsCo.MQ.MessageModel
             {
                 Labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
                  {

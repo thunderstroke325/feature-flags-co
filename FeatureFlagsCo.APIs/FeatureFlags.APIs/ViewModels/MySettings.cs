@@ -30,12 +30,15 @@ namespace FeatureFlags.APIs.ViewModels
 
     public enum HostingTypeEnum
     {
-        Local,
+        DockerCostEffective,
+        DockerDevelopment,
+        DockerRecommended,
         Azure
     }
     public enum MQProviderEnum
     {
         Rabbit,
-        Direct
+        Direct,
+        None
     }
 }

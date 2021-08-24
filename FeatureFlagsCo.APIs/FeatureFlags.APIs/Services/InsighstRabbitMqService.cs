@@ -21,27 +21,25 @@ namespace FeatureFlags.APIs.Services
         public InsighstRabbitMqService(IOptions<MySettings> mySettings)
         {
             _mySettings = mySettings;
-            if(_mySettings.Value.HostingType == HostingTypeEnum.Local.ToString())
+
+            _connectionFactory = new ConnectionFactory() { HostName = _mySettings.Value.InsightsRabbitMqUrl };
+            _connection = _connectionFactory.CreateConnection();
+            _connection.CallbackException += Connection_CallbackException;
+            _connection.ConnectionShutdown += Connection_ConnectionShutdown;
+            _connection.ConnectionBlocked += Connection_ConnectionBlocked;
+            _channel = _connection.CreateModel();
+            _channel.QueueDeclare(queue: "hello",
+                                    durable: false,
+                                    exclusive: false,
+                                    autoDelete: false,
+                                    arguments: null);
+            this.SendMessage(new MessageModel
             {
-                _connectionFactory = new ConnectionFactory() { HostName = _mySettings.Value.InsightsRabbitMqUrl };
-                _connection = _connectionFactory.CreateConnection();
-                _connection.CallbackException += Connection_CallbackException;
-                _connection.ConnectionShutdown += Connection_ConnectionShutdown;
-                _connection.ConnectionBlocked += Connection_ConnectionBlocked;
-                _channel = _connection.CreateModel();
-                _channel.QueueDeclare(queue: "hello",
-                                        durable: false,
-                                        exclusive: false,
-                                        autoDelete: false,
-                                        arguments: null);
-                this.SendMessage(new MessageModel
-                {
-                    Labels = new List<MessageLabel> { new MessageLabel { LabelName = "API Init", LabelValue = DateTime.UtcNow.ToLongDateString() } },
-                    Message = "InsighstRabbitMqService Connected",
-                    SendDateTime = DateTime.UtcNow
-                });
-                _channel.CallbackException += Channel_CallbackException;
-            }
+                Labels = new List<MessageLabel> { new MessageLabel { LabelName = "API Init", LabelValue = DateTime.UtcNow.ToLongDateString() } },
+                Message = "InsighstRabbitMqService Connected",
+                SendDateTime = DateTime.UtcNow
+            });
+            _channel.CallbackException += Channel_CallbackException;
         }
 
         private void Channel_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
@@ -84,5 +82,9 @@ namespace FeatureFlags.APIs.Services
             Console.WriteLine(message);
         }
 
+        public Task SendMessageAsync(MessageModel message)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

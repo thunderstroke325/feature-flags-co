@@ -14,6 +14,12 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - ffc
+    profiles:
+      - costeffective
+      - recommended
+      - development
+      - developmentportal
+      - developmentapi
 
   promtail:
     image: grafana/promtail:2.3.0
@@ -24,6 +30,12 @@ services:
     command: -config.file=/etc/promtail/config.yml
     networks:
       - ffc
+    profiles:
+      - costeffective
+      - recommended
+      - development
+      - developmentportal
+      - developmentapi
 
   grafana:
     image: grafana/grafana:latest
@@ -36,20 +48,30 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     networks:
       - ffc
+    profiles:
+      - costeffective
+      - recommended
+      - development
+      - developmentportal
+      - developmentapi
 
-  # rabbitmq:
-  #   image: rabbitmq:3.9-management
-  #   container_name: rabbitmq
-  #   restart: always
-  #   hostname: rabbitmq
-  #   ports:
-  #     - 15672:15672
-  #     - 5672:5672
-  #   volumes:
-  #     - ./data:/var/lib/rabbitmq
-  #     # - ./docker-entrypoint-initdb.d/rabbitmq.conf:/var/lib/rabbitmq/rabbitmq.conf
-  #   networks:
-  #     - ffc
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: rabbitmq
+    restart: always
+    hostname: rabbitmq
+    ports:
+      - 15672:15672
+      - 5672:5672
+    volumes:
+      - ./data:/var/lib/rabbitmq
+    networks:
+      - ffc
+    profiles:
+      - recommended
+      # - development
+      # - developmentportal
+      # - developmentapi
 
   mongodb:
     image: mongo
@@ -65,18 +87,29 @@ services:
       - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - ffc
-  # mongo-express:
-  #   image: mongo-express
-  #   container_name: mongo-express
-  #   ports:
-  #     - 8081:8081
-  #   environment:
-  #     - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
-  #     - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-  #     - ME_CONFIG_MONGODB_SERVER=mongodb
-  #   restart: unless-stopped
-  #   networks:
-  #     - ffc
+    profiles:
+      - costeffective
+      - recommended
+      - development
+      - developmentportal
+      - developmentapi
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+    restart: unless-stopped
+    networks:
+      - ffc
+    profiles:
+      - recommended
+      - development
+      - developmentportal
+      - developmentapi
 
 
   # mssqldata:
@@ -101,23 +134,43 @@ services:
       - MSSQL_PID=Express
     networks:
       - ffc
+    profiles:
+      - costeffective
+      - recommended
+      - development
+      - developmentportal
+      - developmentapi
     # # don't use this if you don't want to persit data between docker up and down
     # volumes_from:
     #   - mssqldata
 
-  api:
+  costEffectiveApi:
     build:
       context: ../FeatureFlagsCo.APIs
-      dockerfile: Dockerfile
+      dockerfile: ../FeatureFlagsCo.APIs/Dockerfiles/CostEffective/Dockerfile
     image: ffc-api
     container_name: api
     ports:
       - 5001:5001
-    # restart: unless-stopped
     networks:
       - ffc
+    profiles:
+      - costeffective
+      - developmentportal
+      - apionly
+  recommendedApi:
+    build:
+      context: ../FeatureFlagsCo.APIs
+      dockerfile: ../FeatureFlagsCo.APIs/Dockerfiles/Recommended/Dockerfile
+    image: ffc-api
+    container_name: api
+    ports:
+      - 5001:5001
+    networks:
+      - ffc
+    profiles:
+      - recommended
 
-  
   portal:
     build:
       context: ../FeatureFlagsCo.Portal
@@ -130,3 +183,7 @@ services:
     ports:
       - 4200:80
     restart: unless-stopped
+    profiles:
+      - costeffective
+      - recommended
+      - developmentapi

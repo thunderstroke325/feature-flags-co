@@ -154,30 +154,6 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddTransient<IAppInsightsService, AppInsightsService>();
 
 
-            Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
-                    = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
-            aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights").GetSection("InstrumentationKey").Value;
-            aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights").GetSection("ConnectionString").Value;
-            aiOptions.EnableAdaptiveSampling = false;
-            aiOptions.EnableDependencyTrackingTelemetryModule = false;
-            aiOptions.EnableAppServicesHeartbeatTelemetryModule = false;
-            aiOptions.EnablePerformanceCounterCollectionModule = false;
-            aiOptions.EnableEventCounterCollectionModule = false;
-            aiOptions.EnableRequestTrackingTelemetryModule = false;
-            services.AddApplicationInsightsTelemetry(aiOptions);
-
-            if (CurrentEnvironment.EnvironmentName != "Production")
-            {
-                services.AddDistributedMemoryCache();
-            }
-            else
-            {
-                services.AddStackExchangeRedisCache(options =>
-                {
-                    options.Configuration = this.Configuration.GetConnectionString("RedisServerUrl");
-                    options.InstanceName = "feature-flags-users";
-                });
-            }
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -196,9 +172,26 @@ namespace FeatureFlags.AdminWebAPIs
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
 
             if (hostingType == HostingTypeEnum.Azure.ToString())
+            {
                 services.AddSingleton<INoSqlService>(
                     InitializeCosmosClientInstanceAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
-            else if (hostingType == HostingTypeEnum.Local.ToString())
+
+
+                Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
+                        = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
+                aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights").GetSection("InstrumentationKey").Value;
+                aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights").GetSection("ConnectionString").Value;
+                aiOptions.EnableAdaptiveSampling = false;
+                aiOptions.EnableDependencyTrackingTelemetryModule = false;
+                aiOptions.EnableAppServicesHeartbeatTelemetryModule = false;
+                aiOptions.EnablePerformanceCounterCollectionModule = false;
+                aiOptions.EnableEventCounterCollectionModule = false;
+                aiOptions.EnableRequestTrackingTelemetryModule = false;
+                services.AddApplicationInsightsTelemetry(aiOptions);
+            }
+            if(hostingType == HostingTypeEnum.DockerCostEffective.ToString() ||
+               hostingType == HostingTypeEnum.DockerRecommended.ToString() ||
+               hostingType == HostingTypeEnum.DockerDevelopment.ToString())
             {
                 services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
                 services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
@@ -206,23 +199,37 @@ namespace FeatureFlags.AdminWebAPIs
                 services.AddSingleton<MongoDbEnvironmentUserService>();
                 services.AddSingleton<MongoDbEnvironmentUserPropertyService>();
                 services.AddSingleton<INoSqlService, MongoDbService>();
+            }
+            var mqProviderStr = this.Configuration.GetSection("MySettings").GetSection("MQProvider").Value;
+            var grafanaLokiUrl = this.Configuration.GetSection("MySettings").GetSection("GrafanaLokiUrl").Value;
+            if (hostingType == HostingTypeEnum.DockerRecommended.ToString())
+            {
+                var StartSleepTimeStr = this.Configuration.GetSection("MySettings").GetSection("StartSleepTime").Value;
+                Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
 
-                var mqProviderStr = this.Configuration.GetSection("MySettings").GetSection("MQProvider").Value;
-                var grafanaLokiUrl = this.Configuration.GetSection("MySettings").GetSection("GrafanaLokiUrl").Value;
-                if (mqProviderStr == MQProviderEnum.Rabbit.ToString())
+                services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
+
+                var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
+                services.AddSingleton<IRabbitMq2GrafanaLokiService>(new RabbitMq2GrafanaLokiService(insightsRabbitMqUrl, grafanaLokiUrl));
+            }
+            else if(hostingType == HostingTypeEnum.DockerCostEffective.ToString() ||
+                    hostingType == HostingTypeEnum.DockerDevelopment.ToString())
+            {
+                services.AddSingleton<IInsighstMqService>(new InsightsDirectExporter(grafanaLokiUrl));
+            }
+
+
+            if (CurrentEnvironment.EnvironmentName != "Production")
+            {
+                services.AddDistributedMemoryCache();
+            }
+            else
+            {
+                services.AddStackExchangeRedisCache(options =>
                 {
-                    var StartSleepTimeStr = this.Configuration.GetSection("MySettings").GetSection("StartSleepTime").Value;
-                    Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
-
-                    services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
-
-                    var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
-                    services.AddSingleton<IRabbitMq2GrafanaLokiService>(new RabbitMq2GrafanaLokiService(insightsRabbitMqUrl, grafanaLokiUrl));
-                }
-                else if (mqProviderStr == MQProviderEnum.Direct.ToString())
-                {
-                    services.AddSingleton<IInsighstMqService>(new InsightsDirectExporter(grafanaLokiUrl));
-                }
+                    options.Configuration = this.Configuration.GetConnectionString("RedisServerUrl");
+                    options.InstanceName = "feature-flags-users";
+                });
             }
 
         }

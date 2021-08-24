@@ -17,6 +17,11 @@ namespace FeatureFlagsCo.MQ.DirectExporter
 
         public void SendMessage(MessageModel message)
         {
+            throw new NotImplementedException();
+        }
+
+        public async Task SendMessageAsync(MessageModel message)
+        {
             Console.WriteLine("WriteToGrafanaLokiAsync");
             var streams = new ExpandoObject();
             if (message.Labels != null && message.Labels.Count > 0)
@@ -50,26 +55,21 @@ namespace FeatureFlagsCo.MQ.DirectExporter
                 client.DefaultRequestHeaders.Accept.TryParseAdd("application/json");
                 HttpContent content = new StringContent(JsonConvert.SerializeObject(body));
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-                var run = Task.Run(async () =>
+                int i = 0;
+                while (i < 5)
                 {
-                    int i = 0;
-                    while (i < 5)
+                    //由HttpClient发出异步Post请求
+                    HttpResponseMessage res = await client.PostAsync($"http://{_lokiHostName}:3100/loki/api/v1/push", content);
+                    if (res.StatusCode == System.Net.HttpStatusCode.NoContent)
                     {
-                        //由HttpClient发出异步Post请求
-                        HttpResponseMessage res = await client.PostAsync($"http://{_lokiHostName}:3100/loki/api/v1/push", content);
-                        if (res.StatusCode == System.Net.HttpStatusCode.NoContent)
-                        {
-                            Console.WriteLine("Message Sent.");
-                            break;
-                        }
-                        await Task.Delay(500);
-                        i++;
+                        Console.WriteLine("Message Sent.");
+                        break;
                     }
-                });
-                run.Wait();
+                    await Task.Delay(500);
+                    i++;
+                }
             }
         }
-
     }
 
 

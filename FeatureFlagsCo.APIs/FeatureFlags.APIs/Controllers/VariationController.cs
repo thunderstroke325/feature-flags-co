@@ -100,7 +100,7 @@ namespace FeatureFlags.APIs.Controllers
         [Route("GetMultiOptionVariation")]
         public async Task<JsonResult> GetMultiOptionVariation([FromBody] GetUserVariationResultParam param)
         {
-            if(param == null)
+            if (param == null)
             {
                 Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
                 return new JsonResult("Parameter incorrect");
@@ -135,9 +135,11 @@ namespace FeatureFlags.APIs.Controllers
                     ffIdVM);
 
 
-                if(_mySettings.Value.HostingType == HostingTypeEnum.Local.ToString())
+                if (_mySettings.Value.HostingType == HostingTypeEnum.DockerCostEffective.ToString() ||
+                    _mySettings.Value.HostingType == HostingTypeEnum.DockerDevelopment.ToString() ||
+                    _mySettings.Value.HostingType == HostingTypeEnum.DockerRecommended.ToString())
                 {
-                    SendToRabbitMqThenGrafana(param, ffIdVM, returnResult);
+                    await SendToRabbitMqThenGrafana(param, ffIdVM, returnResult);
                 }
                 else if (_mySettings.Value.HostingType == HostingTypeEnum.Azure.ToString())
                 {
@@ -173,7 +175,7 @@ namespace FeatureFlags.APIs.Controllers
             }
         }
 
-        private void SendToRabbitMqThenGrafana(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, Tuple<VariationOption, bool> returnResult)
+        private async Task SendToRabbitMqThenGrafana(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, Tuple<VariationOption, bool> returnResult)
         {
             var labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
                          {
@@ -239,12 +241,24 @@ namespace FeatureFlags.APIs.Controllers
                     });
                 }
             }
-            _insightsService.SendMessage(new FeatureFlagsCo.MQ.MessageModel
+            if(_mySettings.Value.MQProvider == MQProviderEnum.Rabbit.ToString())
             {
-                SendDateTime = DateTime.UtcNow,
-                Labels = labels,
-                Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam())
-            });
+                _insightsService.SendMessage(new FeatureFlagsCo.MQ.MessageModel
+                {
+                    SendDateTime = DateTime.UtcNow,
+                    Labels = labels,
+                    Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam())
+                });
+            }
+            else if(_mySettings.Value.MQProvider == MQProviderEnum.Direct.ToString())
+            {
+                await _insightsService.SendMessageAsync(new FeatureFlagsCo.MQ.MessageModel
+                {
+                    SendDateTime = DateTime.UtcNow,
+                    Labels = labels,
+                    Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam())
+                });
+            }
         }
     }
 }
