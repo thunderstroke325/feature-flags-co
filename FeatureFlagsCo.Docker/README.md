@@ -6,6 +6,7 @@
 # Requirements of docker hosted system
 
 |                  | CPU          | Memory |  Disk    | Ssytem                             |
+| ---------------- | ------------ | ------ | -------- | ---------------------------------- |
 | Cost-effective   | 2 * 1.30Ghz  | 4GB    |  128GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
 | Recommended      | 4 * 1.3Ghz   | 16GB   |  256GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
 | High Performance | X * 4.2Ghz   | 32GB+  |  512GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
