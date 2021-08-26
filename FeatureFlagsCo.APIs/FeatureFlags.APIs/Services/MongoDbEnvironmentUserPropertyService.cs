@@ -12,11 +12,29 @@ namespace FeatureFlags.APIs.Services
     {
         private readonly IMongoCollection<EnvironmentUserProperty> _environmentUserProperties;
 
+        public async Task UpsertItemAsync(EnvironmentUserProperty item)
+        {
+            var existingItem = await GetAsync(item.Id);
+            if (existingItem != null)
+            {
+                await UpdateAsync(item.Id, item);
+            }
+            else
+            {
+                await CreateAsync(item);
+            }
+        }
+
         public MongoDbEnvironmentUserPropertyService(IMongoDbSettings settings)
         {
             var client = new MongoClient(settings.ConnectionString);
             var database = client.GetDatabase(settings.DatabaseName);
             _environmentUserProperties = database.GetCollection<EnvironmentUserProperty>("EnvironmentUserProperties");
+        }
+
+        public async Task<List<EnvironmentUserProperty>> GetByEnvironmentAsync(int envId)
+        {
+            return await _environmentUserProperties.Find(p => p.EnvironmentId == envId).ToListAsync();
         }
 
         public List<EnvironmentUserProperty> Get() =>

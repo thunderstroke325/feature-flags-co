@@ -1,5 +1,6 @@
 ﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels;
+using FeatureFlags.APIs.ViewModels.DataSync;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
 using Microsoft.Azure.Cosmos;
 using MongoDB.Driver;
@@ -53,6 +54,45 @@ namespace FeatureFlags.APIs.Services
         }
         #endregion
 
+        public async Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data) 
+        {
+            data.FeatureFlags.ForEach(async ff => {
+                ff.EnvironmentId = envId;
+                await this._mongoFeatureFlagsService.UpsertItemAsync(ff);
+            });
+
+            data.EnvironmentUsers.ForEach(async u => {
+                u.EnvironmentId = envId;
+                await this._mongoEnvironmentUsersService.UpsertItemAsync(u);
+            });
+
+            if (data.EnvironmentUserProperties != null)
+            {
+                data.EnvironmentUserProperties.EnvironmentId = envId;
+                await this._mongoEnvironmentUserPropertiesService.UpsertItemAsync(data.EnvironmentUserProperties);
+            }
+        }
+
+        
+        public async Task<List<T>> GetEnvironmentDataAsync<T>(int envId)
+        {
+            var result = new List<T>();
+
+            if (typeof(T) == typeof(FeatureFlag))
+            {
+                result = (await _mongoFeatureFlagsService.GetByEnvironmentAsync(envId)) as List<T>;
+            }
+            else if (typeof(T) == typeof(EnvironmentUser))
+            {
+                result = (await _mongoEnvironmentUsersService.GetByEnvironmentAsync(envId)) as List<T>;
+            }
+            else if (typeof(T) == typeof(EnvironmentUserProperty))
+            {
+                result = (await _mongoEnvironmentUserPropertiesService.GetByEnvironmentAsync(envId)) as List<T>;
+            }
+
+            return result;
+        }
 
         public async Task<EnvironmentUser> AddEnvironmentUserAsync(EnvironmentUser item)
         {

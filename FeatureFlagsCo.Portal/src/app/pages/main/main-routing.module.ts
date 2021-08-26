@@ -33,6 +33,13 @@ const routes: Routes = [
         },
       },
       {
+        path: 'data-sync',
+        loadChildren: () => import("./data-sync/data-sync.module").then(m => m.DataSyncModule),
+        data: {
+          breadcrumb: '数据同步'
+        },
+      },
+      {
         path: 'account-settings',
         loadChildren: () => import("./account-settings/account-settings.module").then(m => m.AccountSettingsModule),
         data: {

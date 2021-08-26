@@ -1,5 +1,6 @@
 ﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels;
+using FeatureFlags.APIs.ViewModels.DataSync;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
 using Microsoft.Azure.Cosmos;
 using System;
@@ -9,7 +10,12 @@ using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
 {
-    public class CosmosDbService: INoSqlService
+    class CosmosDbCountResult 
+    {
+        int Count { get; set; }
+    }
+
+    public class CosmosDbService : INoSqlService
     {
         private Container _container;
 
@@ -270,7 +276,7 @@ namespace FeatureFlags.APIs.Services
                     else
                     {
                         var fftu = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId);
-                        if(fftu != null)
+                        if (fftu != null)
                         {
                             item.PercentageRolloutForFalseNumber = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId).PercentageRolloutForFalseNumber;
                             item.PercentageRolloutForTrueNumber = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId).PercentageRolloutForTrueNumber;
@@ -362,10 +368,98 @@ namespace FeatureFlags.APIs.Services
             return await this._container.ReadItemAsync<FeatureFlag>(id, new PartitionKey(id));
         }
 
+        private async Task<int> GetDataCount(int envId, string objectType)
+        {
+            int totalCount = 0;
+
+            QueryDefinition queryDefinition = new QueryDefinition("select value count(1) from f where f.EnvironmentId = @envId and f.ObjectType = @objectType")
+                .WithParameter("@envId", envId)
+                .WithParameter("@objectType", objectType);
+
+            using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
+            {
+                while (feedIterator.HasMoreResults)
+                {
+                    FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
+                    foreach (var item in response)
+                    {
+                        totalCount = (int)item;
+                    }
+                }
+            }
+
+            return totalCount;
+        }
+
+        public async Task<List<T>> GetEnvironmentDataAsync<T>(int envId)
+        {
+            var result = new List<T>();
+            int pageSize = 1000;
+            string objectType = string.Empty;
+
+            if (typeof(T) == typeof(FeatureFlag))
+            {
+                objectType = "FeatureFlag";
+            }
+            else if (typeof(T) == typeof(EnvironmentUser))
+            {
+                objectType = "EnvironmentUser";
+            }
+            else if (typeof(T) == typeof(EnvironmentUserProperty)) {
+                objectType = "EnvironmentUserProperties";
+            }
+
+            int totalCount = await GetDataCount(envId, objectType);
+
+            for (int pageIndex = 0; pageIndex <= totalCount / pageSize; pageIndex++)
+            {
+                QueryDefinition queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @envId and f.ObjectType = @objectType offset @offsetNumber limit @pageSize")
+                    .WithParameter("@envId", envId)
+                    .WithParameter("@objectType", objectType)
+                    .WithParameter("@offsetNumber", pageIndex * pageSize)
+                    .WithParameter("@pageSize", pageSize);
+
+                using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
+                {
+                    while (feedIterator.HasMoreResults)
+                    {
+                        Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
+                        foreach (var item in response)
+                        {
+                            result.Add(item.ToObject<T>());
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public async Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data) 
+        {
+            data.FeatureFlags.ForEach(async ff => {
+                ff.EnvironmentId = envId;
+                await this._container.UpsertItemAsync(ff); 
+            });
+
+            data.EnvironmentUsers.ForEach(async u => {
+                u.EnvironmentId = envId;
+                await this._container.UpsertItemAsync(u);
+            });
+
+            if (data.EnvironmentUserProperties != null)
+            {
+                data.EnvironmentUserProperties.EnvironmentId = envId;
+                await this._container.UpsertItemAsync(data.EnvironmentUserProperties);
+            }
+
+            // TODO refresh cache
+        }
+
         public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentFeatureFlagBasicInfoItemsAsync(int environmentId, int pageIndex = 0, int pageSize = 100)
         {
             var returnResult = new List<FeatureFlagBasicInfo>();
-                var results = new List<FeatureFlag>();
+                
             QueryDefinition queryDefinition = new QueryDefinition("select * from f where f.EnvironmentId = @environmentId and f.IsArchived != true and f.ObjectType = 'FeatureFlag' offset @offsetNumber limit @pageSize")
                 .WithParameter("@environmentId", environmentId)
                 .WithParameter("@offsetNumber", pageIndex * pageSize)
@@ -410,7 +504,6 @@ namespace FeatureFlags.APIs.Services
             }
             return returnResult;
         }
-
 
 
         public async Task<int> QueryEnvironmentUsersCountAsync(string searchText, int environmentId, int pageIndex, int pageSize)

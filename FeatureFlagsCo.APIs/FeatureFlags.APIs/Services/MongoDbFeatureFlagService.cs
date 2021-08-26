@@ -22,6 +22,11 @@ namespace FeatureFlags.APIs.Services
         public List<FeatureFlag> Get() =>
             _featureFlags.Find(p => p.ObjectType == "FeatureFlag").ToList();
 
+        public async Task<List<FeatureFlag>> GetByEnvironmentAsync(int envId)
+        {
+            return await _featureFlags.Find(p => p.EnvironmentId == envId).ToListAsync();
+        }
+
         public async Task<List<FeatureFlag>> SearchAsync(string searchText, int environmentId, int pageIndex, int pageSize)
         {
             if (string.IsNullOrWhiteSpace(searchText))
@@ -38,6 +43,19 @@ namespace FeatureFlags.APIs.Services
         public async Task<FeatureFlag> GetAsync(string id) =>
             await _featureFlags.Find<FeatureFlag>(book => book.Id == id).FirstOrDefaultAsync();
 
+
+        public async Task UpsertItemAsync(FeatureFlag item)
+        {
+            var existingItem = await GetAsync(item.Id);
+            if (existingItem != null)
+            {
+                await UpdateAsync(item.Id, item);
+            }
+            else 
+            {
+                await CreateAsync(item);
+            }
+        }
 
         public async Task<FeatureFlag> CreateAsync(FeatureFlag book)
         {

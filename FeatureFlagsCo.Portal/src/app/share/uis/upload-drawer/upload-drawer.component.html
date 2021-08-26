@@ -1,0 +1,31 @@
+<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzWidth]="500" (nzOnClose)="onClose()">
+    <ng-container *nzDrawerContent>
+      <nz-spin [nzSpinning]="isUploading" nzTip="上传中...">
+        <div class="upload-drawer-layout">
+          <!-- <section>
+            <h5 nz-typography>请选择导入开关用户的方式 ：</h5>
+            <nz-radio-group [(ngModel)]="userUpdateMode">
+              <label *ngFor="let option of userUpdateModeOptions" nz-radio nzValue={{option.mode}}>{{option.label}}</label>
+            </nz-radio-group>
+          </section>
+          <br> -->
+          <section>
+            <h5 nz-typography>请选择要上传的文件（仅支持 json 文件）<a class="template-link" href="/assets/upload_example.json" target="_blank">点击查看模板</a> :</h5>
+            <nz-upload
+                    [nzAction]="uploadUrl"
+                    [nzHeaders]="{ authorization: 'authorization-text' }"
+                    [nzData]="{ userUpdateMode: userUpdateMode }"
+                    [(nzFileList)]="fileList"
+                    (nzChange)="handleChange($event)"
+                  >
+                    <button nz-button>
+                      <i nz-icon nzType="upload"></i>
+                      点击选择并上传文件
+                    </button>
+                  </nz-upload>
+          </section>
+        </div>
+      </nz-spin>
+    </ng-container>
+</nz-drawer>
+

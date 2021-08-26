@@ -153,7 +153,7 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddScoped<IVariationService, VariationService>();
             services.AddTransient<IAppInsightsService, AppInsightsService>();
 
-
+            services.AddScoped<IDataSyncService, DataSyncService>();
 
             services.Configure<IdentityOptions>(options =>
             {

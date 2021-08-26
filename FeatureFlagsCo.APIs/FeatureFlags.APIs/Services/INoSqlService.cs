@@ -1,5 +1,6 @@
 ﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels;
+using FeatureFlags.APIs.ViewModels.DataSync;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,8 @@ namespace FeatureFlags.APIs.Services
         Task<int> TrueFalseStatusGetFeatureFlagHitUsersAsync(string featureFlagId);
         #endregion
 
+        Task<List<T>> GetEnvironmentDataAsync<T>(int envId);
+        Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data);
 
         Task<List<EnvironmentUser>> QueryEnvironmentUsersAsync(string searchText, int environmentId, int pageIndex, int pageSize);
         Task<int> QueryEnvironmentUsersCountAsync(string searchText, int environmentId, int pageIndex, int pageSize);

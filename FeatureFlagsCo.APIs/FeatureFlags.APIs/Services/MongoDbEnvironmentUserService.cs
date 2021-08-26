@@ -19,6 +19,19 @@ namespace FeatureFlags.APIs.Services
             _environmentUsers = database.GetCollection<EnvironmentUser>("EnvironmentUsers");
         }
 
+        public async Task UpsertItemAsync(EnvironmentUser item)
+        {
+            var existingItem = await GetAsync(item.Id);
+            if (existingItem != null)
+            {
+                await UpdateAsync(item.Id, item);
+            }
+            else
+            {
+                await CreateAsync(item);
+            }
+        }
+
         public List<EnvironmentUser> Get() =>
             _environmentUsers.Find(p => p.ObjectType == "EnvironmentUser").ToList();
 
@@ -29,6 +42,11 @@ namespace FeatureFlags.APIs.Services
         {
             await _environmentUsers.InsertOneAsync(book);
             return book;
+        }
+
+        public async Task<List<EnvironmentUser>> GetByEnvironmentAsync(int envId)
+        {
+            return await _environmentUsers.Find(p => p.EnvironmentId == envId).ToListAsync();
         }
 
         public async Task UpsertAsync(EnvironmentUser eu)

@@ -1,0 +1,65 @@
+<section class="body">
+  <div class="content">
+    <nz-spin [nzSpinning]="isDownloading" nzTip="下载中...">
+      <h2 nz-typography>数据同步只针对当前选择的项目和环境（左上角显示的项目和环境），包括以下数据：</h2>
+      <nz-list [nzHeader]="headerTpl" nzItemLayout="vertical">
+        <nz-list-item>
+          <nz-list-item-meta>
+            <nz-list-item-meta-title>
+              开关
+            </nz-list-item-meta-title>
+            <nz-list-item-meta-description>
+              当前环境下的所有开关，包括已经存档的开关
+            </nz-list-item-meta-description>
+          </nz-list-item-meta>
+          <ul nz-list-item-actions>
+            <nz-list-item-action><label nz-checkbox [(ngModel)]="featureFlagsChecked" (ngModelChange)="updateSingleChecked()"></label></nz-list-item-action>
+          </ul>
+        </nz-list-item>
+        <nz-list-item>
+          <nz-list-item-meta>
+            <nz-list-item-meta-title>
+              开关用户
+            </nz-list-item-meta-title>
+            <nz-list-item-meta-description>
+              包括当前环境下的所有开关用户
+            </nz-list-item-meta-description>
+          </nz-list-item-meta>
+          <ul nz-list-item-actions>
+            <nz-list-item-action><label nz-checkbox [(ngModel)]="usersChecked" (ngModelChange)="updateSingleChecked()"></label></nz-list-item-action>
+          </ul>
+        </nz-list-item>
+        <nz-list-item>
+          <nz-list-item-meta>
+            <nz-list-item-meta-title>
+              开关用户属性
+            </nz-list-item-meta-title>
+            <nz-list-item-meta-description>
+              包括所有自定义的用户属性
+            </nz-list-item-meta-description>
+          </nz-list-item-meta>
+          <ul nz-list-item-actions>
+            <nz-list-item-action><label nz-checkbox [(ngModel)]="userPropertiesChecked" (ngModelChange)="updateSingleChecked()"></label></nz-list-item-action>
+          </ul>
+        </nz-list-item>
+      </nz-list>
+      <nz-divider></nz-divider>
+      <nz-space [nzSize]="40">
+        <button (click)="onDownload()" *nzSpaceItem nz-button class="submit" nz-button nzType="default">
+          <i nz-icon nzType="download" nzTheme="outline"></i>
+          下载
+        </button>
+        <button (click)="openUploadForm()" *nzSpaceItem nz-button class="submit" nz-button nzType="default">
+          <i nz-icon nzType="upload" nzTheme="outline"></i>
+          上传
+        </button>
+        <a style="visibility: hidden;" #downloadRef [href]="downloadUri" [download]="downloadFileName"></a>
+      </nz-space>
+    </nz-spin>
+  </div>
+</section>
+<ng-template #headerTpl>
+   <label nz-checkbox [(ngModel)]="downloadAllChecked" (ngModelChange)="updateAllChecked()" [nzIndeterminate]="indeterminate">全选</label>
+</ng-template>
+
+<app-upload-drawer [visible]="uploadFormVisible" (close)="onUploadClosed($event)"></app-upload-drawer>

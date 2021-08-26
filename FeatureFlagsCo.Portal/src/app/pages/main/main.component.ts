@@ -91,6 +91,10 @@ export class MainComponent implements OnInit, OnDestroy {
         path: '/switch-archive'
       }, {
         level: 1,
+        title: '数据同步',
+        path: '/data-sync'
+      }, {
+        level: 1,
         line: true
       }, {
         level: 1,
