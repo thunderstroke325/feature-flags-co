@@ -7,8 +7,7 @@ Official Website: [https://www.feature-flags.co](https://www.feature-flags.co)
 
 ## Architecture
 
-![architecture (1)](https://user-images.githubusercontent.com/68597908/130894139-0675aa6a-6cf6-4ac0-971e-271b727cf39b.png)
-
+![architecture (2)](https://user-images.githubusercontent.com/68597908/130894201-b3be152a-9ae2-4b4d-9ad6-18961e4773a0.png)
 
 ## Docs
 
