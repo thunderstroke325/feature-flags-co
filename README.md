@@ -2,11 +2,12 @@
 
 A High-speed Product Iteration Management Artifact based on Feature Flags Management
 
+
 Official Website: [https://www.feature-flags.co](https://www.feature-flags.co)
 
 ## Architecture
 
-![image](https://user-images.githubusercontent.com/68597908/130893461-61923291-815d-4bfa-a6cb-5cb4b76c038a.png)
+![architecture (1)](https://user-images.githubusercontent.com/68597908/130894139-0675aa6a-6cf6-4ac0-971e-271b727cf39b.png)
 
 
 ## Docs
