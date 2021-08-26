@@ -1,6 +1,6 @@
 # feature-flags-co
 
-A High-speed Product Iteration Management Artifact
+A High-speed Product Iteration Management Artifact based on Feature Flags Management
 
 Official Website: [https://www.feature-flags.co](https://www.feature-flags.co)
 
