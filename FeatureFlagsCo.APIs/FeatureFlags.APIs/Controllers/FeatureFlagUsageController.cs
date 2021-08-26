@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
@@ -11,6 +12,7 @@ using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
 using FeatureFlagsCo.FeatureInsights;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -68,7 +70,7 @@ namespace FeatureFlags.APIs.Controllers
         [HttpGet]
         [Route("GetMultiOptionFeatureFlagUsageData")]
         [AllowAnonymous]
-        public async Task<JsonResult> GetMultiOptionFeatureFlagUsageData(string featureFlagId, string chartQueryTimeSpan)
+        public async Task<dynamic> GetMultiOptionFeatureFlagUsageData(string featureFlagId, string chartQueryTimeSpan)
         {
             int envId = FeatureFlagKeyExtension.GetEnvIdByFeautreFlagId(featureFlagId);
             //var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
@@ -108,8 +110,7 @@ namespace FeatureFlags.APIs.Controllers
             catch (Exception exp)
             {
                 _logger.LogError(exp, $"Get /FeatureFlagUsage/GetMultiOptionFeatureFlagUsageData ; featureFlagId: {featureFlagId}, chartQueryTimeSpan: {chartQueryTimeSpan} ");
-                Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return new JsonResult(exp.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Bad Request" });
             }
         }
 
