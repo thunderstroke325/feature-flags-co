@@ -3,8 +3,7 @@ using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlagsCo.MQ;
-using FeatureFlagsCo.MQ.DirectExporter;
-using FeatureFlagsCo.RabbitMQToGrafanaLoki;
+using FeatureFlagsCo.MQ.ExportToElasticSearch;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -25,6 +24,14 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Instrumentation.AspNetCore;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using FeatureFlagsCo.RabbitMQToGrafanaLoki;
+using FeatureFlagsCo.FeatureInsights;
+using FeatureFlagsCo.FeatureInsights.ElasticSearch;
 
 namespace FeatureFlags.AdminWebAPIs
 {
@@ -52,19 +59,16 @@ namespace FeatureFlags.AdminWebAPIs
                 });
             });
 
-            
-
             services.AddControllers();
 
             // For Entity Framework
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("ConnStr")));
 
+            #region Identity
             // For Identity
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
-
-
             // Adding Authentication
             services.AddAuthentication(options =>
             {
@@ -72,7 +76,6 @@ namespace FeatureFlags.AdminWebAPIs
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-
             // Adding Jwt Bearer
             .AddJwtBearer(options =>
             {
@@ -87,6 +90,17 @@ namespace FeatureFlags.AdminWebAPIs
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
                 };
             });
+            services.Configure<IdentityOptions>(options =>
+            {
+                // Default Password settings.
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 5;
+                options.Password.RequiredUniqueChars = 1;
+            });
+            #endregion
 
             services.AddSwaggerGen(c =>
             {
@@ -155,28 +169,36 @@ namespace FeatureFlags.AdminWebAPIs
 
             services.AddScoped<IDataSyncService, DataSyncService>();
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                // Default Password settings.
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 5;
-                options.Password.RequiredUniqueChars = 1;
-            });
-
             services.Configure<MySettings>(options => Configuration.GetSection("MySettings").Bind(options));
 
+            services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
+            services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
+            services.AddSingleton<MongoDbFeatureFlagService>();
+            services.AddSingleton<MongoDbEnvironmentUserService>();
+            services.AddSingleton<MongoDbEnvironmentUserPropertyService>();
+            services.AddSingleton<INoSqlService, MongoDbService>();
 
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
+            var cacheType = this.Configuration.GetSection("MySettings").GetSection("CacheType").Value;
 
+            if (cacheType != CacheTypeEnum.Memory.ToString())
+            {
+                services.AddDistributedMemoryCache();
+            }
+            else if (cacheType != CacheTypeEnum.Redis.ToString())
+            {
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = this.Configuration.GetConnectionString("RedisServerUrl");
+                    options.InstanceName = "feature-flags-users";
+                });
+            }
+
+            #region Telemetry/Insights
             if (hostingType == HostingTypeEnum.Azure.ToString())
             {
-                services.AddSingleton<INoSqlService>(
-                    InitializeCosmosClientInstanceAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
-
-
+                //services.AddSingleton<INoSqlService>(
+                //    InitializeCosmosClientInstanceAsync(Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
                 Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
                         = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
                 aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights").GetSection("InstrumentationKey").Value;
@@ -189,49 +211,39 @@ namespace FeatureFlags.AdminWebAPIs
                 aiOptions.EnableRequestTrackingTelemetryModule = false;
                 services.AddApplicationInsightsTelemetry(aiOptions);
             }
-            if(hostingType == HostingTypeEnum.DockerCostEffective.ToString() ||
-               hostingType == HostingTypeEnum.DockerRecommended.ToString() ||
-               hostingType == HostingTypeEnum.DockerDevelopment.ToString())
+            if (hostingType == HostingTypeEnum.Docker.ToString())
             {
-                services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
-                services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
-                services.AddSingleton<MongoDbFeatureFlagService>();
-                services.AddSingleton<MongoDbEnvironmentUserService>();
-                services.AddSingleton<MongoDbEnvironmentUserPropertyService>();
-                services.AddSingleton<INoSqlService, MongoDbService>();
-            }
-            var mqProviderStr = this.Configuration.GetSection("MySettings").GetSection("MQProvider").Value;
-            var grafanaLokiUrl = this.Configuration.GetSection("MySettings").GetSection("GrafanaLokiUrl").Value;
-            if (hostingType == HostingTypeEnum.DockerRecommended.ToString())
-            {
-                var StartSleepTimeStr = this.Configuration.GetSection("MySettings").GetSection("StartSleepTime").Value;
-                Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
-
-                services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
-
-                var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
-                services.AddSingleton<IRabbitMq2GrafanaLokiService>(new RabbitMq2GrafanaLokiService(insightsRabbitMqUrl, grafanaLokiUrl));
-            }
-            else if(hostingType == HostingTypeEnum.DockerCostEffective.ToString() ||
-                    hostingType == HostingTypeEnum.DockerDevelopment.ToString())
-            {
-                services.AddSingleton<IInsighstMqService>(new InsightsDirectExporter(grafanaLokiUrl));
-            }
-
-
-            if (CurrentEnvironment.EnvironmentName != "Production")
-            {
-                services.AddDistributedMemoryCache();
-            }
-            else
-            {
-                services.AddStackExchangeRedisCache(options =>
+                var otlpEndpoint = this.Configuration.GetSection("OpenTelemetry").GetSection("Endpoint").Value;
+                if (!string.IsNullOrWhiteSpace(otlpEndpoint))
                 {
-                    options.Configuration = this.Configuration.GetConnectionString("RedisServerUrl");
-                    options.InstanceName = "feature-flags-users";
-                });
+                    AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
+                    var serviceName = this.Configuration.GetSection("OpenTelemetry").GetSection("ServiceName").Value;
+                    services.AddOpenTelemetryTracing((builder) => builder
+                        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddOtlpExporter(otlpOptions =>
+                        {
+                            otlpOptions.Endpoint = new Uri(otlpEndpoint);
+                    }));
+                }
             }
 
+            var StartSleepTimeStr = this.Configuration.GetSection("MySettings").GetSection("StartSleepTime").Value;
+            Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
+
+            var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
+            services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
+
+            var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
+            services.AddSingleton<IExportToElasticSearchService>(new ExportToElasticSearchService(insightsRabbitMqUrl, esHost));
+            services.AddScoped<IFeatureFlagsUsageService, ElasticSearchFeatureFlagsUsageService>();
+
+            var grafanaLokiUrl = this.Configuration.GetSection("MySettings").GetSection("GrafanaLokiUrl").Value;
+            if(!string.IsNullOrWhiteSpace(grafanaLokiUrl))
+                services.AddSingleton<IRabbitMq2GrafanaLokiService>(new RabbitMq2GrafanaLokiService(insightsRabbitMqUrl, grafanaLokiUrl));
+            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

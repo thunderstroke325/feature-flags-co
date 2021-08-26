@@ -1,11 +1,19 @@
 #!/bin/bash
 database=FeatureFlagsCo
-wait_time=30s
+wait_time=5s
 password=YourSTRONG@Passw0rd
 
 echo $database
 # wait for SQL Server to come up
 echo importing data will start in $wait_time...
+sleep $wait_time
+echo importing data...
+sleep $wait_time
+echo importing data...
+sleep $wait_time
+echo importing data...
+sleep $wait_time
+echo importing data...
 sleep $wait_time
 echo importing data...
 

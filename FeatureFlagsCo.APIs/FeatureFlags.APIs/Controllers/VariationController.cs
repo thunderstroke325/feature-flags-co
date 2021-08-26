@@ -135,16 +135,7 @@ namespace FeatureFlags.APIs.Controllers
                     ffIdVM);
 
 
-                if (_mySettings.Value.HostingType == HostingTypeEnum.DockerCostEffective.ToString() ||
-                    _mySettings.Value.HostingType == HostingTypeEnum.DockerDevelopment.ToString() ||
-                    _mySettings.Value.HostingType == HostingTypeEnum.DockerRecommended.ToString())
-                {
-                    await SendToRabbitMqThenGrafana(param, ffIdVM, returnResult);
-                }
-                else if (_mySettings.Value.HostingType == HostingTypeEnum.Azure.ToString())
-                {
-                    SendToApplicationInsights(param, ffIdVM, returnResult);
-                }
+                SendToRabbitMQ(param, ffIdVM, returnResult);
 
                 return new JsonResult(returnResult.Item1);
             }
@@ -175,7 +166,7 @@ namespace FeatureFlags.APIs.Controllers
             }
         }
 
-        private async Task SendToRabbitMqThenGrafana(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, Tuple<VariationOption, bool> returnResult)
+        private void SendToRabbitMQ(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, Tuple<VariationOption, bool> returnResult)
         {
             var labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
                          {
@@ -228,6 +219,11 @@ namespace FeatureFlags.APIs.Controllers
                               {
                                   LabelName = "VariationValue",
                                   LabelValue = returnResult.Item1.VariationValue
+                              },
+                              new FeatureFlagsCo.MQ.MessageLabel
+                              {
+                                  LabelName = "TimeStamp",
+                                  LabelValue = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
                               }
                         };
             if(param.FFUserCustomizedProperties != null && param.FFUserCustomizedProperties.Count > 0)
@@ -241,24 +237,15 @@ namespace FeatureFlags.APIs.Controllers
                     });
                 }
             }
-            if(_mySettings.Value.MQProvider == MQProviderEnum.Rabbit.ToString())
+
+            _insightsService.SendMessage(new FeatureFlagsCo.MQ.MessageModel
             {
-                _insightsService.SendMessage(new FeatureFlagsCo.MQ.MessageModel
-                {
-                    SendDateTime = DateTime.UtcNow,
-                    Labels = labels,
-                    Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam())
-                });
-            }
-            else if(_mySettings.Value.MQProvider == MQProviderEnum.Direct.ToString())
-            {
-                await _insightsService.SendMessageAsync(new FeatureFlagsCo.MQ.MessageModel
-                {
-                    SendDateTime = DateTime.UtcNow,
-                    Labels = labels,
-                    Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam())
-                });
-            }
+                SendDateTime = DateTime.UtcNow,
+                Labels = labels,
+                Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam()),
+                FeatureFlagId = ffIdVM.FeatureFlagId,
+                IndexTarget = "ffvariationrequestindex"
+            });
         }
     }
 }

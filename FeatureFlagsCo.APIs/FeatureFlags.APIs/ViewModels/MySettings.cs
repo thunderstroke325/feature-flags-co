@@ -16,7 +16,6 @@ namespace FeatureFlags.APIs.ViewModels
         public string SendCloudEmailSubject { get; set; }
         public string TestSetting { get; set; }
 
-        public string IDistributedCacheName { get; set; }
 
         public string AppInsightsApplicationId { get; set; }
         public string AppInsightsApplicationApiSecret { get; set; }
@@ -25,20 +24,20 @@ namespace FeatureFlags.APIs.ViewModels
         public string GrafanaLokiUrl { get; set; }
         public string StartSleepTime { get; set; }
         public string HostingType { get; set; }
-        public string MQProvider { get; set; }
+        public string CacheType { get; set; }
+        public string ElasticSearchHost { get; set; }
     }
 
     public enum HostingTypeEnum
     {
-        DockerCostEffective,
-        DockerDevelopment,
-        DockerRecommended,
+        Docker,
         Azure
     }
-    public enum MQProviderEnum
+    public enum CacheTypeEnum
     {
-        Rabbit,
-        Direct,
-        None
+        Redis,
+        Memory
     }
+
+
 }

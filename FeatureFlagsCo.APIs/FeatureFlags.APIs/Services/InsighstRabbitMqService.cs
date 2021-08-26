@@ -33,12 +33,12 @@ namespace FeatureFlags.APIs.Services
                                     exclusive: false,
                                     autoDelete: false,
                                     arguments: null);
-            this.SendMessage(new MessageModel
-            {
-                Labels = new List<MessageLabel> { new MessageLabel { LabelName = "API Init", LabelValue = DateTime.UtcNow.ToLongDateString() } },
-                Message = "InsighstRabbitMqService Connected",
-                SendDateTime = DateTime.UtcNow
-            });
+            //this.SendMessage(new MessageModel
+            //{
+            //    Labels = new List<MessageLabel> { new MessageLabel { LabelName = "API Init", LabelValue = DateTime.UtcNow.ToLongDateString() } },
+            //    Message = "InsighstRabbitMqService Connected",
+            //    SendDateTime = DateTime.UtcNow
+            //});
             _channel.CallbackException += Channel_CallbackException;
         }
 
@@ -78,8 +78,12 @@ namespace FeatureFlags.APIs.Services
                                   routingKey: "hello",
                                   basicProperties: null,
                                   body: body);
+            _channel.BasicPublish(exchange: "",
+                                  routingKey: "hello",
+                                  basicProperties: null,
+                                  body: body);
 
-            Console.WriteLine(message);
+            //Console.WriteLine(message);
         }
 
         public Task SendMessageAsync(MessageModel message)

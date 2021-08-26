@@ -5,55 +5,54 @@ networks:
   ffc:
 
 services:
-  loki:
-    image: grafana/loki:2.3.0
-    container_name: grafana-loki
-    restart: always
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-    networks:
-      - ffc
-    profiles:
-      - costeffective
-      - recommended
-      - development
-      - developmentportal
-      - developmentapi
+  # loki:
+  #   image: grafana/loki:2.3.0
+  #   container_name: grafana-loki
+  #   restart: always
+  #   ports:
+  #     - "3100:3100"
+  #   command: -config.file=/etc/loki/local-config.yaml
+  #   networks:
+  #     - ffc
+  #   profiles:
+  #     - costeffective
+  #     - recommended
+  #     - development
+  #     - developmentportal
+  #     - developmentapi
 
-  promtail:
-    image: grafana/promtail:2.3.0
-    container_name: grafana-promtail
-    restart: always
-    volumes:
-      - /var/log:/var/log
-    command: -config.file=/etc/promtail/config.yml
-    networks:
-      - ffc
-    profiles:
-      - costeffective
-      - recommended
-      - development
-      - developmentportal
-      - developmentapi
+  # promtail:
+  #   image: grafana/promtail:2.3.0
+  #   container_name: grafana-promtail
+  #   restart: always
+  #   volumes:
+  #     - /var/log:/var/log
+  #   command: -config.file=/etc/promtail/config.yml
+  #   networks:
+  #     - ffc
+  #   profiles:
+  #     - costeffective
+  #     - recommended
+  #     - development
+  #     - developmentportal
+  #     - developmentapi
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    restart: always
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    networks:
-      - ffc
-    profiles:
-      - costeffective
-      - recommended
-      - development
-      - developmentportal
-      - developmentapi
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - GF_SECURITY_ADMIN_USER=admin
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin
+  #   networks:
+  #     - ffc
+  #   profiles:
+  #     - docker
+  #     - development
+  #     - developmentportal
+  #     - developmentapi
 
   rabbitmq:
     image: rabbitmq:3.9-management
@@ -68,10 +67,8 @@ services:
     networks:
       - ffc
     profiles:
-      - recommended
-      # - development
-      # - developmentportal
-      # - developmentapi
+      - docker
+      - development
 
   mongodb:
     image: mongo
@@ -88,11 +85,8 @@ services:
     networks:
       - ffc
     profiles:
-      - costeffective
-      - recommended
+      - docker
       - development
-      - developmentportal
-      - developmentapi
   mongo-express:
     image: mongo-express
     container_name: mongo-express
@@ -106,15 +100,9 @@ services:
     networks:
       - ffc
     profiles:
-      - recommended
+      - docker
       - development
-      - developmentportal
-      - developmentapi
 
-
-  # mssqldata:
-  #   image: "mcr.microsoft.com/mssql/server:2019-latest"
-  #   entrypoint: /bin/bash
   mssql:
     image: "mcr.microsoft.com/mssql/server:2017-latest"
     container_name: sqldb
@@ -135,30 +123,10 @@ services:
     networks:
       - ffc
     profiles:
-      - costeffective
-      - recommended
+      - docker
       - development
-      - developmentportal
-      - developmentapi
-    # # don't use this if you don't want to persit data between docker up and down
-    # volumes_from:
-    #   - mssqldata
 
-  costEffectiveApi:
-    build:
-      context: ../FeatureFlagsCo.APIs
-      dockerfile: ../FeatureFlagsCo.APIs/Dockerfiles/CostEffective/Dockerfile
-    image: ffc-api
-    container_name: api
-    ports:
-      - 5001:5001
-    networks:
-      - ffc
-    profiles:
-      - costeffective
-      - developmentportal
-      - apionly
-  recommendedApi:
+  api:
     build:
       context: ../FeatureFlagsCo.APIs
       dockerfile: ../FeatureFlagsCo.APIs/Dockerfiles/Recommended/Dockerfile
@@ -169,7 +137,7 @@ services:
     networks:
       - ffc
     profiles:
-      - recommended
+      - docker
 
   portal:
     build:
@@ -184,6 +152,4 @@ services:
       - 4200:80
     restart: unless-stopped
     profiles:
-      - costeffective
-      - recommended
-      - developmentapi
+      - docker

@@ -9,12 +9,14 @@ using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
+using FeatureFlagsCo.FeatureInsights;
 using FeatureFlagsCo.MQ;
 using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace FeatureFlags.APIs.Controllers
@@ -33,19 +35,24 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IDistributedCache _redisCache;
         private readonly IInsighstMqService _rabbitmqInsightsService;
         private readonly INoSqlService _noSqlService;
+        private readonly IFeatureFlagsUsageService _ffUsageService;
+        private readonly IOptions<MySettings> _mySettings;
 
         //private readonly ILaunchDarklyService _ldService;
 
         public WeatherForecastController(ILogger<WeatherForecastController> logger,
             IDistributedCache redisCache,
             IInsighstMqService rabbitmqInsightsService,
-            INoSqlService noSqlService)
-            //ILaunchDarklyService ldService)
+            INoSqlService noSqlService,
+            IOptions<MySettings> mySettings,
+            IFeatureFlagsUsageService ffUsageService)
         {
             _logger = logger;
             _redisCache = redisCache;
             _rabbitmqInsightsService = rabbitmqInsightsService;
             _noSqlService = noSqlService;
+            _ffUsageService = ffUsageService;
+            _mySettings = mySettings;
         }
 
         [HttpGet]
@@ -131,6 +138,48 @@ namespace FeatureFlags.APIs.Controllers
             });
             return new JsonResult(new VariationOption());
         }
+
+        [HttpPost]
+        [Route("SendDataToElasticSearch")]
+        public void SendDataToElasticSearch()
+        {
+            var date = Guid.NewGuid().ToString();
+            Response.StatusCode = 200;
+            var testFeatureFlagId = FeatureFlagKeyExtension.GetFeatureFlagId(date, "-1");
+            for(int i = 1; i > 0; i--)
+            {
+                _rabbitmqInsightsService.SendMessage(new FeatureFlagsCo.MQ.MessageModel
+                {
+                    Labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
+                     {
+                         new FeatureFlagsCo.MQ.MessageLabel{ LabelName = "dataType", LabelValue = $"SendDataToElasticSearchTest"},
+                         new FeatureFlagsCo.MQ.MessageLabel{ LabelName = "email", LabelValue = $"hu-beau-{i}@outlook.com"},
+                         new FeatureFlagsCo.MQ.MessageLabel{ LabelName = "TimeStamp", LabelValue = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")},
+                         new FeatureFlagsCo.MQ.MessageLabel{ LabelName = "customizedProperty1", LabelValue = i.ToString()},
+                         new FeatureFlagsCo.MQ.MessageLabel{ LabelName = "featureflagId", LabelValue = "FF__-1__-1__-1__e3fa98ec-6aaa-426a-a870-8eb3847b0233"},
+                         new FeatureFlagsCo.MQ.MessageLabel{ LabelName = "VariationLocalId", LabelValue = i.ToString()},
+                         new FeatureFlagsCo.MQ.MessageLabel{ LabelName = "VariationValue", LabelValue = "false"},
+                    },
+                    Message = "",
+                    SendDateTime = DateTime.UtcNow,
+                    FeatureFlagId = "FF__-1__-1__-1__e3fa98ec-6aaa-426a-a870-8eb3847b02e3",
+                    IndexTarget = "ffvariationrequestindex"
+                });
+            }
+        }
+
+        [HttpGet]
+        [Route("GetLinearUsageCountByTimeRange")]
+        public async Task<string> GetLinearUsageCountByTimeRange()
+        {
+            return await _ffUsageService.GetLinearUsageCountByTimeRangeAsync(_mySettings.Value.ElasticSearchHost,
+                                                                             "ffvariationrequestindex",
+                                                                             "FF__-1__-1__-1__e3fa98ec-6aaa-426a-a870-8eb3847b0233", 
+                                                                             DateTime.UtcNow.AddHours(-5),
+                                                                             DateTime.UtcNow,
+                                                                             10);
+        }
+        
 
         [HttpGet]
         [Route("ReturnTest501")]

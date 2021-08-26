@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,15 +10,15 @@ namespace FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels
 {
     public class FeatureFlagUsageViewModel
     {
-        [JsonProperty("totalUsers")]
-        public int TotalUsers { get; set; }
-        [JsonProperty("hitUsers")]
-        public int HitUsers { get; set; }
-        [JsonProperty("chartData")]
-        public FeatureFlagUsageChartDataViewModel ChartData { get; set; }
+        //[JsonProperty("totalUsers")]
+        //public int TotalUsers { get; set; }
+        //[JsonProperty("hitUsers")]
+        //public int HitUsers { get; set; }
+        //[JsonProperty("chartData")]
+        public string ChartData { get; set; }
 
         [JsonProperty("userDistribution")]
-        public FeatureFlagUerDistributionViewModel UserDistribution { get; set; }
+        public string UserByVariationValue { get; set; }
 
     }
 

@@ -46,29 +46,15 @@ After docker compose started, please wait 2-3 minutes untill all services have b
 
 ## Development on local
 
-This solution will start all services except api, portal and rabbitmq.
+This solution will start all services except api, portal.
 
 You can run by following commands:
 
     cd FeatureFlagsCo.Docker
     docker-compose --profile development up
 
-If you want to just develop app frontend portal, you can run by following commands:
 
-    cd FeatureFlagsCo.Docker
-    docker-compose --profile developmentportal up
-
-This will start all services except portal and rabbitmq.
-
-If you want to just develop api, you can run by following commands:
-
-    cd FeatureFlagsCo.Docker
-    docker-compose --profile developmentapi up
-
-This will start all services except api and rabbitmq.
-
-
-After docker compose started, please wait 30-50 secondes untill all services have been successfully etablished.
+After docker compose started, please wait 2-3 minutes untill all services have been successfully etablished. RabbitMQ take more times than other services, API services will run after the RabbitMQ started.
 
 
 ## Initial values
