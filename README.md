@@ -1,13 +1,12 @@
 # feature-flags-co
 
+feature-flags-co is a product iteration acceleration management tool
 
 Official Website: [https://www.feature-flags.co](https://www.feature-flags.co)
 
-An open source product-level feature flags plateform
+## Architecture
 
-High-frequency/Secured release/rollback/offiline product features. Rest easy!
-
-Make feature refined to each market user, each module, each minute, each technical environment, each practical scenario, each operational link, each staff member.
+![image](https://user-images.githubusercontent.com/68597908/130893461-61923291-815d-4bfa-a6cb-5cb4b76c038a.png)
 
 
 ## Docs
