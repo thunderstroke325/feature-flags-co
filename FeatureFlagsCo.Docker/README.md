@@ -1,6 +1,7 @@
 # Architecture
 
-![architecture](https://user-images.githubusercontent.com/68597908/130388173-dbdafb6f-49e5-4225-9f02-e1327bdcfde5.png)
+![architecture (1)](https://user-images.githubusercontent.com/68597908/130887752-520dbc6e-5a6d-47df-b1c6-19260d6cfcd7.png)
+
 
 
 # Requirements of docker hosted system
