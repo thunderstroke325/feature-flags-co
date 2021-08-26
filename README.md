@@ -1,6 +1,6 @@
 # feature-flags-co
 
-feature-flags-co is a product iteration acceleration management tool
+A high-speed iterative product management tool based on feature flags
 
 Official Website: [https://www.feature-flags.co](https://www.feature-flags.co)
 
