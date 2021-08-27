@@ -181,11 +181,11 @@ namespace FeatureFlags.AdminWebAPIs
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
             var cacheType = this.Configuration.GetSection("MySettings").GetSection("CacheType").Value;
 
-            if (cacheType != CacheTypeEnum.Memory.ToString())
+            if (cacheType == CacheTypeEnum.Memory.ToString())
             {
                 services.AddDistributedMemoryCache();
             }
-            else if (cacheType != CacheTypeEnum.Redis.ToString())
+            else if (cacheType == CacheTypeEnum.Redis.ToString())
             {
                 services.AddStackExchangeRedisCache(options =>
                 {

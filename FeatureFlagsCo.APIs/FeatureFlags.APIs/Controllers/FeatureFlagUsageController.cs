@@ -85,7 +85,7 @@ namespace FeatureFlags.APIs.Controllers
                 //returnModel.UserDistribution = _appInsightsService.GetFFUserDistribution(featureFlagId, chartQueryTimeSpan);
 
                 DateTime startUTCDateTime = DateTime.UtcNow.AddDays(-7), endUtcDateTime = DateTime.UtcNow;
-                int interval = 10;
+                int interval = 7;
                 if (chartQueryTimeSpan == FeatureFlagUsageChartQueryTimeSpanEnum.P1D.ToString())
                     startUTCDateTime = endUtcDateTime.AddDays(-1);
                 if (chartQueryTimeSpan == FeatureFlagUsageChartQueryTimeSpanEnum.P7D.ToString())

@@ -4,7 +4,11 @@
         <div class="content-body" name="detail" *ngIf="!hideContent">
             <ng-container>
                 <!-- <h2>共有{{totalUsers}}用户被标记，其中{{hitUsers}}人使用此功能</h2> -->
-                <h2>{{userUsageStr}}</h2>
+                <h4 style="
+                margin: 0px;
+                border: 1px solid lightgray;
+                padding: 5px;
+            ">{{userUsageStr}}</h4>
                 <div class="report-echarts" #reportEcharts [style.height]="height">
 
                 </div>

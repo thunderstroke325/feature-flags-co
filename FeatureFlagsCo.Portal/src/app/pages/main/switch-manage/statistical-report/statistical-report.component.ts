@@ -82,41 +82,66 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
 
   public getFeatureFlagUsage() {
     window.setTimeout(() => {
-      this.isLoading = true;
+      this.isLoading = false;
+      console.log('setTimeout');
     });
     this.switchServe.getReport(this.switchId, this.timeSpan)
       .pipe(
         map(res => {
+          console.log(res);
           this.totalUsers = res.totalUsers || 0;
           this.hitUsers = res.hitUsers || 0;
-          let userUsageStr = `共有${res.totalUsers || 0}用户被标记，其中${res.hitUsers || 0}人使用此功能`;
-          if (this.totalUsers === 0 && this.hitUsers === 0)
-            userUsageStr = "";
-          if (this.totalUsers === 0 && this.hitUsers === 0 && res.userDistribution && res.userDistribution !== null &&
-            res.userDistribution.tables && res.userDistribution.tables !== null && res.userDistribution.tables.length > 0) {
-            for (let i = 0; i < res.userDistribution.tables.length; i++) {
-              let usage = res.userDistribution.tables[0];
-              if (usage && usage.rows && usage.rows.length > 0) {
-                userUsageStr = '';
-                for (let j = 0; j < usage.rows.length; j++) {
-                  userUsageStr += `${usage.rows[j][0]}: ${usage.rows[j][1]}个用户; `
-                }
-              }
+          // let userUsageStr = `共有${res.totalUsers || 0}用户被标记，其中${res.hitUsers || 0}人使用此功能`;
+          // if (this.totalUsers === 0 && this.hitUsers === 0)
+          //   userUsageStr = "";
+          // if (this.totalUsers === 0 && this.hitUsers === 0 && res.userDistribution && res.userDistribution !== null &&
+          //   res.userDistribution.tables && res.userDistribution.tables !== null && res.userDistribution.tables.length > 0) {
+          //   for (let i = 0; i < res.userDistribution.tables.length; i++) {
+          //     let usage = res.userDistribution.tables[0];
+          //     if (usage && usage.rows && usage.rows.length > 0) {
+          //       userUsageStr = '';
+          //       for (let j = 0; j < usage.rows.length; j++) {
+          //         userUsageStr += `${usage.rows[j][0]}: ${usage.rows[j][1]}个用户; `
+          //       }
+          //     }
+          //   }
+          // }
+          let userUsageStr = "";
+          let userByVariationValue = JSON.parse(res.userByVariationValue);
+          console.log(userByVariationValue);
+          if (userByVariationValue && userByVariationValue.aggregations &&
+            userByVariationValue.aggregations.group_by_status &&
+            userByVariationValue.aggregations.group_by_status.buckets &&
+            userByVariationValue.aggregations.group_by_status.buckets.length > 0) {
+            let buckets = userByVariationValue.aggregations.group_by_status.buckets;
+            for (let i = 0; i < buckets.length; i++) {
+              userUsageStr += `| ${buckets[i].key}: ${buckets[i].doc_count}个用户 `
             }
+            userUsageStr += "|";
           }
           this.userUsageStr = userUsageStr;
 
-          return res['chartData'] || {};
+          console.log();
+          let chartData = JSON.parse(res.chartData);
+          return chartData || {};
         })
       )
       .subscribe(
         res => {
-          const series = this.formatSeries(res);
-          this.xname = this.formatXname(res);
+          let buckets = [];
+          if (res && res.aggregations &&
+            res.aggregations.range &&
+            res.aggregations.range.buckets &&
+            res.aggregations.range.buckets.length > 0) {
+            buckets = res.aggregations.range.buckets;
+          }
+          const series = this.formatSeries(buckets);
+          const xAxis = this.formatXAxis(buckets)
           this.yname = this.formatYname(res);
           const option = {
             title: {
-              text: '下图为用户触发开关标记判断的次数分布图'
+              // text: '下图为用户触发开关标记判断的次数分布图'
+              text: ''
             },
             tooltip: {
               trigger: 'axis',
@@ -130,10 +155,11 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
                 </span>`
               },
             },
-            xAxis: {
-              name: this.xname,
-              type: 'time',
-            },
+            // xAxis: {
+            //   name: this.xname,
+            //   type: 'time',
+            // },
+            xAxis: xAxis,
             yAxis: {
               name: this.yname,
               type: 'value',
@@ -141,8 +167,8 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
             },
             series
           };
-          this.myChart.setOption(option);
           this.isLoading = false;
+          this.myChart.setOption(option);
         },
         _ => {
           this.isLoading = false;
@@ -155,24 +181,67 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
     this.getFeatureFlagUsage();
   }
 
-  private formatXname(option: any) {
-    const tables = option.tables || [];
-    return tables[0]?.columns?.[0]?.name || '';
+  private formatXAxis(option: any) {
+    let data = [];
+    if (option && option.length > 0) {
+      for (let i = 0; i < option.length; i++) {
+        console.log(option[i].to_as_string.replace('T', ' '));
+        var date = new Date(option[i].to_as_string.replace('T', ' ') + ' UTC');
+        console.log(date);
+        data.push(this.formatDate(date));
+      }
+    }
+    console.log(data);
+    return {
+      name: "日期时间",
+      // type: 'time',
+      data: data
+    }
   }
-
+  private formatDate(date_ob) {
+    // adjust 0 before single digit date
+    let date = ("0" + date_ob.getDate()).slice(-2);
+    // current month
+    let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+    // current year
+    let year = date_ob.getFullYear();
+    // current hours
+    let hours = date_ob.getHours();
+    // current minutes
+    let minutes = date_ob.getMinutes();
+    // current seconds
+    let seconds = date_ob.getSeconds();
+    // prints date & time in YYYY-MM-DD HH:MM:SS format
+    return month + "-" + date + " " + hours + ":" + minutes;
+  }
   private formatYname(option: any) {
-    const tables = option.tables || [];
-    return tables[0]?.columns?.[1]?.name || '';
+    // const tables = option.tables || [];
+    // return tables[0]?.columns?.[1]?.name || '';
+    // const tables = option.tables || [];
+    // return tables[0]?.columns?.[1]?.name || '';
+    return "被调用次数";
   }
 
   private formatSeries(option: any) {
-    const tables = option.tables || [];
-    return tables.map(item => {
-      return {
-        name: item.name,
-        type: 'line',
-        data: item.rows.sort((a: string[], b: string[]) => new Date(a[0] || '').getTime() - new Date(b[0] || '').getTime())
+    // const tables = option.tables || [];
+    let data = [];
+    if (option && option.length > 0) {
+      for (let i = 0; i < option.length; i++) {
+        data.push(option[i].doc_count);
       }
-    });
+    }
+    // return tables.map(item => {
+    //   return {
+    //     name: item.name,
+    //     type: 'line',
+    //     data: item.rows.sort((a: string[], b: string[]) => new Date(a[0] || '').getTime() - new Date(b[0] || '').getTime())
+    //   }
+    // });
+    console.log(data);
+    return {
+      name: "日期时间",
+      type: 'line',
+      data: data
+    };
   }
 }

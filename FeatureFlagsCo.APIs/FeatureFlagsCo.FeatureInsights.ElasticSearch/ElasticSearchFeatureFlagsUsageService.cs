@@ -13,7 +13,7 @@ namespace FeatureFlagsCo.FeatureInsights.ElasticSearch
         public async Task<string> GetFFVariationUserCountAsync(string esHost, string indexTarget, string featureFlagId)
         {
             var term1EO = new ExpandoObject();
-            term1EO.TryAdd("featureflagId.keyword", featureFlagId);
+            term1EO.TryAdd("FeatureFlagId.keyword", featureFlagId);
             //var term2EO = new ExpandoObject();
             //term2EO.TryAdd("VariationValue.keyword", variationLocalId);
             var mustEO = new List<dynamic>() {
@@ -69,13 +69,13 @@ namespace FeatureFlagsCo.FeatureInsights.ElasticSearch
         public async Task<string> GetLinearUsageCountByTimeRangeAsync(string esHost, string indexTarget, string featureFlagId, DateTime startDateTime, DateTime endDateTime, int interval)
         {
             var termEO = new ExpandoObject();
-            termEO.TryAdd("featureflagId.keyword", featureFlagId);
+            termEO.TryAdd("FeatureFlagId.keyword", featureFlagId);
             var rangeEO = new ExpandoObject();
             var rangesEO = new List<ExpandoObject>();
 
             var intervalBySeconds = endDateTime.Subtract(startDateTime).TotalSeconds / interval;
             var indexDateTime = startDateTime;
-            while (indexDateTime <= endDateTime)
+            while (indexDateTime < endDateTime)
             {
                 var rangeItem = new ExpandoObject();
                 var from = indexDateTime.ToString("yyyy-MM-ddTHH:mm:ss");
