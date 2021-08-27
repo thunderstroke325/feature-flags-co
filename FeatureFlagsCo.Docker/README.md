@@ -1,61 +1,40 @@
-# Architecture
-
-![architecture (1)](https://user-images.githubusercontent.com/68597908/130887752-520dbc6e-5a6d-47df-b1c6-19260d6cfcd7.png)
-
 
 
 # Requirements of docker hosted system
 
 |                  | CPU          | Memory |  Disk    | Ssytem                             |
 | ---------------- | ------------ | ------ | -------- | ---------------------------------- |
-| Cost-effective   | 2 * 1.30Ghz  | 4GB    |  128GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
+| Minimum          | 2 * 1.3Ghz   | 8GB    |  128GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
 | Recommended      | 4 * 1.3Ghz   | 16GB   |  256GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
 | High Performance | X * 4.2Ghz   | 32GB+  |  512GB   | Ubuntu 18.04 / 20.04 (LTS) / 21.04 |
 
 Run different docker commands for different case:
 
-- Run Docker for Cost-effective solution
-- Run Docker for Recommended solution
-- Run Docker for local development
-- Run Docker for local development (portal only)
-- Run Docker for local development (API only)
+- Run Docker for entire solution
+- Run Docker for development solution
 
-## Run Docker for Cost-effective solution
+## Run Docker for entire solution
 
-Cost-effective solution provide an product level system. It means you can play with feature-flags-co without coding. This version use a async telemetry collector, this allows system can be running with low computing resources. Disadvantage is this version has doesn't support high concurrent requests.
+This solution provide an product level system. It means you can play with feature-flags-co without coding. 
 
 You can run the entire feature-flags-co service with Docker by running the following commands:
 
     cd FeatureFlagsCo.Docker
-    docker-compose --profile costeffective up
+    docker-compose --profile docker up
 
 
 After docker compose started, please wait 30-50 secondes untill all services have been successfully etablished.
 
-## Run Docker for Recommended solution
+## Run Docker for development solution
 
-Recommended solution provide an product level system. This use an "InsightsExporter" to collect data and send data to a message queue instead of save directly to file/database.
+This solution will start all services except api, portal.
 
 You can run the entire feature-flags-co service with Docker by running the following commands:
 
     cd FeatureFlagsCo.Docker
-    docker-compose --profile recommended up
-
-
-After docker compose started, please wait 2-3 minutes untill all services have been successfully etablished. RabbitMQ take more times than other services, API services will run after the RabbitMQ started.
-
-## Development on local
-
-This solution will start all services except api, portal.
-
-You can run by following commands:
-
-    cd FeatureFlagsCo.Docker
     docker-compose --profile development up
 
-
 After docker compose started, please wait 2-3 minutes untill all services have been successfully etablished. RabbitMQ take more times than other services, API services will run after the RabbitMQ started.
-
 
 ## Initial values
 
@@ -66,14 +45,7 @@ After docker compose started, please wait 2-3 minutes untill all services have b
 5. Grafana Loki Url: `http://localhost:3100`.
 6. Sql Server Express Url: `tcp://localhost,1433`. Default Username: `sa `, Default password: `YourSTRONG@Passw0rd`
 7. MongoDB url: `mongodb://admin:password@localhost:27017/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false`
-
-### Some instruments in Grafana
-
-    count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])
-    sum(count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[30m])) by (userName)
-    count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1",varaition="false"}[1d])))
-    count(count by (userName) (count_over_time({featureFlagId="ff__2__3__a1"}[1d])))
-    {featureFlagId="ff__2__3__a1",varaition="false"}
+8. Elastic search Kibana: `http://localhost:5601`
 
 ## Sql Server initilized issues
 

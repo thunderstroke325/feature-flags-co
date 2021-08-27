@@ -213,21 +213,21 @@ namespace FeatureFlags.AdminWebAPIs
             }
             if (hostingType == HostingTypeEnum.Docker.ToString())
             {
-                var otlpEndpoint = this.Configuration.GetSection("OpenTelemetry").GetSection("Endpoint").Value;
-                if (!string.IsNullOrWhiteSpace(otlpEndpoint))
-                {
-                    AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+                //var otlpEndpoint = this.Configuration.GetSection("OpenTelemetry").GetSection("Endpoint").Value;
+                //if (!string.IsNullOrWhiteSpace(otlpEndpoint))
+                //{
+                //    AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-                    var serviceName = this.Configuration.GetSection("OpenTelemetry").GetSection("ServiceName").Value;
-                    services.AddOpenTelemetryTracing((builder) => builder
-                        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-                        .AddAspNetCoreInstrumentation()
-                        .AddHttpClientInstrumentation()
-                        .AddOtlpExporter(otlpOptions =>
-                        {
-                            otlpOptions.Endpoint = new Uri(otlpEndpoint);
-                    }));
-                }
+                //    var serviceName = this.Configuration.GetSection("OpenTelemetry").GetSection("ServiceName").Value;
+                //    services.AddOpenTelemetryTracing((builder) => builder
+                //        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+                //        .AddAspNetCoreInstrumentation()
+                //        .AddHttpClientInstrumentation()
+                //        .AddOtlpExporter(otlpOptions =>
+                //        {
+                //            otlpOptions.Endpoint = new Uri(otlpEndpoint);
+                //    }));
+                //}
             }
 
             var StartSleepTimeStr = this.Configuration.GetSection("MySettings").GetSection("StartSleepTime").Value;
