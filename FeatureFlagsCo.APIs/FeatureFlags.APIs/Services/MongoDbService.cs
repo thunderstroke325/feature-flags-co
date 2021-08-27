@@ -2,7 +2,6 @@
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.APIs.ViewModels.DataSync;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
-using Microsoft.Azure.Cosmos;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -54,21 +53,31 @@ namespace FeatureFlags.APIs.Services
         }
         #endregion
 
-        public async Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data) 
+        public async Task SaveEnvironmentDataAsync(int accountId, int projectId, int envId, EnvironmentDataViewModel data) 
         {
-            data.FeatureFlags.ForEach(async ff => {
+            data.FeatureFlags.ForEach(async ff =>
+            {
+                var keyName = FeatureFlagKeyExtension.CreateNewFeatureFlagKeyName(envId, ff.FF.Name);
+                ff.Id = FeatureFlagKeyExtension.GetFeatureFlagId(keyName, envId.ToString(), accountId.ToString(), projectId.ToString());
                 ff.EnvironmentId = envId;
+                ff.FF.EnvironmentId = envId;
+
+                ff.FF.Id = ff.Id;
+                ff._Id = null;
                 await this._mongoFeatureFlagsService.UpsertItemAsync(ff);
             });
 
-            data.EnvironmentUsers.ForEach(async u => {
+            data.EnvironmentUsers.ForEach(async u =>
+            {
                 u.EnvironmentId = envId;
+                u._Id = null;
                 await this._mongoEnvironmentUsersService.UpsertItemAsync(u);
             });
 
             if (data.EnvironmentUserProperties != null)
             {
                 data.EnvironmentUserProperties.EnvironmentId = envId;
+                data.EnvironmentUserProperties._Id = null;
                 await this._mongoEnvironmentUserPropertiesService.UpsertItemAsync(data.EnvironmentUserProperties);
             }
         }
@@ -426,14 +435,27 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<EnvironmentUserProperty> GetEnvironmentUserPropertiesForCRUDAsync(int environmentId)
         {
-            var eup = await _mongoEnvironmentUserPropertiesService.GetByEnvironmentIdAsync(environmentId);
-            if (eup == null)
-                eup = new EnvironmentUserProperty
+            string id = FeatureFlagKeyExtension.GetEnvironmentUserPropertyId(environmentId);
+            try
+            {
+                EnvironmentUserProperty returnModel = await _mongoEnvironmentUserPropertiesService.GetAsync(id);
+                if (returnModel == null)
+                    returnModel = new EnvironmentUserProperty()
+                    {
+                        EnvironmentId = environmentId,
+                        Properties = new List<string>()
+                    };
+
+                return returnModel;
+            }
+            catch (MongoException ex)
+            {
+                return new EnvironmentUserProperty()
                 {
                     EnvironmentId = environmentId,
                     Properties = new List<string>()
                 };
-            return eup;
+            }
         }
 
         public async Task CreateOrUpdateEnvironmentUserPropertiesForCRUDAsync(EnvironmentUserProperty param)

@@ -21,7 +21,7 @@ namespace FeatureFlags.APIs.Services
         #endregion
 
         Task<List<T>> GetEnvironmentDataAsync<T>(int envId);
-        Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data);
+        Task SaveEnvironmentDataAsync(int accountId, int projectId, int envId, EnvironmentDataViewModel data);
 
         Task<List<EnvironmentUser>> QueryEnvironmentUsersAsync(string searchText, int environmentId, int pageIndex, int pageSize);
         Task<int> QueryEnvironmentUsersCountAsync(string searchText, int environmentId, int pageIndex, int pageSize);

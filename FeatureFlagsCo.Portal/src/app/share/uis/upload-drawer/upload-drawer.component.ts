@@ -3,7 +3,6 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadChangeParam, NzUploadFile } from 'ng-zorro-antd/upload';
 import { AccountService } from 'src/app/services/account.service';
 import { DataSyncService } from 'src/app/services/data-sync.service';
-import { UserUpdateMode } from './types/upload-types';
 
 @Component({
   selector: 'app-upload-drawer',
@@ -11,20 +10,6 @@ import { UserUpdateMode } from './types/upload-types';
   styleUrls: ['./upload-drawer.component.less']
 })
 export class UploadDrawerComponent implements OnInit {
-
-  userUpdateMode: UserUpdateMode = UserUpdateMode.Undefined;
-  userUpdateModeOptions: {mode: UserUpdateMode, label: string}[] = [
-    {
-      mode: UserUpdateMode.OverWrite,
-      label: '覆盖（将覆盖已存在的相同的开关用户）'
-    },
-    {
-      mode: UserUpdateMode.NotUpload,
-      label: '不导入（不导入开关用户但是开关用户的属性仍将被导入）'
-    }
-  ];
-
-  userUpdateModeUndefined: UserUpdateMode = UserUpdateMode.Undefined;
 
   uploadUrl: string = null;
   isUploading: boolean = false;

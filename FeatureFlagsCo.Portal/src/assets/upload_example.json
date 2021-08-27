@@ -1,1 +1,179 @@
-{"version":null,"date":"2021-08-24T18:27:01.0194673Z","featureFlags":null,"featureFlagUsers":null,"userProperties":null}
+{
+	"version": "1.0",
+	"date": "2021-08-27T21:07:45.4125252Z",
+	"featureFlags": [{
+		"_Id": "61294f90301be50403c1ca19",
+		"id": "FF__6__10__21__朋友圈",
+		"environmentId": 21,
+		"objectType": "FeatureFlag",
+		"isArchived": true,
+		"ff": {
+			"id": "FF__6__10__21__朋友圈",
+			"name": "朋友圈",
+			"keyName": "朋友圈",
+			"environmentId": 21,
+			"creatorUserId": "598a4dec-47f7-41bf-a5aa-7cfc4725b685",
+			"status": "Disabled",
+			"defaultRuleValue": false,
+			"percentageRolloutForTrue": 0,
+			"percentageRolloutForTrueNumber": 0,
+			"percentageRolloutForFalse": null,
+			"percentageRolloutForFalseNumber": 0,
+			"percentageRolloutBasedProperty": null,
+			"valueWhenDisabled": null,
+			"lastUpdatedTime": "2021-06-07T22:03:16.869Z",
+			"defaultRulePercentageRollouts": null,
+			"variationOptionWhenDisabled": null
+		},
+		"ffp": [],
+		"fftuwmtr": [],
+		"fftiuForFalse": [],
+		"fftiuForTrue": [],
+		"targetIndividuals": null,
+		"variationOptions": null,
+		"isMultiOptionMode": null
+	}, {
+		"_Id": "61294f90301be50403c1ca1f",
+		"id": "FF__6__10__21__新的",
+		"environmentId": 21,
+		"objectType": "FeatureFlag",
+		"isArchived": null,
+		"ff": {
+			"id": "FF__6__10__21__新的",
+			"name": "新的",
+			"keyName": "新的",
+			"environmentId": 21,
+			"creatorUserId": "ecdcac87-0c12-41e1-ae73-f4a547d72a8c",
+			"status": "Enabled",
+			"defaultRuleValue": null,
+			"percentageRolloutForTrue": null,
+			"percentageRolloutForTrueNumber": 0,
+			"percentageRolloutForFalse": null,
+			"percentageRolloutForFalseNumber": 0,
+			"percentageRolloutBasedProperty": null,
+			"valueWhenDisabled": null,
+			"lastUpdatedTime": "2021-08-27T20:47:18.986Z",
+			"defaultRulePercentageRollouts": [{
+				"rolloutPercentage": [0, 1],
+				"valueOption": {
+					"localId": 1,
+					"displayOrder": 1,
+					"variationValue": "true"
+				}
+			}],
+			"variationOptionWhenDisabled": {
+				"localId": 1,
+				"displayOrder": 1,
+				"variationValue": "true"
+			}
+		},
+		"ffp": [],
+		"fftuwmtr": [{
+			"ruleId": "40892ef7-f3fe-4b33-9fe0-0988c209029c",
+			"ruleName": "",
+			"ruleJsonContent": [{
+				"property": "民族",
+				"operation": "Equal",
+				"value": "abc"
+			}],
+			"variationRuleValue": null,
+			"percentageRolloutForTrue": null,
+			"percentageRolloutForTrueNumber": 0,
+			"percentageRolloutForFalse": null,
+			"percentageRolloutForFalseNumber": 0,
+			"percentageRolloutBasedProperty": null,
+			"valueOptionsVariationRuleValues": [{
+				"rolloutPercentage": [0, 1],
+				"valueOption": {
+					"localId": 3,
+					"displayOrder": 3,
+					"variationValue": "neutral"
+				}
+			}]
+		}, {
+			"ruleId": "48b9db78-5f6c-4e4b-9d2a-192ac08c31c5",
+			"ruleName": "",
+			"ruleJsonContent": [{
+				"property": "爱好",
+				"operation": "NotEqual",
+				"value": "abc"
+			}],
+			"variationRuleValue": null,
+			"percentageRolloutForTrue": null,
+			"percentageRolloutForTrueNumber": 0,
+			"percentageRolloutForFalse": null,
+			"percentageRolloutForFalseNumber": 0,
+			"percentageRolloutBasedProperty": null,
+			"valueOptionsVariationRuleValues": [{
+				"rolloutPercentage": [0, 0.9],
+				"valueOption": {
+					"localId": 1,
+					"displayOrder": 1,
+					"variationValue": "true"
+				}
+			}, {
+				"rolloutPercentage": [0.9, 1],
+				"valueOption": {
+					"localId": 2,
+					"displayOrder": 2,
+					"variationValue": "false"
+				}
+			}, {
+				"rolloutPercentage": [1, 1],
+				"valueOption": {
+					"localId": 3,
+					"displayOrder": 3,
+					"variationValue": "neutral"
+				}
+			}]
+		}],
+		"fftiuForFalse": [],
+		"fftiuForTrue": [],
+		"targetIndividuals": [{
+			"individuals": [],
+			"valueOption": {
+				"localId": 1,
+				"displayOrder": 1,
+				"variationValue": "true"
+			}
+		}, {
+			"individuals": [],
+			"valueOption": {
+				"localId": 2,
+				"displayOrder": 2,
+				"variationValue": "false"
+			}
+		}, {
+			"individuals": [],
+			"valueOption": {
+				"localId": 3,
+				"displayOrder": 3,
+				"variationValue": "neutral"
+			}
+		}],
+		"variationOptions": [{
+			"localId": 1,
+			"displayOrder": 1,
+			"variationValue": "true"
+		}, {
+			"localId": 2,
+			"displayOrder": 2,
+			"variationValue": "false"
+		}, {
+			"localId": 3,
+			"displayOrder": 3,
+			"variationValue": "neutral"
+		}],
+		"isMultiOptionMode": true
+	}],
+	"environmentUsers": [],
+	"environmentUserProperties": {
+		"_Id": "61294f90301be50403c1ca21",
+		"id": "WUP__21",
+		"environmentId": 21,
+		"projectId": 0,
+		"accountId": 0,
+		"objectType": "EnvironmentUserProperties",
+		"properties": ["国家", "民族", "爱好"]
+	}
+}

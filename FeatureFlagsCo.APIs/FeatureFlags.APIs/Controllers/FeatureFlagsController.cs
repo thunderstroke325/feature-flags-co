@@ -48,6 +48,7 @@ namespace FeatureFlags.APIs.Controllers
         [Route("GetEnvironmentFeatureFlags/{environmentId}")]
         public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentFeatureFlags(int environmentId)
         {
+            // TODO pagination
             return await _cosmosDbService.GetEnvironmentFeatureFlagBasicInfoItemsAsync(environmentId, 0, 300);
         }
 
@@ -162,13 +163,16 @@ namespace FeatureFlags.APIs.Controllers
         [Route("GetEnvironmentUserProperties/{environmentId}")]
         public async Task<List<string>> GetEnvironmentUserProperties(int environmentId)
         {
-            var p = await _cosmosDbService.GetEnvironmentUserPropertiesAsync(environmentId);
-            if (p != null)
-                return p.Properties ?? new List<string>();
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, environmentId))
+            {
+                var p = await _cosmosDbService.GetEnvironmentUserPropertiesAsync(environmentId);
+                if (p != null)
+                    return p.Properties ?? new List<string>();
+            }
+
             return new List<string>();
         }
-
-
 
         #region multi variation options
 

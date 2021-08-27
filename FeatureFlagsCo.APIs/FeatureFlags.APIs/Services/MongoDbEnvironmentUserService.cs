@@ -24,6 +24,7 @@ namespace FeatureFlags.APIs.Services
             var existingItem = await GetAsync(item.Id);
             if (existingItem != null)
             {
+                item._Id = existingItem._Id;
                 await UpdateAsync(item.Id, item);
             }
             else

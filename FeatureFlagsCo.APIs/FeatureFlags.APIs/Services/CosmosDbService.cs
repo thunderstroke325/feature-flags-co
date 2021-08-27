@@ -435,7 +435,7 @@ namespace FeatureFlags.APIs.Services
             return result;
         }
 
-        public async Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data) 
+        public async Task SaveEnvironmentDataAsync(int accountId, int projectId, int envId, EnvironmentDataViewModel data) 
         {
             data.FeatureFlags.ForEach(async ff => {
                 ff.EnvironmentId = envId;
