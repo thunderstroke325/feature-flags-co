@@ -141,8 +141,6 @@ services:
         hard: 65536
     cap_add:
       - IPC_LOCK
-    # volumes:
-    #   - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
       - 9300:9300
@@ -151,47 +149,13 @@ services:
     profiles:
       - docker
       - development
-  # es-apm:
-  #   image: "docker.elastic.co/apm/apm-server:7.14.0"
-  #   container_name: elasticsearchapm
-  #   restart: always
-  #   hostname: elasticsearchapm
-  #   ports:
-  #     - 8200:8200
-  #     - 9300:9300
-  #   command: >
-  #     apm-server -e
-  #       -E apm-server.rum.enabled=true
-  #       -E apm-server.host=0.0.0.0:8200
-  #       -E setup.kibana.host=kibana:5601
-  #   depends_on:
-  #     elasticsearch:
-  #       condition: service_healthy
-  #   networks:
-  #     - ffc
-  #   profiles:
-  #     - docker
-  #     - development
   es-kibana:
     image: "docker.elastic.co/kibana/kibana:7.14.0"
-    # container_name: "es-kibana"
     environment:
       SERVER_NAME: kibana.example.org
       ELASTICSEARCH_URL: http://elasticsearch:9200
     ports:
       - 5601:5601
-    # logging:
-    #   driver: 'json-file'
-    #   options:
-    #       max-size: '2m'
-    #       max-file: '5'
-    # healthcheck:
-    #   test: ["CMD", "curl", "--write-out", "'HTTP %{http_code}'", "--silent", "--output", "/dev/null", "http://kibana:5601/"]
-    #   retries: 10
-    #   interval: 10s
-    # depends_on:
-    #   elasticsearch:
-    #     condition: service_healthy
     networks:
       - ffc
     profiles:
