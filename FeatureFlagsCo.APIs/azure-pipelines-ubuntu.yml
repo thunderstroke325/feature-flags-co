@@ -1,0 +1,307 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- main
+
+
+pool:
+  vmImage: windows-latest
+
+variables:
+- group: MJKG_API_SETTINGS
+- name: buildConfiguration
+  value: Release
+
+
+stages:
+
+- stage: 'Development'
+  jobs:
+  - deployment: 'DeployToDevelopment'
+    environment: 'Approval_API_Dev'
+    strategy:
+        runOnce:
+          deploy:
+            steps:
+              - script: |
+                  dir
+                  
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Install .NET Core SDK
+                inputs:
+                  version: 3.1.x
+                  packageType: runtime
+
+              - task: PowerShell@2
+                displayName: Replace Settings
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs/FeatureFlags.APIs
+                    $pathToJson = "appsettings.json"
+                    $a = Get-Content $pathToJson | ConvertFrom-Json
+            
+                    $a.ConnectionStrings.ConnStr = "$(SQLDATABASE_ConnectionString_Dev)"
+                    $a.ConnectionStrings.RedisServerUrl = "$(REDISCACHE_ConnectionString_Dev)"
+                    $a.JWT.Secret = "$(JWT_Secret_Dev)"
+                    $a.CosmosDb.Account = "$(CosmosDb_Account_Dev)"
+                    $a.CosmosDb.Key = "$(CosmosDb_Key_Dev)"
+                    $a.CosmosDb.DatabaseName = "$(CosmosDb_Account_DatabaseName)"
+                    $a.CosmosDb.ContainerName = "$(CosmosDb_Account_ContainerName)"
+
+                    $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey_Dev)"
+                    $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString_Dev)"
+                    $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId_Dev)"
+                    $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret_Dev)"
+
+                    $a.MySettings.SendCloudAPIUser = "$(SendCloudAPIUser)"
+                    $a.MySettings.SendCloudAPIKey = "$(SendCloudAPIKey)"
+                    $a.MySettings.SendCloudFrom = "noreply@feature-flags.co"
+                    $a.MySettings.SendCloudFromName = "feature-flags.co"
+                    $a.MySettings.SendCloudTemplate = "forgetpassword"
+                    $a.MySettings.SendCloudEmailSubject = "feature-flags.co"
+
+                    ConvertTo-Json $a -depth 100  | set-content $pathToJson
+
+                    $pathToJsonCheck = "appsettings.json"
+                    $aCheck = Get-Content $pathToJson | ConvertFrom-Json
+                    Write-Host $aCheck.ConnectionStrings.ConnStr
+                    Write-Host $aCheck.ConnectionStrings.RedisServerUrl
+                    Write-Host $aCheck.JWT.Secret
+                    Write-Host $aCheck.CosmosDb.Account
+                    Write-Host $aCheck.CosmosDb.Key
+                    Write-Host $aCheck.CosmosDb.DatabaseName
+                    Write-Host $aCheck.CosmosDb.ContainerName
+                    Write-Host $aCheck.ApplicationInsights.InstrumentationKey
+                    Write-Host $aCheck.ApplicationInsights.ConnectionString
+                    Write-Host $aCheck.MySettings.AppInsightsApplicationId
+                    Write-Host $aCheck.MySettings.AppInsightsApplicationApiSecret.
+
+              
+              - task: DotNetCoreCLI@2
+                displayName: dotnet restore api
+                inputs:
+                  command: restore
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+              - task: DotNetCoreCLI@2
+                displayName: dotnet build api
+                inputs:
+                  command: 'build'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+                  
+              - task: DotNetCoreCLI@2
+                inputs:
+                  command: publish
+                  publishWebProjects: True
+                  arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+                  zipAfterPublish: True
+              - task: AzureWebApp@1
+                inputs:
+                  azureSubscription: 'azure-china-devops'
+                  appType: 'webApp'
+                  appName: 'ffc-api-ce2-dev'
+                  package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+                  deploymentMethod: 'auto'
+
+              
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet restore
+              #   inputs:
+              #     command: restore
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet build
+              #   inputs:
+              #     command: 'build'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+
+              # - task: DotNetCoreCLI@2
+              #   displayName: dotnet test
+              #   inputs:
+              #     command: 'test'
+              #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
+     
+
+- stage: 'DevelopmentIntegrationTest'
+  jobs:
+  - deployment: 'DevIntegrationTest'
+    environment: 'Approval_API_Dev'
+    condition: succeeded()
+    strategy:
+        runOnce:
+          deploy:
+            steps:
+              - script: |
+                  dir
+                  
+              - checkout: self
+
+              # - task: replacetokens@3
+              #   displayName: Replace tokens in all tfvars files
+              #   inputs:
+              #     rootDirectory: '$(Build.SourcesDirectory)/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests'
+              #     targetFiles: '**/*.json'
+              #     emptyValue: EMPTY
+              #     tokenPrefix: '#{'
+              #     tokenSuffix: '}#'
+              #   env:
+              #     loginUserName: '$(Postman_Integration_Test_Login_Username)'
+              #     loginPassword: '$(Postman_Integration_Test_Login_Password)'
+
+              - task: PowerShell@2
+                displayName: Replace Postman Setting
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests
+                    
+                    $pathToJson = "ffc-variation-random-test.json"
+                    $a = Get-Content $pathToJson | ConvertFrom-Json
+                    Write-Host $a
+                    $a.variable[0].value = "$(API_URL_Dev)"
+                    ConvertTo-Json $a -depth 100  | set-content $pathToJson
+                    
+                    $pathToJsonCheck = "ffc-variation-random-test.json"
+                    $aCheck = Get-Content $pathToJson | ConvertFrom-Json
+                    Write-Host $aCheck.variable[0].value
+                    
+                    $pathToJson2 = "ffc-multi-variation-ffp-test.json"
+                    $a2 = Get-Content $pathToJson2 | ConvertFrom-Json
+                    $a2.variable[0].value = "$(API_URL_Dev)"
+                    ConvertTo-Json $a2 -depth 100  | set-content $pathToJson2
+                    
+                    $pathToJsonCheck2 = "ffc-multi-variation-ffp-test.json"
+                    $aCheck2 = Get-Content $pathToJson2 | ConvertFrom-Json
+                    Write-Host $aCheck2.variable[0].value
+                    
+                    $pathToJson3 = "ffc-multi-variation-cache-test.json"
+                    $a3 = Get-Content $pathToJson3 | ConvertFrom-Json
+                    $a3.variable[0].value = "$(API_URL_Dev)"
+                    ConvertTo-Json $a3 -depth 100  | set-content $pathToJson3
+                    
+                    $pathToJsonCheck3 = "ffc-multi-variation-cache-test.json"
+                    $aCheck3 = Get-Content $pathToJson3 | ConvertFrom-Json
+                    Write-Host $aCheck3.variable[0].value
+              
+              - task: Bash@3
+                displayName: 'run newman'
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs
+                    cd FeatureFlagsCo.APIs.Tests
+                    cd Postman.IntegrationTests
+                    npm install -g newman
+                    newman run ffc-variation-random-test.json --reporters cli,junit --reporter-junit-export junit-report.xml
+              
+              - task: Bash@3
+                displayName: 'run newman'
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs
+                    cd FeatureFlagsCo.APIs.Tests
+                    cd Postman.IntegrationTests
+                    npm install -g newman
+                    newman run ffc-multi-variation-ffp-test.json --reporters cli,junit --reporter-junit-export junit-report2.xml
+
+              - task: Bash@3
+                displayName: 'run newman'
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs
+                    cd FeatureFlagsCo.APIs.Tests
+                    cd Postman.IntegrationTests
+                    npm install -g newman
+                    newman run ffc-multi-variation-cache-test.json --reporters cli,junit --reporter-junit-export junit-report3.xml
+
+              - task: PublishTestResults@2
+                inputs:
+                  testResultsFormat: 'JUnit'
+                  testResultsFiles: '**/*.xml'
+                  mergeTestResults: true
+                  failTaskOnFailedTests: true
+                displayName: 'Publish Test Results'   
+
+- stage: 'Production'
+  condition: succeeded()
+  jobs:
+  - deployment: 'DeployToProduction'
+    environment: 'Approval_API'
+    strategy:
+        runOnce:
+          deploy:
+            steps:
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Install .NET Core SDK
+                inputs:
+                  version: 3.1.x
+                  packageType: runtime
+
+              - task: PowerShell@2
+                displayName: Replace Settings
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs/FeatureFlags.APIs
+                    $pathToJson = "appsettings.json"
+                    $a = Get-Content $pathToJson | ConvertFrom-Json
+            
+                    $a.ConnectionStrings.ConnStr = "$(SQLDATABASE_ConnectionString)"
+                    $a.ConnectionStrings.RedisServerUrl = "$(REDISCACHE_ConnectionString)"
+                    $a.JWT.Secret = "$(JWT_Secret)"
+                    $a.CosmosDb.Account = "$(CosmosDb_Account)"
+                    $a.CosmosDb.Key = "$(CosmosDb_Key)"
+                    $a.CosmosDb.DatabaseName = "$(CosmosDb_Account_DatabaseName)"
+                    $a.CosmosDb.ContainerName = "$(CosmosDb_Account_ContainerName)"
+
+                    $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey)"
+                    $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString)"
+                    $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId)"
+                    $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret)"
+                    
+                    $a.MySettings.SendCloudAPIUser = "$(SendCloudAPIUser)"
+                    $a.MySettings.SendCloudAPIKey = "$(SendCloudAPIKey)"
+                    $a.MySettings.SendCloudFrom = "noreply@feature-flags.co"
+                    $a.MySettings.SendCloudFromName = "feature-flags.co"
+                    $a.MySettings.SendCloudTemplate = "forgetpassword"
+                    $a.MySettings.SendCloudEmailSubject = "feature-flags.co"
+
+                    ConvertTo-Json $a -depth 100  | set-content $pathToJson
+
+                    $pathToJsonCheck = "appsettings.json"
+                    $aCheck = Get-Content $pathToJson | ConvertFrom-Json
+                    Write-Host $a.ConnectionStrings.ConnStr
+
+
+              - task: DotNetCoreCLI@2
+                displayName: dotnet restore
+                inputs:
+                  command: restore
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+              - task: DotNetCoreCLI@2
+                inputs:
+                  command: 'build'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIs/FeatureFlags.APIs.csproj'
+    
+              - task: DotNetCoreCLI@2
+                inputs:
+                  command: publish
+                  publishWebProjects: True
+                  arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+                  zipAfterPublish: True
+
+              - task: AzureWebApp@1
+                inputs:
+                  azureSubscription: 'azure-china-devops'
+                  appType: 'webApp'
+                  appName: 'ffc-webapp-api-ce2'
+                  package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+                  deploymentMethod: 'auto'

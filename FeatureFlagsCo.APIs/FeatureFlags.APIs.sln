@@ -5,6 +5,7 @@ VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DevOps", "DevOps", "{56DC8120-F7DB-46B9-AF69-191037C1D42D}"
 	ProjectSection(SolutionItems) = preProject
+		azure-pipelines-ubuntu.yml = azure-pipelines-ubuntu.yml
 		azure-pipelines.yml = azure-pipelines.yml
 		Dockerfile = Dockerfile
 	EndProjectSection
@@ -19,9 +20,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.MQ", "Featur
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.MQ.ExportToElasticSearch", "FeatureFlagsCo.ExportToElasticSearch\FeatureFlagsCo.MQ.ExportToElasticSearch.csproj", "{997D96E7-AC91-4CC9-BA6B-A7CE58FC8ABA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlagsCo.FeatureInsights", "FeatureFlagsCo.FeatureInsights\FeatureFlagsCo.FeatureInsights.csproj", "{6E2336CA-DBFD-4161-9FA2-DC4D69B041F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.FeatureInsights", "FeatureFlagsCo.FeatureInsights\FeatureFlagsCo.FeatureInsights.csproj", "{6E2336CA-DBFD-4161-9FA2-DC4D69B041F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlagsCo.FeatureInsights.ElasticSearch", "FeatureFlagsCo.FeatureInsights.ElasticSearch\FeatureFlagsCo.FeatureInsights.ElasticSearch.csproj", "{101F9D63-9B2F-4DE6-8862-769A73F5B541}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.FeatureInsights.ElasticSearch", "FeatureFlagsCo.FeatureInsights.ElasticSearch\FeatureFlagsCo.FeatureInsights.ElasticSearch.csproj", "{101F9D63-9B2F-4DE6-8862-769A73F5B541}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
