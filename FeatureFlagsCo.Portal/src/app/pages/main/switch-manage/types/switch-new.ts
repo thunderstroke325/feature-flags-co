@@ -1,3 +1,4 @@
+
 export interface IUserType {
     id: string;
     keyId?: string;
@@ -272,7 +273,13 @@ export class CSwitchParams {
         let ffDataFilters: IFfpParams[] = this.ffp.filter((item: IFfpParams) => item.variationValue !== null && item.prerequisiteFeatureFlagId !== null);
         this.ffp = [...ffDataFilters];
 
-        // this.ff.defaultRuleValue = this.ff.defaultRuleValue === "null" ? null : this.ff.defaultRuleValue;
+        // prerequistes
+        this.ffp = this.ffp.map(f => {
+          const result = Object.assign({}, f);
+          result.valueOptionsVariationValue = f.selectedFeatureFlag.variationOptions.find(v => v.localId === result.valueOptionsVariationValue.localId);
+
+          return result;
+        });
 
         this.fftuwmtr = this.fftuwmtr.filter(f => f.ruleJsonContent.length > 0);
         this.fftuwmtr.forEach((item: IFftuwmtrParams) => {

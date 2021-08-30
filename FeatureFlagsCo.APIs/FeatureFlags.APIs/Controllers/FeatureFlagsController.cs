@@ -151,6 +151,18 @@ namespace FeatureFlags.APIs.Controllers
             if (ff.IsMultiOptionMode.HasValue && ff.IsMultiOptionMode.Value) 
             {
                 ff.VariationOptions = param.VariationOptions;
+                ff.FF.VariationOptionWhenDisabled = param.VariationOptions.FirstOrDefault(o => o.LocalId == ff.FF.VariationOptionWhenDisabled.LocalId);
+                ff.FFTUWMTR.ForEach(f => {
+                    f.ValueOptionsVariationRuleValues.ForEach(v => v.ValueOption = param.VariationOptions.FirstOrDefault(o => o.LocalId == v.ValueOption.LocalId));
+                });
+                ff.TargetIndividuals.ForEach(t => t.ValueOption = param.VariationOptions.FirstOrDefault(v => v.LocalId == t.ValueOption.LocalId));
+
+                // update prerequistes
+                foreach (var f in ff.FFP)
+                {
+                    var prerequisite = await _cosmosDbService.GetFeatureFlagAsync(f.PrerequisiteFeatureFlagId);
+                    f.ValueOptionsVariationValue = prerequisite.VariationOptions.FirstOrDefault(v => v.LocalId == f.ValueOptionsVariationValue.LocalId);
+                }
             }
             
             await _cosmosDbService.UpdateFeatureFlagAsync(ff);

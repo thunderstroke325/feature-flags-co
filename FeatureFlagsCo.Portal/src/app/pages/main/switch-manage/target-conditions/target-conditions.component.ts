@@ -204,7 +204,7 @@ export class TargetConditionsComponent implements OnInit {
   }
 
 
-  // 保存设置c
+  // 保存设置
   public onSaveSetting() {
 
     this.featureDetail.setTargetUsers('true', this.targetUserSelectedListTrue);
