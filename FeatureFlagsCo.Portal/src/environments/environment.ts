@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   projectEnvKey: '#{PROJECT_ENV_KEY_DEV}#',
-  url: 'http://localhost:5001',
+  url: 'https://ffc-api-ce2-dev.chinacloudsites.cn',
   name: 'Development',
   statisticUrl: null
 };
