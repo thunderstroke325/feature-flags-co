@@ -79,10 +79,6 @@ stages:
                     Write-Host $aCheck.ConnectionStrings.ConnStr
                     Write-Host $aCheck.ConnectionStrings.RedisServerUrl
                     Write-Host $aCheck.JWT.Secret
-                    Write-Host $aCheck.CosmosDb.Account
-                    Write-Host $aCheck.CosmosDb.Key
-                    Write-Host $aCheck.CosmosDb.DatabaseName
-                    Write-Host $aCheck.CosmosDb.ContainerName
                     Write-Host $aCheck.ApplicationInsights.InstrumentationKey
                     Write-Host $aCheck.ApplicationInsights.ConnectionString
                     Write-Host $aCheck.MySettings.AppInsightsApplicationId
