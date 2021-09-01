@@ -147,7 +147,7 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
                 if (!params || !params[0] || !params[0].value) return '';
                 return `
                 <span>
-                  ${this.xname}: <span style="font-weight: bold">${params[0].axisValue}</span>
+                  ${this.xname}: <span style="font-weight: bold">${params[0].axisValue.slice(5, -3)}</span>
                   <br/>
                   ${this.yname}: <span style="font-weight: bold">${params[0].value}</span>
                 </span>`
@@ -186,7 +186,7 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
         console.log(option[i].to_as_string.replace('T', ' '));
         var date = new Date(option[i].to_as_string.replace('T', ' ') + ' UTC');
         console.log(date);
-        data.push(moment(date).format("MM-DD HH:MM"));
+        data.push(moment(date).format("YYYY-MM-DD HH:MM:SS"));
       }
     }
 
