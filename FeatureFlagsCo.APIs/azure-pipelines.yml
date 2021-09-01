@@ -65,7 +65,7 @@ stages:
                     $a.MySettings.SendCloudTemplate = "forgetpassword"
                     $a.MySettings.SendCloudEmailSubject = "feature-flags.co"
 
-                    $a.MongoDbSettings.ConnectionString = $(MongoDbSettings_ConnectionString_Dev)"
+                    $a.MongoDbSettings.ConnectionString = $(MongoDbSettings_ConnectionString_Dev)
                     $a.MongoDbSettings.DatabaseName = $(MongoDbSettings_DatabaseName_Dev)"
 
                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
