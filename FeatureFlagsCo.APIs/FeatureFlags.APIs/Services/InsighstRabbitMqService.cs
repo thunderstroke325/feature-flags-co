@@ -22,7 +22,8 @@ namespace FeatureFlags.APIs.Services
         {
             _mySettings = mySettings;
 
-            _connectionFactory = new ConnectionFactory() { HostName = _mySettings.Value.InsightsRabbitMqUrl };
+            _connectionFactory = new ConnectionFactory();
+            _connectionFactory.Uri = new Uri(_mySettings.Value.InsightsRabbitMqUrl);
             _connection = _connectionFactory.CreateConnection();
             _connection.CallbackException += Connection_CallbackException;
             _connection.ConnectionShutdown += Connection_ConnectionShutdown;
