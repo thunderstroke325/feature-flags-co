@@ -48,10 +48,6 @@ stages:
                     $a.ConnectionStrings.ConnStr = "$(SQLDATABASE_ConnectionString_Dev)"
                     $a.ConnectionStrings.RedisServerUrl = "$(REDISCACHE_ConnectionString_Dev)"
                     $a.JWT.Secret = "$(JWT_Secret_Dev)"
-                    $a.CosmosDb.Account = "$(CosmosDb_Account_Dev)"
-                    $a.CosmosDb.Key = "$(CosmosDb_Key_Dev)"
-                    $a.CosmosDb.DatabaseName = "$(CosmosDb_Account_DatabaseName)"
-                    $a.CosmosDb.ContainerName = "$(CosmosDb_Account_ContainerName)"
 
                     $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey_Dev)"
                     $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString_Dev)"
