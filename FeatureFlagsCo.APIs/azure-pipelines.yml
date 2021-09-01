@@ -57,8 +57,10 @@ stages:
                     $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString_Dev)"
                     $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId_Dev)"
                     $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret_Dev)"
-                    $a.MySettings.InsightsRabbitMqUrl = "$(AppInsights_InsightsRabbitMqUrl_Dev)"
-                    $a.MySettings.ElasticSearchHost = "$(AppInsights_ElasticSearchHost_Dev)"
+                    $a.MySettings.InsightsRabbitMqUrl = "$(MySettings_InsightsRabbitMqUrl_Dev)"
+                    $a.MySettings.ElasticSearchHost = "$(MySettings_ElasticSearchHost_Dev)"
+                    $a.MySettings.CacheType = "$(MySettings_CacheType_Dev)"
+                    
 
                     $a.MySettings.SendCloudAPIUser = "$(SendCloudAPIUser)"
                     $a.MySettings.SendCloudAPIKey = "$(SendCloudAPIKey)"
