@@ -55,12 +55,6 @@ stages:
 
                     $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey_Dev)"
                     $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString_Dev)"
-                    $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId_Dev)"
-                    $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret_Dev)"
-                    $a.MySettings.InsightsRabbitMqUrl = "$(MySettings_InsightsRabbitMqUrl_Dev)"
-                    $a.MySettings.ElasticSearchHost = "$(MySettings_ElasticSearchHost_Dev)"
-                    $a.MySettings.CacheType = "$(MySettings_CacheType_Dev)"
-                    
 
                     $a.MySettings.SendCloudAPIUser = "$(SendCloudAPIUser)"
                     $a.MySettings.SendCloudAPIKey = "$(SendCloudAPIKey)"
@@ -69,8 +63,15 @@ stages:
                     $a.MySettings.SendCloudTemplate = "forgetpassword"
                     $a.MySettings.SendCloudEmailSubject = "feature-flags.co"
 
-                    $a.MongoDbSettings.ConnectionString = $(MongoDbSettings_ConnectionString_Dev)"
-                    $a.MongoDbSettings.DatabaseName = $(MongoDbSettings_DatabaseName_Dev)"
+                    $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId_Dev)"
+                    $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret_Dev)"
+
+                    $a.MySettings.InsightsRabbitMqUrl = "$(MySettings_InsightsRabbitMqUrl_Dev)"
+                    $a.MySettings.ElasticSearchHost = "$(MySettings_ElasticSearchHost_Dev)"
+                    $a.MySettings.CacheType = "$(MySettings_CacheType_Dev)"
+
+                    $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString_Dev)"
+                    $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName_Dev)"
 
                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
 
