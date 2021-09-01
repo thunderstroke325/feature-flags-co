@@ -30,14 +30,14 @@ namespace FeatureFlags.APIs.Services
         public async Task<List<FeatureFlag>> SearchAsync(string searchText, int environmentId, int pageIndex, int pageSize)
         {
             if (string.IsNullOrWhiteSpace(searchText))
-                return await _featureFlags.Find(p => p.EnvironmentId == environmentId).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
+                return await _featureFlags.Find(p => p.EnvironmentId == environmentId).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
             else
-                return await _featureFlags.Find(p => p.EnvironmentId == environmentId && p.FF.Name.Contains(searchText)).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
+                return await _featureFlags.Find(p => p.EnvironmentId == environmentId && p.FF.Name.Contains(searchText)).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
         }
 
         public async Task<List<FeatureFlag>> SearchArchivedAsync(int environmentId, int pageIndex, int pageSize)
         {
-            return await _featureFlags.Find(p => p.EnvironmentId == environmentId && p.IsArchived == true).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
+            return await _featureFlags.Find(p => p.EnvironmentId == environmentId && p.IsArchived == true).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
         }
 
         public async Task<FeatureFlag> GetAsync(string id) =>
@@ -49,6 +49,7 @@ namespace FeatureFlags.APIs.Services
             var existingItem = await GetAsync(item.Id);
             if (existingItem != null)
             {
+                item._Id = existingItem._Id;
                 await UpdateAsync(item.Id, item);
             }
             else 

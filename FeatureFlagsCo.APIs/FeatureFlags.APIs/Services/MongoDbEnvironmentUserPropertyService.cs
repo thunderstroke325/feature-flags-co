@@ -14,9 +14,13 @@ namespace FeatureFlags.APIs.Services
 
         public async Task UpsertItemAsync(EnvironmentUserProperty item)
         {
+            string id = FeatureFlagKeyExtension.GetEnvironmentUserPropertyId(item.EnvironmentId);
+            item.Id = id;
+
             var existingItem = await GetAsync(item.Id);
             if (existingItem != null)
             {
+                item._Id = existingItem._Id;
                 await UpdateAsync(item.Id, item);
             }
             else

@@ -18,8 +18,8 @@ export class DataSyncService {
     return this.baseUrl.replace(/#envId/ig, `${envId}`) + 'upload';
   }
 
-  getEnvironmentData(envId: number, downloadOptions: number): Observable<any> {
-    const url = this.baseUrl.replace(/#envId/ig, `${envId}`) + `download/${downloadOptions}`;
+  getEnvironmentData(envId: number): Observable<any> {
+    const url = this.baseUrl.replace(/#envId/ig, `${envId}`) + `download`;
     return this.http.get(url);
   }
 }

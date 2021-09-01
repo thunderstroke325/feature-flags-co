@@ -24,12 +24,6 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenTelemetry;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Instrumentation.AspNetCore;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using FeatureFlagsCo.RabbitMQToGrafanaLoki;
 using FeatureFlagsCo.FeatureInsights;
 using FeatureFlagsCo.FeatureInsights.ElasticSearch;
 
@@ -240,9 +234,6 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddSingleton<IExportToElasticSearchService>(new ExportToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddScoped<IFeatureFlagsUsageService, ElasticSearchFeatureFlagsUsageService>();
 
-            var grafanaLokiUrl = this.Configuration.GetSection("MySettings").GetSection("GrafanaLokiUrl").Value;
-            if(!string.IsNullOrWhiteSpace(grafanaLokiUrl))
-                services.AddSingleton<IRabbitMq2GrafanaLokiService>(new RabbitMq2GrafanaLokiService(insightsRabbitMqUrl, grafanaLokiUrl));
             #endregion
         }
 

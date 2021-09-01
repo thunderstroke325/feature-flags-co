@@ -1,56 +1,46 @@
 ﻿using FeatureFlags.APIs.Models;
+using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.ViewModels.DataSync;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
 {
     public interface IDataSyncService {
-        Task<EnvironmentDataViewModel> GetEnvironmentDataAsync(int envId, DownloadOptionEnum options);
-        Task SaveEnvironmentDataAsync(int envId, UserUpdateModeEnum userUpdateMode, EnvironmentDataViewModel data);
+        Task<EnvironmentDataViewModel> GetEnvironmentDataAsync(int envId);
+        Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data);
     }
 
     public class DataSyncService : IDataSyncService
     {
         private readonly INoSqlService _noSqlService;
-        public DataSyncService(INoSqlService noSqlService)
+        private readonly IFeatureFlagsService _featureFlagService;
+
+        public DataSyncService(
+            INoSqlService noSqlService,
+            IFeatureFlagsService featureFlagService)
         {
             _noSqlService = noSqlService;
+            _featureFlagService = featureFlagService;
         }
 
-        public async Task<EnvironmentDataViewModel> GetEnvironmentDataAsync(int envId, DownloadOptionEnum options)
+        public async Task<EnvironmentDataViewModel> GetEnvironmentDataAsync(int envId)
         {
-            var result = new EnvironmentDataViewModel
+            return new EnvironmentDataViewModel
             {
                 Date = DateTime.UtcNow,
                 Version = "1.0",
-                FeatureFlags = new List<FeatureFlag>(),
-                EnvironmentUsers = new List<EnvironmentUser>()
+                FeatureFlags = await _noSqlService.GetEnvironmentDataAsync<FeatureFlag>(envId),
+                EnvironmentUsers = await _noSqlService.GetEnvironmentDataAsync<EnvironmentUser>(envId),
+                EnvironmentUserProperties = (await _noSqlService.GetEnvironmentDataAsync<EnvironmentUserProperty>(envId)).FirstOrDefault()
             };
-
-            if ((options & DownloadOptionEnum.FeatureFlags) != DownloadOptionEnum.None) 
-            {
-                result.FeatureFlags = await _noSqlService.GetEnvironmentDataAsync<FeatureFlag>(envId);
-            }
-
-            if ((options & DownloadOptionEnum.Users) != DownloadOptionEnum.None)
-            {
-                result.EnvironmentUsers = await _noSqlService.GetEnvironmentDataAsync<EnvironmentUser>(envId);
-            }
-
-            if ((options & DownloadOptionEnum.UserProperties) != DownloadOptionEnum.None)
-            {
-                result.EnvironmentUserProperties = (await _noSqlService.GetEnvironmentDataAsync<EnvironmentUserProperty>(envId)).FirstOrDefault();
-            }
-
-            return result;
         }
 
-        public async Task SaveEnvironmentDataAsync(int envId, UserUpdateModeEnum userUpdateMode, EnvironmentDataViewModel data)
+        public async Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data)
         {
-            await _noSqlService.SaveEnvironmentDataAsync(envId, data);
+            var ids = await _featureFlagService.GetAccountAndProjectIdByEnvironmentIdAsync(envId);
+            await _noSqlService.SaveEnvironmentDataAsync(ids[1], ids[0], envId, data);
         }
     }
 }

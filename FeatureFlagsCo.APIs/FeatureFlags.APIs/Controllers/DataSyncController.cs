@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Authentication;
-using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.DataSync;
@@ -38,13 +35,13 @@ namespace FeatureFlags.APIs.Controllers
         }
 
         [HttpGet]
-        [Route("download/{options}")]
-        public async Task<dynamic> GetEnvironmentData(int envId, DownloadOptionEnum options)
+        [Route("download")]
+        public async Task<dynamic> GetEnvironmentData(int envId)
         {
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
             {
-                return await _dataSyncService.GetEnvironmentDataAsync(envId, options);
+                return await _dataSyncService.GetEnvironmentDataAsync(envId);
             }
 
             return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
@@ -72,7 +69,7 @@ namespace FeatureFlags.APIs.Controllers
                 try
                 {
                     data = JsonConvert.DeserializeObject<EnvironmentDataViewModel>(content);
-                    await _dataSyncService.SaveEnvironmentDataAsync(envId, model.UserUpdateMode, data);
+                    await _dataSyncService.SaveEnvironmentDataAsync(envId, data);
                 }
                 catch
                 {

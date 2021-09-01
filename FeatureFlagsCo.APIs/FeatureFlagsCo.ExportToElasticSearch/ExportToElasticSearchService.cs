@@ -22,12 +22,11 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
         private readonly ConnectionFactory _factory;
         private IConnection _connection;
         private IModel _channel;
-        private readonly string _rabbitHostName;
         private readonly string _esHost;
-        public ExportToElasticSearchService(string rabbitHostName = "rabbitmq", string esHost = "http://localhost:9200")
+        public ExportToElasticSearchService(string rabbitConnectStr = "amqp://localhost:5672/", string esHost = "http://localhost:9200")
         {
-            _factory = new ConnectionFactory() { HostName = rabbitHostName };
-            _rabbitHostName = rabbitHostName;
+            _factory = new ConnectionFactory();
+            _factory.Uri = new Uri(rabbitConnectStr);
             _esHost = esHost;
 
             Init();

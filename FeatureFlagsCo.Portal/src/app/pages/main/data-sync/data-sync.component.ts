@@ -44,7 +44,7 @@ export class DataSyncComponent implements OnInit, OnDestroy {
 
   onDownload() {
     this.isDownloading = true;
-    this.dataSyncService.getEnvironmentData(this.currentEnvId, this.calculateDownloadOptions()).subscribe(data => this.downloadFile(data), err => {
+    this.dataSyncService.getEnvironmentData(this.currentEnvId).subscribe(data => this.downloadFile(data), err => {
       this.isDownloading = false;
       this.message.error("数据下载失败！");
     });
@@ -69,55 +69,5 @@ export class DataSyncComponent implements OnInit, OnDestroy {
 
   onUploadClosed(data: any) {
     this.uploadFormVisible = false;
-  }
-
-
-  featureFlagsChecked: boolean = true;
-  usersChecked: boolean = true;
-  userPropertiesChecked: boolean = true;
-
-  indeterminate: boolean = false;
-  downloadAllChecked: boolean = true;
-  updateAllChecked(): void {
-    this.indeterminate = false;
-    if (this.downloadAllChecked) {
-      this.featureFlagsChecked = true;
-      this.usersChecked = true;
-      this.userPropertiesChecked = true;
-    } else {
-      this.featureFlagsChecked = false;
-      this.usersChecked = false;
-      this.userPropertiesChecked = false;
-    }
-  }
-
-  updateSingleChecked(): void {
-    if (!this.featureFlagsChecked && !this.usersChecked && !this.userPropertiesChecked) {
-      this.downloadAllChecked = false;
-      this.indeterminate = false;
-    } else if (this.featureFlagsChecked && this.usersChecked && this.userPropertiesChecked) {
-      this.downloadAllChecked = true;
-      this.indeterminate = false;
-    } else {
-      this.indeterminate = true;
-    }
-  }
-
-  private calculateDownloadOptions(): number {
-    let result: number = 0;
-
-    if(this.featureFlagsChecked) {
-      result = result | 1;
-    }
-
-    if(this.usersChecked) {
-      result = result | 2;
-    }
-
-    if(this.userPropertiesChecked) {
-      result = result | 4;
-    }
-
-    return result;
   }
 }

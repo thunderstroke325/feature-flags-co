@@ -48,6 +48,7 @@ namespace FeatureFlags.APIs.Controllers
         [Route("GetEnvironmentFeatureFlags/{environmentId}")]
         public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentFeatureFlags(int environmentId)
         {
+            // TODO pagination
             return await _cosmosDbService.GetEnvironmentFeatureFlagBasicInfoItemsAsync(environmentId, 0, 300);
         }
 
@@ -150,6 +151,18 @@ namespace FeatureFlags.APIs.Controllers
             if (ff.IsMultiOptionMode.HasValue && ff.IsMultiOptionMode.Value) 
             {
                 ff.VariationOptions = param.VariationOptions;
+                ff.FF.VariationOptionWhenDisabled = param.VariationOptions.FirstOrDefault(o => o.LocalId == ff.FF.VariationOptionWhenDisabled.LocalId);
+                ff.FFTUWMTR.ForEach(f => {
+                    f.ValueOptionsVariationRuleValues.ForEach(v => v.ValueOption = param.VariationOptions.FirstOrDefault(o => o.LocalId == v.ValueOption.LocalId));
+                });
+                ff.TargetIndividuals.ForEach(t => t.ValueOption = param.VariationOptions.FirstOrDefault(v => v.LocalId == t.ValueOption.LocalId));
+
+                // update prerequistes
+                foreach (var f in ff.FFP)
+                {
+                    var prerequisite = await _cosmosDbService.GetFeatureFlagAsync(f.PrerequisiteFeatureFlagId);
+                    f.ValueOptionsVariationValue = prerequisite.VariationOptions.FirstOrDefault(v => v.LocalId == f.ValueOptionsVariationValue.LocalId);
+                }
             }
             
             await _cosmosDbService.UpdateFeatureFlagAsync(ff);
@@ -162,13 +175,16 @@ namespace FeatureFlags.APIs.Controllers
         [Route("GetEnvironmentUserProperties/{environmentId}")]
         public async Task<List<string>> GetEnvironmentUserProperties(int environmentId)
         {
-            var p = await _cosmosDbService.GetEnvironmentUserPropertiesAsync(environmentId);
-            if (p != null)
-                return p.Properties ?? new List<string>();
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, environmentId))
+            {
+                var p = await _cosmosDbService.GetEnvironmentUserPropertiesAsync(environmentId);
+                if (p != null)
+                    return p.Properties ?? new List<string>();
+            }
+
             return new List<string>();
         }
-
-
 
         #region multi variation options
 
