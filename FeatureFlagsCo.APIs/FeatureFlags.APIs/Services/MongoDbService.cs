@@ -161,6 +161,7 @@ namespace FeatureFlags.APIs.Services
                         }
                     }
                 },
+                IsArchived = false,
                 FFP = new List<FeatureFlagPrerequisite>(),
                 FFTIUForFalse = new List<FeatureFlagTargetIndividualUser>(),
                 FFTIUForTrue = new List<FeatureFlagTargetIndividualUser>(),
@@ -390,7 +391,7 @@ namespace FeatureFlags.APIs.Services
         public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentFeatureFlagBasicInfoItemsAsync(int environmentId, int pageIndex = 0, int pageSize = 100)
         {
             var returnResult = new List<FeatureFlagBasicInfo>();
-            var ffs = (await _mongoFeatureFlagsService.SearchAsync(null, environmentId, pageIndex, pageSize));
+            var ffs = await _mongoFeatureFlagsService.GetFeatureFlagsAsync(environmentId, false, pageIndex, pageSize);
             foreach (var ff in ffs)
             {
                 var ffb = ff.FF;
@@ -406,7 +407,7 @@ namespace FeatureFlags.APIs.Services
         public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentArchivedFeatureFlagBasicInfoItemsAsync(int environmentId, int pageIndex = 0, int pageSize = 100)
         {
             var returnResult = new List<FeatureFlagBasicInfo>();
-            var ffs = (await _mongoFeatureFlagsService.SearchArchivedAsync(environmentId, pageIndex, pageSize));
+            var ffs = await _mongoFeatureFlagsService.GetFeatureFlagsAsync(environmentId, true, pageIndex, pageSize);
             foreach (var ff in ffs)
             {
                 var ffb = ff.FF;
