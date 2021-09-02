@@ -37,7 +37,7 @@ export class ResetComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         res => {
-          this.resetToken = decodeURIComponent(res.tokenid.replace(/%20/g, '+'));
+          this.resetToken = decodeURIComponent(res.tokenid.replace(/ /g, '+'));
         }
       )
   }

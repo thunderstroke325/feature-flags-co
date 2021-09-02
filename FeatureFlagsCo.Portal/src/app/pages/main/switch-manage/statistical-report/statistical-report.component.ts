@@ -4,10 +4,9 @@ import { Subject } from 'rxjs';
 import { SwitchService } from 'src/app/services/switch.service';
 import * as echarts from 'echarts';
 import { map } from 'rxjs/operators';
-import { DatePipe, formatDate } from '@angular/common';
 import { environment } from './../../../../../environments/environment';
 import { AccountService } from 'src/app/services/account.service';
-import { CSwitchParams } from '../types/switch-new';
+import * as moment from 'moment';
 
 @Component({
   selector: 'report',
@@ -30,7 +29,7 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
   public userUsageStr: string = '';
   public hideContent: boolean = false;
 
-  private xname: string = '';
+  private xname: string = '时间';
   private yname: string = '';
 
   public isLoading: boolean = false;
@@ -38,8 +37,7 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
   constructor(
     private route: ActivatedRoute,
     private switchServe: SwitchService,
-    private accountService: AccountService,
-    private datePipe: DatePipe
+    private accountService: AccountService
   ) {
     this.switchId = this.route.snapshot.params['id'];
   }
@@ -51,17 +49,17 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   ngOnInit(): void {
-    if (environment.name === 'Standalone') {
-      this.hideContent = true;
-      const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    // if (environment.name === 'Standalone') {
+    //   this.hideContent = true;
+    //   const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
 
-      if (environment.statisticUrl[environment.statisticUrl.length - 1] === '/') {
-        environment.statisticUrl = environment.statisticUrl.slice(0, environment.statisticUrl.length - 1);
-      }
+    //   if (environment.statisticUrl[environment.statisticUrl.length - 1] === '/') {
+    //     environment.statisticUrl = environment.statisticUrl.slice(0, environment.statisticUrl.length - 1);
+    //   }
 
-      const url = environment.statisticUrl + `/explore?left=["now-2d","now","Loki",{"expr":"{EnvId=\\"${currentAccountProjectEnv.projectEnv.envId}\\",FeatureFlagKeyName=\\"${this.switchServe.getCurrentSwitch().keyName}\\"}"}]`;
-      window.open(url, "_blank");
-    }
+    //   const url = environment.statisticUrl + `/explore?left=["now-2d","now","Loki",{"expr":"{EnvId=\\"${currentAccountProjectEnv.projectEnv.envId}\\",FeatureFlagKeyName=\\"${this.switchServe.getCurrentSwitch().keyName}\\"}"}]`;
+    //   window.open(url, "_blank");
+    // }
   }
 
   ngAfterViewInit(): void {
@@ -149,9 +147,9 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
                 if (!params || !params[0] || !params[0].value) return '';
                 return `
                 <span>
-                  ${this.xname}: <span style="font-weight: bold">${this.datePipe.transform(params[0].value[0], 'short')}</span>
+                  ${this.xname}: <span style="font-weight: bold">${params[0].axisValue.slice(5, -3)}</span>
                   <br/>
-                  ${this.yname}: <span style="font-weight: bold">${params[0].value[1]}</span>
+                  ${this.yname}: <span style="font-weight: bold">${params[0].value}</span>
                 </span>`
               },
             },
@@ -188,32 +186,17 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
         console.log(option[i].to_as_string.replace('T', ' '));
         var date = new Date(option[i].to_as_string.replace('T', ' ') + ' UTC');
         console.log(date);
-        data.push(this.formatDate(date));
+        data.push(moment(date).format("YYYY-MM-DD HH:MM:SS"));
       }
     }
-    console.log(data);
+
     return {
       name: "日期时间",
       // type: 'time',
       data: data
     }
   }
-  private formatDate(date_ob) {
-    // adjust 0 before single digit date
-    let date = ("0" + date_ob.getDate()).slice(-2);
-    // current month
-    let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
-    // current year
-    let year = date_ob.getFullYear();
-    // current hours
-    let hours = date_ob.getHours();
-    // current minutes
-    let minutes = date_ob.getMinutes();
-    // current seconds
-    let seconds = date_ob.getSeconds();
-    // prints date & time in YYYY-MM-DD HH:MM:SS format
-    return month + "-" + date + " " + hours + ":" + minutes;
-  }
+
   private formatYname(option: any) {
     // const tables = option.tables || [];
     // return tables[0]?.columns?.[1]?.name || '';

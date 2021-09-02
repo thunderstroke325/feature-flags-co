@@ -1,7 +1,6 @@
 ﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels;
 using MongoDB.Driver;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,9 +34,16 @@ namespace FeatureFlags.APIs.Services
                 return await _featureFlags.Find(p => p.EnvironmentId == environmentId && p.FF.Name.Contains(searchText)).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
         }
 
-        public async Task<List<FeatureFlag>> SearchArchivedAsync(int environmentId, int pageIndex, int pageSize)
+        public async Task<List<FeatureFlag>> GetFeatureFlagsAsync(int envId, bool isArchived, int pageIndex, int pageSize)
         {
-            return await _featureFlags.Find(p => p.EnvironmentId == environmentId && p.IsArchived == true).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
+            if (isArchived)
+            {
+                return await _featureFlags.Find((p) => p.EnvironmentId == envId && p.IsArchived == true).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
+            }
+            else 
+            {
+                return await _featureFlags.Find((p) => p.EnvironmentId == envId && p.IsArchived == null || p.IsArchived.Value == false).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
+            }
         }
 
         public async Task<FeatureFlag> GetAsync(string id) =>

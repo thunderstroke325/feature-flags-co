@@ -25,6 +25,7 @@
     "echarts": "^5.1.1",
     "ffc-angular-sdk": "0.0.16",
     "ffc-js-client-sdk": "0.0.13",
+    "moment": "^2.29.1",
     "ng-zorro-antd": "^11.4.1",
     "rxjs": "^6.6.7",
     "tslib": "^2.2.0",
