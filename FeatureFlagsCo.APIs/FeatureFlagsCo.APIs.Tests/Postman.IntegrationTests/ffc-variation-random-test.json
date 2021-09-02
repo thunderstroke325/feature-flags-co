@@ -12,14 +12,14 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"var environmentSecret = \"MzkwLWZlYjctNCUyMDIxMDczMTExNDkwNV9fNF9fMl9fNF9fZGVmYXVsdF9hNGIyYQ==\";\r",
+							"var environmentSecret = \"YzA4LTUxZTEtNCUyMDIxMDkwMjEwNDQ1N19fMl9fMl9fNF9fZGVmYXVsdF9kNmZlNQ==\";\r",
 							"var environmentId = 4;\r",
 							"\r",
 							"\r",
 							"pm.collectionVariables.set(\"environmentId\", environmentId);\r",
 							"pm.collectionVariables.set(\"projectId\", 2);\r",
-							"pm.collectionVariables.set(\"organizationId\", 4);\r",
-							"pm.collectionVariables.set(\"organizationId\", 4);\r",
+							"pm.collectionVariables.set(\"organizationId\", 2);\r",
+							"pm.collectionVariables.set(\"organizationId\", 2);\r",
 							"pm.collectionVariables.set(\"environmentSecret\", environmentSecret)\r",
 							"\r",
 							"var users = generateUsers(environmentSecret);\r",
@@ -376,7 +376,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"test@feature-flags.co\",\r\n  \"password\": \"NGNiNjgwMzAt\"\r\n}",
+					"raw": "{\r\n  \"email\": \"me@hu-beau.com\",\r\n  \"password\": \"OTgxZDhiNmMt\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1212,65 +1212,6 @@
 					"path": [
 						"Variation",
 						"GetMultiOptionVariation"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get Single Variation - Basic",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"\r",
-							"console.log('#########Get Single Variation - Basic STARTED#######');"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"var responseData = JSON.parse(responseBody);\r",
-							"console.log(responseData);\r",
-							"pm.test(\"Successful POST request\", function () {\r",
-							"    pm.expect(responseBody).to.be.eq(\"true\");\r",
-							"});\r",
-							"\r",
-							"console.log('#########Get Single Variation - Basic END#######');\r",
-							"\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"2020年7月前旧版本真假状态表达测试用Flag\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"2020年7月前旧版本真假状态表达测试用Flag-匹配条件测试\",\r\n    \"ffUserEmail\": \"nuser-truefalse-0@feature-flags.test\",\r\n    \"ffUserKeyId\": \"2020年7月前旧版本真假状态表达测试用Flag-匹配条件测试\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"property-0\",\r\n            \"value\": \"value-0\"\r\n        },\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"530\"\r\n        },\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"value-3\"\r\n        },\r\n        {\r\n            \"name\": \"property-4\",\r\n            \"value\": \"905\"\r\n        },\r\n        {\r\n            \"name\": \"property-5\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-6\",\r\n            \"value\": \"value-6\"\r\n        },\r\n        {\r\n            \"name\": \"property-7\",\r\n            \"value\": \"575\"\r\n        },\r\n        {\r\n            \"name\": \"property-8\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-9\",\r\n            \"value\": \"value-9\"\r\n        }\r\n    ]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{apihost}}/Variation/GetUserVariationResult",
-					"host": [
-						"{{apihost}}"
-					],
-					"path": [
-						"Variation",
-						"GetUserVariationResult"
 					]
 				}
 			},

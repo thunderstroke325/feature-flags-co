@@ -12,14 +12,14 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"var environmentSecret = \"MzkwLWZlYjctNCUyMDIxMDczMTExNDkwNV9fNF9fMl9fNF9fZGVmYXVsdF9hNGIyYQ==\";\r",
+							"var environmentSecret = \"YzA4LTUxZTEtNCUyMDIxMDkwMjEwNDQ1N19fMl9fMl9fNF9fZGVmYXVsdF9kNmZlNQ==\";\r",
 							"var environmentId = 4;\r",
 							"\r",
 							"\r",
 							"pm.collectionVariables.set(\"environmentId\", environmentId);\r",
 							"pm.collectionVariables.set(\"projectId\", 2);\r",
-							"pm.collectionVariables.set(\"organizationId\", 4);\r",
-							"pm.collectionVariables.set(\"organizationId\", 4);\r",
+							"pm.collectionVariables.set(\"organizationId\", 2);\r",
+							"pm.collectionVariables.set(\"organizationId\", 2);\r",
 							"pm.collectionVariables.set(\"environmentSecret\", environmentSecret)\r",
 							"\r",
 							"var variationOptions = generateVariationOptions(5);\r",
@@ -246,7 +246,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"test@feature-flags.co\",\r\n  \"password\": \"NGNiNjgwMzAt\"\r\n}",
+					"raw": "{\r\n  \"email\": \"me@hu-beau.com\",\r\n  \"password\": \"OTgxZDhiNmMt\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -722,7 +722,7 @@
 	"variable": [
 		{
 			"key": "apihost",
-			"value": "http://localhost:5001"
+			"value": "https://ffc-api-ce2-dev.chinacloudsites.cn"
 		},
 		{
 			"key": "environmentId",

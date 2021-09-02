@@ -12,14 +12,14 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"var environmentSecret = \"MzkwLWZlYjctNCUyMDIxMDczMTExNDkwNV9fNF9fMl9fNF9fZGVmYXVsdF9hNGIyYQ==\";\r",
+							"var environmentSecret = \"YzA4LTUxZTEtNCUyMDIxMDkwMjEwNDQ1N19fMl9fMl9fNF9fZGVmYXVsdF9kNmZlNQ==\";\r",
 							"var environmentId = 4;\r",
 							"\r",
 							"\r",
 							"pm.collectionVariables.set(\"environmentId\", environmentId);\r",
 							"pm.collectionVariables.set(\"projectId\", 2);\r",
-							"pm.collectionVariables.set(\"organizationId\", 4);\r",
-							"pm.collectionVariables.set(\"organizationId\", 4);\r",
+							"pm.collectionVariables.set(\"organizationId\", 2);\r",
+							"pm.collectionVariables.set(\"organizationId\", 2);\r",
 							"pm.collectionVariables.set(\"environmentSecret\", environmentSecret)\r",
 							"\r",
 							"var variationOptions = generateVariationOptions(5);\r",
@@ -305,7 +305,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"test@feature-flags.co\",\r\n  \"password\": \"NGNiNjgwMzAt\"\r\n}",
+					"raw": "{\r\n  \"email\": \"me@hu-beau.com\",\r\n  \"password\": \"OTgxZDhiNmMt\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -490,10 +490,10 @@
 							"console.log('#########Update feature flag 1 STARTED#######');\r",
 							"var testData1Str = pm.collectionVariables.get(\"testData1\");\r",
 							"\r",
-							"testData1Str = testData1Str.replace('##{featureFlagId1}##', pm.variables.get(\"featureFlagId1\"));\r",
-							"testData1Str = testData1Str.replace('##{featureFlagId1}##', pm.variables.get(\"featureFlagId1\"));\r",
-							"testData1Str = testData1Str.replace('##{featureFlagName1}##', pm.variables.get(\"featureFlagName1\"));\r",
-							"testData1Str = testData1Str.replace('##{featureFlagKeyName1}##', pm.variables.get(\"featureFlagKeyName1\"));\r",
+							"testData1Str = testData1Str.replace('##{featureFlagId1}##', pm.collectionVariables.get(\"featureFlagId1\"));\r",
+							"testData1Str = testData1Str.replace('##{featureFlagId1}##', pm.collectionVariables.get(\"featureFlagId1\"));\r",
+							"testData1Str = testData1Str.replace('##{featureFlagName1}##', pm.collectionVariables.get(\"featureFlagName1\"));\r",
+							"testData1Str = testData1Str.replace('##{featureFlagKeyName1}##', pm.collectionVariables.get(\"featureFlagKeyName1\"));\r",
 							"\r",
 							"console.log(JSON.parse(testData1Str));\r",
 							"\r",
@@ -631,85 +631,6 @@
 			"response": []
 		},
 		{
-			"name": "Get Feature Flag 2",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"console.log('#########Get feature flag 2 STARTED#######');"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"\r",
-							"\r",
-							"pm.test(\"Successful Get request\", function () {\r",
-							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);\r",
-							"});\r",
-							"\r",
-							"var jsonData = JSON.parse(responseBody);\r",
-							"console.log(jsonData);\r",
-							"\r",
-							"pm.collectionVariables.set(\"featureFlagName2\", jsonData.ff.name);\r",
-							"pm.collectionVariables.set(\"featureFlagKeyName2\", jsonData.ff.keyName);\r",
-							"\r",
-							"\r",
-							"console.log('#########Create feature flag 2 END#######');"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{apihost}}/FeatureFlags/GetFeatureFlag?id={{featureFlagId2}}",
-					"host": [
-						"{{apihost}}"
-					],
-					"path": [
-						"FeatureFlags",
-						"GetFeatureFlag"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "{{featureFlagId2}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Update Feature Flag 2",
 			"event": [
 				{
@@ -719,10 +640,10 @@
 							"console.log('#########Update feature flag 2 STARTED#######');\r",
 							"var testData2Str = pm.collectionVariables.get(\"testData2\");\r",
 							"\r",
-							"testData2Str = testData2Str.replace('##{featureFlagId2}##', pm.variables.get(\"featureFlagId2\"));\r",
-							"testData2Str = testData2Str.replace('##{featureFlagId2}##', pm.variables.get(\"featureFlagId2\"));\r",
-							"testData2Str = testData2Str.replace('##{featureFlagName2}##', pm.variables.get(\"featureFlagName2\"));\r",
-							"testData2Str = testData2Str.replace('##{featureFlagKeyName2}##', pm.variables.get(\"featureFlagKeyName2\"));\r",
+							"testData2Str = testData2Str.replace('##{featureFlagId2}##', pm.collectionVariables.get(\"featureFlagId2\"));\r",
+							"testData2Str = testData2Str.replace('##{featureFlagId2}##', pm.collectionVariables.get(\"featureFlagId2\"));\r",
+							"testData2Str = testData2Str.replace('##{featureFlagName2}##', pm.collectionVariables.get(\"featureFlagName2\"));\r",
+							"testData2Str = testData2Str.replace('##{featureFlagKeyName2}##', pm.collectionVariables.get(\"featureFlagKeyName2\"));\r",
 							"\r",
 							"console.log(JSON.parse(testData2Str));\r",
 							"\r",
@@ -949,12 +870,12 @@
 							"var testData3Str = pm.collectionVariables.get(\"testData3\");\r",
 							"\r",
 							"\r",
-							"testData3Str = testData3Str.replace('##{featureFlagId1}##', pm.variables.get(\"featureFlagId1\"));\r",
-							"testData3Str = testData3Str.replace('##{featureFlagId2}##', pm.variables.get(\"featureFlagId2\"));\r",
-							"testData3Str = testData3Str.replace('##{featureFlagId3}##', pm.variables.get(\"featureFlagId3\"));\r",
-							"testData3Str = testData3Str.replace('##{featureFlagId3}##', pm.variables.get(\"featureFlagId3\"));\r",
-							"testData3Str = testData3Str.replace('##{featureFlagName3}##', pm.variables.get(\"featureFlagName3\"));\r",
-							"testData3Str = testData3Str.replace('##{featureFlagKeyName3}##', pm.variables.get(\"featureFlagKeyName3\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagId1}##', pm.collectionVariables.get(\"featureFlagId1\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagId2}##', pm.collectionVariables.get(\"featureFlagId2\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagId3}##', pm.collectionVariables.get(\"featureFlagId3\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagId3}##', pm.collectionVariables.get(\"featureFlagId3\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagName3}##', pm.collectionVariables.get(\"featureFlagName3\"));\r",
+							"testData3Str = testData3Str.replace('##{featureFlagKeyName3}##', pm.collectionVariables.get(\"featureFlagKeyName3\"));\r",
 							"\r",
 							"console.log(JSON.parse(testData3Str));\r",
 							"\r",
@@ -1107,7 +1028,7 @@
 	"variable": [
 		{
 			"key": "apihost",
-			"value": "http://localhost:5001"
+			"value": "https://ffc-api-ce2-dev.chinacloudsites.cn"
 		},
 		{
 			"key": "token",
