@@ -13,17 +13,17 @@ using System.Threading.Tasks;
 
 namespace FeatureFlagsCo.MQ.ExportToElasticSearch
 {
-    public interface IExportToElasticSearchService
+    public interface IExportInsightsDataToElasticSearchService
     {
         void Init();
     }
-    public class ExportToElasticSearchService: IExportToElasticSearchService
+    public class ExportInsightsDataToElasticSearchService: IExportInsightsDataToElasticSearchService
     {
         private readonly ConnectionFactory _factory;
         private IConnection _connection;
         private IModel _channel;
         private readonly string _esHost;
-        public ExportToElasticSearchService(string rabbitConnectStr = "amqp://localhost:5672/", string esHost = "http://localhost:9200")
+        public ExportInsightsDataToElasticSearchService(string rabbitConnectStr = "amqp://localhost:5672/", string esHost = "http://localhost:9200")
         {
             _factory = new ConnectionFactory();
             _factory.Uri = new Uri(rabbitConnectStr);

@@ -226,10 +226,13 @@ namespace FeatureFlags.AdminWebAPIs
             Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
 
             var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
+            services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
             services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
+            
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
-            services.AddSingleton<IExportToElasticSearchService>(new ExportToElasticSearchService(insightsRabbitMqUrl, esHost));
+            services.AddSingleton<IExportExperimentsDataToElasticSearchService>(new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+            services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddScoped<IFeatureFlagsUsageService, ElasticSearchFeatureFlagsUsageService>();
 
             #endregion

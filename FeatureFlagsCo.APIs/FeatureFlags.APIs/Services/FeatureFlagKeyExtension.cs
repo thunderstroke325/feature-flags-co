@@ -79,12 +79,25 @@ namespace FeatureFlags.APIs.Services
         public static int GetEnvIdByFeautreFlagId(string featureFlagId)
         {
             return Convert.ToInt32(featureFlagId.Split("__")[3]);
-
         }
         public static string GetFeautreFlagKeyById(string featureFlagId)
         {
             return featureFlagId.Split("__")[4].Trim();
-
+        }
+        public static FeatureFlagIdByEnvironmentKeyViewModel GetEnvIdsByEnvKey(string envKey)
+        {
+            var keyOriginTextByte = System.Convert.FromBase64String(envKey);
+            var keyOriginText = System.Text.Encoding.UTF8.GetString(keyOriginTextByte).Split("__");
+            var accountId = keyOriginText[1];
+            var projectId = keyOriginText[2];
+            var envId = keyOriginText[3];
+            return new FeatureFlagIdByEnvironmentKeyViewModel
+            {
+                AccountId = accountId,
+                EnvId = envId,
+                FeatureFlagId = null,
+                ProjectId = projectId
+            };
         }
     }
 
