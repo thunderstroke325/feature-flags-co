@@ -11,15 +11,6 @@ namespace FeatureFlags.APIs.Services
 {
     public interface INoSqlService
     {
-        #region old version true false status functions
-        Task TrueFalseStatusUpdateItemAsync(string id, dynamic item);
-        Task<dynamic> TrueFalseStatusGetItemAsync(string id);
-        Task<EnvironmentFeatureFlagUser> TrueFalseStatusAddEnvironmentFeatureFlagUserAsync(EnvironmentFeatureFlagUser item);
-        Task<EnvironmentFeatureFlagUser> TrueFalseStatusGetEnvironmentFeatureFlagUserAsync(string id);
-        Task<int> TrueFalseStatusGetFeatureFlagTotalUsersAsync(string featureFlagId);
-        Task<int> TrueFalseStatusGetFeatureFlagHitUsersAsync(string featureFlagId);
-        #endregion
-
         Task<List<T>> GetEnvironmentDataAsync<T>(int envId);
         Task SaveEnvironmentDataAsync(int accountId, int projectId, int envId, EnvironmentDataViewModel data);
 

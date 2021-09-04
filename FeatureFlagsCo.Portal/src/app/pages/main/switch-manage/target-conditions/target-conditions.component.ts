@@ -16,7 +16,6 @@ export class TargetConditionsComponent implements OnInit {
 
   private destory$: Subject<void> = new Subject();
 
-  public multistateEnabled: boolean = false;
   public switchStatus: 'Enabled' | 'Disabled' = 'Enabled';  // 开关状态
   public propertiesList: string[] = [];                     // 用户配置列表
   public featureList: IPrequisiteFeatureFlag[] = [];                     // 开关列表
@@ -56,8 +55,6 @@ export class TargetConditionsComponent implements OnInit {
 
         this.initSwitchStatus();
         this.initUpperSwitch();
-        this.initTargetUserListForTrue();
-        this.initTargetUserListForFalse();
 
         this.onSearchUser();
         this.onSearchPrequisiteFeatureFlags();
@@ -75,27 +72,25 @@ export class TargetConditionsComponent implements OnInit {
     this.route.data.pipe(map(res => res.switchInfo))
     .subscribe((result: CSwitchParams) => {
       this.featureDetail = new CSwitchParams(result);
-      this.multistateEnabled =this.featureDetail.getIsMultiOptionMode();
-      if (this.multistateEnabled) {
-        this.variationOptions = this.featureDetail.getVariationOptions();
 
-        this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
-          acc[cur.localId] = this.featureDetail.getTargetIndividuals().find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
-          return acc;
-        }, {});
+      this.variationOptions = this.featureDetail.getVariationOptions();
 
-        if (this.featureDetail.getFFDefaultRulePercentageRollouts().length === 0) {
-          this.featureDetail.setFFDefaultRulePercentageRollouts([
-            {
-              rolloutPercentage: [0, 1],
-              valueOption: this.variationOptions[0]
-            }
-          ]);
-        }
+      this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
+        acc[cur.localId] = this.featureDetail.getTargetIndividuals().find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
+        return acc;
+      }, {});
 
-        if (!this.featureDetail.getFFVariationOptionWhenDisabled()) {
-          this.featureDetail.setFFVariationOptionWhenDisabled(this.variationOptions[0]);
-        }
+      if (this.featureDetail.getFFDefaultRulePercentageRollouts().length === 0) {
+        this.featureDetail.setFFDefaultRulePercentageRollouts([
+          {
+            rolloutPercentage: [0, 1],
+            valueOption: this.variationOptions[0]
+          }
+        ]);
+      }
+
+      if (!this.featureDetail.getFFVariationOptionWhenDisabled()) {
+        this.featureDetail.setFFVariationOptionWhenDisabled(this.variationOptions[0]);
       }
 
       const detail: IFfParams = this.featureDetail.getSwicthDetail();
@@ -128,16 +123,6 @@ export class TargetConditionsComponent implements OnInit {
     this.featureDetail.setUpperFeatures(this.upperFeatures);
   }
 
-  // 初始化目标用户，状态为 true
-  private initTargetUserListForTrue() {
-    this.targetUserSelectedListTrue = [...this.featureDetail.getTargetUsers("true") as IUserType[]];
-  }
-
-  // 初始化目标用户，状态为 false
-  private initTargetUserListForFalse() {
-    this.targetUserSelectedListFalse = [...this.featureDetail.getTargetUsers("false") as IUserType[]];
-  }
-
   // 目标用户发生改变
   public onSelectedUserListChange(data: IUserType[], type: 'true' | 'false') {
     if(type === 'true') {
@@ -163,24 +148,9 @@ export class TargetConditionsComponent implements OnInit {
       })
   }
 
-  // 切换默认值
-  public switchBaseProperty() {
-    let baseProperty = this.featureDetail.getFFBasedProperty();
-    if(!baseProperty) {
-      baseProperty = true;
-    } else {
-      baseProperty = !baseProperty;
-    }
-    this.featureDetail.setFFBasedProperty(baseProperty);
-  }
 
   public onVariationOptionWhenDisabledChange(option: IVariationOption) {
     this.featureDetail.setFFVariationOptionWhenDisabled(option);
-  }
-
-  // 默认返回值配置
-  public onDefaultValuePercentageChange(value: { serve: boolean | string, F: number, T: number }) {
-    this.featureDetail.setFFConfig(value);
   }
 
   // 删除规则
@@ -193,31 +163,9 @@ export class TargetConditionsComponent implements OnInit {
     this.featureDetail.addFftuwmtr();
   }
 
-  // 规则的 serve 配置发生改变
-  public onPercentageChange(value: { serve: boolean | string, F: number, T: number }, index: number) {
-    this.featureDetail.setConditionServe(value, index);
-  }
-
   // 规则字段发生改变
   public onRuleConfigChange(value: IJsonContent[], index: number) {
     this.featureDetail.setConditionConfig(value, index);
-  }
-
-
-  // 保存设置
-  public onSaveSetting() {
-
-    this.featureDetail.setTargetUsers('true', this.targetUserSelectedListTrue);
-    this.featureDetail.setTargetUsers('false', this.targetUserSelectedListFalse);
-
-    this.featureDetail.onSortoutSubmitData();
-
-    this.switchServe.updateSwitch(this.featureDetail, false)
-      .subscribe((result) => {
-        this.msg.success("修改成功!");
-    }, error => {
-      this.msg.error("修改失败!");
-    })
   }
 
   /****multi state* */
@@ -232,7 +180,7 @@ export class TargetConditionsComponent implements OnInit {
     this.featureDetail.setFFDefaultRulePercentageRollouts(value);
   }
 
-  public onSaveSettingMultistates() {
+  public onSaveConditions() {
 
     // TODO check percentage === 100%
     const validationErrs = this.featureDetail.checkMultistatesPercentage();
@@ -246,7 +194,7 @@ export class TargetConditionsComponent implements OnInit {
 
     this.featureDetail.onSortoutSubmitData();
 
-    this.switchServe.updateSwitch(this.featureDetail, true)
+    this.switchServe.updateSwitch(this.featureDetail)
       .subscribe((result) => {
         this.msg.success("修改成功!");
     }, error => {

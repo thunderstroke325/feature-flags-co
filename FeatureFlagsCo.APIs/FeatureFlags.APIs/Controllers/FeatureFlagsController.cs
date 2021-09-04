@@ -108,10 +108,7 @@ namespace FeatureFlags.APIs.Controllers
         {
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             FeatureFlag ff = await _noSqlDbService.GetFlagAsync(id);
-            if (ff.FFTIUForTrue == null)
-                ff.FFTIUForTrue = new List<FeatureFlagTargetIndividualUser>();
-            if (ff.FFTIUForFalse == null)
-                ff.FFTIUForFalse = new List<FeatureFlagTargetIndividualUser>();
+
             return ff;
         }
 
@@ -148,21 +145,19 @@ namespace FeatureFlags.APIs.Controllers
             FeatureFlag ff = await _noSqlDbService.GetFeatureFlagAsync(param.Id);
             ff.FF.LastUpdatedTime = DateTime.UtcNow;
             ff.FF.Name = param.Name;
-            if (ff.IsMultiOptionMode.HasValue && ff.IsMultiOptionMode.Value) 
-            {
-                ff.VariationOptions = param.VariationOptions;
-                ff.FF.VariationOptionWhenDisabled = param.VariationOptions.FirstOrDefault(o => o.LocalId == ff.FF.VariationOptionWhenDisabled.LocalId);
-                ff.FFTUWMTR.ForEach(f => {
-                    f.ValueOptionsVariationRuleValues.ForEach(v => v.ValueOption = param.VariationOptions.FirstOrDefault(o => o.LocalId == v.ValueOption.LocalId));
-                });
-                ff.TargetIndividuals.ForEach(t => t.ValueOption = param.VariationOptions.FirstOrDefault(v => v.LocalId == t.ValueOption.LocalId));
 
-                // update prerequistes
-                foreach (var f in ff.FFP)
-                {
-                    var prerequisite = await _noSqlDbService.GetFeatureFlagAsync(f.PrerequisiteFeatureFlagId);
-                    f.ValueOptionsVariationValue = prerequisite.VariationOptions.FirstOrDefault(v => v.LocalId == f.ValueOptionsVariationValue.LocalId);
-                }
+            ff.VariationOptions = param.VariationOptions;
+            ff.FF.VariationOptionWhenDisabled = param.VariationOptions.FirstOrDefault(o => o.LocalId == ff.FF.VariationOptionWhenDisabled.LocalId);
+            ff.FFTUWMTR.ForEach(f => {
+                f.ValueOptionsVariationRuleValues.ForEach(v => v.ValueOption = param.VariationOptions.FirstOrDefault(o => o.LocalId == v.ValueOption.LocalId));
+            });
+            ff.TargetIndividuals.ForEach(t => t.ValueOption = param.VariationOptions.FirstOrDefault(v => v.LocalId == t.ValueOption.LocalId));
+
+            // update prerequistes
+            foreach (var f in ff.FFP)
+            {
+                var prerequisite = await _noSqlDbService.GetFeatureFlagAsync(f.PrerequisiteFeatureFlagId);
+                f.ValueOptionsVariationValue = prerequisite.VariationOptions.FirstOrDefault(v => v.LocalId == f.ValueOptionsVariationValue.LocalId);
             }
             
             await _noSqlDbService.UpdateFeatureFlagAsync(ff);

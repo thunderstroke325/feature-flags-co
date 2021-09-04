@@ -26,11 +26,6 @@ export interface IFfParams {
     environmentId: number;
     creatorUserId: string;
     status: 'Enabled' | 'Disabled';
-    defaultRuleValue: boolean | string;
-    percentageRolloutForTrue: number;
-    percentageRolloutForFalse: number;
-    percentageRolloutBasedProperty: boolean;
-    valueWhenDisabled: boolean;
     lastUpdatedTime: string;
     // multi states
     variationOptionWhenDisabled: IVariationOption;
@@ -45,7 +40,6 @@ export interface IFfSettingParams {
 
 export interface IFfpParams {
     prerequisiteFeatureFlagId: string;
-    variationValue?: boolean;
     valueOptionsVariationValue?: IVariationOption;
     selectedFeatureFlag?: IPrequisiteFeatureFlag;
 }
@@ -70,10 +64,6 @@ export interface IFftuwmtrParams {
     ruleId: string;
     ruleName: string;
     ruleJsonContent: IJsonContent[];
-    variationRuleValue: boolean | string;
-    percentageRolloutForTrue: number;
-    percentageRolloutForFalse: number;
-    percentageRolloutBasedProperty: string;
     valueOptionsVariationRuleValues: IRulePercentageRollout[];
 }
 
@@ -105,7 +95,6 @@ export class CSwitchParams {
     private fftuwmtr: IFftuwmtrParams[];
     private targetIndividuals: ITargetIndividualForVariationOption[];
     private variationOptions: IVariationOption[];
-    private isMultiOptionMode: boolean;
 
     constructor(data: CSwitchParams) {
 
@@ -119,59 +108,8 @@ export class CSwitchParams {
         this.fftiuForTrue = data.fftiuForTrue;
         this.fftuwmtr = data.fftuwmtr;
 
-        this.variationOptions = data.variationOptions?.sort((a, b) => a.displayOrder - b.displayOrder); // multistate
-        this.targetIndividuals = data.targetIndividuals; // multistate
-        this.isMultiOptionMode = data.isMultiOptionMode; // multistate
-
-        this.initFFNullString();
-        this.initFFTuwmtrNullString();
-    }
-
-    // 获取默认返回值
-    // 默认选项
-    public getFFDefaultRuleValue() {
-        return this.ff.defaultRuleValue;
-    }
-
-    // true 与 false 的数值
-    public getPercentageValue(type: 'true' | 'false') {
-        if(type === 'true') {
-            return this.ff.percentageRolloutForTrue;
-        } else {
-            return this.ff.percentageRolloutForFalse;
-        }
-    }
-
-    // 获取默认返回值
-    public getFFBasedProperty(): boolean {
-        return this.ff.valueWhenDisabled;
-    }
-
-    // 设置默认返回值
-    public setFFBasedProperty(value: boolean) {
-        this.ff.valueWhenDisabled = value;
-    }
-
-    // 设置默认返回值
-    public setFFConfig(value: { serve: boolean | string, F: number, T: number }) {
-        this.ff.defaultRuleValue = value.serve;
-        let trueValue = value.serve !== 'null' ? null : value.T;
-        this.ff.percentageRolloutForTrue = Number((trueValue / 100).toFixed(2));
-        this.ff.percentageRolloutForFalse = trueValue !== null ? 1 - this.ff.percentageRolloutForTrue : null;
-    }
-
-    // 设置 ff 字段的 defaultRuleValue 属性值
-    private initFFNullString() {
-        let result = this.needNullString(this.ff.defaultRuleValue as boolean, this.ff.percentageRolloutForTrue, this.ff.percentageRolloutForFalse);
-        result && (this.ff.defaultRuleValue = 'null');
-    }
-
-    // 设置 fftuwmtr 字段的 defaultRuleValue 属性值
-    private initFFTuwmtrNullString() {
-        this.fftuwmtr.forEach((fft: IFftuwmtrParams) => {
-            let result = this.needNullString(fft.variationRuleValue as boolean, fft.percentageRolloutForTrue, fft.percentageRolloutForFalse);
-            result && (fft.variationRuleValue = 'null');
-        })
+        this.variationOptions = data.variationOptions?.sort((a, b) => a.displayOrder - b.displayOrder);
+        this.targetIndividuals = data.targetIndividuals;
     }
 
     // 判断是否需要将 null 改为 字符串 ‘null’
@@ -199,41 +137,9 @@ export class CSwitchParams {
         return this.ffp;
     }
 
-    // 获取目标用户
-    public getTargetUsers(type: 'true' | 'false') {
-        if(type === 'true') {
-            return this.fftiuForTrue;
-        } else {
-            return this.fftiuForFalse;
-        }
-    }
-
-    // 设置目标用户
-    public setTargetUsers(type: 'true' | 'false', data: IUserType[]) {
-        let lists: IFftiuParams[] = [];
-        data.forEach((item: IUserType) => {
-            let list: IFftiuParams = {
-                id: item.id,
-                name: item.name,
-                keyId: item.keyId,
-                email: item.email
-            }
-            lists.push(list);
-        })
-        if(type === 'true') {
-            this.fftiuForTrue = [...lists];
-        } else {
-            this.fftiuForFalse = [...lists];
-        }
-    }
-
     // 获取匹配规则
     public getFftuwmtr(): IFftuwmtrParams[] {
         return this.fftuwmtr;
-    }
-
-    public getIsMultiOptionMode(): boolean {
-      return !!this.isMultiOptionMode;
     }
 
     // 删除匹配规则
@@ -247,20 +153,8 @@ export class CSwitchParams {
             ruleId: '',
             ruleName: '',
             ruleJsonContent: [],
-            variationRuleValue: null,
-            percentageRolloutForTrue: null,
-            percentageRolloutForFalse: null,
-            percentageRolloutBasedProperty: null,
             valueOptionsVariationRuleValues: [],
         })
-    }
-
-    // 设置规则 serve
-    public setConditionServe(value: { serve: boolean | string, F: number, T: number }, index: number) {
-        this.fftuwmtr[index].variationRuleValue = value.serve;
-        let trueValue = value.serve !== 'null' ? null : value.T;
-        this.fftuwmtr[index].percentageRolloutForTrue = Number((trueValue / 100).toFixed(2));
-        this.fftuwmtr[index].percentageRolloutForFalse = trueValue !== null ? 1 - this.fftuwmtr[index].percentageRolloutForTrue : null;
     }
 
     // 设置字段信息
@@ -270,9 +164,6 @@ export class CSwitchParams {
 
     // 处理提交数据
     public onSortoutSubmitData() {
-        let ffDataFilters: IFfpParams[] = this.ffp.filter((item: IFfpParams) => item.variationValue !== null && item.prerequisiteFeatureFlagId !== null);
-        this.ffp = [...ffDataFilters];
-
         // prerequistes
         this.ffp = this.ffp.map(f => {
           const result = Object.assign({}, f);
@@ -283,8 +174,6 @@ export class CSwitchParams {
 
         this.fftuwmtr = this.fftuwmtr.filter(f => f.ruleJsonContent.length > 0);
         this.fftuwmtr.forEach((item: IFftuwmtrParams) => {
-            item.variationRuleValue = item.variationRuleValue === 'null' ? null : item.variationRuleValue; // not useful for multi states
-
             item.ruleJsonContent.forEach((rule: IJsonContent) => {
                 if(rule.type === 'multi') {
                     rule.value = JSON.stringify(rule.multipleValue);
@@ -354,7 +243,7 @@ export class CSwitchParams {
       // fftuwmtr
       this.fftuwmtr.filter(f => f.ruleJsonContent.length > 0).forEach((item: IFftuwmtrParams) => {
           const percentage = item.valueOptionsVariationRuleValues.reduce((acc, curr: IRulePercentageRollout) => {
-              return acc + curr.rolloutPercentage[1] - curr.rolloutPercentage[0];
+              return acc + (curr.rolloutPercentage[1] - curr.rolloutPercentage[0]);
           }, 0);
 
           if (percentage !== 1) {

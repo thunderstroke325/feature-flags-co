@@ -57,13 +57,6 @@ namespace FeatureFlags.APIs.Controllers
         }
 
         [HttpGet]
-        [Route("GetFeatureFlagUser/{id}")]
-        public async Task<EnvironmentFeatureFlagUser> GetFeatureFlagUser(string id)
-        {
-            return await _nosqlDBService.TrueFalseStatusGetEnvironmentFeatureFlagUserAsync(id);
-        }
-
-        [HttpGet]
         [Route("GetEnvironmentUser/{id}")]
         public async Task<EnvironmentUser> GetEnvironmentUser(string id)
         {

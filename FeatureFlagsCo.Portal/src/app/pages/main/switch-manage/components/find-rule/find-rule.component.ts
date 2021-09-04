@@ -20,9 +20,6 @@ export class FindRuleComponent {
         value: '',
         multipleValue: []
       });
-      this.variationRuleValue = null;
-      this.percentageRolloutForFalse = null;
-      this.percentageRolloutForTrue = null;
     } else {
       value.ruleJsonContent.forEach((item: IJsonContent) => {
         let result: ruleType = ruleValueConfig.filter((rule: ruleType) => rule.value === item.operation)[0];
@@ -45,14 +42,9 @@ export class FindRuleComponent {
           type: result.type
         })
       })
-
-      this.variationRuleValue = value.variationRuleValue;
-      this.percentageRolloutForFalse = value.percentageRolloutForFalse;
-      this.percentageRolloutForTrue = value.percentageRolloutForTrue;
     }
   }
 
-  @Input() multistateEnabled: boolean = false;
   @Input() properties: string[] = [];                 // 字段配置
   @Input() index: number = 0;
 

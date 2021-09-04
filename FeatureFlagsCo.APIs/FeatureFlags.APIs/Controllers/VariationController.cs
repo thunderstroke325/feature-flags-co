@@ -41,61 +41,6 @@ namespace FeatureFlags.APIs.Controllers
             _insightsService = insightsService;
         }
 
-
-        #region old version of true/false status variation
-        [HttpPost]
-        [Route("GetUserVariationResult")]
-        public async Task<bool?> GetVariation([FromBody] GetUserVariationResultParam param)
-        {
-            Tuple<bool?, bool> returnResult = await GetVariationCore(param);
-
-            return returnResult.Item1;
-        }
-
-
-        private async Task<Tuple<bool?, bool>> GetVariationCore(GetUserVariationResultParam param)
-        {
-            var ffIdVM = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
-            var returnResult = await _variationService.TrueFalseStatusCheckVariableAsync(param.EnvironmentSecret, param.FeatureFlagKeyName,
-                new EnvironmentUser()
-                {
-                    Country = param.FFUserCountry,
-                    CustomizedProperties = param.FFUserCustomizedProperties,
-                    Email = param.FFUserEmail,
-                    KeyId = param.FFUserKeyId,
-                    Name = param.FFUserName
-                },
-                ffIdVM);
-            var customizedTraceProperties = new Dictionary<string, object>()
-            {
-                ["envId"] = ffIdVM.EnvId,
-                ["accountId"] = ffIdVM.AccountId,
-                ["projectId"] = ffIdVM.ProjectId,
-                ["featureFlagKey"] = param.FeatureFlagKeyName,
-                ["userKey"] = param.FFUserKeyId,
-                ["readOnlyOperation"] = returnResult.Item2,
-            };
-            using (_logger.BeginScope(customizedTraceProperties))
-            {
-                _logger.LogInformation("variation-request");
-            }
-
-            return returnResult;
-        }
-
-        [HttpPost]
-        [Route("GetUserVariationResultInJson")]
-        public async Task<GetUserVariationResultJsonViewModel> GetVariationInJson([FromBody] GetUserVariationResultParam param)
-        {
-            Tuple<bool?, bool> returnResult = await GetVariationCore(param);
-
-            return new GetUserVariationResultJsonViewModel()
-            {
-                VariationResult = returnResult.Item1
-            };
-        }
-        #endregion
-
         [HttpPost]
         [Route("GetMultiOptionVariation")]
         public async Task<JsonResult> GetMultiOptionVariation([FromBody] GetUserVariationResultParam param)

@@ -17,7 +17,6 @@ import { FfcAngularSdkService } from 'ffc-angular-sdk';
 export class SwitchSettingComponent implements OnDestroy {
 
   private destory$: Subject<void> = new Subject();
-  public multistateEnabled: boolean = false;
   public currentSwitch: IFfParams = null;
   public variationOptions: IVariationOption[];
   public variationOptionEditId: number | null = null;
@@ -34,10 +33,7 @@ export class SwitchSettingComponent implements OnDestroy {
     this.route.data.pipe(map(res => res.switchInfo))
       .subscribe((result: CSwitchParams) => {
         this.featureDetail = new CSwitchParams(result);
-        this.multistateEnabled = this.featureDetail.getIsMultiOptionMode();
-        if (this.multistateEnabled) {
-          this.variationOptions = this.featureDetail.getVariationOptions();
-        }
+        this.variationOptions = this.featureDetail.getVariationOptions();
         this.currentSwitch = this.featureDetail.getSwicthDetail();
       })
   }
@@ -101,25 +97,23 @@ export class SwitchSettingComponent implements OnDestroy {
     const { id, name } = this.currentSwitch;
     const data: IFfSettingParams = {id, name};
 
-    if (this.multistateEnabled) {
-      if (this.variationOptions.filter(v => v.variationValue === null || v.variationValue === '').length > 0) { // states with no values exist in the array
-        this.msg.warning("请确保所有返回状态都设置了值！");
-        return;
+    if (this.variationOptions.filter(v => v.variationValue === null || v.variationValue === '').length > 0) { // states with no values exist in the array
+      this.msg.warning("请确保所有返回状态都设置了值！");
+      return;
+    }
+
+    // reset multistate id and order
+    let maxId = Math.max(...this.variationOptions.map(x => x.localId));
+    this.variationOptions.forEach((e, i) => {
+      if (e.localId < 0) {
+        maxId += 1;
+        e.localId = maxId;
       }
 
-      // reset multistate id and order
-      let maxId = Math.max(...this.variationOptions.map(x => x.localId));
-      this.variationOptions.forEach((e, i) => {
-        if (e.localId < 0) {
-          maxId += 1;
-          e.localId = maxId;
-        }
+      e.displayOrder = i + 1;
+    });
 
-        e.displayOrder = i + 1;
-      });
-
-      data.variationOptions = this.variationOptions;
-    }
+    data.variationOptions = this.variationOptions;
 
     this.switchServe.updateSwitchSetting(data)
       .subscribe((result: IFfParams) => {

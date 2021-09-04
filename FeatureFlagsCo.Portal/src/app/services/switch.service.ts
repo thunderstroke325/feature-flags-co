@@ -129,11 +129,10 @@ export class SwitchService {
   }
 
   // 修改开关
-  public updateSwitch(param: CSwitchParams, multistateEnabled: boolean = false): Observable<any> {
+  public updateSwitch(param: CSwitchParams): Observable<any> {
     const switchDetail = param.getSwicthDetail();
-    let defaultRuleValue = switchDetail.defaultRuleValue === 'null' ? null : switchDetail.defaultRuleValue;
-    const url = multistateEnabled && param.getIsMultiOptionMode() ? environment.url + `/FeatureFlags/UpdateMultiOptionSupportedFeatureFlag` : environment.url + `/FeatureFlags/UpdateFeatureFlag`;
-    return this.http.put(url, { ...param, ff: { ...switchDetail, defaultRuleValue } });
+    const url = environment.url + `/FeatureFlags/UpdateMultiOptionSupportedFeatureFlag`;
+    return this.http.put(url, { ...param, ff: { ...switchDetail } });
   }
 
   // 存档开关

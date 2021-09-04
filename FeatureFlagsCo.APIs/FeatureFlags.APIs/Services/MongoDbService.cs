@@ -26,33 +26,6 @@ namespace FeatureFlags.APIs.Services
             _mongoEnvironmentUserPropertiesService = mongoEnvironmentUserPropertiesService;
         }
 
-
-        #region old version true false status functions
-        public async Task TrueFalseStatusUpdateItemAsync(string id, dynamic item)
-        {
-        }
-        public async Task<dynamic> TrueFalseStatusGetItemAsync(string id)
-        {
-            return null;
-        }
-        public async Task<EnvironmentFeatureFlagUser> TrueFalseStatusAddEnvironmentFeatureFlagUserAsync(EnvironmentFeatureFlagUser item)
-        {
-            return null;
-        }
-        public async Task<EnvironmentFeatureFlagUser> TrueFalseStatusGetEnvironmentFeatureFlagUserAsync(string id)
-        {
-            return null;
-        }
-        public async Task<int> TrueFalseStatusGetFeatureFlagTotalUsersAsync(string featureFlagId)
-        {
-            return 0;
-        }
-        public async Task<int> TrueFalseStatusGetFeatureFlagHitUsersAsync(string featureFlagId)
-        {
-            return 0;
-        }
-        #endregion
-
         public async Task SaveEnvironmentDataAsync(int accountId, int projectId, int envId, EnvironmentDataViewModel data) 
         {
             data.FeatureFlags.ForEach(async ff =>
@@ -163,8 +136,6 @@ namespace FeatureFlags.APIs.Services
                 },
                 IsArchived = false,
                 FFP = new List<FeatureFlagPrerequisite>(),
-                FFTIUForFalse = new List<FeatureFlagTargetIndividualUser>(),
-                FFTIUForTrue = new List<FeatureFlagTargetIndividualUser>(),
                 FFTUWMTR = new List<FeatureFlagTargetUsersWhoMatchTheseRuleParam>(),
                 VariationOptions = new List<VariationOption>() {
                     new VariationOption() {
@@ -178,7 +149,6 @@ namespace FeatureFlags.APIs.Services
                         VariationValue = "false"
                     },
                 },
-                IsMultiOptionMode = true,
                 TargetIndividuals = new List<TargetIndividualForVariationOption>()
             };
             return await _mongoFeatureFlagsService.CreateAsync(newFeatureFlag);
@@ -229,9 +199,6 @@ namespace FeatureFlags.APIs.Services
                 param.EnvironmentId = param.FF.EnvironmentId;
                 param.Id = param.FF.Id;
                 param.FF.LastUpdatedTime = DateTime.UtcNow;
-                param.FF.DefaultRuleValue = null;
-                param.FF.ValueWhenDisabled = null;
-
 
                 if (param.FFTUWMTR != null && param.FFTUWMTR.Count > 0)
                 {
@@ -282,22 +249,7 @@ namespace FeatureFlags.APIs.Services
                     {
                         item.RuleId = Guid.NewGuid().ToString();
                     }
-                    else
-                    {
-                        var fftu = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId);
-                        if(fftu != null)
-                        {
-                            item.PercentageRolloutForFalseNumber = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId).PercentageRolloutForFalseNumber;
-                            item.PercentageRolloutForTrueNumber = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId).PercentageRolloutForTrueNumber;
-                        }
-                    }
                 }
-            }
-            if (originFF.FF.PercentageRolloutForFalse != null && originFF.FF.PercentageRolloutForTrue != null &&
-                param.FF.PercentageRolloutForFalse != null && param.FF.PercentageRolloutForTrue != null)
-            {
-                param.FF.PercentageRolloutForFalseNumber = originFF.FF.PercentageRolloutForFalseNumber;
-                param.FF.PercentageRolloutForTrueNumber = originFF.FF.PercentageRolloutForTrueNumber;
             }
 
             param._Id = originFF._Id;
@@ -421,12 +373,10 @@ namespace FeatureFlags.APIs.Services
         }
 
 
-
         public async Task<int> QueryEnvironmentUsersCountAsync(string searchText, int environmentId, int pageIndex, int pageSize)
         {
             return await _mongoEnvironmentUsersService.CountAsync(searchText, environmentId);
         }
-
 
 
         public async Task<List<EnvironmentUser>> QueryEnvironmentUsersAsync(string searchText, int environmentId, int pageIndex, int pageSize)
@@ -490,7 +440,6 @@ namespace FeatureFlags.APIs.Services
         {
             await _mongoEnvironmentUsersService.UpsertAsync(param);
         }
-
 
         public async Task<List<PrequisiteFeatureFlagViewModel>> SearchPrequisiteFeatureFlagsAsync(int environmentId, string searchText = "", int pageIndex = 0, int pageSize = 20)
         {

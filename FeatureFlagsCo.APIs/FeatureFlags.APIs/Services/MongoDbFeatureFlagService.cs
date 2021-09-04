@@ -19,7 +19,7 @@ namespace FeatureFlags.APIs.Services
         }
 
         public List<FeatureFlag> Get() =>
-            _featureFlags.Find(p => p.ObjectType == "FeatureFlag").ToList();
+            _featureFlags.Find(p => true).ToList();
 
         public async Task<List<FeatureFlag>> GetByEnvironmentAsync(int envId)
         {
@@ -36,14 +36,7 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<List<FeatureFlag>> GetFeatureFlagsAsync(int envId, bool isArchived, int pageIndex, int pageSize)
         {
-            if (isArchived)
-            {
-                return await _featureFlags.Find((p) => p.EnvironmentId == envId && p.IsArchived == true).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
-            }
-            else 
-            {
-                return await _featureFlags.Find((p) => p.EnvironmentId == envId && p.IsArchived == null || p.IsArchived.Value == false).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
-            }
+            return await _featureFlags.Find((p) => p.EnvironmentId == envId && p.IsArchived == isArchived).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
         }
 
         public async Task<FeatureFlag> GetAsync(string id) =>

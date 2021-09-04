@@ -27,77 +27,6 @@ namespace FeatureFlags.APIs.Services
             this._container = dbClient.GetContainer(databaseName, containerName);
         }
 
-
-        #region old version true false status functions
-        public async Task TrueFalseStatusUpdateItemAsync(string id, dynamic item)
-        {
-            await this._container.UpsertItemAsync<dynamic>(item, new PartitionKey(id));
-        }
-        public async Task<dynamic> TrueFalseStatusGetItemAsync(string id)
-        {
-            try
-            {
-                return await this._container.ReadItemAsync<dynamic>(id, new PartitionKey(id));
-            }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return null;
-            }
-        }
-        public async Task<EnvironmentFeatureFlagUser> TrueFalseStatusAddEnvironmentFeatureFlagUserAsync(EnvironmentFeatureFlagUser item)
-        {
-            var newItem = await this._container.CreateItemAsync<EnvironmentFeatureFlagUser>(item, new PartitionKey(item.id), new ItemRequestOptions());
-            return newItem;
-        }
-        public async Task<EnvironmentFeatureFlagUser> TrueFalseStatusGetEnvironmentFeatureFlagUserAsync(string id)
-        {
-            try
-            {
-                return await this._container.ReadItemAsync<EnvironmentFeatureFlagUser>(id, new PartitionKey(id));
-            }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return null;
-            }
-        }
-        public async Task<int> TrueFalseStatusGetFeatureFlagTotalUsersAsync(string featureFlagId)
-        {
-            int envId = FeatureFlagKeyExtension.GetEnvIdByFeautreFlagId(featureFlagId);
-            QueryDefinition queryDefinition = new QueryDefinition("select value count(1) from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentFFUser'")
-              .WithParameter("@environmentId", envId);
-            using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
-            {
-                while (feedIterator.HasMoreResults)
-                {
-                    Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                    foreach (var item in response)
-                    {
-                        return (int)item;
-                    }
-                }
-            }
-            return 0;
-        }
-        public async Task<int> TrueFalseStatusGetFeatureFlagHitUsersAsync(string featureFlagId)
-        {
-            int envId = FeatureFlagKeyExtension.GetEnvIdByFeautreFlagId(featureFlagId);
-            QueryDefinition queryDefinition = new QueryDefinition("select value count(1) from f where f.EnvironmentId = @environmentId and f.ObjectType = 'EnvironmentFFUser' and f.ResultValue = true")
-              .WithParameter("@environmentId", envId);
-            using (FeedIterator<dynamic> feedIterator = _container.GetItemQueryIterator<dynamic>(queryDefinition))
-            {
-                while (feedIterator.HasMoreResults)
-                {
-                    Microsoft.Azure.Cosmos.FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
-                    foreach (var item in response)
-                    {
-                        return (int)item;
-                    }
-                }
-            }
-            return 0;
-        }
-        #endregion
-
         public async Task<EnvironmentUser> AddEnvironmentUserAsync(EnvironmentUser item)
         {
             var newItem = await this._container.CreateItemAsync<EnvironmentUser>(item, new PartitionKey(item.Id), new ItemRequestOptions());
@@ -159,8 +88,6 @@ namespace FeatureFlags.APIs.Services
                     }
                 },
                 FFP = new List<FeatureFlagPrerequisite>(),
-                FFTIUForFalse = new List<FeatureFlagTargetIndividualUser>(),
-                FFTIUForTrue = new List<FeatureFlagTargetIndividualUser>(),
                 FFTUWMTR = new List<FeatureFlagTargetUsersWhoMatchTheseRuleParam>(),
                 VariationOptions = new List<VariationOption>() {
                     new VariationOption() {
@@ -174,7 +101,6 @@ namespace FeatureFlags.APIs.Services
                         VariationValue = "false"
                     },
                 },
-                IsMultiOptionMode = true,
                 TargetIndividuals = new List<TargetIndividualForVariationOption>()
             };
             return await _container.CreateItemAsync<FeatureFlag>(newFeatureFlag);
@@ -225,8 +151,6 @@ namespace FeatureFlags.APIs.Services
                 param.EnvironmentId = param.FF.EnvironmentId;
                 param.Id = param.FF.Id;
                 param.FF.LastUpdatedTime = DateTime.UtcNow;
-                param.FF.DefaultRuleValue = null;
-                param.FF.ValueWhenDisabled = null;
 
 
                 if (param.FFTUWMTR != null && param.FFTUWMTR.Count > 0)
@@ -261,7 +185,6 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<FeatureFlag> UpdateFeatureFlagAsync(FeatureFlag param)
         {
-            var originFF = await this.GetFlagAsync(param.Id);
             param.EnvironmentId = param.FF.EnvironmentId;
             param.Id = param.FF.Id;
             param.FF.LastUpdatedTime = DateTime.UtcNow;
@@ -273,23 +196,9 @@ namespace FeatureFlags.APIs.Services
                     {
                         item.RuleId = Guid.NewGuid().ToString();
                     }
-                    else
-                    {
-                        var fftu = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId);
-                        if (fftu != null)
-                        {
-                            item.PercentageRolloutForFalseNumber = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId).PercentageRolloutForFalseNumber;
-                            item.PercentageRolloutForTrueNumber = originFF.FFTUWMTR.FirstOrDefault(p => p.RuleId == item.RuleId).PercentageRolloutForTrueNumber;
-                        }
-                    }
                 }
             }
-            if (originFF.FF.PercentageRolloutForFalse != null && originFF.FF.PercentageRolloutForTrue != null &&
-                param.FF.PercentageRolloutForFalse != null && param.FF.PercentageRolloutForTrue != null)
-            {
-                param.FF.PercentageRolloutForFalseNumber = originFF.FF.PercentageRolloutForFalseNumber;
-                param.FF.PercentageRolloutForTrueNumber = originFF.FF.PercentageRolloutForTrueNumber;
-            }
+
             return await this._container.UpsertItemAsync<FeatureFlag>(param);
         }
 

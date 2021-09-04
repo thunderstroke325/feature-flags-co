@@ -8,8 +8,7 @@
 <ng-template #conditionTemplate>
     <ng-container *ngIf="!isLoading; else loadingTem;">
         <div class="detail-body">
-            <button *ngIf="!multistateEnabled" class="save"nz-button nzType="primary" (click)="onSaveSetting()">保存设置</button>
-            <button *ngIf="multistateEnabled" class="save"nz-button nzType="primary" (click)="onSaveSettingMultistates()">保存设置</button>
+            <button class="save"nz-button nzType="primary" (click)="onSaveConditions()">保存设置</button>
             <div class="item">
                 <p class="label">开启或关闭开关</p>
                 <nz-button-group>
@@ -17,47 +16,26 @@
                     <button nz-button [nzType]="switchStatus === 'Disabled' ? 'primary' : 'default'"  (click)="onChangeSwitchStatus('Disabled')">关</button>
                 </nz-button-group>
             </div>
-            <div class="item" *ngIf="multistateEnabled">
+            <div class="item">
                 <p class="label">上游开关(若下方上游开关不符合条件，则此开关处于关闭状态)</p>
                 <upper-switch [featureList]="featureList" [upperFeatures]="upperFeatures" (search)="onSearchPrequisiteFeatureFlags($event)" (onUpperSwicthChange)="onUpperSwicthChange($event)"></upper-switch>
             </div>
             <div class="item">
                 <p class="label">目标用户</p>
-                <ng-container *ngIf="!multistateEnabled">
-                  <div class="content">
-                    <target-user [type]="'true'"
-                                 [tipIdx]="0"
-                                 [userList]="userList"
-                                 [selectedUserDetailList]="targetUserSelectedListTrue"
-                                 (search)="onSearchUser($event)"
-                                 (onSelectedUserListChange)="onSelectedUserListChange($event, 'true')"></target-user>
-                  </div>
-                  <div class="content">
-                      <target-user [type]="'false'"
-                                  [tipIdx]="1"
-                                  [userList]="userList"
-                                  [selectedUserDetailList]="targetUserSelectedListFalse"
-                                  (search)="onSearchUser($event)"
-                                  (onSelectedUserListChange)="onSelectedUserListChange($event, 'false')"></target-user>
-                  </div>
-                </ng-container>
-                <ng-container *ngIf="multistateEnabled">
-                  <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
-                    <target-user [type]="variationOption.variationValue"
-                                 [tipIdx]="i"
-                                 [userList]="userList"
-                                 [selectedUserDetailList]="targetIndividuals[variationOption.localId]"
-                                 (search)="onSearchUser($event)"
-                                 (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)"></target-user>
-                  </div>
-                </ng-container>
+                <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
+                  <target-user [type]="variationOption.variationValue"
+                                [tipIdx]="i"
+                                [userList]="userList"
+                                [selectedUserDetailList]="targetIndividuals[variationOption.localId]"
+                                (search)="onSearchUser($event)"
+                                (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)"></target-user>
+                </div>
             </div>
             <div class="item">
                 <p class="label">使用匹配条件找到目标用户</p>
                 <ng-container *ngFor="let condition of featureDetail?.getFftuwmtr(); let key=index;">
                     <div class="content">
                         <find-rule [data]="condition"
-                                   [multistateEnabled]="multistateEnabled"
                                    [properties]="propertiesList"
                                    [index]="key"
                                    (deleteRule)="onDeleteCondition(key)"
@@ -71,45 +49,26 @@
                 <button nz-button nzType="primary" (click)="onAddCondition()">添加规则</button>
             </div>
             <div class="item ">
-              <ng-container *ngIf="!multistateEnabled">
-                <p class="label">默认返回值</p>
-                <app-serve [isSingle]="true"
-                           [variationRuleValue]="featureDetail?.getFFDefaultRuleValue()"
-                           [truePercentage]="featureDetail?.getPercentageValue('true') || 0"
-                           (onPercentageChange)="onDefaultValuePercentageChange($event)"></app-serve>
-              </ng-container>
-              <ng-container *ngIf="multistateEnabled">
-                <p class="label">默认返回值</p>
-                <app-serve-multistates [isSingle]="true"
-                           [variationOptions]="variationOptions"
-                           [rulePercentageRollouts]="featureDetail?.getFFDefaultRulePercentageRollouts()"
-                           (onPercentageChange)="onDefaultRulePercentageRolloutsChange($event)"></app-serve-multistates>
-              </ng-container>
+              <p class="label">默认返回值</p>
+              <app-serve-multistates [isSingle]="true"
+                          [variationOptions]="variationOptions"
+                          [rulePercentageRollouts]="featureDetail?.getFFDefaultRulePercentageRollouts()"
+                          (onPercentageChange)="onDefaultRulePercentageRolloutsChange($event)"></app-serve-multistates>
+
             </div>
             <div class="item">
-              <ng-container *ngIf="multistateEnabled">
-                <div class="default">
-                  <span class="label">如果开关关闭了，应返回</span>
-                  <button style="margin-left:10px" nz-button nz-dropdown nzTrigger="click" [nzDropdownMenu]="ddm">
-                    {{featureDetail?.getFFVariationOptionWhenDisabled()?.variationValue}}
-                    <i nz-icon nzType="down"></i>
-                  </button>
-                </div>
-                <nz-dropdown-menu #ddm="nzDropdownMenu">
-                  <ul nz-menu>
-                    <li nz-menu-item *ngFor="let variationOption of variationOptions" (click)="onVariationOptionWhenDisabledChange(variationOption)">{{variationOption.variationValue}}</li>
-                  </ul>
-                </nz-dropdown-menu>
-              </ng-container>
-              <ng-container *ngIf="!multistateEnabled">
-                <div class="default">
-                    <span class="label">如果开关关闭了，应返回</span>
-                    <div class="btn" (click)="switchBaseProperty()">
-                        {{featureDetail?.getFFBasedProperty() ? featureDetail?.getFFBasedProperty(): false}}
-                    </div>
-                </div>
-                <span class="tip">在任何其他情况下，开关都将返回 false</span>
-              </ng-container>
+              <div class="default">
+                <span class="label">如果开关关闭了，应返回</span>
+                <button style="margin-left:10px" nz-button nz-dropdown nzTrigger="click" [nzDropdownMenu]="ddm">
+                  {{featureDetail?.getFFVariationOptionWhenDisabled()?.variationValue}}
+                  <i nz-icon nzType="down"></i>
+                </button>
+              </div>
+              <nz-dropdown-menu #ddm="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item *ngFor="let variationOption of variationOptions" (click)="onVariationOptionWhenDisabledChange(variationOption)">{{variationOption.variationValue}}</li>
+                </ul>
+              </nz-dropdown-menu>
             </div>
         </div>
     </ng-container>

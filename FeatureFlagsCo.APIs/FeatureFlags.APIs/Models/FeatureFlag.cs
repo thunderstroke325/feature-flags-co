@@ -17,20 +17,13 @@ namespace FeatureFlags.APIs.Models
         [JsonProperty("id")]
         public string Id { get; set; }
         public int EnvironmentId { get; set; }
-        public string ObjectType { get { return "FeatureFlag"; } set { value = "FeatureFlag"; } }
-        public bool? IsArchived { get; set; }
+        public bool IsArchived { get; set; }
         public FeatureFlagBasicInfo FF { get; set; }
         public List<FeatureFlagPrerequisite> FFP { get; set; }
         public List<FeatureFlagTargetUsersWhoMatchTheseRuleParam> FFTUWMTR { get; set; }
 
-        public List<FeatureFlagTargetIndividualUser> FFTIUForFalse { get; set; }
-        public List<FeatureFlagTargetIndividualUser> FFTIUForTrue { get; set; }
-
-
         public List<TargetIndividualForVariationOption> TargetIndividuals { get; set; }
         public List<VariationOption> VariationOptions { get; set; }
-
-        public bool? IsMultiOptionMode { get; set; }
     }
 
 
@@ -43,13 +36,7 @@ namespace FeatureFlags.APIs.Models
         public int EnvironmentId { get; set; }
         public string CreatorUserId { get; set; }
         public string Status { get; set; }
-        public bool? DefaultRuleValue { get; set; }
-        public double? PercentageRolloutForTrue { get; set; }
-        public int PercentageRolloutForTrueNumber { get; set; }
-        public double? PercentageRolloutForFalse { get; set; }
-        public int PercentageRolloutForFalseNumber { get; set; }
-        public string PercentageRolloutBasedProperty { get; set; }
-        public bool? ValueWhenDisabled { get; set; }
+        
         public DateTime? LastUpdatedTime { get; set; }
 
         public List<VariationOptionPercentageRollout> DefaultRulePercentageRollouts { get; set; }
@@ -64,7 +51,6 @@ namespace FeatureFlags.APIs.Models
     public class FeatureFlagPrerequisite
     {
         public string PrerequisiteFeatureFlagId { get; set; }
-        public bool VariationValue { get; set; }
         public VariationOption ValueOptionsVariationValue { get; set; }
     }
     public class FeatureFlagTargetIndividualUser
@@ -79,15 +65,7 @@ namespace FeatureFlags.APIs.Models
         public string RuleId { get; set; }
         public string RuleName { get; set; }
         public List<FeatureFlagRuleJsonContent> RuleJsonContent { get; set; }
-        public bool? VariationRuleValue { get; set; }
-        public double? PercentageRolloutForTrue { get; set; }
-        public int PercentageRolloutForTrueNumber { get; set; }
-        public double? PercentageRolloutForFalse { get; set; }
-        public int PercentageRolloutForFalseNumber { get; set; }
-        public string PercentageRolloutBasedProperty { get; set; }
-
-
-
+       
         public List<VariationOptionPercentageRollout> ValueOptionsVariationRuleValues { get; set; }
     }
 

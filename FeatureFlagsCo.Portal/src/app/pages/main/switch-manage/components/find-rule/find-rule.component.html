@@ -18,16 +18,9 @@
                   (deleteRule)="onDeleteRuleItem(key)"
                   (ruleChange)="onRuleChange($event, key)"></app-rule>
     </ng-container>
-    <ng-container *ngIf="!multistateEnabled">
-      <app-serve [variationRuleValue]="variationRuleValue"
-        [truePercentage]="percentageRolloutForTrue || 0"
-        (onPercentageChange)="onPercentageChange($event)"></app-serve>
-    </ng-container>
 
-    <ng-container *ngIf="multistateEnabled">
-      <app-serve-multistates [isSingle]="true"
-                  [variationOptions]="variationOptions"
-                  [rulePercentageRollouts]="rulePercentageRollouts"
-                  (onPercentageChange)="onPercentageChangeMultistates.next($event)"></app-serve-multistates>
-  </ng-container>
+    <app-serve-multistates [isSingle]="true"
+                [variationOptions]="variationOptions"
+                [rulePercentageRollouts]="rulePercentageRollouts"
+                (onPercentageChange)="onPercentageChangeMultistates.next($event)"></app-serve-multistates>
 </section>
