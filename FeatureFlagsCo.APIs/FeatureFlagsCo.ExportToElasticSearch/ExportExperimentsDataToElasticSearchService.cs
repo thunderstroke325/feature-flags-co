@@ -121,6 +121,7 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
                 {
                     try
                     {
+
                         client.DefaultRequestHeaders.Accept.TryParseAdd("application/json");
                         HttpContent content = new StringContent(JsonConvert.SerializeObject(message));
                         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");

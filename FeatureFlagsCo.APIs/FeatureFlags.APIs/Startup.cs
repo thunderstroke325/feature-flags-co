@@ -234,6 +234,7 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddSingleton<IExportExperimentsDataToElasticSearchService>(new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddScoped<IFeatureFlagsUsageService, ElasticSearchFeatureFlagsUsageService>();
+            services.AddScoped<IExperimentationService, ExperimentationService>();
 
             #endregion
         }
