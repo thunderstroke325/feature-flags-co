@@ -257,15 +257,9 @@ stages:
                     $a.ConnectionStrings.ConnStr = "$(SQLDATABASE_ConnectionString)"
                     $a.ConnectionStrings.RedisServerUrl = "$(REDISCACHE_ConnectionString)"
                     $a.JWT.Secret = "$(JWT_Secret)"
-                    $a.CosmosDb.Account = "$(CosmosDb_Account)"
-                    $a.CosmosDb.Key = "$(CosmosDb_Key)"
-                    $a.CosmosDb.DatabaseName = "$(CosmosDb_Account_DatabaseName)"
-                    $a.CosmosDb.ContainerName = "$(CosmosDb_Account_ContainerName)"
 
                     $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey)"
                     $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString)"
-                    $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId)"
-                    $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret)"
                     
                     $a.MySettings.SendCloudAPIUser = "$(SendCloudAPIUser)"
                     $a.MySettings.SendCloudAPIKey = "$(SendCloudAPIKey)"
@@ -273,12 +267,31 @@ stages:
                     $a.MySettings.SendCloudFromName = "feature-flags.co"
                     $a.MySettings.SendCloudTemplate = "forgetpassword"
                     $a.MySettings.SendCloudEmailSubject = "feature-flags.co"
+                    
+                    $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId)"
+                    $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret)"
 
+                    $a.MySettings.InsightsRabbitMqUrl = "$(MySettings_InsightsRabbitMqUrl)"
+                    $a.MySettings.ElasticSearchHost = "$(MySettings_ElasticSearchHost)"
+                    $a.MySettings.CacheType = "$(MySettings_CacheType)"
+
+                    $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString)"
+                    $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName)"
+                    
                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
 
                     $pathToJsonCheck = "appsettings.json"
                     $aCheck = Get-Content $pathToJson | ConvertFrom-Json
-                    Write-Host $a.ConnectionStrings.ConnStr
+                    Write-Host $aCheck.ConnectionStrings.ConnStr
+                    Write-Host $aCheck.ConnectionStrings.RedisServerUrl
+                    Write-Host $aCheck.JWT.Secret
+                    Write-Host $aCheck.ApplicationInsights.InstrumentationKey
+                    Write-Host $aCheck.ApplicationInsights.ConnectionString
+                    Write-Host $aCheck.MySettings.AppInsightsApplicationId
+                    Write-Host $aCheck.MySettings.InsightsRabbitMqUrl
+                    Write-Host $aCheck.MySettings.ElasticSearchHost
+                    Write-Host $aCheck.MongoDbSettings.ConnectionString
+                    Write-Host $aCheck.MongoDbSettings.DatabaseName
 
 
               - task: DotNetCoreCLI@2
