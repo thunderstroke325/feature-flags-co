@@ -40,14 +40,16 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpGet]
         [Route("RawData")]
-        public async Task<JsonResult> GetList(string secret, long? startUnixTimeStamp, long? endUnixTimeStamp)
+        public async Task<JsonResult> GetList(string secret, long? startUnixTimeStamp, long? endUnixTimeStamp, int? pageIndex, int? pageSize)
         {
             var ffIds = FeatureFlagKeyExtension.GetEnvIdsByEnvKey(secret);
             var r = await _experimentsService.GetListAsync(
                 _mySettings.Value.ElasticSearchHost,
                 ffIds.EnvId,
                 startUnixTimeStamp ?? (Int64)(DateTime.UtcNow.AddDays(-1).Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds,
-                endUnixTimeStamp ?? (Int64)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds);
+                endUnixTimeStamp ?? (Int64)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds,
+                pageIndex ?? 0,
+                pageSize ?? 20);
             Response.StatusCode = (int)r.Item2;
             return new JsonResult(new
             {

@@ -31,13 +31,15 @@ namespace FeatureFlags.APIs.Services
             _mySettings = mySettings;
         }
 
-        public async Task<Tuple<string, System.Net.HttpStatusCode>> GetListAsync(string esHost, string envId, long startUnixTimeStamp, long endUnixTimeStamp)
+        public async Task<Tuple<string, System.Net.HttpStatusCode>> GetListAsync(
+            string esHost, string envId, long startUnixTimeStamp, long endUnixTimeStamp,
+            int pageIndex = 0, int pageSize = 20)
         {
             var term1EO = new ExpandoObject();
             term1EO.TryAdd("EnvironmentId.keyword", envId);
             var mustEO = new List<dynamic>() {
                 new {
-                    term=term1EO
+                    term = term1EO
                 },
                 new {
                     range = new
@@ -58,7 +60,17 @@ namespace FeatureFlags.APIs.Services
             queryEO.TryAdd("bool", boolEO);
             var body = new
             {
-                query = queryEO
+                from = pageIndex * pageSize,
+                size = pageSize,
+                query = queryEO,
+                sort = new List<dynamic> {
+                    new
+                    {
+                        TimeStamp = new {
+                            order = "desc"
+                        }
+                    }
+                }
             };
 
             using (var client = new HttpClient())
