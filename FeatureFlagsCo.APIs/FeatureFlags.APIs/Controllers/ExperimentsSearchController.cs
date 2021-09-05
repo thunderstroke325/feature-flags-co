@@ -39,7 +39,7 @@ namespace FeatureFlags.APIs.Controllers
 
 
         [HttpGet]
-        [Route("PushData")]
+        [Route("RawData")]
         public async Task<JsonResult> GetList(string secret, long? startUnixTimeStamp, long? endUnixTimeStamp)
         {
             var ffIds = FeatureFlagKeyExtension.GetEnvIdsByEnvKey(secret);
