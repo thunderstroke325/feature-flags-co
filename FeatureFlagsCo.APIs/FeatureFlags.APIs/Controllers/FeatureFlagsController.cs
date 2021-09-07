@@ -147,6 +147,7 @@ namespace FeatureFlags.APIs.Controllers
             ff.FF.Name = param.Name;
 
             ff.VariationOptions = param.VariationOptions;
+            ff.FF.DefaultRulePercentageRollouts.ForEach(d => d.ValueOption = param.VariationOptions.FirstOrDefault(v => v.LocalId == d.ValueOption.LocalId));
             ff.FF.VariationOptionWhenDisabled = param.VariationOptions.FirstOrDefault(o => o.LocalId == ff.FF.VariationOptionWhenDisabled.LocalId);
             ff.FFTUWMTR.ForEach(f => {
                 f.ValueOptionsVariationRuleValues.ForEach(v => v.ValueOption = param.VariationOptions.FirstOrDefault(o => o.LocalId == v.ValueOption.LocalId));
