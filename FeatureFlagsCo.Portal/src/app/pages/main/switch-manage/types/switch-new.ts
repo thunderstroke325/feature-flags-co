@@ -167,7 +167,7 @@ export class CSwitchParams {
         // prerequistes
         this.ffp = this.ffp.map(f => {
           const result = Object.assign({}, f);
-          result.valueOptionsVariationValue = f.selectedFeatureFlag.variationOptions.find(v => v.localId === result.valueOptionsVariationValue.localId);
+          result.valueOptionsVariationValue = f.selectedFeatureFlag?.variationOptions?.find(v => v.localId === result.valueOptionsVariationValue.localId);
 
           return result;
         });

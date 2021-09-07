@@ -76,7 +76,7 @@ export class TargetConditionsComponent implements OnInit {
       this.variationOptions = this.featureDetail.getVariationOptions();
 
       this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
-        acc[cur.localId] = this.featureDetail.getTargetIndividuals().find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
+        acc[cur.localId] = this.featureDetail.getTargetIndividuals().filter(t => t.valueOption !== null).find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
         return acc;
       }, {});
 

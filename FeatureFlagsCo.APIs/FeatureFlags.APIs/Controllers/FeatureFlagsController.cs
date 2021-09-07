@@ -151,7 +151,10 @@ namespace FeatureFlags.APIs.Controllers
             ff.FFTUWMTR.ForEach(f => {
                 f.ValueOptionsVariationRuleValues.ForEach(v => v.ValueOption = param.VariationOptions.FirstOrDefault(o => o.LocalId == v.ValueOption.LocalId));
             });
-            ff.TargetIndividuals.ForEach(t => t.ValueOption = param.VariationOptions.FirstOrDefault(v => v.LocalId == t.ValueOption.LocalId));
+            ff.TargetIndividuals = ff.TargetIndividuals.Select(t => new TargetIndividualForVariationOption { 
+                ValueOption = param.VariationOptions.FirstOrDefault(v => v.LocalId == t.ValueOption.LocalId),
+                Individuals = t.Individuals
+            }).ToList().FindAll(t => t.ValueOption != null);
 
             // update prerequistes
             foreach (var f in ff.FFP)
