@@ -1,5 +1,6 @@
 ﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,31 @@ namespace FeatureFlags.APIs.Services
     public class MongoDbEnvironmentUserPropertyService
     {
         private readonly IMongoCollection<EnvironmentUserProperty> _environmentUserProperties;
+        private readonly IOptions<MySettings> _mySettings;
+
+        public MongoDbEnvironmentUserPropertyService(IMongoDbSettings settings,
+            IOptions<MySettings> mySettings)
+        {
+            _mySettings = mySettings;
+
+            MongoClient client = null;
+            if (mySettings.Value.HostingType == HostingTypeEnum.Azure.ToString())
+            {
+                MongoClientSettings s = MongoClientSettings.FromUrl(
+                  new MongoUrl(settings.ConnectionString)
+                );
+                s.SslSettings =
+                  new SslSettings() { EnabledSslProtocols = SslProtocols.Tls12 };
+                client = new MongoClient(s);
+            }
+            else
+            {
+                client = new MongoClient(settings.ConnectionString);
+            }
+
+            var database = client.GetDatabase(settings.DatabaseName);
+            _environmentUserProperties = database.GetCollection<EnvironmentUserProperty>("EnvironmentUserProperties");
+        }
 
         public async Task UpsertItemAsync(EnvironmentUserProperty item)
         {
@@ -28,18 +54,6 @@ namespace FeatureFlags.APIs.Services
             {
                 await CreateAsync(item);
             }
-        }
-
-        public MongoDbEnvironmentUserPropertyService(IMongoDbSettings settings)
-        {
-            MongoClientSettings s = MongoClientSettings.FromUrl(
-              new MongoUrl(settings.ConnectionString)
-            );
-            s.SslSettings =
-              new SslSettings() { EnabledSslProtocols = SslProtocols.Tls12 };
-            var client = new MongoClient(s);
-            var database = client.GetDatabase(settings.DatabaseName);
-            _environmentUserProperties = database.GetCollection<EnvironmentUserProperty>("EnvironmentUserProperties");
         }
 
         public async Task<List<EnvironmentUserProperty>> GetByEnvironmentAsync(int envId)

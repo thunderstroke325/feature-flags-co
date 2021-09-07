@@ -1,5 +1,6 @@
 ﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,15 +12,28 @@ namespace FeatureFlags.APIs.Services
     public class MongoDbFeatureFlagService
     {
         private readonly IMongoCollection<FeatureFlag> _featureFlags;
+        private readonly IOptions<MySettings> _mySettings;
 
-        public MongoDbFeatureFlagService(IMongoDbSettings settings)
+        public MongoDbFeatureFlagService(IMongoDbSettings settings,
+            IOptions<MySettings> mySettings)
         {
-            MongoClientSettings s = MongoClientSettings.FromUrl(
-              new MongoUrl(settings.ConnectionString)
-            );
-            s.SslSettings =
-              new SslSettings() { EnabledSslProtocols = SslProtocols.Tls12 };
-            var client = new MongoClient(s);
+            _mySettings = mySettings;
+
+            MongoClient client = null;
+            if (mySettings.Value.HostingType == HostingTypeEnum.Azure.ToString())
+            {
+                MongoClientSettings s = MongoClientSettings.FromUrl(
+                  new MongoUrl(settings.ConnectionString)
+                );
+                s.SslSettings =
+                  new SslSettings() { EnabledSslProtocols = SslProtocols.Tls12 };
+                client = new MongoClient(s);
+            }
+            else
+            {
+                client = new MongoClient(settings.ConnectionString);
+            }
+
             var database = client.GetDatabase(settings.DatabaseName);
             _featureFlags = database.GetCollection<FeatureFlag>("FeatureFlags");
         }
