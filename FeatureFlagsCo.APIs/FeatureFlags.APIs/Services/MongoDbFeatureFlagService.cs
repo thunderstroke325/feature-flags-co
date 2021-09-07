@@ -3,6 +3,7 @@ using FeatureFlags.APIs.ViewModels;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
@@ -13,7 +14,12 @@ namespace FeatureFlags.APIs.Services
 
         public MongoDbFeatureFlagService(IMongoDbSettings settings)
         {
-            var client = new MongoClient(settings.ConnectionString);
+            MongoClientSettings s = MongoClientSettings.FromUrl(
+              new MongoUrl(settings.ConnectionString)
+            );
+            s.SslSettings =
+              new SslSettings() { EnabledSslProtocols = SslProtocols.Tls12 };
+            var client = new MongoClient(s);
             var database = client.GetDatabase(settings.DatabaseName);
             _featureFlags = database.GetCollection<FeatureFlag>("FeatureFlags");
         }
