@@ -1,5 +1,6 @@
 ﻿using FeatureFlags.APIs.ViewModels;
 using FeatureFlagsCo.MQ;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
@@ -19,9 +20,12 @@ namespace FeatureFlags.APIs.Services
         private IConnection _connection;
         private IModel _channel;
         private string _queueName;
-        public AuditLogMqService(IOptions<MySettings> mySettings)
+        private readonly ILogger<AuditLogMqService> _logger;
+        public AuditLogMqService(IOptions<MySettings> mySettings,
+            ILogger<AuditLogMqService> logger)
         {
             _mySettings = mySettings;
+            _logger = logger;
 
             _connectionFactory = new ConnectionFactory();
             _connectionFactory.Uri = new Uri(_mySettings.Value.InsightsRabbitMqUrl);
@@ -69,19 +73,26 @@ namespace FeatureFlags.APIs.Services
 
         public void Log(AuditLogMessageModel message)
         {
-            message.TimeStamp = (Int64)(DateTime.UtcNow.AddDays(-1).Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
-            var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
+            try
+            {
+                message.TimeStamp = (Int64)(DateTime.UtcNow.AddDays(-1).Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
+                var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
 
-            _channel.BasicPublish(exchange: "",
-                                  routingKey: _queueName,
-                                  basicProperties: null,
-                                  body: body);
-            //_channel.BasicPublish(exchange: "",
-            //                      routingKey: "experiments",
-            //                      basicProperties: null,
-            //                      body: body);
+                _channel.BasicPublish(exchange: "",
+                                      routingKey: _queueName,
+                                      basicProperties: null,
+                                      body: body);
+                //_channel.BasicPublish(exchange: "",
+                //                      routingKey: "experiments",
+                //                      basicProperties: null,
+                //                      body: body);
 
-            //Console.WriteLine(message);
+                //Console.WriteLine(message);
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, exp.Message);
+            }
         }
     }
 }
