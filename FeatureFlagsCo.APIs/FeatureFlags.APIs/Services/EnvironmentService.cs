@@ -25,6 +25,8 @@ namespace FeatureFlags.APIs.Services
         public Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param, int accountId);
 
         Task<bool> CheckIfUserHasRightToReadEnvAsync(string userId, int envId);
+
+        Task<EnvProjectInfoViewModel> GetProjectAndEnvInformationAsync(int envId);
     }
 
     public class EnvironmentService : IEnvironmentService
@@ -119,6 +121,19 @@ namespace FeatureFlags.APIs.Services
             var env = await _dbContext.Environments.FirstOrDefaultAsync(p => p.Id == envId);
             var proj = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == env.ProjectId);
             return await _dbContext.AccountUserMappings.AnyAsync(p => p.AccountId == proj.AccountId && p.UserId == userId);
+        }
+
+        public async Task<EnvProjectInfoViewModel> GetProjectAndEnvInformationAsync(int envId)
+        {
+            var env = await _dbContext.Environments.FirstOrDefaultAsync(p => p.Id == envId);
+            var proj = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == env.ProjectId);
+            return new EnvProjectInfoViewModel()
+            {
+                EnvId = env.Id,
+                EnvName = env.Name,
+                ProjectId = proj.Id,
+                ProjectName = proj.Name
+            };
         }
     }
 }

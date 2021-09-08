@@ -228,13 +228,18 @@ namespace FeatureFlags.AdminWebAPIs
             var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
             services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
             services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
+            services.AddSingleton<IAuditLogMqService, AuditLogMqService>();
             
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
             services.AddSingleton<IExportExperimentsDataToElasticSearchService>(new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+            services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+            services.AddSingleton<IExportAuditLogDataToElasticSearchService>(new ExportAuditLogDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+            
             services.AddScoped<IFeatureFlagsUsageService, ElasticSearchFeatureFlagsUsageService>();
             services.AddScoped<IExperimentationService, ExperimentationService>();
+            services.AddScoped<IAuditLogSearchService, AuditLogSearchService>();
 
             #endregion
         }
@@ -250,6 +255,7 @@ namespace FeatureFlags.AdminWebAPIs
             {
                 app.UseExceptionHandler("/error");
             }
+
 
             //app.UseRequestBodyLogging();
 
@@ -275,9 +281,10 @@ namespace FeatureFlags.AdminWebAPIs
                 endpoints.MapControllers()
                     .RequireCors("AllowMyOrigin");
             });
+
+
         }
     }
-
 
     public static class ApplicationInsightExtensions
     {

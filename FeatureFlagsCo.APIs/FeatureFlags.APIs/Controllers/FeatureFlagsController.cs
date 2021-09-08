@@ -7,6 +7,7 @@ using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
+using FeatureFlagsCo.MQ;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
@@ -27,12 +28,14 @@ namespace FeatureFlags.APIs.Controllers
         private readonly INoSqlService _noSqlDbService;
         private readonly IDistributedCache _redisCache;
         private readonly IEnvironmentService _envService;
+        private readonly IAuditLogMqService _auditLogService;
 
         public FeatureFlagsController(ILogger<FeatureFlagsController> logger, IGenericRepository repository,
             IFeatureFlagsService featureFlagService,
             INoSqlService noSqlDbService,
             IDistributedCache redisCache,
-            IEnvironmentService envService)
+            IEnvironmentService envService,
+            IAuditLogMqService auditLogService)
         {
             _logger = logger;
             _repository = repository;
@@ -41,6 +44,7 @@ namespace FeatureFlags.APIs.Controllers
             _redisCache = redisCache;
 
             _envService = envService;
+            _auditLogService = auditLogService;
         }
 
 
@@ -79,7 +83,53 @@ namespace FeatureFlags.APIs.Controllers
         public async Task<FeatureFlag> ArchiveEnvironmentdFeatureFlag([FromBody] FeatureFlagArchiveParam param)
         {
             await _redisCache.RemoveAsync(param.FeatureFlagId);
-            return await _noSqlDbService.ArchiveEnvironmentdFeatureFlagAsync(param);
+            var archivedFeatureFlag = await _noSqlDbService.ArchiveEnvironmentdFeatureFlagAsync(param);
+
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            var currentUserName = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name").Value;
+            var envProjInfo = await _envService.GetProjectAndEnvInformationAsync(archivedFeatureFlag.EnvironmentId);
+            _auditLogService.Log(new AuditLogMessageModel
+            {
+                Route = "/FeatureFlags/ArchiveEnvironmentdFeatureFlag",
+                MainMessage = "##{FeatureFlagName}## has been archived by ##{UserName}## in ##{EnvironmentName}## of ##{ProjectName}##",
+                PostBody = JsonConvert.SerializeObject(param ?? new FeatureFlagArchiveParam()),
+                FeatureFlagId = archivedFeatureFlag.Id,
+                EnvironmentId = archivedFeatureFlag.EnvironmentId.ToString(),
+                ProjectId = envProjInfo.ProjectId.ToString(),
+                User = new AuditLogUserInfo
+                {
+                    UserId = currentUserId,
+                    UserName = currentUserName
+                },
+                CustomizedProperties = new List<MqCustomizedProperty>
+                {
+                    new MqCustomizedProperty
+                    {
+                         Name = "FeatureFlagName",
+                         Value = archivedFeatureFlag.FF.Name
+                    },
+                    new MqCustomizedProperty
+                    {
+                         Name = "UserName",
+                         Value = currentUserName,
+
+                    },
+                    new MqCustomizedProperty
+                    {
+                         Name = "EnvironmentName",
+                         Value = envProjInfo.EnvName,
+
+                    },
+                    new MqCustomizedProperty
+                    {
+                         Name = "ProjectName",
+                         Value = envProjInfo.ProjectName,
+
+                    }
+                }
+            });
+
+            return archivedFeatureFlag;
         }
 
         [HttpPost]
