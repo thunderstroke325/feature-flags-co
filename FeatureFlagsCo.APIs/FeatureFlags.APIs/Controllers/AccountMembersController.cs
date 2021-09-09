@@ -26,12 +26,14 @@ namespace FeatureFlags.APIs.Controllers
         private readonly ILogger<AccountsController> _logger;
         private readonly IAccountService _accountService;
         private readonly IAccountUserService _accountUserService;
+        private readonly IEnvironmentService _envService;
 
         public AccountMembersController(
             UserManager<ApplicationUser> userManager,
             ILogger<AccountsController> logger, 
             IGenericRepository repository,
             IAccountService accountService,
+            IEnvironmentService envService,
             IAccountUserService accountUserService)
         {
             _userManager = userManager;
@@ -39,6 +41,7 @@ namespace FeatureFlags.APIs.Controllers
             _repository = repository;
             _accountService = accountService;
             _accountUserService = accountUserService;
+            _envService = envService;
         }
 
         [HttpGet]
@@ -50,6 +53,18 @@ namespace FeatureFlags.APIs.Controllers
            return await _accountUserService.GetAccountMembersAsync(currentUserId, accountId);
         }
 
+        [HttpGet]
+        [Route("{searchText}")]
+        public async Task<dynamic> SearchAccountMembers(int accountId, string searchText)
+        {
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (_accountUserService.IsInAccountUserRoles(accountId, currentUserId, new List<AccountUserRoleEnum> { AccountUserRoleEnum.Owner, AccountUserRoleEnum.Admin }))
+            {
+                return await _accountUserService.SearchAccountMemberAsync(accountId, searchText);
+            }
+
+            return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+        }
 
         [HttpDelete]
         [Route("{userId}")]

@@ -14,7 +14,7 @@
         .save {
             position: absolute;
             top: 50px;
-            right: 50px;
+            right: 10px;
         }
 
         > div .label {
@@ -62,3 +62,145 @@
         background: rgba(255, 255, 255,0.5);
     }
 }
+
+::ng-deep .target-approval {
+  .ant-modal-header {
+    border: none;
+
+    .ant-modal-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+  }
+  .ant-modal-body{
+    padding-top: 0px;
+  }
+  .context {
+    background-color: rgb(241, 243, 245);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 10px;
+  }
+  .warning-message {
+    font-size: 15px;
+    font-weight: 500;
+    padding: 10px;
+    border: 1px solid #d2d2d2;
+    margin-top: 15px;
+    border-left: 3px solid #ff912b;
+    .warning {
+      display: flex;
+
+      .warning-icon {
+        color: #ff912b;
+      }
+      .warning-content {
+        padding-left: 5px;
+      }
+    }
+  }
+  .pending-changes {
+    border-bottom: 1px solid #d2d2d2;
+    margin-top: 10px;
+    h3.pending-changes-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #212529;
+      line-height: 22.5px;
+      margin-bottom:5px;
+    }
+
+    .change-instructions {
+      padding-left:5px;
+      .instruction-count {
+        margin-bottom: 5px;
+      }
+
+      .instruction-list {
+        padding-left:0px;
+        .instruction-category {
+          h3{
+            margin-bottom: 0px;
+            font-size:13px;
+            font-weight:700;
+            line-height:19.5px;
+          }
+          list-style-type: none;
+          .instructions {
+            padding-left:30px;
+            line-height: 25px;
+            a {
+              color: green;
+              text-decoration: underline;
+            }
+
+            ul.no-style {
+              list-style-type: none;
+              padding-left:0px;
+
+              li {
+                span {
+                  padding-left: 5px;
+                  color: #646f7a;
+                  font-weight: 500;
+                }
+              }
+
+              li.clause {
+                color: #646f7a;
+                font-weight: 500;
+              }
+              li.and {
+                height: 30px;
+                font-weight: 900;
+                line-height: 30px;
+                color: #00000080;
+              }
+
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .approval-request {
+    border-bottom: 1px solid #d2d2d2;
+    padding-bottom: 10px;
+    margin-top: 10px;
+    .approval-request-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #212529;
+      line-height: 22.5px;
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+
+  input, textarea {
+    &.ffc-input {
+      width: 100%;
+    }
+  }
+  .save {
+    padding-top: 10px;
+    .approval-request-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #212529;
+      line-height: 22.5px;
+      margin-bottom: 5px;
+    }
+  }
+
+  nz-select {
+    width: 100%;
+  }
+
+  .loading-icon {
+    margin-right: 8px;
+  }
+}
+

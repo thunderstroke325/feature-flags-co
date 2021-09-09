@@ -8,9 +8,12 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { SafeHtmlPipe } from 'src/app/share/pipes/safe-html.pipe';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 
 @NgModule({
-  declarations: [TargetConditionsComponent ],
+  declarations: [TargetConditionsComponent, SafeHtmlPipe ],
   imports: [
     ComponentsModule,
     NzButtonModule,
@@ -18,6 +21,8 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
     NzMessageModule,
     NzSpinModule,
     NzDropDownModule,
+    NzModalModule,
+    NzSelectModule,
     TargetConditionsRoutingModule
   ]
 })

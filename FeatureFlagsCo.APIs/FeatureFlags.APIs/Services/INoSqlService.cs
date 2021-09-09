@@ -39,7 +39,5 @@ namespace FeatureFlags.APIs.Services
         Task<EnvironmentUserProperty> GetEnvironmentUserPropertiesAsync(int environmentId);
 
         Task UpsertEnvironmentUserAsync(EnvironmentUser param);
-
-
     }
 }

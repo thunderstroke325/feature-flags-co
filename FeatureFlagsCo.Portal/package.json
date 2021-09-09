@@ -1,6 +1,6 @@
 {
   "name": "feature-flagsco-fontend",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --open --host=0.0.0.0",
@@ -23,8 +23,8 @@
     "@microsoft/applicationinsights-angularplugin-js": "^2.6.2",
     "@microsoft/applicationinsights-web": "^2.6.3",
     "echarts": "^5.1.1",
-    "ffc-angular-sdk": "0.0.16",
-    "ffc-js-client-sdk": "0.0.13",
+    "ffc-angular-sdk": "0.0.17",
+    "ffc-js-client-sdk": "0.0.14",
     "moment": "^2.29.1",
     "ng-zorro-antd": "^11.4.1",
     "rxjs": "^6.6.7",

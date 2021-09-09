@@ -8,7 +8,18 @@
 <ng-template #conditionTemplate>
     <ng-container *ngIf="!isLoading; else loadingTem;">
         <div class="detail-body">
-            <button class="save"nz-button nzType="primary" (click)="onSaveConditions()">保存设置</button>
+            <button *ngIf="!approvalRequestEnabled" class="save"nz-button nzType="primary" (click)="onSaveConditionsOld()">保存设置</button>
+            <nz-button-group class="save" *ngIf="approvalRequestEnabled">
+              <button nz-button nzType="primary" (click)="onPreSaveConditions()">保存设置</button>
+              <button nz-button nz-dropdown [nzDropdownMenu]="menu1" nzPlacement="bottomRight">
+                <i nz-icon nzType="ellipsis"></i>
+              </button>
+            </nz-button-group>
+            <nz-dropdown-menu #menu1="nzDropdownMenu">
+              <ul nz-menu>
+                <li nz-menu-item (click)="onRequestApproval()">请求审阅</li>
+              </ul>
+            </nz-dropdown-menu>
             <div class="item">
                 <p class="label">开启或关闭开关</p>
                 <nz-button-group>
@@ -38,7 +49,7 @@
                         <find-rule [data]="condition"
                                    [properties]="propertiesList"
                                    [index]="key"
-                                   (deleteRule)="onDeleteCondition(key)"
+                                   (deleteRule)="onDeleteRule(key)"
                                    (percentageChange)="onPercentageChange($event, key)"
                                    (ruleConfigChange)="onRuleConfigChange($event, key)"
                                    [variationOptions]="variationOptions"
@@ -46,7 +57,7 @@
                                    (onPercentageChangeMultistates)="onPercentageChangeMultistates($event, key)"></find-rule>
                     </div>
                 </ng-container>
-                <button nz-button nzType="primary" (click)="onAddCondition()">添加规则</button>
+                <button nz-button nzType="primary" (click)="onAddRule()">添加规则</button>
             </div>
             <div class="item ">
               <p class="label">默认返回值</p>
@@ -78,3 +89,79 @@
         </div>
     </ng-template>
 </ng-template>
+
+<nz-modal [nzWidth]='800' nzClassName="target-approval" [(nzVisible)]="requestApprovalModalVisible" [nzTitle]="isApprovalRequestModal ? '请求审阅' : '保存改动'" [nzClosable]="false" (nzOnCancel)="requestApprovalModalVisible=false">
+  <ng-container *nzModalContent>
+    <div nz-row [nzGutter]="0" class="">
+      <section class="context">
+        <div><span>{{pendingChanges.featureFlag.name}}</span><span> ({{pendingChanges.featureFlag.keyName}}) </span></div>
+        <div><span>环境 : </span><span>{{pendingChanges.projectEnv.envName}}</span></div>
+      </section>
+      <section class="warning-message">
+        <div class="warning">
+          <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+          <div class="warning-content">以下改动将可能会影响到统计数据</div>
+        </div>
+      </section>
+      <section class="pending-changes">
+        <h3 class="pending-changes-title">改动</h3>
+        <div class="change-instructions">
+          <p class="instruction-count">
+            <span>{{pendingChanges.data.instructions.length}}</span> 个待提交改动
+          </p>
+          <ul class="instruction-list">
+            <li class="instruction-category" *ngFor="let item of pendingChanges.categorizedInstructions" >
+              <ng-container *ngIf="item.changes.length > 0">
+                <h3>{{item.category}}</h3>
+                <ul class="instructions">
+                  <li class="instruction" *ngFor="let change of item.changes">
+                    <span [innerHtml]="change | safeHtml"></span>
+                  </li>
+                </ul>
+              </ng-container>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section  class="approval-request">
+        <div class="approval-request-title">
+          <div>请求审阅</div>
+          <div (click)='isApprovalRequestModal=!isApprovalRequestModal'><i *ngIf="isApprovalRequestModal" nz-icon nzType="minus" nzTheme="outline" style="cursor: pointer;"></i><i *ngIf="!isApprovalRequestModal" nz-icon nzType="plus" nzTheme="outline" style="cursor: pointer;"></i></div>
+        </div>
+        <div *ngIf="isApprovalRequestModal">
+          <div>描述<span style="color:red">*</span></div>
+          <input nz-input placeholder="请对改动做简要描述" class="ffc-input" [(ngModel)]="pendingChanges.comment" />
+          <div style="margin-top:5px">审核人<span style="color:red">*</span></div>
+          <nz-select
+            nzMode="multiple"
+            nzPlaceHolder="选择审核人"
+            nzAllowClear
+            nzShowSearch
+            nzServerSearch
+            [(ngModel)]="pendingChanges.selectedReviewers"
+            (nzOnSearch)="pendingChanges.onSearchReviewers($event)"
+          >
+            <ng-container *ngFor="let o of pendingChanges.reviewerList">
+              <nz-option *ngIf="!pendingChanges.isReviewersLoading" [nzValue]="o" [nzLabel]="o.userName || o.email"></nz-option>
+            </ng-container>
+            <nz-option *ngIf="pendingChanges.isReviewersLoading" nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              数据加载中...
+            </nz-option>
+          </nz-select>
+        </div>
+      </section>
+      <section *ngIf="!isApprovalRequestModal" class="save">
+        <div class="save-title">评论</div>
+        <textarea class="ffc-input" rows="4" nz-input [(ngModel)]="pendingChanges.comment"></textarea>
+      </section>
+    </div>
+  </ng-container>
+  <div *nzModalFooter>
+    <span style="display:inline-box;color:red;margin-right:10px" *ngIf="!pendingChanges.hasInstruction()">只有在存在改动的情况下才可<span *ngIf="!isApprovalRequestModal">保存</span><span *ngIf="isApprovalRequestModal">提交审阅</span></span>
+    <button nz-button nzType="default" (click)="requestApprovalModalVisible=false">取消</button>
+    <button [disabled]="!pendingChanges.hasInstruction()" *ngIf="!isApprovalRequestModal" nz-button nzType="primary" (click)="onSaveConditions()" >保存改动</button>
+    <button [disabled]="!pendingChanges.canSubmit()" *ngIf="isApprovalRequestModal" nz-button nzType="primary" (click)="handleOk()" >提交审阅</button>
+  </div>
+</nz-modal>

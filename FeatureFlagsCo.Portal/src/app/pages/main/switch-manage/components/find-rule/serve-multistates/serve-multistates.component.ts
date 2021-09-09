@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { getPercentageFromRolloutPercentageArray, isNotPercentageRollout } from 'src/app/utils';
 import { IVariationOption, IRulePercentageRollout } from '../../../types/switch-new';
 
 interface IRulePercentageRolloutValue extends IRulePercentageRollout {
@@ -26,7 +27,7 @@ export class ServeMultistatesComponent implements OnInit {
 
   ngOnInit(): void {
 
-    if (this.isNotPercentageRollout()) {
+    if (isNotPercentageRollout(this.rulePercentageRollouts)) {
       this.selectedValueOptionId = this.rulePercentageRollouts[0]?.valueOption.localId || null;
       this.rulePercentageRolloutValues = this.variationOptions.map((v, idx) => ({
         rolloutPercentage: [0, idx === 0 ? 1 : 0],
@@ -44,27 +45,18 @@ export class ServeMultistatesComponent implements OnInit {
         }
         if (rule) {
             result.rolloutPercentage = [rule.rolloutPercentage[0], rule.rolloutPercentage[1]];
-            result.percentageValue = this.getPercentageFromRolloutPercentageArray(result.rolloutPercentage);
+            result.percentageValue = getPercentageFromRolloutPercentageArray(result.rolloutPercentage);
         }
         return result;
       });
     }
   }
 
-  getPercentageFromRolloutPercentageArray(arr: number[]): number {
-    const diff = arr[1] - arr[0];
-    return Number((Number(diff.toFixed(2)) * 100).toFixed(0));
-  }
-
-  private isNotPercentageRollout() : boolean {
-    return this.rulePercentageRollouts.length === 0 || (this.rulePercentageRollouts.length === 1 && this.rulePercentageRollouts[0].rolloutPercentage.length === 2 && this.rulePercentageRollouts[0].rolloutPercentage[0] === 0 && this.rulePercentageRollouts[0].rolloutPercentage[1] === 1);
-  }
-
   public modelChange() {
     if(this.selectedValueOptionId === -1) {
       let currentRolloutPercentage = [0, 0];
       this.result = this.rulePercentageRolloutValues.map(r => {
-        currentRolloutPercentage = [currentRolloutPercentage[1], currentRolloutPercentage[1] + r.percentageValue / 100.0]
+        currentRolloutPercentage = [currentRolloutPercentage[1], parseFloat((currentRolloutPercentage[1] + r.percentageValue / 100.0).toFixed(2))]
         return {
           rolloutPercentage: currentRolloutPercentage,
           valueOption: r.valueOption

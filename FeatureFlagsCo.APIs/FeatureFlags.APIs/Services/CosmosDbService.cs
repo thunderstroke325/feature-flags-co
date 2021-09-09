@@ -15,7 +15,7 @@ namespace FeatureFlags.APIs.Services
         int Count { get; set; }
     }
 
-    public class CosmosDbService : INoSqlService
+    public class CosmosDbService
     {
         private Container _container;
 

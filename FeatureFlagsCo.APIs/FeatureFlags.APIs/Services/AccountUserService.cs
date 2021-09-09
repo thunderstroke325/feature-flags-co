@@ -20,6 +20,8 @@ namespace FeatureFlags.APIs.Services
 
         public Task<AccountUserMapping> GetAccountOwnerAsync(int accountId);
 
+        Task<List<AccountUserViewModel>> SearchAccountMemberAsync(int accountId, string searchText, int returnSize = 5);
+
         public Task<AccountUserMapping> GetOwnerAccountAsync(string userId);
 
         public bool IsInAccountUserRoles(int accountId, string userId, IEnumerable<AccountUserRoleEnum> roles);
@@ -65,10 +67,27 @@ namespace FeatureFlags.APIs.Services
                                                      select new AccountUserViewModel
                                                      {
                                                          UserId = user.Id,
+                                                         UserName = user.UserName,
                                                          Email = user.Email,
                                                          Role = aum.Role,
                                                          InitialPassword = includeInitialPassword || currentUserId.Equals(aum.InvitorUserId) ? invit.InitialPassword : null
                                                      };
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<List<AccountUserViewModel>> SearchAccountMemberAsync(int accountId, string searchText, int returnSize = 5)
+        {
+            IQueryable<AccountUserViewModel> query = (from aum in _dbContext.AccountUserMappings
+                                                     join user in _dbContext.Users on aum.UserId equals user.Id // inner join
+                                                     where aum.AccountId == accountId && (user.Email.Contains(searchText) || user.UserName.Contains(searchText))
+                                                     select new AccountUserViewModel
+                                                     {
+                                                         UserId = user.Id,
+                                                         Email = user.Email,
+                                                         UserName = user.UserName,
+                                                         Role = aum.Role,
+                                                     }).Take(returnSize);
 
             return await query.ToListAsync();
         }

@@ -80,9 +80,11 @@ export class UpperSwitchComponent {
     this.onOutputResult();
   }
 
-  onSelectChange(currentUpperFeature: IFfpParams) {
+  onSelectChange(currentUpperFeature: IFfpParams, selectedOption: IPrequisiteFeatureFlag) {
     this.sortoutSelectedID();
-    currentUpperFeature.prerequisiteFeatureFlagId = currentUpperFeature.selectedFeatureFlag.id;
+    currentUpperFeature.prerequisiteFeatureFlagId = selectedOption.id;
+    currentUpperFeature.selectedFeatureFlag = Object.assign({}, selectedOption);
+    currentUpperFeature.valueOptionsVariationValue = null;
   }
 
   // 数据发生改变

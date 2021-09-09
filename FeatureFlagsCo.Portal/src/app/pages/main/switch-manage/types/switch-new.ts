@@ -1,3 +1,4 @@
+import { uuidv4 } from "src/app/utils";
 
 export interface IUserType {
     id: string;
@@ -150,16 +151,11 @@ export class CSwitchParams {
     // 添加匹配规则
     public addFftuwmtr() {
         this.fftuwmtr.push({
-            ruleId: '',
+            ruleId: uuidv4(),
             ruleName: '',
             ruleJsonContent: [],
             valueOptionsVariationRuleValues: [],
         })
-    }
-
-    // 设置字段信息
-    public setConditionConfig(value: IJsonContent[], index: number) {
-        this.fftuwmtr[index].ruleJsonContent = [...value];
     }
 
     // 处理提交数据
@@ -215,6 +211,11 @@ export class CSwitchParams {
       this.ff.defaultRulePercentageRollouts = Array.from(value);
     }
 
+        // 设置字段信息
+    public setConditionConfig(value: IJsonContent[], index: number) {
+        this.fftuwmtr[index].ruleJsonContent = [...value];
+    }
+
     public setRuleValueOptionsVariationRuleValues(value: IRulePercentageRollout[], index: number) {
       this.fftuwmtr[index].valueOptionsVariationRuleValues = Array.from(value);
     }
@@ -233,7 +234,7 @@ export class CSwitchParams {
       }
 
       const defaultRulePercentage = this.ff.defaultRulePercentageRollouts?.reduce((acc, curr: IRulePercentageRollout) => {
-        return acc + curr.rolloutPercentage[1] - curr.rolloutPercentage[0];
+        return acc + (curr.rolloutPercentage[1] - curr.rolloutPercentage[0]);
       }, 0);
 
       if (defaultRulePercentage !== undefined && defaultRulePercentage !== 1) {

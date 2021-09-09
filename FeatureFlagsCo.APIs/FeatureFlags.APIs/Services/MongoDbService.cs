@@ -15,15 +15,19 @@ namespace FeatureFlags.APIs.Services
         private readonly MongoDbFeatureFlagService _mongoFeatureFlagsService;
         private readonly MongoDbEnvironmentUserService _mongoEnvironmentUsersService;
         private readonly MongoDbEnvironmentUserPropertyService _mongoEnvironmentUserPropertiesService;
+        private readonly FFPendingChangesService _ffPendingChangesService;
 
         public MongoDbService(
             MongoDbFeatureFlagService mongoFeatureFlagsService,
             MongoDbEnvironmentUserService mongoEnvironmentUsersService,
-            MongoDbEnvironmentUserPropertyService mongoEnvironmentUserPropertiesService)
+            MongoDbEnvironmentUserPropertyService mongoEnvironmentUserPropertiesService,
+            FFPendingChangesService ffPendingChangesService
+            )
         {
             _mongoFeatureFlagsService = mongoFeatureFlagsService;
             _mongoEnvironmentUsersService = mongoEnvironmentUsersService;
             _mongoEnvironmentUserPropertiesService = mongoEnvironmentUserPropertiesService;
+            _ffPendingChangesService = ffPendingChangesService;
         }
 
         public async Task SaveEnvironmentDataAsync(int accountId, int projectId, int envId, EnvironmentDataViewModel data) 

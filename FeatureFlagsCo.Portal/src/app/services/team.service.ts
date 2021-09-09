@@ -19,6 +19,11 @@ export class TeamService {
     return this.http.get(url);
   }
 
+  public searchMembers(accountId: number, searchText: string): Observable<any> {
+    const url = this.baseUrl.replace(/#accountId/ig, `${accountId}`) + `/${searchText}`;
+    return this.http.get(url);
+  }
+
   public postAddMemberToAccount(accountId: number, params): Observable<any> {
     const url = this.baseUrl.replace(/#accountId/ig, `${accountId}`);
     return this.http.post(url, params);

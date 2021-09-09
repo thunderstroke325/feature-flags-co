@@ -6,6 +6,9 @@ import { map } from 'rxjs/operators';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType, IVariationOption, IFftiuParams, IRulePercentageRollout, IPrequisiteFeatureFlag } from '../types/switch-new';
 import { FfcAngularSdkService } from 'ffc-angular-sdk';
+import { PendingChange } from '../types/pending-changes';
+import { TeamService } from 'src/app/services/team.service';
+import { IAccount, IProjectEnv } from 'src/app/config/types';
 
 @Component({
   selector: 'conditions',
@@ -13,8 +16,6 @@ import { FfcAngularSdkService } from 'ffc-angular-sdk';
   styleUrls: ['./target-conditions.component.less']
 })
 export class TargetConditionsComponent implements OnInit {
-
-  private destory$: Subject<void> = new Subject();
 
   public switchStatus: 'Enabled' | 'Disabled' = 'Enabled';  // 开关状态
   public propertiesList: string[] = [];                     // 用户配置列表
@@ -29,11 +30,17 @@ export class TargetConditionsComponent implements OnInit {
   public variationOptions: IVariationOption[] = [];                         // multi state
   public targetIndividuals: {[key: string]: IUserType[]}  = {}; // multi state
 
+  currentAccount: IAccount = null;
+
+  approvalRequestEnabled: boolean = false;
   constructor(
     private route:ActivatedRoute,
     private switchServe: SwitchService,
-    private msg: NzMessageService
+    private msg: NzMessageService,
+    private ffcAngularSdkService: FfcAngularSdkService,
+    private teamService: TeamService
   ) {
+    this.approvalRequestEnabled = this.ffcAngularSdkService.variation('approval-request') === 'true';
     this.ListenerResolveData();
   }
 
@@ -47,11 +54,12 @@ export class TargetConditionsComponent implements OnInit {
     this.isLoading = true;
     forkJoin([
       this.switchServe.getEnvUserProperties(),
-      //this.switchServe.getSwitchList(this.switchServe.envId)
+      this.switchServe.getSwitchList(this.switchServe.envId)
     ]).subscribe((result) => {
       if(result) {
         this.propertiesList = result[0];
-        //this.featureList = result[1];
+        this.featureList = result[1];
+        this.pendingChanges.setFeatureFlagList(this.featureList);
 
         this.initSwitchStatus();
         this.initUpperSwitch();
@@ -89,13 +97,33 @@ export class TargetConditionsComponent implements OnInit {
         ]);
       }
 
-      if (!this.featureDetail.getFFVariationOptionWhenDisabled()) {
-        this.featureDetail.setFFVariationOptionWhenDisabled(this.variationOptions[0]);
-      }
+      // if (!this.featureDetail.getFFVariationOptionWhenDisabled()) {
+      //   this.featureDetail.setFFVariationOptionWhenDisabled(this.variationOptions[0]);
+      // }
 
       const detail: IFfParams = this.featureDetail.getSwicthDetail();
       this.switchServe.setCurrentSwitch(detail);
       this.switchId = detail.id;
+
+      const currentProject: IProjectEnv = JSON.parse(localStorage.getItem('current-project'));
+      const currentAccount: IAccount = JSON.parse(localStorage.getItem('current-account'));
+      const currentUrl = this.route.snapshot['_routerState'].url;
+      this.pendingChanges = new PendingChange(
+        this.teamService,
+        currentAccount.id,
+        currentProject,
+        detail,
+        this.variationOptions,
+        currentUrl.substr(0, currentUrl.lastIndexOf('/') + 1)
+        );
+
+      this.pendingChanges.initialize(
+        this.targetIndividuals,
+        this.featureDetail.getFFVariationOptionWhenDisabled(),
+        this.featureDetail.getFFDefaultRulePercentageRollouts(),
+        this.featureDetail.getFftuwmtr(),
+        this.featureDetail.getUpperFeatures()
+        );
     })
   }
 
@@ -154,12 +182,12 @@ export class TargetConditionsComponent implements OnInit {
   }
 
   // 删除规则
-  public onDeleteCondition(index: number) {
+  public onDeleteRule(index: number) {
     this.featureDetail.deleteFftuwmtr(index);
   }
 
   // 添加规则
-  public onAddCondition() {
+  public onAddRule() {
     this.featureDetail.addFftuwmtr();
   }
 
@@ -180,9 +208,7 @@ export class TargetConditionsComponent implements OnInit {
     this.featureDetail.setFFDefaultRulePercentageRollouts(value);
   }
 
-  public onSaveConditions() {
-
-    // TODO check percentage === 100%
+  public onPreSaveConditions() {
     const validationErrs = this.featureDetail.checkMultistatesPercentage();
 
     if (validationErrs.length > 0) {
@@ -190,19 +216,95 @@ export class TargetConditionsComponent implements OnInit {
       return false;
     }
 
-    this.featureDetail.setTargetIndividuals(this.targetIndividuals);
+    if (!this.sortoutSubmitData()) {
+      return;
+    }
 
-    this.featureDetail.onSortoutSubmitData();
+    this.pendingChanges.generateInstructions(
+      this.targetIndividuals,
+      this.featureDetail.getFFVariationOptionWhenDisabled(),
+      this.featureDetail.getFFDefaultRulePercentageRollouts(),
+      this.featureDetail.getFftuwmtr(),
+      this.featureDetail.getUpperFeatures()
+    );
+
+    this.isApprovalRequestModal = false;
+    this.requestApprovalModalVisible = true;
+  }
+
+  public onSaveConditionsOld() {
+    const validationErrs = this.featureDetail.checkMultistatesPercentage();
+
+    if (validationErrs.length > 0) {
+      this.msg.error(validationErrs[0]); // TODO display all messages by multiple lines
+      return false;
+    }
+
+    if (!this.sortoutSubmitData()) {
+      return;
+    }
+
+    this.onSaveConditions();
+  }
+
+  public onSaveConditions() {
+    this.featureDetail.setTargetIndividuals(this.targetIndividuals);
 
     this.switchServe.updateSwitch(this.featureDetail)
       .subscribe((result) => {
         this.msg.success("修改成功!");
+
+        const featureDetail = new CSwitchParams(result.data);
+        const targetIndividuals = this.variationOptions.reduce((acc, cur) => {
+          acc[cur.localId] = this.featureDetail.getTargetIndividuals().find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
+          return acc;
+        }, {});
+        this.pendingChanges.initialize(
+          targetIndividuals,
+          featureDetail.getFFVariationOptionWhenDisabled(),
+          featureDetail.getFFDefaultRulePercentageRollouts(),
+          featureDetail.getFftuwmtr(),
+          featureDetail.getUpperFeatures()
+          );
+        this.requestApprovalModalVisible = false;
     }, error => {
       this.msg.error("修改失败!");
+      this.requestApprovalModalVisible = true;
     })
+  }
+
+  private sortoutSubmitData(): boolean{
+    try {
+      this.featureDetail.onSortoutSubmitData();
+      return true;
+    } catch(e) {
+      this.msg.warning("请确保所填数据完整!");
+      return false;
+    }
   }
 
   public onPercentageChangeMultistates(value: IRulePercentageRollout[], index: number) {
     this.featureDetail.setRuleValueOptionsVariationRuleValues(value, index);
+  }
+
+  /***************************Request approval********************************/
+  requestApprovalModalVisible: boolean = false;
+  pendingChanges: PendingChange;
+  isApprovalRequestModal = false;
+  public onRequestApproval(){
+
+    if (!this.sortoutSubmitData()) {
+      return;
+    }
+
+    this.pendingChanges.generateInstructions(
+      this.targetIndividuals,
+      this.featureDetail.getFFVariationOptionWhenDisabled(),
+      this.featureDetail.getFFDefaultRulePercentageRollouts(),
+      this.featureDetail.getFftuwmtr(),
+      this.featureDetail.getUpperFeatures()
+    );
+    this.requestApprovalModalVisible = true;
+    this.isApprovalRequestModal = true;
   }
 }

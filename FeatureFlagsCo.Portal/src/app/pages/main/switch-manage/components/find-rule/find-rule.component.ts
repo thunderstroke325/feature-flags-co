@@ -13,7 +13,7 @@ export class FindRuleComponent {
   set data(value: IFftuwmtrParams) {
     this.ruleContentList = [];
     // 新创建的
-    if(!value.ruleId) {
+    if(value.ruleJsonContent.length === 0) {
       this.ruleContentList.push({
         property: '',
         operation: '',
