@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FeatureFlags.APIs.ViewModels.FeatureFlagTrigger;
 
 namespace FeatureFlags.APIs.Services
 {
@@ -577,6 +578,36 @@ namespace FeatureFlags.APIs.Services
 
 
             return returnResult;
+        }
+
+        public Task<List<FeatureFlagTrigger>> GetFlagTriggersByFfIdAsync(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpOrDownFeatureFlagByFlagTriggerAsync(string token)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<FeatureFlagTriggerViewModel> CreateFlagTriggerAsync(FeatureFlagTriggerViewModel trigger)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<FeatureFlagTrigger> DisableFlagTriggerAsync(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<FeatureFlagTrigger> DeleteFlagTriggerAsync(string id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<FeatureFlagTrigger> ResetFlagTriggerTokenAsync(string id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

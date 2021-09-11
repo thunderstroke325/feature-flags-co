@@ -1,0 +1,81 @@
+<div *ngIf="isEnabled" class="flag-triggers"><h2>事件触发器</h2>
+<div class="subtitle">
+  <div>通过事件触发器可以远程打开或关闭开关</div>
+  <button nz-button nzType="primary" nzBlock (click)="onCreateTrigger()">+ 添加触发器</button>
+</div>
+<div *ngFor="let trigger of triggers" class="trigger">
+  <nz-card [nzActions]="[actionStatus, actionReset, actionRemove]">
+    <div class="trigger-body">
+      <div class="trigger-body-main">
+        <div class="avatar" [class]="'status_' + trigger.status">
+          <i nz-icon nzType="aim" nzTheme="outline"></i>
+        </div>
+        <div>
+          <div class="trigger-type">{{ trigger.typeName }}</div>
+          <div class="trigger-action">更新开关状态到 <nz-tag [class]="'action_' + trigger.action" class="action">{{trigger.actionName}}</nz-tag></div>
+          <div class="trigger-url">
+            <span *ngIf="!trigger.canCopyToken">{{trigger.triggerUrl}}</span>
+            <span *ngIf="trigger.canCopyToken" nz-typography nzCopyable nzCopyText="{{ trigger.triggerUrl }}">{{trigger.triggerUrl}}</span>
+          </div>
+          <div class="trigger-description">{{trigger.description}}</div>
+        </div>
+      </div>
+      <div style="text-align: right">
+        <div>被调用 <strong>{{trigger.times}}</strong> 次</div>
+        <div *ngIf="!!trigger.lastTriggeredAt">最后一次被调用于 {{trigger.lastTriggeredAt}}</div>
+        <div>更新于 {{trigger.updatedAt}}</div>
+      </div>
+    </div>
+  </nz-card>
+  <ng-template #actionStatus>
+     <a *ngIf="trigger.statusName === 'Enabled'" (click)="disableTrigger(trigger)">关闭</a>
+     <a *ngIf="trigger.statusName === 'Disabled'" (click)="enableTrigger(trigger)">激活</a>
+  </ng-template>
+  <ng-template #actionReset>
+    <a nz-popconfirm nzPopconfirmTitle="当前URL将失效，重置后请立即复制并保存URL" nzPopconfirmPlacement="bottom" (nzOnConfirm)="resetToken(trigger)" [nzIcon]="iconTpl">
+      重置 URL
+    </a>
+  </ng-template>
+  <ng-template #actionRemove>
+    <a nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="archiveTrigger(trigger)" [nzIcon]="iconTpl">
+      <i nz-icon nzType="delete" nzTheme="fill"></i>
+    </a>
+  </ng-template>
+  <ng-template #iconTpl>
+    <i nz-icon nzType="question-circle-o" style="color: red;"></i>
+  </ng-template>
+</div>
+</div>
+<nz-divider *ngIf="isEnabled"></nz-divider>
+
+<nz-modal  [(nzVisible)]="isCreationModalVisible" nzTitle="新建触发器" [nzOkLoading]="isCreationLoading" (nzOnCancel)="cancelCreation()" (nzOnOk)="createTrigger()">
+  <ng-container *nzModalContent>
+    <div class="create-trigger">
+      <div class="info-item">
+        <div>类型</div>
+        <nz-select [(ngModel)]="newFlagTrigger.type" nzPlaceHolder="选择触发器类型" [nzCustomTemplate]="typeTemplate">
+          <nz-option *ngFor="let type of flagTriggerTypes;" [nzLabel]="type.label" [nzValue]="type.id"></nz-option>
+        </nz-select>
+        <ng-template #typeTemplate let-selected>
+          <!-- <i nz-icon [nzType]="selected.nzValue"></i> -->
+          <i nz-icon nzType="aim"></i>
+          {{ selected.nzLabel }}
+        </ng-template>
+      </div>
+      <div class="info-item" style="margin-top: 10px">
+        <div>动作</div>
+        <nz-select [(ngModel)]="newFlagTrigger.action" nzPlaceHolder="选择触发器动作" [nzCustomTemplate]="actionTemplate">
+          <nz-option *ngFor="let action of flagTriggerActions" [nzLabel]="action.label" [nzValue]="action.id"></nz-option>
+        </nz-select>
+        <ng-template #actionTemplate let-selected>
+          更新开关状态到
+          <nz-tag [class]="'action_' + newFlagTrigger.action" class="action">{{selected.nzLabel}}</nz-tag>
+        </ng-template>
+      </div>
+      <div class="info-item">
+        <div>描述</div>
+        <textarea [(ngModel)]="newFlagTrigger.description" nz-input placeholder="简要描述什么情况下会触发该触发器" [nzAutosize]="{ minRows: 3, maxRows: 5 }"></textarea>
+      </div>
+    </div>
+  </ng-container>
+</nz-modal>

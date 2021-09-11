@@ -1,0 +1,110 @@
+.flag-triggers {
+  width: 60%;
+
+  .subtitle {
+    display: flex;
+    justify-content: space-between;
+
+    button {
+      width: 20%;
+    }
+  }
+  .trigger {
+
+    margin: 10px 0px;
+
+    .trigger-body {
+      display:flex;
+      justify-content: space-between;
+
+      .trigger-body-main {
+        display:flex;
+        align-items:center;
+
+        .avatar {
+          margin-right: 10px;
+          font-size: 32px;
+          &.status_1 {
+            color: #389e0d;
+          }
+          &.status_2 {
+            color: rgba(0, 0, 0, 0.45);
+          }
+        }
+
+        .trigger-type {
+          overflow: hidden;
+          color: rgba(0, 0, 0, 0.85);
+          font-weight: 600;
+          font-size: 16px;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          margin-bottom: 8px;
+        }
+
+        .trigger-action {
+          .action {
+            border-radius: 10px;
+
+            &.action_1 {
+              color: #389e0d;
+              background: #f6ffed;
+              border-color: #b7eb8f;
+            }
+            &.action_2 {
+              color: #cf1322;
+              background: #fff1f0;
+              border-color: #ffa39e
+            }
+          }
+
+        }
+
+        .trigger-description {
+          color: rgba(0, 0, 0, 0.45);
+        }
+      }
+    }
+
+    ::ng-deep {
+      .ant-card-actions > li {
+        margin: 5px 0;
+      }
+      .ant-card-bordered {
+        border: 1px solid #b2b3b3;
+      }
+      nz-select {
+        width: 100%;
+      }
+    }
+  }
+}
+
+::ng-deep {
+  nz-select, textarea {
+    width: 100%;
+  }
+
+ .create-trigger {
+   .info-item:not(:first-child) {
+    margin-top: 10px;
+   }
+
+   .action {
+    border-radius: 10px;
+
+    &.action_1 {
+      color: #389e0d;
+      background: #f6ffed;
+      border-color: #b7eb8f;
+    }
+    &.action_2 {
+      color: #cf1322;
+      background: #fff1f0;
+      border-color: #ffa39e
+    }
+  }
+ }
+}
+
+

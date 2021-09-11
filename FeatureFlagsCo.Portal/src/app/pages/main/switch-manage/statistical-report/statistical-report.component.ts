@@ -186,7 +186,7 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
         console.log(option[i].to_as_string.replace('T', ' '));
         var date = new Date(option[i].to_as_string.replace('T', ' ') + ' UTC');
         console.log(date);
-        data.push(moment(date).format("YYYY-MM-DD HH:MM:SS"));
+        data.push(moment(date).format("YYYY-MM-DD HH:mm:ss"));
       }
     }
 

@@ -2,6 +2,8 @@
     <app-layout>
         <app-nav-btns name="header" [routeUrl]="'setting'" [id]="currentSwitch?.id"></app-nav-btns>
         <div class="setting-body" name="detail" *ngIf="currentSwitch">
+          <app-flag-triggers [featureFlagId]="currentSwitch.id">
+          </app-flag-triggers>
             <div class="info-item">
                 <p>名称</p>
                 <input class="name half" nz-input placeholder="开关名称..." [(ngModel)]="currentSwitch.name" />

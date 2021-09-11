@@ -16,7 +16,15 @@ import { FindRuleComponent } from './find-rule/find-rule.component';
 import { RuleComponent } from './find-rule/rule/rule.component';
 import { ServeComponent } from './find-rule/serve/serve.component';
 import { ServeMultistatesComponent } from './find-rule/serve-multistates/serve-multistates.component';
+import { FlagTriggersComponent } from './flag-triggers/flag-triggers.component';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
 
 @NgModule({
   declarations: [
@@ -27,7 +35,8 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
     FindRuleComponent,
     RuleComponent,
     ServeComponent ,
-    ServeMultistatesComponent
+    ServeMultistatesComponent,
+    FlagTriggersComponent
   ],
   imports: [
     CommonModule,
@@ -38,7 +47,14 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
     NzSelectModule,
     NzSliderModule,
     NzPaginationModule,
-    NzPopconfirmModule
+    NzPopconfirmModule,
+    NzCardModule,
+    NzDropDownModule,
+    NzAvatarModule,
+    NzTagModule,
+    NzModalModule,
+    NzTypographyModule,
+    NzDividerModule
   ],
   exports: [
     NavBtnsComponent,
@@ -48,7 +64,8 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
     TargetUserComponent,
     FindRuleComponent,
     ServeComponent,
-    ServeMultistatesComponent
+    ServeMultistatesComponent,
+    FlagTriggersComponent
   ]
 })
 export class ComponentsModule { }

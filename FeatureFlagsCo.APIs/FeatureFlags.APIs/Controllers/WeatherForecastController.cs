@@ -73,9 +73,9 @@ namespace FeatureFlags.APIs.Controllers
                     Id = FeatureFlagKeyExtension.GetFeatureFlagId(guid, "-1")
                 }, "", -1, -1);
             }
-            catch(Exception exp)
+            catch(Exception)
             {
-
+                new Exception("mock test erreur");
             }
             return new JsonResult(newFF);
         }

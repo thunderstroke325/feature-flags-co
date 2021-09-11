@@ -58,13 +58,14 @@ namespace FeatureFlags.APIs.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("GetFeatureFlagUsageData")]
+        [Obsolete("deprecated, not use anymore")]
         public async Task<FeatureFlagUsageViewModel> GetFeatureFlagUsageData(string featureFlagId, string chartQueryTimeSpan)
         {
             var returnModel = new FeatureFlagUsageViewModel();
             //returnModel.TotalUsers = await _cosmosDbService.TrueFalseStatusGetFeatureFlagTotalUsersAsync(featureFlagId);
             //returnModel.HitUsers = await _cosmosDbService.TrueFalseStatusGetFeatureFlagHitUsersAsync(featureFlagId);
             //returnModel.ChartData = _appInsightsService.GetFFUsageChartData(featureFlagId, chartQueryTimeSpan);
-            return returnModel;
+            return await Task.FromResult(returnModel);
         }
 
         [HttpGet]
