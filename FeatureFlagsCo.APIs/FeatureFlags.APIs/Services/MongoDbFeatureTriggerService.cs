@@ -34,6 +34,10 @@ namespace FeatureFlags.APIs.Services
             _triggers = client
                 .GetDatabase(settings.DatabaseName)
                 .GetCollection<FeatureFlagTrigger>("FeatureFlagTriggers");
+
+            // Create index on updatedAt
+            var indexKeysDefinition = Builders<FeatureFlagTrigger>.IndexKeys.Descending(fft => fft.UpdatedAt);
+            Task.Run(() => _triggers.Indexes.CreateOneAsync(new CreateIndexModel<FeatureFlagTrigger>(indexKeysDefinition))).Wait();
         }
 
         public List<FeatureFlagTrigger> Get() =>
