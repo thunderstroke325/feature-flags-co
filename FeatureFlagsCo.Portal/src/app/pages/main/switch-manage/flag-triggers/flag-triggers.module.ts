@@ -9,7 +9,6 @@ import { FlagTriggersComponent } from './flag-triggers.component';
   declarations: [FlagTriggersComponent],
   imports: [
     CommonModule,
-
     ComponentsModule,
     FlagTriggersRoutingModule
   ]

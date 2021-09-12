@@ -79,6 +79,7 @@ export class FlagTriggersComponent implements OnInit {
         canCopyToken: true
       });
 
+      this.message.success('成功创建新的触发器！');
       this.triggers = [trigger, ...this.triggers];
       this.isCreationLoading = false;
       this.isCreationModalVisible = false;
@@ -94,17 +95,22 @@ export class FlagTriggersComponent implements OnInit {
   }
 
   disableTrigger(trigger: IFlagTrigger){
-    this.toggleTriggerStatus(trigger, FlagTriggerStatus.Disabled);
+    this.toggleTriggerStatus(trigger, FlagTriggerStatus.Disabled, () => {
+      this.message.success('成功关闭触发器！');
+    });
   }
 
   enableTrigger(trigger: IFlagTrigger){
-    this.toggleTriggerStatus(trigger, FlagTriggerStatus.Enabled);
+    this.toggleTriggerStatus(trigger, FlagTriggerStatus.Enabled, () => {
+      this.message.success('成功激活触发器！');
+    });
   }
 
   archiveTrigger(trigger: IFlagTrigger){
     this.toggleTriggerStatus(trigger, FlagTriggerStatus.Archived, () => {
       const idx = this.triggers.findIndex(f => f.id === trigger.id);
       this.triggers.splice(idx, 1);
+      this.message.success('成功删除触发器！');
     });
   }
 
@@ -113,6 +119,7 @@ export class FlagTriggersComponent implements OnInit {
       trigger.token = res.token;
       trigger.triggerUrl = this.flagTriggerService.getTriggerUrl(res.token);
       trigger.canCopyToken = true;
+      this.message.success('成功重置 URL！');
     });
   }
 
