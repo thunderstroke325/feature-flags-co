@@ -1,10 +1,9 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FfcAngularSdkService } from 'ffc-angular-sdk';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { FlagTriggerService } from 'src/app/services/flag-trigger.service';
 import { FlagTriggerAction, FlagTriggerStatus, FlagTriggerType, IFlagTrigger } from '../../types/flag-triggers';
 import * as moment from 'moment';
-import { NzModalService } from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'app-flag-triggers',

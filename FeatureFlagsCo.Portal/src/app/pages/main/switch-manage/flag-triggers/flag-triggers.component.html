@@ -1,0 +1,15 @@
+<section class="body">
+  <app-layout>
+      <app-nav-btns name="header" [routeUrl]="'triggers'" [id]="featureFlagId"></app-nav-btns>
+      <ng-container *ngTemplateOutlet="triggersTemplate" name="detail"></ng-container>
+  </app-layout>
+</section>
+
+<ng-template #triggersTemplate>
+  <ng-container>
+    <div class="detail-body" name="detail" *ngIf="featureFlagId">
+      <app-flag-triggers [featureFlagId]="featureFlagId">
+      </app-flag-triggers>
+    </div>
+  </ng-container>
+</ng-template>

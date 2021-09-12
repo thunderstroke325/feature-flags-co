@@ -110,19 +110,18 @@ namespace FeatureFlags.APIs.Controllers
         }
 
         [HttpGet]
-        [Route("/trigger/{token}")]
+        [Route("trigger/{token}")]
         public async Task<dynamic> Trigger(string token)
         {
             try
             {
                 await _noSqlDbService.TriggerFeatureFlagByFlagTriggerAsync(token);
-                return null;
+                return StatusCode(StatusCodes.Status200OK);
             }
             catch (NotSupportedException e) 
             {
-                return StatusCode(StatusCodes.Status200OK);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            
         }
 
         [HttpPost]

@@ -38,6 +38,13 @@ const routes: Routes = [
           breadcrumb: '开关详情'
         }
       }, {
+        path: 'triggers/:id',
+        resolve: { switchInfo: SwicthSettingResolver },
+        loadChildren: () => import("./flag-triggers/flag-triggers.module").then(m => m.FlagTriggersModule),
+        data: {
+          breadcrumb: '开关详情'
+        }
+      }, {
         path: '',
         redirectTo: '/switch-manage'
       }

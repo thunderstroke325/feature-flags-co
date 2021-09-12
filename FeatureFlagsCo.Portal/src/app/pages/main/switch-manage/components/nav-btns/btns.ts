@@ -8,5 +8,8 @@ export const btnsConfig = [
     },{
         id: 'report',
         label: '统计报表'
-    }
+    },{
+      id: 'triggers',
+      label: '触发器'
+  }
 ]
