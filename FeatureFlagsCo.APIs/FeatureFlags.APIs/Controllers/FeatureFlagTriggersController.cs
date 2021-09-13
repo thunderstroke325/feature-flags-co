@@ -118,9 +118,15 @@ namespace FeatureFlags.APIs.Controllers
                 await _noSqlDbService.TriggerFeatureFlagByFlagTriggerAsync(token);
                 return StatusCode(StatusCodes.Status200OK);
             }
-            catch (NotSupportedException e) 
+            catch (NotSupportedException) 
             {
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                _logger.LogWarning($"There is an error in the trigger. Token: {token}");
+                return StatusCode(StatusCodes.Status200OK);
+            }
+            catch (InvalidOperationException)
+            {
+                _logger.LogWarning($"Invalid Token: {token}");
+                return StatusCode(StatusCodes.Status200OK);
             }
         }
 

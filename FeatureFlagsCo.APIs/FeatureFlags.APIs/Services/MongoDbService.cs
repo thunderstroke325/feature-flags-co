@@ -20,16 +20,20 @@ namespace FeatureFlags.APIs.Services
         private readonly MongoDbEnvironmentUserPropertyService _mongoEnvironmentUserPropertiesService;
         private readonly MongoDbFeatureTriggerService _mongoDbFeatureTriggerService;
 
+        private readonly IJwtUtilsService _jwtUtilsService;
+
         public MongoDbService(
             MongoDbFeatureFlagService mongoFeatureFlagsService,
             MongoDbEnvironmentUserService mongoEnvironmentUsersService,
             MongoDbEnvironmentUserPropertyService mongoEnvironmentUserPropertiesService,
-            MongoDbFeatureTriggerService mongoDbFeatureTriggerService)
+            MongoDbFeatureTriggerService mongoDbFeatureTriggerService,
+            IJwtUtilsService jwtUtilsService)
         {
             _mongoFeatureFlagsService = mongoFeatureFlagsService;
             _mongoEnvironmentUsersService = mongoEnvironmentUsersService;
             _mongoEnvironmentUserPropertiesService = mongoEnvironmentUserPropertiesService;
             _mongoDbFeatureTriggerService = mongoDbFeatureTriggerService;
+            _jwtUtilsService = jwtUtilsService;
         }
 
         public async Task SaveEnvironmentDataAsync(int accountId, int projectId, int envId,
@@ -487,7 +491,10 @@ namespace FeatureFlags.APIs.Services
 
         public async Task TriggerFeatureFlagByFlagTriggerAsync(string token)
         {
-            var trigger = await _mongoDbFeatureTriggerService.GetByTokenAsync(token);
+            
+            var id = _jwtUtilsService.ValidateToken(token);
+            if(id == null) throw new InvalidOperationException("Invalid token");
+            var trigger = await _mongoDbFeatureTriggerService.GetByTokenAsync(id, token);
             if (trigger != null && trigger.Status == (int)FeatureFlagTriggerStatusEnum.Enabled)
             {
                 var featureFlag = await _mongoFeatureFlagsService.GetAsync(trigger.FeatureFlagId);
@@ -496,10 +503,10 @@ namespace FeatureFlags.APIs.Services
                     switch (trigger.Action)
                     {
                         case (int)FeatureFlagTriggerActionEnum.On:
-                            featureFlag.FF.Status = "Enabled";
+                            featureFlag.FF.Status = FeatureFlagStatutEnum.Enabled.ToString();
                             break;
                         case (int)FeatureFlagTriggerActionEnum.Off:
-                            featureFlag.FF.Status = "Disabled";
+                            featureFlag.FF.Status = FeatureFlagStatutEnum.Disabled.ToString();
                             break;
                         default:
                             throw new NotSupportedException("action doesn't be supported");
@@ -527,7 +534,6 @@ namespace FeatureFlags.APIs.Services
             {
                 Times = 0,
                 Status = (int)FeatureFlagTriggerStatusEnum.Enabled,
-                Token = Guid.NewGuid().ToString(),
                 Type = (int)trigger.Type,
                 Action = (int)trigger.Action,
                 FeatureFlagId = trigger.FeatureFlagId,
@@ -536,10 +542,13 @@ namespace FeatureFlags.APIs.Services
             };
 
             newTrigger = await _mongoDbFeatureTriggerService.CreateAsync(newTrigger);
-
+            var token = _jwtUtilsService.GenerateToken(newTrigger._Id);
+            newTrigger.Token = token;
+            newTrigger.Id = newTrigger._Id;
+            newTrigger = await _mongoDbFeatureTriggerService.UpdateAsync(newTrigger._Id, newTrigger);
             trigger.Id = newTrigger._Id;
             trigger.UpdatedAt = newTrigger.UpdatedAt;
-            trigger.Token = newTrigger.Token;
+            trigger.Token = token;
 
             return trigger;
         }
@@ -550,6 +559,7 @@ namespace FeatureFlags.APIs.Services
             if (trigger != null)
             {
                 trigger.Status = (int) FeatureFlagTriggerStatusEnum.Disabled;
+                trigger.UpdatedAt = DateTime.UtcNow;
                 return await _mongoDbFeatureTriggerService.UpdateAsync(id, trigger);
             }
 
@@ -562,6 +572,7 @@ namespace FeatureFlags.APIs.Services
             if (trigger != null)
             {
                 trigger.Status = (int)FeatureFlagTriggerStatusEnum.Enabled;
+                trigger.UpdatedAt = DateTime.UtcNow;
                 await _mongoDbFeatureTriggerService.UpdateAsync(id, trigger);
                 return trigger;
             }
@@ -575,6 +586,7 @@ namespace FeatureFlags.APIs.Services
             if (trigger != null)
             {
                 trigger.Status = (int)FeatureFlagTriggerStatusEnum.Archived;
+                trigger.UpdatedAt = DateTime.UtcNow;
                 await _mongoDbFeatureTriggerService.UpdateAsync(id, trigger);
                 return trigger;
             }
@@ -587,7 +599,8 @@ namespace FeatureFlags.APIs.Services
             var trigger = await _mongoDbFeatureTriggerService.GetByIdAndFeatureFlagIdAsync(id, featureFlagId);
             if (trigger != null)
             {
-                trigger.Token = Guid.NewGuid().ToString();
+                trigger.Token = _jwtUtilsService.GenerateToken(trigger._Id);
+                trigger.UpdatedAt = DateTime.UtcNow;
                 await _mongoDbFeatureTriggerService.UpdateAsync(id, trigger);
                 return trigger;
             }

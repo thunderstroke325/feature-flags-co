@@ -163,9 +163,11 @@ namespace FeatureFlags.AdminWebAPIs
 
             services.AddScoped<IDataSyncService, DataSyncService>();
 
+            services.Configure<JWTSettings>(options => Configuration.GetSection("JWT").Bind(options));
             services.Configure<MySettings>(options => Configuration.GetSection("MySettings").Bind(options));
-
             services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
+            
+            services.AddSingleton<IJwtUtilsService, JwtUtilsService>();
             services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
             services.AddSingleton<MongoDbFeatureFlagService>();
             services.AddSingleton<MongoDbEnvironmentUserService>();

@@ -68,10 +68,10 @@ namespace FeatureFlags.APIs.Services
                 .SortByDescending(trigger => trigger.UpdatedAt).ToListAsync();
         }
 
-        public async Task<FeatureFlagTrigger> GetByTokenAsync(string token)
+        public async Task<FeatureFlagTrigger> GetByTokenAsync(string id, string token)
         {
             return await _triggers
-                .Find(trigger => trigger.Token == token && trigger.Status != (int)FeatureFlagTriggerStatusEnum.Archived)
+                .Find(trigger => trigger._Id == id && trigger.Token == token && trigger.Status != (int)FeatureFlagTriggerStatusEnum.Archived)
                 .FirstOrDefaultAsync();
         }
 
