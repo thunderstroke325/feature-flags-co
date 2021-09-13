@@ -1,0 +1,70 @@
+<section class="body">
+  <app-layout>
+      <app-nav-btns name="header" [routeUrl]="'experimentations'" [id]="featureFlagId"></app-nav-btns>
+      <ng-container *ngTemplateOutlet="triggersTemplate" name="detail"></ng-container>
+  </app-layout>
+</section>
+
+<ng-template #triggersTemplate>
+  <ng-container>
+    <div class="detail-body" name="detail" *ngIf="featureFlagId">
+      <div *ngIf="experimentation==='temporary version'">
+        <div nz-row>
+          <span style="display:inline-block; margin-right: 10px;">目标开关</span>
+          <nz-select [(ngModel)]="targetFeatureFlag" nzPlaceHolder="请选择开关" style="width: 25%">
+            <nz-option *ngFor="let feature of featureList" [nzLabel]="feature.name" [nzValue]="feature"></nz-option>
+          </nz-select>
+        </div>
+        <div nz-row style="margin-top: 10px;">
+          <span style="display:inline-block; margin-right: 10px;">时间区间</span>
+          <nz-range-picker [nzAllowClear] [(ngModel)]="dateRange" (ngModelChange)="onChange($event)" (nzOnCalendarChange)="onChange($event)" style="width: 25%"></nz-range-picker>
+          <button nz-button nzType="primary" nzBlock (click)="onSubmit()" style="width: 150px;margin-left: 30px">提交</button>
+        </div>
+        <nz-table #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" nzTitle="zhuanhua" [nzData]="resultData" style="margin-top: 20px;">
+          <thead>
+            <tr>
+              <th>特性</th>
+              <th>转化数 / 用户数</th>
+              <th>转化率</th>
+              <th>置信区间</th>
+              <th>变化</th>
+              <th>P-值</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr [class]="winnerId === data.id ? 'winner' : ''" *ngFor="let data of borderedTable.data">
+              <td>{{ data.variation }}</td>
+              <td>{{ data.conversion }}/{{ data.uniqueUsers }}</td>
+              <td>{{ data.conversionRate }}%</td>
+              <td>{{ data.confidenceInterval }}%</td>
+              <td>{{ data.change }}%</td>
+              <td>{{ data.pValue }}</td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </div>
+      <div *ngIf="experimentation==='final version'">
+        <nz-empty
+        nzNotFoundImage="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+        [nzNotFoundContent]="contentTpl"
+        >
+          <ng-template #contentTpl>
+            <h1>This is the final version, available soon!!!</h1>
+          </ng-template>
+        </nz-empty>
+      </div>
+      <div *ngIf="experimentation==='pro only'">
+        <nz-empty
+        nzNotFoundImage="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+        [nzNotFoundContent]="contentTpl"
+        >
+        <ng-template #contentTpl>
+          <h2>
+            该功能仅对 Professional 用户开放，请联系我们。
+          </h2>
+        </ng-template>
+      </nz-empty>
+      </div>
+    </div>
+  </ng-container>
+</ng-template>
