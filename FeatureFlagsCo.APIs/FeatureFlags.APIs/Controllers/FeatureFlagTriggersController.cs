@@ -6,6 +6,7 @@ using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.FeatureFlagTrigger;
 using FeatureFlagsCo.MQ;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.Logging;
 
 namespace FeatureFlags.APIs.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class FeatureFlagTriggersController : ControllerBase
@@ -108,7 +110,7 @@ namespace FeatureFlags.APIs.Controllers
                 LastTriggeredAt = fft.LastTriggeredAt
             };
         }
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("trigger/{token}")]
         public async Task<dynamic> Trigger(string token)

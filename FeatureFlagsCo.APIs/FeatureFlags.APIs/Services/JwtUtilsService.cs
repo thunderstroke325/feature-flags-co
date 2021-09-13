@@ -31,7 +31,7 @@ namespace FeatureFlags.APIs.Services
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("id", identity) }),
                 NotBefore = DateTime.UtcNow,
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
@@ -52,7 +52,8 @@ namespace FeatureFlags.APIs.Services
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    RequireExpirationTime = false, 
+                    RequireExpirationTime = false,
+                    ValidateLifetime = false,
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
 
