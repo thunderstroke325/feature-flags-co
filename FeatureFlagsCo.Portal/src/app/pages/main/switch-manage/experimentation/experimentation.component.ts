@@ -91,7 +91,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         variation: this.currentVariationOptions[idx]?.variationValue,
         conversionRate: r.toFixed(2),
         confidenceInterval: d.confidenceInterval,
-        change: d.isBaseline? 'Baseline' : (d.conversion / d.uniqueUsers * 100 - baseLine.conversion / baseLine.uniqueUsers * 100).toFixed(2)
+        change: d.isBaseline? 'Baseline' : `${(d.conversion / d.uniqueUsers * 100 - baseLine.conversion / baseLine.uniqueUsers * 100).toFixed(2)}%`
       });
     });
 
