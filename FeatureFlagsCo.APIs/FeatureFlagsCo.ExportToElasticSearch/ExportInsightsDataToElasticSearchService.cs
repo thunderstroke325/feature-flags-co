@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -139,6 +140,19 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
                         client.DefaultRequestHeaders.Accept.TryParseAdd("application/json");
                         HttpContent content = new StringContent(JsonConvert.SerializeObject(bodyCore));
                         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                        if (esHost.Contains("@")) // esHost contains username and password 
+                        {
+                            var startIndex = esHost.LastIndexOf("/") + 1;
+                            var endIndex = esHost.LastIndexOf("@");
+                            var credential = esHost.Substring(startIndex, endIndex - startIndex).Split(":");
+                            var userName = credential[0];
+                            var password = credential[1];
+
+                            esHost = esHost.Substring(0, startIndex) + esHost.Substring(endIndex + 1);
+
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                                                        "Basic", Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{userName}:{password}")));
+                        }
                         //由HttpClient发出异步Post请求
                         //HttpResponseMessage res = await client.PutAsync($"{esHost}/{message.IndexTarget}/_create/{message.FeatureFlagId}", content);
                         HttpResponseMessage res = await client.PostAsync($"{esHost}/{message.IndexTarget}/_doc/", content);
