@@ -9,9 +9,9 @@ namespace FeatureFlagsCo.MQ
         public string Secret { get; set; }
         public long TimeStamp { get; set; }
         public string Type { get; set; }
-        public string MethodName { get; set; }
+        public string EventName { get; set; }
         public MqUserInfo User { get; set; }
-        public string ApplicationType { get; set; }
+        public string AppType { get; set; }
         public List<MqCustomizedProperty> CustomizedProperties { get; set; }
         public string ProjectId { get; set; }
         public string EnvironmentId { get; set; }

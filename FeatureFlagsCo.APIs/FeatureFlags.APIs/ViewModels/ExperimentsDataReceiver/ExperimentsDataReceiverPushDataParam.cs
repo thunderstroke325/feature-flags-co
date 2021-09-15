@@ -1,12 +1,6 @@
-﻿using FeatureFlags.APIs.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace FeatureFlags.APIs.ViewModels.ExperimentsDataReceiver
+﻿namespace FeatureFlags.APIs.ViewModels.ExperimentsDataReceiver
 {
-    public enum ApplicationTypeEnum
+    public enum AppTypeEnum
     {
         MiniProgram,
         Javascript,
