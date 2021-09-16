@@ -49,7 +49,7 @@ namespace FeatureFlags.APIs.Controllers
 
             if (!_accountUserService.IsAccountMember(accountId, currentUserId))
             {
-                return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             return await _environmentService.GetEnvs(accountId, projectId);
@@ -69,12 +69,12 @@ namespace FeatureFlags.APIs.Controllers
                 !_projectUserService.IsInProjectUserRoles(projectId, currentUserId, new List<ProjectUserRoleEnum> { ProjectUserRoleEnum.Owner }))
               )
             {
-                return StatusCode (StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode (StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             if (string.IsNullOrWhiteSpace(param.Name))
             {
-                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "Bad request" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad request" });
             }
 
             var newEnv = await _environmentService.CreateEnvAsync(param, accountId);
@@ -105,12 +105,12 @@ namespace FeatureFlags.APIs.Controllers
                 !_projectUserService.IsInProjectUserRoles(projectId, currentUserId, new List<ProjectUserRoleEnum> { ProjectUserRoleEnum.Owner }))
                 )
             {
-                return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             if (string.IsNullOrWhiteSpace(param.Name))
             {
-                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "Bad request" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad request" });
             }
 
             env.Name = param.Name;
@@ -136,7 +136,7 @@ namespace FeatureFlags.APIs.Controllers
                 !_projectUserService.IsInProjectUserRoles(projectId, currentUserId, new List<ProjectUserRoleEnum> { ProjectUserRoleEnum.Owner }))
                   )
             {
-                return StatusCode (StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode (StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             await _environmentService.RemoveEnvAsync(envId);
@@ -163,7 +163,7 @@ namespace FeatureFlags.APIs.Controllers
                 !_projectUserService.IsInProjectUserRoles(projectId, currentUserId, new List<ProjectUserRoleEnum> { ProjectUserRoleEnum.Owner }))
                     )
             {
-                return StatusCode (StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode (StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             string newKey;
@@ -178,7 +178,7 @@ namespace FeatureFlags.APIs.Controllers
                     env.MobileSecret = newKey;
                     break;
                 default:
-                    return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message = "Bad request" });
+                    return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad request" });
             }
             
             await _repository.UpdateAsync<Environment>(env);

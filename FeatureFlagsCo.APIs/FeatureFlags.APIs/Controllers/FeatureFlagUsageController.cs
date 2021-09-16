@@ -111,7 +111,7 @@ namespace FeatureFlags.APIs.Controllers
             catch (Exception exp)
             {
                 _logger.LogError(exp, $"Get /FeatureFlagUsage/GetMultiOptionFeatureFlagUsageData ; featureFlagId: {featureFlagId}, chartQueryTimeSpan: {chartQueryTimeSpan} ");
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Bad Request" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Bad Request" });
             }
         }
 

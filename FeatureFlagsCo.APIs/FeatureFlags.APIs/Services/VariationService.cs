@@ -59,6 +59,11 @@ namespace FeatureFlags.APIs.Repositories
             else
             {
                 featureFlag = await _nosqlDbService.GetFeatureFlagAsync(featureFlagId);
+                if (featureFlag == null) // feature flag doesn't exist
+                {
+                    return null;
+                }
+
                 await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
                 readOnlyOperation = false;
             }

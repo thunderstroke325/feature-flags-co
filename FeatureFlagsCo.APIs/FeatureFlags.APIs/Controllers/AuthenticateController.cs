@@ -100,7 +100,7 @@ namespace FeatureFlags.APIs.Controllers
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "User already exists!" });
 
             var result = await _userManager.CreateAsync(
                 new ApplicationUser()
@@ -115,7 +115,7 @@ namespace FeatureFlags.APIs.Controllers
             );
 
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = result.Errors.ToList().First().Description });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = result.Errors.ToList().First().Description });
 
             // create account
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -126,7 +126,7 @@ namespace FeatureFlags.APIs.Controllers
 
             await _accountService.CreateAccountAsync(user.Id, account);
 
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+            return Ok(new Response { Code = "Success", Message = "User created successfully!" });
         }
 
         [HttpPost]
@@ -135,7 +135,7 @@ namespace FeatureFlags.APIs.Controllers
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "User already exists!" });
 
             ApplicationUser user = new ApplicationUser()
             {
@@ -146,7 +146,7 @@ namespace FeatureFlags.APIs.Controllers
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "User creation failed! Please check user details and try again." });
 
             if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
                 await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
@@ -158,7 +158,7 @@ namespace FeatureFlags.APIs.Controllers
                 await _userManager.AddToRoleAsync(user, UserRoles.Admin);
             }
 
-            return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+            return Ok(new Response { Code = "Success", Message = "User created successfully!" });
         }
 
         [HttpPost]
@@ -240,7 +240,7 @@ namespace FeatureFlags.APIs.Controllers
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             var userExists = await _userManager.FindByIdAsync(currentUserId);
             if (userExists == null)
-                return StatusCode(StatusCodes.Status404NotFound, new Response { Status = "Error", Message = "User not found!" });
+                return StatusCode(StatusCodes.Status404NotFound, new Response { Code = "Error", Message = "User not found!" });
             return new
             {
                 Email = userExists.Email,
@@ -255,21 +255,21 @@ namespace FeatureFlags.APIs.Controllers
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists == null)
-                return StatusCode(StatusCodes.Status404NotFound, new Response { Status = "Error", Message = "User not found!" });
+                return StatusCode(StatusCodes.Status404NotFound, new Response { Code = "Error", Message = "User not found!" });
 
             userExists.PhoneNumber = model.PhoneNumber;
             var token = await _userManager.GeneratePasswordResetTokenAsync(userExists);
             var result = await _userManager.UpdateAsync(userExists);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = result.Errors.ToList().First().Description });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = result.Errors.ToList().First().Description });
             result = await _userManager.ResetPasswordAsync(userExists, token, model.Password);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = result.Errors.ToList().First().Description });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = result.Errors.ToList().First().Description });
 
             // remove all invitations to the user
             await _userInvitationService.ClearAsync(userExists.Id);
 
-            return Ok(new Response { Status = "Success", Message = "User info updated successfully!" });
+            return Ok(new Response { Code = "Success", Message = "User info updated successfully!" });
         }
 
     }

@@ -78,7 +78,7 @@ namespace FeatureFlags.APIs.Controllers
 
                 if (accountOwner == null || currentUserId != accountOwner.UserId) 
                 {
-                    return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                    return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
                 }
 
                 account.OrganizationName = param.OrganizationName;
@@ -102,7 +102,7 @@ namespace FeatureFlags.APIs.Controllers
 
                 if (currentUserId != accontOwner.UserId)
                 {
-                    return StatusCode (StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                    return StatusCode (StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
                 }
 
                 await _accountService.DeleteAccountAsync(account.Id);

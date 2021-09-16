@@ -44,7 +44,7 @@ namespace FeatureFlags.APIs.Controllers
                 return await _dataSyncService.GetEnvironmentDataAsync(envId);
             }
 
-            return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+            return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
         }
 
         [HttpPost]
@@ -54,7 +54,7 @@ namespace FeatureFlags.APIs.Controllers
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             if (!await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
             {
-                return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             if (model.File.Length > 0)

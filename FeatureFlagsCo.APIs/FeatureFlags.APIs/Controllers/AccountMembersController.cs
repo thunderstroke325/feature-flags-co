@@ -63,7 +63,7 @@ namespace FeatureFlags.APIs.Controllers
                 return await _accountUserService.SearchAccountMemberAsync(accountId, searchText);
             }
 
-            return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+            return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
         }
 
         [HttpDelete]
@@ -74,7 +74,7 @@ namespace FeatureFlags.APIs.Controllers
 
             if (currentUserId == userId || !_accountUserService.IsInAccountUserRoles(accountId, userId, new List<AccountUserRoleEnum> { AccountUserRoleEnum.Owner, AccountUserRoleEnum.Admin })) 
             {
-                return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             await _accountUserService.RemoveUserAsync(accountId, userId);
@@ -90,14 +90,14 @@ namespace FeatureFlags.APIs.Controllers
 
             if (!_accountUserService.IsInAccountUserRoles(accountId, currentUserId, new List<AccountUserRoleEnum> { AccountUserRoleEnum.Owner, AccountUserRoleEnum.Admin }))
             {
-                return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             var allowedInitialRoles = new List<string> { AccountUserRoleEnum.Admin.ToString() };
             var roleString = allowedInitialRoles.FirstOrDefault(x => x.Equals(param.Role));
             if (string.IsNullOrEmpty(roleString))
             {
-                return StatusCode(StatusCodes.Status400BadRequest, new Response { Status = "Error", Message ="Bad Request" });
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message ="Bad Request" });
             }
 
             var user = await _userManager.FindByEmailAsync(param.Email);
@@ -116,7 +116,7 @@ namespace FeatureFlags.APIs.Controllers
                 );
 
                 if (!result.Succeeded)
-                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = result.Errors.ToList().First().Description });
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = result.Errors.ToList().First().Description });
 
                 user = await _userManager.FindByEmailAsync(param.Email);
 

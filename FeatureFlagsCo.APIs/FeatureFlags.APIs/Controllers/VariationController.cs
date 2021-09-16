@@ -1,8 +1,10 @@
-﻿using FeatureFlags.APIs.Models;
+﻿using FeatureFlags.APIs.Authentication;
+using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlagsCo.MQ;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -43,27 +45,23 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("GetMultiOptionVariation")]
-        public async Task<JsonResult> GetMultiOptionVariation([FromBody] GetUserVariationResultParam param)
+        public async Task<dynamic> GetMultiOptionVariation([FromBody] GetUserVariationResultParam param)
         {
             if (param == null)
             {
-                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
-                return new JsonResult("Parameter incorrect");
+                return StatusCode(StatusCodes.Status200OK, new Response { Code = "Error", Message = "Parameter incorrect" });
             }
             else if (string.IsNullOrWhiteSpace(param.EnvironmentSecret))
             {
-                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
-                return new JsonResult("EnvironmentSecret shouldn't be empty");
+                return StatusCode(StatusCodes.Status200OK, new Response { Code = "Error", Message = "EnvironmentSecret shouldn't be empty" });
             }
             else if (string.IsNullOrWhiteSpace(param.FeatureFlagKeyName))
             {
-                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
-                return new JsonResult("FeatureFlagKeyName shouldn't be empty");
+                return StatusCode(StatusCodes.Status200OK, new Response { Code = "Error", Message = "FeatureFlagKeyName shouldn't be empty" });
             }
             else if (string.IsNullOrWhiteSpace(param.FFUserKeyId))
             {
-                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
-                return new JsonResult("FFUserKeyId shouldn't be empty");
+                return StatusCode(StatusCodes.Status200OK, new Response { Code = "Error", Message = "FFUserKeyId shouldn't be empty" });
             }
             try
             {
@@ -79,6 +77,10 @@ namespace FeatureFlags.APIs.Controllers
                     },
                     ffIdVM);
 
+                if (returnResult == null) 
+                {
+                    return StatusCode(StatusCodes.Status200OK, new Response { Code = "Error", Message = "Feature Flag doesn't exist, please verify your featureFlagKeyName" });
+                }
 
                 SendToRabbitMQ(param, ffIdVM, returnResult);
 

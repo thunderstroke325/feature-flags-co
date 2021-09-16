@@ -55,13 +55,13 @@ namespace FeatureFlags.APIs.Controllers
                     return pendingChanges;
                 }
 
-                return StatusCode(StatusCodes.Status401Unauthorized, new Response { Status = "Error", Message = "Unauthorized" });
+                return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
             }
             catch (Exception exp)
             {
                 _logger.LogError(exp, JsonConvert.SerializeObject(param));
 
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "Internal Error" });
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
             }
         }
     }

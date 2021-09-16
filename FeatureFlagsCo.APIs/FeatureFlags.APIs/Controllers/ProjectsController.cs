@@ -49,7 +49,7 @@ namespace FeatureFlags.APIs.Controllers
 
             if (!_accountUserService.IsAccountMember(accountId, currentUserId))
             {
-                return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             return await _projectService.GetProjects(accountId);
@@ -63,7 +63,7 @@ namespace FeatureFlags.APIs.Controllers
 
             if (!_accountUserService.IsInAccountUserRoles(accountId, currentUserId, new List<AccountUserRoleEnum> { AccountUserRoleEnum.Owner, AccountUserRoleEnum.Admin })) 
             {
-                return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             return await _projectService.CreateProjectAsync(currentUserId, accountId, param);
@@ -86,7 +86,7 @@ namespace FeatureFlags.APIs.Controllers
                     !_projectUserService.IsInProjectUserRoles(project.Id, currentUserId, new List<ProjectUserRoleEnum> { ProjectUserRoleEnum.Owner }))
                     )
                 {
-                    return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                    return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Code", Message = "Forbidden" });
                 }
 
                 project.Name = param.Name;
@@ -109,7 +109,7 @@ namespace FeatureFlags.APIs.Controllers
                 !_projectUserService.IsInProjectUserRoles(project.Id, currentUserId, new List<ProjectUserRoleEnum> { ProjectUserRoleEnum.Owner }))
                 )
             {
-                return StatusCode(StatusCodes.Status403Forbidden, new Response { Status = "Error", Message = "Forbidden" });
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
             await _projectService.RemoveProjectAsync(projectId);
