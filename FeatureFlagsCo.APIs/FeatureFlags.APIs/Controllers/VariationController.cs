@@ -84,7 +84,7 @@ namespace FeatureFlags.APIs.Controllers
 
                 if (returnResult == null) 
                 {
-                    return StatusCode(StatusCodes.Status200OK, new Response { Code = "Error", Message = "Feature Flag doesn't exist, please verify your featureFlagKeyName" });
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Feature Flag doesn't exist, please verify your featureFlagKeyName" });
                 }
 
                 SendToRabbitMQ(param, ffIdVM, returnResult);
