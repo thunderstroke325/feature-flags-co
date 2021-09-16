@@ -47,21 +47,26 @@ namespace FeatureFlags.APIs.Controllers
         [Route("GetMultiOptionVariation")]
         public async Task<dynamic> GetMultiOptionVariation([FromBody] GetUserVariationResultParam param)
         {
+
             if (param == null)
             {
-                return StatusCode(StatusCodes.Status200OK, new Response { Code = "Error", Message = "Parameter incorrect" });
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("Parameter incorrect");
             }
             else if (string.IsNullOrWhiteSpace(param.EnvironmentSecret))
             {
-                return StatusCode(StatusCodes.Status200OK, new Response { Code = "Error", Message = "EnvironmentSecret shouldn't be empty" });
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("EnvironmentSecret shouldn't be empty");
             }
             else if (string.IsNullOrWhiteSpace(param.FeatureFlagKeyName))
             {
-                return StatusCode(StatusCodes.Status200OK, new Response { Code = "Error", Message = "FeatureFlagKeyName shouldn't be empty" });
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("FeatureFlagKeyName shouldn't be empty");
             }
             else if (string.IsNullOrWhiteSpace(param.FFUserKeyId))
             {
-                return StatusCode(StatusCodes.Status200OK, new Response { Code = "Error", Message = "FFUserKeyId shouldn't be empty" });
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("FFUserKeyId shouldn't be empty");
             }
             try
             {
