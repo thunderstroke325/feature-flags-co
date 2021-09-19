@@ -32,7 +32,7 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<List<ExperimentResult>> GetExperimentResult(ExperimentQueryViewModel param)
         {
-            string experimentationHost = _mySettings.Value.ExperimentationServiceHost;
+            string experimentationHost = _mySettings.Value.ExperimentsServiceHost;
 
             using (var client = new HttpClient())
             {

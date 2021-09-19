@@ -109,12 +109,7 @@
                       {{ data.changeToBaseline }}
                     </td>
                     <td>
-                      <ng-container *ngIf="data.pValue !== -1">
-                        {{ data.pValue }}
-                      </ng-container>
-                      <ng-container *ngIf="data.pValue === -1">
-                        --
-                      </ng-container>
+                      {{ data.pValue }}
                     </td>
                   </tr>
                 </ng-container>

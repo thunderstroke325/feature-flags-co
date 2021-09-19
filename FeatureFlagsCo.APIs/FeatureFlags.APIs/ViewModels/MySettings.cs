@@ -26,7 +26,7 @@ namespace FeatureFlags.APIs.ViewModels
         public string HostingType { get; set; }
         public string CacheType { get; set; }
         public string ElasticSearchHost { get; set; }
-        public string ExperimentationServiceHost { get; set; }
+        public string ExperimentsServiceHost { get; set; }
     }
 
     public enum HostingTypeEnum
