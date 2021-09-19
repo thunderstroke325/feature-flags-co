@@ -1,0 +1,27 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+
+- task: Docker@2
+  inputs:
+    containerRegistry: 'ffc0registry0dev'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: 'azure-china-devops'
+    appType: 'webAppContainer'
+    WebAppName: 'ffc-experiment-dev'
+    DockerNamespace: 'ffc0registry0dev.azurecr.io'
+    DockerRepository: 'ffc-experiment'
+    DockerImageTag: 'latest'
