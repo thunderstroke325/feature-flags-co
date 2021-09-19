@@ -129,7 +129,7 @@ def expt_data():
                         {
                             "VariationValue": {
                             "terms": {
-                                "field": "VariationValue.keyword"
+                                "field": "VariationLocalId.keyword"
                             }
                             }
                         }
@@ -188,6 +188,7 @@ def expt_data():
     res_B = es.search(index=Index, body=query_body_B)
  
     # Stat of Flag
+    var_baseline = data['Flag']['BaselineVariation']
     dict_var_user = {}
     dict_var_occurence = {}
     for item in res_A['aggregations']['keys']['buckets']:
@@ -201,11 +202,11 @@ def expt_data():
             dict_var_user[ value ]  =  dict_var_user[ value] + [user]
 
     print('dictionary of flag var:occurence')
-    print(dict_var_occurence)
-
+    print(dict_var_occurence)  
+      
     for item in dict_var_user.keys():
         dict_var_user[item] = list(set(dict_var_user[item]))
- 
+
 
     # Stat of Expt.
     dict_expt_occurence = {}
@@ -217,6 +218,7 @@ def expt_data():
                     dict_expt_occurence[it] = 1
                 else:
                     dict_expt_occurence[it] = 1 + dict_expt_occurence[it]
+
     print('dictionary of expt var:occurence')
     print(dict_expt_occurence)
 
@@ -229,40 +231,64 @@ def expt_data():
         return m, m-h, m+h
 
     output = []
-    var_baseline = data['Flag']['BaselineVariation']
-    BaselineRate = dict_expt_occurence[var_baseline]/dict_var_occurence[var_baseline]
-    # Preprare Baseline data sample distribution for Pvalue Calculation 
-    dist_baseline = [1 for i in range(dict_expt_occurence[var_baseline])] + [0 for i in range(dict_var_occurence[var_baseline]-dict_expt_occurence[var_baseline])] 
-    for item in dict_var_occurence.keys(): 
-        if item in  dict_expt_occurence.keys():
-            dist_item = [1 for i in range(dict_expt_occurence[item])] + [0 for i in range(dict_var_occurence[item]-dict_expt_occurence[item])]
-            rate, min, max = mean_confidence_interval(dist_item)
-            confidenceInterval = [ 0 if round(min,2)<0 else round(min,2), 1 if round(max,2)>1 else round(max,2)]
-            pValue = round(1-stats.ttest_ind(dist_baseline, dist_item).pvalue,2)
+    # If  (baseline variation usage = 0) or  (baseline variation customer event = 0 )
+    if var_baseline not in list(dict_var_occurence.keys()) or var_baseline not in dict_expt_occurence.keys():
+        for item in dict_var_occurence.keys(): 
+            if item in  dict_expt_occurence.keys():
+                dist_item = [1 for i in range(dict_expt_occurence[item])] + [0 for i in range(dict_var_occurence[item]-dict_expt_occurence[item])]
+                rate, min, max = mean_confidence_interval(dist_item)
+                if math.isnan(min) or math.isnan(max):
+                    confidenceInterval = [-1, -1]
+                else:
+                    confidenceInterval = [ 0 if round(min,2)<0 else round(min,2), 1 if round(max,2)>1 else round(max,2)]
+                pValue = -1
+                output.append({ 'variation': item,
+                                'conversion' : dict_expt_occurence[item],  
+                                'uniqueUsers' : dict_var_occurence[item], 
+                                'conversionRate':   round(rate,2),
+                                'changeToBaseline' : -1,
+                                'confidenceInterval': confidenceInterval, 
+                                'pValue': -1 ,
+                                'isBaseline': True if data['Flag']['BaselineVariation'] == item else False, 
+                                'isWinner': False,
+                                'isInvalid': True 
+                                } 
+                            )
+    else:
+        BaselineRate = dict_expt_occurence[var_baseline]/dict_var_occurence[var_baseline]
+        # Preprare Baseline data sample distribution for Pvalue Calculation 
+        dist_baseline = [1 for i in range(dict_expt_occurence[var_baseline])] + [0 for i in range(dict_var_occurence[var_baseline]-dict_expt_occurence[var_baseline])] 
+        for item in dict_var_occurence.keys(): 
+            if item in  dict_expt_occurence.keys():
+                dist_item = [1 for i in range(dict_expt_occurence[item])] + [0 for i in range(dict_var_occurence[item]-dict_expt_occurence[item])]
+                rate, min, max = mean_confidence_interval(dist_item)
+                if math.isnan(min) or math.isnan(max):
+                    confidenceInterval = [-1, -1]
+                else:
+                    confidenceInterval = [ 0 if round(min,2)<0 else round(min,2), 1 if round(max,2)>1 else round(max,2)]
+                pValue = round(1-stats.ttest_ind(dist_baseline, dist_item).pvalue,2)
+                output.append({ 'variation': item,
+                                'conversion' : dict_expt_occurence[item],  
+                                'uniqueUsers' : dict_var_occurence[item], 
+                                'conversionRate':   round(rate,2),
+                                'changeToBaseline' : round(rate-BaselineRate,2),
+                                'confidenceInterval': confidenceInterval, 
+                                'pValue': -1 if math.isnan(pValue) else pValue,
+                                'isBaseline': True if data['Flag']['BaselineVariation'] == item else False, 
+                                'isWinner': False,
+                                'isInvalid': True if (pValue < 0.95) or math.isnan(pValue) else False
+                                } 
+                            )
+        # Get winner variation
+        listValid = [output.index(item) for item in output if item['isInvalid'] == False]
 
-        
-            output.append({ 'variation': item,
-                            'conversion' : dict_expt_occurence[item],  
-                            'uniqueUsers' : dict_var_occurence[item], 
-                            'conversionRate':   round(rate,2),
-                            'changeToBaseline' : round(rate-BaselineRate,2),
-                            'confidenceInterval': confidenceInterval, 
-                            'pValue': pValue,
-                            'isBaseline': True if data['Flag']['BaselineVariation'] == item else False, 
-                            'isWinner': False,
-                            'isInvalid': True if (pValue < 0.95) or math.isnan(pValue) else False
-                            } 
-                        )
-    # Get winner variation
-    listValid = [output.index(item) for item in output if item['isInvalid'] == False]
-
-    # If at least one variation is valid:
-    if len(listValid) != 0: 
-        dictValid = {}
-        for index in listValid:
-            dictValid[index] = output[index]['conversionRate']
-        maxRateIndex = [k for k, v in sorted(dictValid.items(), key=lambda item: item[1])][-1]        
-        output[maxRateIndex]['isWinner'] = True
+        # If at least one variation is valid:
+        if len(listValid) != 0: 
+            dictValid = {}
+            for index in listValid:
+                dictValid[index] = output[index]['conversionRate']
+            maxRateIndex = [k for k, v in sorted(dictValid.items(), key=lambda item: item[1])][-1]        
+            output[maxRateIndex]['isWinner'] = True
 
     print('ExptResults:')
     print(output)
