@@ -73,10 +73,10 @@ namespace FeatureFlags.APIs.Services
                                   routingKey: "experiments",
                                   basicProperties: null,
                                   body: body);
-            _channel.BasicPublish(exchange: "",
-                                  routingKey: "experiments",
-                                  basicProperties: null,
-                                  body: body);
+            //_channel.BasicPublish(exchange: "",
+            //                      routingKey: "experiments",
+            //                      basicProperties: null,
+            //                      body: body);
 
             //Console.WriteLine(message);
         }
