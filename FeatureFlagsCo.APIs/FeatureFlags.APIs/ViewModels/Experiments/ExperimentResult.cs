@@ -17,6 +17,6 @@ namespace FeatureFlags.APIs.ViewModels.Experiments
         public long UniqueUsers { get; set; }
         public string Variation { get; set; }
 
-        public List<string> ConfidenceInterval { get; set; }
+        public List<float> ConfidenceInterval { get; set; }
     }
 }

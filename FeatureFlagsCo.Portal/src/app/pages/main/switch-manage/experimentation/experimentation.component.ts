@@ -125,27 +125,23 @@ export class ExperimentationComponent implements OnInit {
     };
 
     this.isLoadingResult = true;
+    this.experimentResult = [];
     this.experimentService.getExperimentResult(this.switchServe.envId, param).subscribe((result) => {
-      // const result: any = [
-      //     {
-      //       "variation": "Green"
-      //   },
-      // ];
       if(result && result.length > 0) {
         this.experimentResult = this.currentVariationOptions.map((option) => {
-          const found = result.find(r => r.variation === option.localId);
+          const found = result.find(r => r.variation == option.localId);
 
           return !found ? this.createEmptyExperimentResult(option) : Object.assign({}, found, {
             variationValue: option.variationValue,
             conversionRate: (found.conversionRate * 100).toFixed(1),
             confidenceInterval: found.confidenceInterval.map(c => c === -1 ? '-' : c * 100),
-            changeToBaseline: (found.changeToBaseline * 100).toFixed(1),
-            isBaseline: true,
+            changeToBaseline: found.changeToBaseline === -1 ? '--' : (found.changeToBaseline * 100).toFixed(1) + '%',
+            pValue: found.pValue === -1 ? '--' : found.pValue,
             isEmpty: false
           })
         });
 
-        this.hasInvalidVariation = this.experimentResult.findIndex(e => e.isInvalid) > -1;
+        this.hasInvalidVariation = this.experimentResult.findIndex(e => e.isInvalid && !e.isBaseline) > -1;
         this.hasWinnerVariation = this.experimentResult.findIndex(e => e.isWinner) > -1;
       } else {
         this.message.warning("暂时还没有实验数据，请修改时间区间或稍后再试!");
@@ -162,7 +158,7 @@ export class ExperimentationComponent implements OnInit {
     return {
       isEmpty: true,
       variationValue: option.variationValue,
-      isBaseline: true
+      isBaseline: this.selectedBaseline.localId === option.localId
      };
   }
 

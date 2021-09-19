@@ -35,12 +35,14 @@
           td:first-child {
             text-align: left;
           }
-
-          td {
-            text-align: center;
-          }
         }
 
+        td:not(:first-child) {
+          text-align: center;
+        }
+        td:first-child {
+          text-align: left;
+        }
         .baseline_cell {
           background-color: #F8F8F8;
           text-align: center;
