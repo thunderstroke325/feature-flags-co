@@ -10,7 +10,7 @@ export const btnsConfig = [
       label: '触发器'
     },{
       id: 'experimentations',
-      label: 'Experimentations'
+      label: '数据实验'
     },{
       id: 'report',
       label: '统计报表'

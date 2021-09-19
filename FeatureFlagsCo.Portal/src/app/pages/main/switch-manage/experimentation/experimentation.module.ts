@@ -9,16 +9,26 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { FormsModule } from '@angular/forms';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 @NgModule({
   declarations: [ExperimentationComponent],
   imports: [
+    CommonModule,
+    FormsModule,
     NzEmptyModule,
     NzSelectModule,
     NzDatePickerModule,
     NzTableModule,
     NzButtonModule,
-    CommonModule,
+    NzIconModule,
+    NzCardModule,
+    NzSpinModule,
+    NzToolTipModule,
     ComponentsModule,
     ExperimentationRoutingModule
   ]
