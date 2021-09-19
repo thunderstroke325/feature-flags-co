@@ -127,7 +127,7 @@ def expt_data():
                             }
                         },
                         {
-                            "VariationValue": {
+                            "VariationLocalId": {
                             "terms": {
                                 "field": "VariationLocalId.keyword"
                             }
@@ -191,14 +191,15 @@ def expt_data():
     var_baseline = data['Flag']['BaselineVariation']
     dict_var_user = {}
     dict_var_occurence = {}
+
     for item in res_A['aggregations']['keys']['buckets']:
-        value = item['key']['VariationValue']
+        value = item['key']['VariationLocalId']
         user  = item['key']['UserKeyId']
         if  value not in list(dict_var_occurence.keys()) :
             dict_var_occurence[ value ]  = 1
             dict_var_user[ value ]  = [user]
         else :
-            dict_var_occurence[ value] = dict_var_occurence[ user] + 1
+            dict_var_occurence[ value] = dict_var_occurence[ value] + 1
             dict_var_user[ value ]  =  dict_var_user[ value] + [user]
 
     print('dictionary of flag var:occurence')
