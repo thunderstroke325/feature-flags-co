@@ -17,37 +17,38 @@ es = connect_elasticsearch()
 
 @app.route('/api/InsertFlagUsageEvent', methods=['GET'])
 def add_flagevent():
+    Nevents=10000
+    actions = []
+    dict_value = {0:"Big-Button", 1:"Normal-Button", 2:"Small-Button"}
     for group in range(3):
-      Nevents = 10000
-      dict_value = {0:"Big-Button", 1:"Normal-Button", 2:"Small-Button"}
-      actions = [
-          {
-              "_id" : uuid.uuid4(), # random UUID for _id
-              "doc_type" : "_doc", # document _type
-              "doc": { # the body of the document
-                    "RequestPath" : "index/paypage",
-                    "FeatureFlagId" : "FF__38__48__103__PayButton",
-                    "EnvId" : "103",
-                    "AccountId" : "38",
-                    "ProjectId" : "48",
-                    "FeatureFlagKeyName" : "PayButton",
-                    "UserKeyId" : "u_group"+str(group)+"_"+str(doc)+"@testliang.com",
-                    "FFUserName" : "u_group"+str(group)+"_"+str(doc),
-                    "VariationLocalId" : str(group),
-                    "VariationValue" : dict_value[group],
-                    "TimeStamp" : datetime.now(),
-                    "phoneNumber" : "135987652543"
+      for doc in range(Nevents):
+        data={
+                "_index": "ffvariationrequestindex",
+                "_type": "_doc",
+                "_id" : uuid.uuid4(), # random UUID for _id
+                "doc_type" : "_doc", # document _type
+                "_source": { # the body of the document
+                      "RequestPath" : "index/paypage",
+                      "FeatureFlagId" : "FF__38__48__103__PayButton",
+                      "EnvId" : "103",
+                      "AccountId" : "38",
+                      "ProjectId" : "48",
+                      "FeatureFlagKeyName" : "PayButton",
+                      "UserKeyId" : "u_group"+str(group)+"_"+str(doc)+"@testliang.com",
+                      "FFUserName" : "u_group"+str(group)+"_"+str(doc),
+                      "VariationLocalId" : str(group),
+                      "VariationValue" : dict_value[group],
+                      "TimeStamp" : datetime.now(),
+                      "phoneNumber" : "135987652543"
+                }
               }
-          }
-          for doc in range(Nevents)
-      ]
-
-      try:
-          # make the bulk call, and get a response
-          response = helpers.bulk(es, actions, index='ffvariationrequestindex', doc_type='_doc')
-          print ("\nRESPONSE:", response)
-      except Exception as e:
-          print("\nERROR:", e)
+        actions.append(data) 
+    try:
+      # make the bulk call, and get a response
+      response = helpers.bulk(es, actions)
+      print ("\nRESPONSE:", response)
+    except Exception as e:
+      print("\nERROR:", e)
     return jsonify({"status":"succesfully sent "+str(Nevents*3)+' events to index ffvariationrequestindex'})
 
 '''
@@ -80,18 +81,18 @@ def add_flagevent():
 ###########################################
 @app.route('/api/InsertCustomEvent', methods=['GET'])
 def add_customevent():
+    Nevents=10000
+    actions = []
     for group in range(3):
-#      Nevents = 10000 - (group+1)*2000
-      Nevents = 2
-      dict_value = {0:"Big-Button", 1:"Normal-Button", 2:"Small-Button"}
-      actions = [
-          {
-              "_id" : uuid.uuid4(), # random UUID for _id
-              "doc_type" : "_doc", # document _type
-              "doc": { # the body of the document
+      for doc in range(Nevents - (group+1)*2000):
+        data={
+                "_index": "experiments",
+                "_type": "_doc",
+                "_id" : uuid.uuid4(), # random UUID for _id
+                "doc_type" : "_doc", # document _type
+                "_source": { # the body of the document
                         "Route" : "index",
-                        "Secret" : "Yoursecret",                        
-                        "TimeStamp" : datetime.now().strftime('%s')+'000',
+                        "Secret" : "Yoursecret",
                         "Type" : "CustomEvent",
                         "EventName" : "clickButtonPayTrack",
                         "User" : {
@@ -111,16 +112,14 @@ def add_customevent():
                         "ProjectId" : "48",
                         "EnvironmentId" : "103",
                         "AccountId" : "38"
+                  }
               }
-          }
-          for doc in range(Nevents)
-      ]
-
-      try:
+        actions.append(data) 
+    try:
           # make the bulk call, and get a response
-          response = helpers.bulk(es, actions, index='experiments', doc_type='_doc')
+          response = helpers.bulk(es, actions, index='experimentss', doc_type='_doc')
           print ("\nRESPONSE:", response)
-      except Exception as e:
+    except Exception as e:
           print("\nERROR:", e)
     return jsonify({"status":"succesfully sent "+str(Nevents*3)+' events to index experiments'})
 
