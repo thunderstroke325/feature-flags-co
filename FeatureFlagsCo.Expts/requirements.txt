@@ -1,5 +1,0 @@
-flask
-elasticsearch
-elasticsearch_dsl
-numpy
-scipy
