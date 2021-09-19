@@ -6,20 +6,14 @@
 trigger: none
 
 variables:
-  # Azure Resource Manager connection created during pipeline creation
-  azureServiceConnectionId: '{{ azureServiceConnection.Id }}'
-
   # Web app name
-  webAppName: '{{ webAppName }}'
+  webAppName: 'ffc-experiment-dev'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
-  # Environment name
-  environmentName: '{{ webAppName }}'
-
   # Project root folder. Point to the folder containing manage.py file.
-  projectRoot: $(System.DefaultWorkingDirectory)
+  projectRoot: $(System.DefaultWorkingDirectory)/FeatureFlagsCo.Experiments
 
   # Python version: 3.7
   pythonVersion: '3.8'
@@ -66,7 +60,6 @@ stages:
   - deployment: DeploymentJob
     pool:
       vmImage: $(vmImageName)
-    environment: $(environmentName)
     strategy:
       runOnce:
         deploy:
@@ -80,6 +73,6 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Deploy Azure Web App : {{ webAppName }}'
             inputs:
-              azureSubscription: $(azureServiceConnectionId)
+              azureSubscription: 'azure-china-devops'
               appName: $(webAppName)
               package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
