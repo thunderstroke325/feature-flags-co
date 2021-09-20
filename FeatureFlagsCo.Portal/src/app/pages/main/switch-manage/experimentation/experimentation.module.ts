@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { PercentagePipe } from 'src/app/share/pipes/percentage.pipe';
 
 import { ExperimentationRoutingModule } from './experimentation-routing.module';
 import { ComponentsModule } from '../components/components.module';
@@ -16,7 +17,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 @NgModule({
-  declarations: [ExperimentationComponent],
+  declarations: [ExperimentationComponent, PercentagePipe],
   imports: [
     CommonModule,
     FormsModule,

@@ -79,13 +79,18 @@
                       <span *ngIf="data.isWinner" nz-tooltip [nzTooltipTitle]="'该特性胜出'" [nzTooltipColor]="'cyan'">
                         <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i>
                       </span>
-                      <span *ngIf="data.isInvalid && !data.isBaseline" nz-tooltip [nzTooltipTitle]="'相对于基准特性并不具有统计学上的优势'" [nzTooltipColor]="'cyan'">
-                        <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i>
+                      <span *ngIf="data.isInvalid" nz-tooltip [nzTooltipTitle]="'相对于基准特性并不具有统计学上的优势'" [nzTooltipColor]="'cyan'">
+                        <ng-container *ngIf="!data.isBaseline">
+                          <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i>
+                        </ng-container>
+                        <ng-container *ngIf="data.isBaseline">
+                          <span class="icon_placeholder"></span>
+                        </ng-container>
                       </span>
                       <span class="icon_placeholder" *ngIf="!data.isWinner && !data.isInvalid"></span>
                       &nbsp;{{ data.variationValue }}</td>
                     <td>{{ data.conversion }}/{{ data.uniqueUsers }}</td>
-                    <td>{{ data.conversionRate }}%</td>
+                    <td>{{ data.conversionRate | percentage }}</td>
                     <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell">
                       <div>基准特性</div>
                     </td>
@@ -95,18 +100,18 @@
                           <div class="BoxChart-whisker"></div>
                           <div class="BoxChart-box--container">
                             <div class="BoxChart-box--line"></div>
-                            <div class="BoxChart-box" [style.left.px]="data.confidenceInterval[0] * 2" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) * 2">
-                              <div class="BoxChart-box--median" [style.left.px]="(data.converstionRate - data.confidenceInterval[0]) * 2"></div>
+                            <div class="BoxChart-box" [style.left.px]="data.confidenceInterval[0] * 200" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) * 200">
+                              <div class="BoxChart-box--median" [style.left.px]="(data.conversionRate - data.confidenceInterval[0]) * 200"></div>
                             </div>
                           </div>
                           <div class="BoxChart-whisker"></div>
                         </div>
                        </div>
-                       <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0]}}% - {{data.confidenceInterval[1]}}%</div>
+                       <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
                        <div *ngIf="data.confidenceInterval[0] === '-'"class="confidence_interval"> -- </div>
                     </td>
                     <td *ngIf="!data.isBaseline">
-                      {{ data.changeToBaseline }}
+                      {{ data.changeToBaseline | percentage }}
                     </td>
                     <td>
                       {{ data.pValue }}

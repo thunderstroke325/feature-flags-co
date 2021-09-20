@@ -133,9 +133,6 @@ export class ExperimentationComponent implements OnInit {
 
           return !found ? this.createEmptyExperimentResult(option) : Object.assign({}, found, {
             variationValue: option.variationValue,
-            conversionRate: (found.conversionRate * 100).toFixed(1),
-            confidenceInterval: found.confidenceInterval.map(c => c === -1 ? '-' : c * 100),
-            changeToBaseline: found.changeToBaseline === -1 ? '--' : (found.changeToBaseline * 100).toFixed(1) + '%',
             pValue: found.pValue === -1 ? '--' : found.pValue,
             isEmpty: false
           })
