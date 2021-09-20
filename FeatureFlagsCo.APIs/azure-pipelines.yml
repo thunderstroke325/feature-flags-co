@@ -65,6 +65,8 @@ stages:
                     $a.MySettings.InsightsRabbitMqUrl = "$(MySettings_InsightsRabbitMqUrl_Dev)"
                     $a.MySettings.ElasticSearchHost = "$(MySettings_ElasticSearchHost_Dev)"
                     $a.MySettings.CacheType = "$(MySettings_CacheType_Dev)"
+                    
+                    $a.MySettings.ExperimentsServiceHost = "$(MySettings_ExperimentsServiceHost_Dev)"
 
                     $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString_Dev)"
                     $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName_Dev)"
@@ -79,7 +81,8 @@ stages:
                     Write-Host $aCheck.ApplicationInsights.InstrumentationKey
                     Write-Host $aCheck.ApplicationInsights.ConnectionString
                     Write-Host $aCheck.MySettings.AppInsightsApplicationId
-                    Write-Host $aCheck.MySettings.AppInsightsApplicationApiSecret.
+                    Write-Host $aCheck.MySettings.AppInsightsApplicationApiSecret
+                    Write-Host $aCheck.MySettings.ExperimentsServiceHost
 
               
               - task: DotNetCoreCLI@2
@@ -274,6 +277,8 @@ stages:
                     $a.MySettings.InsightsRabbitMqUrl = "$(MySettings_InsightsRabbitMqUrl)"
                     $a.MySettings.ElasticSearchHost = "$(MySettings_ElasticSearchHost)"
                     $a.MySettings.CacheType = "$(MySettings_CacheType)"
+                    
+                    $a.MySettings.ExperimentsServiceHost = "$(MySettings_ExperimentsServiceHost)"
 
                     $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString)"
                     $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName)"
@@ -292,6 +297,7 @@ stages:
                     Write-Host $aCheck.MySettings.ElasticSearchHost
                     Write-Host $aCheck.MongoDbSettings.ConnectionString
                     Write-Host $aCheck.MongoDbSettings.DatabaseName
+                    Write-Host $aCheck.MongoDbSettings.ExperimentsServiceHost
 
 
               - task: DotNetCoreCLI@2
