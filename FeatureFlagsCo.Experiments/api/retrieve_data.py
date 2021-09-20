@@ -107,9 +107,9 @@ def expt_data():
                         "range": {
                             "TimeStamp": {
                                 # when no start time selected: defaut time to 2000-01-01:01H
-                                "gte": '946731600000' if data['StartExptTime'] == "" else data['StartExptTime'],
+                                "gte": "2000-01-01T01:00:00" if data['StartExptTime'] == "" else data['StartExptTime'],
                                 # when no end time selected: defaut time to NOW
-                                "lte":  datetime.now().strftime('%s')+'000' if  data['EndExptTime'] == "" else data['EndExptTime']
+                                "lte":  datetime.now() if  data['EndExptTime'] == "" else data['EndExptTime']
                             }
                         }
                     }
@@ -142,6 +142,7 @@ def expt_data():
                 }
                     
     res_A = es.search(index=Index, body=query_body_A)
+
     # Query Expt data   
     Index = "experiments"
     query_body_B ={
@@ -160,10 +161,10 @@ def expt_data():
                             "filter": {
                                 "range": {
                                     "TimeStamp": {
-                                        # when no start time selected: defaut time to 2000-01-01:01H
-                                        "gte": '946731600000' if data['StartExptTime'] == "" else data['StartExptTime'],
-                                        # when no end time selected: defaut time to NOW
-                                        "lte":  datetime.now().strftime('%s')+'000' if  data['EndExptTime'] == "" else data['EndExptTime']
+                                            # when no start time selected: defaut time to 2000-01-01:01H
+                                            "gte": "2000-01-01T01:00:00" if data['StartExptTime'] == "" else data['StartExptTime'],
+                                            # when no end time selected: defaut time to NOW
+                                            "lte":  datetime.now() if  data['EndExptTime'] == "" else data['EndExptTime']
                                     }
                                 }
                             }

@@ -10,7 +10,7 @@ def connect_elasticsearch(**kwargs):
     if 'hosts' in kwargs.keys():
         _es_hosts = kwargs['hosts']
     _es_obj = None
-    _es_obj = Elasticsearch(hosts=_es_hosts, http_auth=(_es_username, _es_passwd),timeout=10)
+    _es_obj = Elasticsearch(hosts=_es_hosts, http_auth=(_es_username, _es_passwd),timeout=30,max_retries=10,retry_on_timeout=True)
 
     if _es_obj.ping():
         print('Elasticsearch Connected!')

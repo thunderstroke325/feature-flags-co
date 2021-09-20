@@ -17,9 +17,9 @@ es = connect_elasticsearch()
 
 @app.route('/api/InsertFlagUsageEvent', methods=['GET'])
 def add_flagevent():
-    Nevents=10000
+    Nevents=1000
     actions = []
-    dict_value = {0:"Big-Button", 1:"Normal-Button", 2:"Small-Button"}
+    dict_value = {1:"Big-Button", 3:"Normal-Button", 2:"Small-Button"}
     for group in range(3):
       for doc in range(Nevents):
         data={
@@ -36,9 +36,9 @@ def add_flagevent():
                       "FeatureFlagKeyName" : "PayButton",
                       "UserKeyId" : "u_group"+str(group)+"_"+str(doc)+"@testliang.com",
                       "FFUserName" : "u_group"+str(group)+"_"+str(doc),
-                      "VariationLocalId" : str(group),
-                      "VariationValue" : dict_value[group],
-                      "TimeStamp" : datetime.now(),
+                      "VariationLocalId" : str(group+1),
+                      "VariationValue" : dict_value[group+1],
+                      "TimeStamp" : datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
                       "phoneNumber" : "135987652543"
                 }
               }
@@ -81,10 +81,10 @@ def add_flagevent():
 ###########################################
 @app.route('/api/InsertCustomEvent', methods=['GET'])
 def add_customevent():
-    Nevents=10000
+    Nevents=1000
     actions = []
     for group in range(3):
-      for doc in range(Nevents - (group+1)*2000):
+      for doc in range(Nevents - (group+1)*200):
         data={
                 "_index": "experiments",
                 "_type": "_doc",
