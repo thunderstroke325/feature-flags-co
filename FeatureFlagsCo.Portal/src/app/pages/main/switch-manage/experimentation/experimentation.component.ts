@@ -5,7 +5,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from 'src/app/services/experiment.service';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IVariationOption } from '../types/switch-new';
-import { differenceInCalendarDays, getUnixTime  } from 'date-fns';
+import { differenceInCalendarDays } from 'date-fns';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
@@ -115,8 +115,8 @@ export class ExperimentationComponent implements OnInit {
 
     const param = {
       eventName: this.selectedEvent,
-      startExptTime: `${getUnixTime(this.dateRange[0])}000`,
-      endExptTime: `${getUnixTime(this.dateRange[1])}000`,
+      startExptTime: this.dateRange[0].toISOString().slice(0, 19),
+      endExptTime: this.dateRange[1].toISOString().slice(0, 19),
       flag: {
         id: this.featureFlagId,
         baselineVariation: `${this.selectedBaseline.localId}`,

@@ -1,20 +1,17 @@
-﻿using System;
+﻿using FeatureFlagsCo.MQ;
 using System.Collections.Generic;
 
-namespace FeatureFlagsCo.MQ
+namespace FeatureFlags.APIs.ViewModels.Experiments
 {
-    public class ExperimentMessageModel
+    public class ExperimentMessageViewModel
     {
         public string Route { get; set; }
         public string Secret { get; set; }
-        public string TimeStamp { get; set; }
+        public long TimeStamp { get; set; } // This is ignored, to be removed along with SDKs
         public string Type { get; set; }
         public string EventName { get; set; }
         public MqUserInfo User { get; set; }
         public string AppType { get; set; }
         public List<MqCustomizedProperty> CustomizedProperties { get; set; }
-        public string ProjectId { get; set; }
-        public string EnvironmentId { get; set; }
-        public string AccountId { get; set; }
     }
 }

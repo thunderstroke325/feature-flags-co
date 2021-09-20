@@ -2,6 +2,7 @@
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
+using FeatureFlags.APIs.ViewModels.Experiments;
 using FeatureFlags.APIs.ViewModels.ExperimentsDataReceiver;
 using FeatureFlagsCo.MQ;
 using Microsoft.AspNetCore.Mvc;
@@ -36,17 +37,29 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("PushData")]
-        public JsonResult PushData([FromBody] List<ExperimentMessageModel> param)
+        public JsonResult PushData([FromBody] List<ExperimentMessageViewModel> param)
         {
             if (param != null && param.Count > 0)
             {
                 foreach (var item in param)
                 {
                     var ffIdVM = FeatureFlagKeyExtension.GetEnvIdsByEnvKey(item.Secret);
-                    item.ProjectId = ffIdVM.ProjectId;
-                    item.EnvironmentId = ffIdVM.EnvId;
-                    item.AccountId = ffIdVM.AccountId;
-                    _experimentsService.SendMessage(item);
+                    var message = new ExperimentMessageModel 
+                    {
+                        Route = item.Route,
+                        Secret = item.Secret,
+                        Type = item.Type,
+                        EventName = item.EventName,
+                        User = item.User,
+                        AppType = item.AppType,
+                        CustomizedProperties = item.CustomizedProperties,
+                        ProjectId = ffIdVM.ProjectId,
+                        EnvironmentId = ffIdVM.EnvId,
+                        AccountId = ffIdVM.AccountId,
+                        TimeStamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss")
+                    };
+
+                    _experimentsService.SendMessage(message);
                 }
                 return new JsonResult(null);
             }
