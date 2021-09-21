@@ -95,7 +95,7 @@ def expt_data():
                     "must": [
                         {
                         "match": {
-                            'FeatureFlagId': data['Flag']['Id'] 
+                            'FeatureFlagId.keyword': data['Flag']['Id'] 
                         }
                         }, {
                                 "match": {
@@ -151,7 +151,7 @@ def expt_data():
                         "bool": {
                             "must": [{
                                 "match": {
-                                            'EventName' : data['EventName']
+                                            'EventName.keyword' : data['EventName']
                                 }
                             }, {
                                 "match": {

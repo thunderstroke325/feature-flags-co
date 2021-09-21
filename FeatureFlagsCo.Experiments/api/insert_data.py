@@ -94,6 +94,7 @@ def add_customevent():
                         "Route" : "index",
                         "Secret" : "Yoursecret",
                         "Type" : "CustomEvent",
+                        "TimeStamp" : datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
                         "EventName" : "clickButtonPayTrack",
                         "User" : {
                           "FFUserName" : "u_group"+str(group)+"_"+str(doc),
