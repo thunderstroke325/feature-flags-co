@@ -27,12 +27,20 @@ export class NavBtnsComponent {
       }
     }
 
-    const experimentationDisabled = this.ffcAngularSdkService.variation('experimentation') === 'hide';
-    if (experimentationDisabled) {
+    const experimentation  = this.ffcAngularSdkService.variation('experimentation');
+    if (experimentation === 'hide') {
       const idx = this.navConfig.findIndex(n => n.id === 'experimentations');
       if (idx > -1) {
         this.navConfig.splice(idx, 1);
       }
+    }
+
+    if (experimentation === 'temporary version') {
+      this.navConfig = this.navConfig.map(n => {
+        return Object.assign({}, n, {
+          label: n.id === 'experimentations' ? `${n.label}(公测版)` : n.label
+        });
+      })
     }
   }
 
