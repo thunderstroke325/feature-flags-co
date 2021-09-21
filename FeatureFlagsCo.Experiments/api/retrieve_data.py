@@ -289,8 +289,10 @@ def expt_data():
             dictValid = {}
             for index in listValid:
                 dictValid[index] = output[index]['conversionRate']
-            maxRateIndex = [k for k, v in sorted(dictValid.items(), key=lambda item: item[1])][-1]        
-            output[maxRateIndex]['isWinner'] = True
+            maxRateIndex = [k for k, v in sorted(dictValid.items(), key=lambda item: item[1])][-1]    
+            # when baseline has the highest conversion rate
+            if output[maxRateIndex]['changeToBaseline'] > 0:  
+                output[maxRateIndex]['isWinner'] = True
 
     print('ExptResults:')
     print(output)
