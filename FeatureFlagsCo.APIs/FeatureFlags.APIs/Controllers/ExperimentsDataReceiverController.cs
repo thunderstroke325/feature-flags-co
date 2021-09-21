@@ -56,7 +56,7 @@ namespace FeatureFlags.APIs.Controllers
                         ProjectId = ffIdVM.ProjectId,
                         EnvironmentId = ffIdVM.EnvId,
                         AccountId = ffIdVM.AccountId,
-                        TimeStamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss")
+                        TimeStamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
                     };
 
                     _experimentsService.SendMessage(message);
