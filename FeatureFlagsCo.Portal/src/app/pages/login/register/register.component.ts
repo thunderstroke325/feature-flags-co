@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { LoginService } from 'src/app/services/login.service';
 import { repeatPasswordValidator } from 'src/app/utils/validators';
@@ -16,6 +16,7 @@ export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
 
   isLoading: boolean = false;
+  phoneNumber: string = null;
 
   get password() {
     if (!this.registerForm || !this.registerForm.value) return '';
@@ -30,8 +31,13 @@ export class RegisterComponent implements OnInit {
   constructor(
     private loginService: LoginService,
     private router: Router,
+    private route: ActivatedRoute,
     private message: NzMessageService
-    ) { }
+    ) {
+      this.route.queryParams.subscribe(params => {
+        this.phoneNumber = params['tel'];
+      });
+    }
 
   ngOnInit(): void {
     this.initForm();
@@ -42,7 +48,7 @@ export class RegisterComponent implements OnInit {
       email: new FormControl(null, [Validators.required, Validators.email]),
       password: new FormControl(null, [Validators.required, Validators.minLength(5)]),
       _password: new FormControl(null, [Validators.required]),
-      phoneNumber: new FormControl(null, [Validators.required]),
+      phoneNumber: new FormControl(this.phoneNumber, [Validators.required]),
     }, {
       validators: repeatPasswordValidator
     })
