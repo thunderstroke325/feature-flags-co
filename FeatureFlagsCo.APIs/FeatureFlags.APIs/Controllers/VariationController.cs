@@ -175,8 +175,8 @@ namespace FeatureFlags.APIs.Controllers
                               new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "TimeStamp",
-                                  LabelValue = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss")
-                              }
+                                  LabelValue = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
+                              } 
                         };
             if(param.FFUserCustomizedProperties != null && param.FFUserCustomizedProperties.Count > 0)
             {
