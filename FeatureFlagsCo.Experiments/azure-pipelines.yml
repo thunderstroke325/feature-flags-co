@@ -65,16 +65,17 @@ stages:
                 additionalImageTags: $(Build.BuildId)
                 projectName: 'ffc-experiments-dev'
 
-
             - task: AzureRmWebAppDeployment@4
               inputs:
                 ConnectionType: 'AzureRM'
                 azureSubscription: 'azure-china-devops'
                 appType: 'webAppContainer'
                 WebAppName: 'ffc-expeirments-ce2-dev'
-                DockerNamespace: 'ffc0acr0ce2.azurecr.cn'
+                DockerNamespace: 'ffc0acr0ce20dev.azurecr.cn'
                 DockerRepository: 'ffc-experiments-dev'
                 DockerImageTag: '$(Build.BuildId)'
+
+
 
 - stage: 'Production'
   condition: succeeded()
