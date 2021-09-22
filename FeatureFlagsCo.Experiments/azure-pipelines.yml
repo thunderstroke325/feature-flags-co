@@ -24,11 +24,11 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticurl}}','http://52.131.239.36:9200'
+      (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticurl}}','http://52.131.239.36:9200' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
       
-      (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticusername}}','elastic'
+      (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticusername}}','elastic' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
 
-      (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticpassword}}','$(ES_Password_Dev)'
+      (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticpassword}}','$(ES_Password_Dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
       
       $a = Get-Content $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
       Write-Host $a
