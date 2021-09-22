@@ -8,5 +8,6 @@ services:
   #   image: "redis:alpine"
   ffc-experiments:
     build:
-      dockerfile:./Dockerfile
+      context: ../FeatureFlagsCo.Experiments
+      dockerfile:Dockerfile
     image: ffc-experiments
