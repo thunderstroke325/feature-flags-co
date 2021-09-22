@@ -67,6 +67,13 @@ def nosdk():
                     }
                     }
                 },
+                "sort": [
+                    {
+                        "TimeStamp": {
+                            "order": "desc"
+                        }
+                    }
+                ],
                 "aggs": {
                     "keys": {
                     "composite": {
@@ -122,6 +129,13 @@ def nosdk():
                             }
                         }
                     },
+                    "sort": [
+                        {
+                            "TimeStamp": {
+                                "order": "desc"
+                            }
+                        }
+                    ],
                     "aggs": {
                         "keys": {
                             "composite": {
