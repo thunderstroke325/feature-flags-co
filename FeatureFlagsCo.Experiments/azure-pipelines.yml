@@ -19,8 +19,21 @@ steps:
     azureSubscription: 'azure-china-devops'
     azureContainerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
     dockerComposeFile: 'FeatureFlagsCo.Experiments/docker-compose.yml'
-    action: 'Run a Docker Compose command'
-    dockerComposeCommand: 'rm --all'
+    action: Build services
+    projectName: 'ffc-experiments'
+    qualifyImageNames: true
+    additionalImageTags: $(Build.BuildId)
+
+- task: DockerCompose@0
+  displayName: Push services
+  inputs:
+    action: Push services
+    azureSubscription: 'azure-china-devops'
+    azureContainerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
+    dockerComposeFile: docker-compose.yml
+    projectName: 'ffc-experiments'
+    qualifyImageNames: true
+    additionalImageTags: $(Build.BuildId)
     
 # - task: Docker@2
 #   inputs:
