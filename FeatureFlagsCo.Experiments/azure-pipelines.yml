@@ -9,10 +9,10 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-
 - task: Bash@3
   inputs:
-    filePath: 'ls $(System.DefaultWorkingDirectory)'
+    targetType: 'inline'
+    script: 'ls $(System.DefaultWorkingDirectory)'
 - task: DockerCompose@0
   inputs:
     containerregistrytype: 'Azure Container Registry'
