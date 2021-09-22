@@ -42,12 +42,12 @@ stages:
                   
                   $a = Get-Content $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
                   Write-Host $a
+                  
             - task: DockerCompose@0
               inputs:
-
                 containerregistrytype: 'Azure Container Registry'
                 azureSubscription: 'azure-china-devops'
-                azureContainerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
+                azureContainerRegistry: '{"loginServer":"ffc0acr0ce20dev.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co-dev/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce20dev"}'
                 dockerComposeFile: '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Experiments/docker-compose-dev.yml'
                 action: 'Build services'
                 includeLatestTag: true
@@ -58,7 +58,7 @@ stages:
               inputs:
                 containerregistrytype: 'Azure Container Registry'
                 azureSubscription: 'azure-china-devops'
-                azureContainerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
+                azureContainerRegistry: '{"loginServer":"ffc0acr0ce20dev.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co-dev/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce20dev"}'
                 dockerComposeFile: '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Experiments/docker-compose-dev.yml'
                 action: 'Push services'
                 includeLatestTag: true
