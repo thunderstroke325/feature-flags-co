@@ -10,19 +10,15 @@ pool:
 
 steps:
 
-# - task: Docker@2
-#   inputs:
-   
-#     containerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
-#     repository: '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Experiments'
-#     command: 'buildAndPush'
-#     Dockerfile: '**/Dockerfile'
+- task: Bash@3
+  inputs:
+    filePath: 'ls $(System.DefaultWorkingDirectory)'/
 - task: DockerCompose@0
   inputs:
     containerregistrytype: 'Azure Container Registry'
     azureSubscription: 'azure-china-devops'
     azureContainerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
-    dockerComposeFile: '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Experiments/docker-compose.yml'
+    dockerComposeFile: 'FeatureFlagsCo.Experiments/docker-compose.yml'
     action: 'Run a Docker Compose command'
     dockerComposeCommand: 'rm --all'
     
