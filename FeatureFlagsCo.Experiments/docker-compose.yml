@@ -9,5 +9,5 @@ services:
   ffc-experiments:
     build:
       context: ../FeatureFlagsCo.Experiments
-      dockerfile:Dockerfile
+      dockerfile: Dockerfile
     image: ffc-experiments
