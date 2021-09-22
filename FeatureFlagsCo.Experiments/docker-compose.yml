@@ -8,5 +8,5 @@ services:
   #   image: "redis:alpine"
   ffc-experiments:
     build:
-      dockerfile:Dockerfile
+      dockerfile:./Dockerfile
     image: ffc-experiments
