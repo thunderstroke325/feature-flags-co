@@ -22,7 +22,7 @@ steps:
     containerregistrytype: 'Azure Container Registry'
     azureSubscription: 'azure-china-devops'
     azureContainerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
-    dockerComposeFile: '**/docker-compose.yml'
+    dockerComposeFile: '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Experiments/docker-compose.yml'
     action: 'Run a Docker Compose command'
     dockerComposeCommand: 'rm --all'
     
