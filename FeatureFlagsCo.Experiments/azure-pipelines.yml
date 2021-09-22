@@ -71,7 +71,7 @@ stages:
                 ConnectionType: 'AzureRM'
                 azureSubscription: 'azure-china-devops'
                 appType: 'webAppContainer'
-                WebAppName: 'ffc-expeirments-ce2'
+                WebAppName: 'ffc-expeirments-ce2-dev'
                 DockerNamespace: 'ffc0acr0ce2.azurecr.cn'
                 DockerRepository: 'ffc-experiments-dev'
                 DockerImageTag: '$(Build.BuildId)'
@@ -114,7 +114,7 @@ stages:
                 action: 'Build services'
                 includeLatestTag: true
                 additionalImageTags: $(Build.BuildId)
-                projectName: 'ffc-experiments-dev'
+                projectName: 'ffc-experiments'
 
             - task: DockerCompose@0
               inputs:
@@ -125,7 +125,7 @@ stages:
                 action: 'Push services'
                 includeLatestTag: true
                 additionalImageTags: $(Build.BuildId)
-                projectName: 'ffc-experiments-dev'
+                projectName: 'ffc-experiments'
 
 
             - task: AzureRmWebAppDeployment@4
@@ -135,5 +135,5 @@ stages:
                 appType: 'webAppContainer'
                 WebAppName: 'ffc-expeirments-ce2'
                 DockerNamespace: 'ffc0acr0ce2.azurecr.cn'
-                DockerRepository: 'ffc-experiments-dev'
+                DockerRepository: 'ffc-experiments'
                 DockerImageTag: '$(Build.BuildId)'
