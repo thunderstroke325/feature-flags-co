@@ -40,7 +40,7 @@ namespace FeatureFlags.APIs.Services
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
                 //由HttpClient发出异步Post请求
-                HttpResponseMessage res = await client.PostAsync($"{experimentationHost}/api/ExperimentResults", content);
+                HttpResponseMessage res = await client.PostAsync($"{experimentationHost}/api/nosdk", content);
                 if (res.StatusCode == System.Net.HttpStatusCode.OK)
                 {
                     var result = await res.Content.ReadAsStringAsync();
