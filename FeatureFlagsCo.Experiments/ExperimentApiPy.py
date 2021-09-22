@@ -6,6 +6,8 @@ app = Flask(__name__)
 from api.insert_data import *
 from api.retrieve_data import *
 from api.test import * 
+from api.nosdk import *
+
 
 if __name__ == '__main__':
     app.run()
