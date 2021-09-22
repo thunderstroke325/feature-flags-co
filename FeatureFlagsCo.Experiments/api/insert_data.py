@@ -3,9 +3,7 @@ from ExperimentApiPy import app
 from api.elastic_connection import connect_elasticsearch
 from flask import jsonify, request
 from datetime import datetime
-import collections
-from datetime import datetime
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import helpers
 import os, uuid
 
 ###########################################
@@ -20,6 +18,7 @@ def add_flagevent():
     Nevents=1000
     actions = []
     dict_value = {1:"Big-Button", 3:"Normal-Button", 2:"Small-Button"}
+    start = datetime.now()
     for group in range(3):
       for doc in range(Nevents):
         data={
@@ -49,7 +48,11 @@ def add_flagevent():
       print ("\nRESPONSE:", response)
     except Exception as e:
       print("\nERROR:", e)
-    return jsonify({"status":"succesfully sent "+str(Nevents*3)+' events to index ffvariationrequestindex'})
+    delta = datetime.now() - start
+    return jsonify({
+      "status":"succesfully sent "+str(Nevents*3)+' events to index ffvariationrequestindex', 
+      "delta_time_s": delta.total_seconds()
+    })
 
 '''
 # Push one by one
@@ -83,6 +86,7 @@ def add_flagevent():
 def add_customevent():
     Nevents=1000
     actions = []
+    start = datetime.now()
     for group in range(3):
       for doc in range(Nevents - (group+1)*200):
         data={
@@ -122,7 +126,11 @@ def add_customevent():
           print ("\nRESPONSE:", response)
     except Exception as e:
           print("\nERROR:", e)
-    return jsonify({"status":"succesfully sent "+str(Nevents*3)+' events to index experiments'})
+    delta = datetime.now() - start
+    return jsonify({
+      "status":"succesfully sent "+str(Nevents*3)+' events to index experiments',
+      "delta_time_s": delta.total_seconds()
+    })
 
 '''
 # Push one by one

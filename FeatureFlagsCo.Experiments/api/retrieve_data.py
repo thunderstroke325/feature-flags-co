@@ -140,9 +140,10 @@ def expt_data():
                 },
                 "size": 0
                 }
-                    
+    search_start = datetime.now()                
     res_A = es.search(index=Index, body=query_body_A)
-
+    search_end = datetime.now()
+    delta_time_search_a_s = (search_end - search_start).total_seconds() 
     # Query Expt data   
     Index = "experiments"
     query_body_B ={
@@ -186,7 +187,10 @@ def expt_data():
                     },
                     "size": 0
                 }
+    search_start = datetime.now()
     res_B = es.search(index=Index, body=query_body_B)
+    search_end = datetime.now()
+    delta_time_search_b_s = (search_end - search_start).total_seconds()
  
     # Stat of Flag
     var_baseline = data['Flag']['BaselineVariation']
@@ -298,5 +302,12 @@ def expt_data():
     print(output)
     endtime = datetime.now()
     print('processing time:') 
-    print((endtime-startime))
+    delta = (endtime-startime).total_seconds()
+    print(delta) 
+    output.append({
+        'status' : 'ok',
+        'delta_time_s': delta,
+        'delta_time_search_a_s': delta_time_search_a_s,
+        'delta_time_search_b_s': delta_time_search_b_s
+    })
     return jsonify(output)
