@@ -14,6 +14,7 @@ namespace FeatureFlags.APIs.Authentication
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
         public string PhoneNumber { get; set; }
+        public string OrgName { get; set; }
 
     }
 }

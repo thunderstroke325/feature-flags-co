@@ -24,9 +24,17 @@
         </nz-form-control>
     </nz-form-item>
     <nz-form-item>
+      <nz-form-label>机构名称</nz-form-label>
+      <nz-form-control nzErrorTip="请输入机构名称！">
+          <nz-input-group nzPrefixIcon="bank">
+              <input type="text" nz-input formControlName="orgName" placeholder="机构名称" />
+          </nz-input-group>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
         <nz-form-label>手机号</nz-form-label>
         <nz-form-control nzErrorTip="请输入手机号！">
-            <nz-input-group nzPrefixIcon="user">
+            <nz-input-group nzPrefixIcon="phone">
                 <input type="text" nz-input formControlName="phoneNumber" placeholder="手机号" />
             </nz-input-group>
         </nz-form-control>

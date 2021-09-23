@@ -75,7 +75,7 @@ export class ProjectService {
 
     const currentProject = this.projects[0];
     const currentEnv = currentProject.environments.slice(0, 1)[0];
-    const result = { projectId: currentProject.id, projectName: currentProject.name, envId: currentEnv.id, envName: currentEnv.name };
+    const result = { projectId: currentProject.id, projectName: currentProject.name, envId: currentEnv.id, envName: currentEnv.name, envSecret: currentEnv.secret };
     this.changeCurrentProjectAndEnv(result);
     return result;
   }

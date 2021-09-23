@@ -77,7 +77,7 @@ namespace FeatureFlags.APIs.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad request" });
             }
 
-            var newEnv = await _environmentService.CreateEnvAsync(param, accountId);
+            var newEnv = await _environmentService.CreateEnvAsync(param, accountId, currentUserId);
             EnvKeyViewModel envKeyViewModel = await RegenerateEnvKey(accountId, projectId, newEnv.Id, new EnvKeyViewModel
             {
                 KeyName = "Secret"

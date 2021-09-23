@@ -13,7 +13,7 @@ namespace FeatureFlags.APIs.Repositories
     public interface IAccountService
     {
         Task<List<AccountViewModel>> GetAccountsAsync(string userId);
-        Task<AccountViewModel> CreateAccountAsync(string currentUserId, AccountViewModel param);
+        Task<AccountViewModel> CreateAccountAsync(string currentUserId, AccountViewModel param, bool isInitializingAccount = false);
         // Delete account, including all of its users, projects and envs
         Task DeleteAccountAsync(int accountId);
 
@@ -55,7 +55,7 @@ namespace FeatureFlags.APIs.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<AccountViewModel> CreateAccountAsync(string currentUserId, AccountViewModel param)
+        public async Task<AccountViewModel> CreateAccountAsync(string currentUserId, AccountViewModel param, bool isInitializingAccount = false)
         {
 
             var newAccount = await _repository.CreateAsync<Account>(new Account
@@ -72,7 +72,7 @@ namespace FeatureFlags.APIs.Repositories
             });
 
             // create default project
-            await this._projectService.CreateProjectAsync(currentUserId, newAccount.Id, new ProjectViewModel { Name = "Default Project" });
+            await this._projectService.CreateProjectAsync(currentUserId, newAccount.Id, new ProjectViewModel { Name = "Default Project" }, isInitializingAccount);
 
             return new AccountViewModel
             {

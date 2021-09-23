@@ -31,6 +31,7 @@ export class TargetConditionsComponent implements OnInit {
   public targetIndividuals: {[key: string]: IUserType[]}  = {}; // multi state
 
   currentAccount: IAccount = null;
+  currentProjectEnv: IProjectEnv = null;
 
   approvalRequestEnabled: boolean = false;
   constructor(
@@ -105,13 +106,13 @@ export class TargetConditionsComponent implements OnInit {
       this.switchServe.setCurrentSwitch(detail);
       this.switchId = detail.id;
 
-      const currentProject: IProjectEnv = JSON.parse(localStorage.getItem('current-project'));
-      const currentAccount: IAccount = JSON.parse(localStorage.getItem('current-account'));
+      this.currentProjectEnv = JSON.parse(localStorage.getItem('current-project'));
+      this.currentAccount = JSON.parse(localStorage.getItem('current-account'));
       const currentUrl = this.route.snapshot['_routerState'].url;
       this.pendingChanges = new PendingChange(
         this.teamService,
-        currentAccount.id,
-        currentProject,
+        this.currentAccount.id,
+        this.currentProjectEnv,
         detail,
         this.variationOptions,
         currentUrl.substr(0, currentUrl.lastIndexOf('/') + 1)

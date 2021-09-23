@@ -39,6 +39,9 @@ namespace FeatureFlags.APIs.Services
         Task<FeatureFlag> CreateFeatureFlagAsync(CreateFeatureFlagViewModel param, string currentUserId, int projectId,
             int accountId);
 
+        Task<FeatureFlag> CreateDemoFeatureFlagAsync(CreateFeatureFlagViewModel param, string currentUserId, int projectId,
+            int accountId);
+        
         Task<FeatureFlag> UpdateFeatureFlagAsync(FeatureFlag param);
         Task<ReturnJsonModel<FeatureFlag>> UpdateMultiValueOptionSupportedFeatureFlagAsync(FeatureFlag param);
         Task<FeatureFlag> ArchiveEnvironmentdFeatureFlagAsync(FeatureFlagArchiveParam param);

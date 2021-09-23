@@ -39,7 +39,8 @@ export interface IProjectEnv {
   projectId: number,
   projectName: string,
   envId: number,
-  envName: string
+  envName: string,
+  envSecret: string
 }
 
 export enum EnvKeyNameEnum {

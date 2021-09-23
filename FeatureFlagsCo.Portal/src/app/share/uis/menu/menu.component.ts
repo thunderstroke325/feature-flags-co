@@ -77,6 +77,7 @@ export class MenuComponent implements OnInit {
       projectName: this.selectedProject.name,
       envId: this.selectedEnv.id,
       envName: this.selectedEnv.name,
+      envSecret: this.selectedEnv.secret
     };
 
     this.projectService.changeCurrentProjectAndEnv(projectEnv);

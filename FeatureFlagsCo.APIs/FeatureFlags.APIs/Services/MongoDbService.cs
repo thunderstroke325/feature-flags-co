@@ -111,6 +111,168 @@ namespace FeatureFlags.APIs.Services
             }
         }
 
+        public async Task<FeatureFlag> CreateDemoFeatureFlagAsync(CreateFeatureFlagViewModel param, string currentUserId,
+           int projectId, int accountId)
+        {
+            var keyName = FeatureFlagKeyExtension.CreateNewFeatureFlagKeyName(param.EnvironmentId, param.Name);
+            var featureFlagId = FeatureFlagKeyExtension.GetFeatureFlagId(keyName, param.EnvironmentId.ToString(),
+                accountId.ToString(), projectId.ToString());
+            var newFeatureFlag = new FeatureFlag()
+            {
+                Id = featureFlagId,
+                EnvironmentId = param.EnvironmentId,
+                FF = new FeatureFlagBasicInfo
+                {
+                    Id = featureFlagId,
+                    LastUpdatedTime = DateTime.UtcNow,
+                    KeyName = keyName,
+                    EnvironmentId = param.EnvironmentId,
+                    CreatorUserId = currentUserId,
+                    Name = param.Name,
+                    Status = param.Status,
+                    VariationOptionWhenDisabled = new VariationOption()
+                    {
+                        DisplayOrder = 1,
+                        LocalId = 1,
+                        VariationValue = "产品经理话术版1"
+                    },
+                    DefaultRulePercentageRollouts = new List<VariationOptionPercentageRollout>()
+                    {
+                        new VariationOptionPercentageRollout
+                        {
+                            RolloutPercentage = new double[2] {0, 0.33},
+                            ValueOption = new VariationOption()
+                            {
+                                DisplayOrder = 1,
+                                LocalId = 1,
+                                VariationValue = "产品经理话术版1"
+                            }
+                        },
+                        new VariationOptionPercentageRollout
+                        {
+                            RolloutPercentage = new double[2] {0.33, 0.67},
+                            ValueOption = new VariationOption()
+                            {
+                                DisplayOrder = 2,
+                                LocalId = 2,
+                                VariationValue = "程序员话术版1"
+                            }
+                        },
+                        new VariationOptionPercentageRollout
+                        {
+                            RolloutPercentage = new double[2] {0.67, 1},
+                            ValueOption = new VariationOption()
+                            {
+                                DisplayOrder = 3,
+                                LocalId = 3,
+                                VariationValue = "产品经理话术版2"
+                            }
+                        }
+                    }
+                },
+                IsArchived = false,
+                FFP = new List<FeatureFlagPrerequisite>(),
+                FFTUWMTR = new List<FeatureFlagTargetUsersWhoMatchTheseRuleParam>() 
+                {
+                    new FeatureFlagTargetUsersWhoMatchTheseRuleParam 
+                    {
+                        RuleName = "CSDN 规则",
+                        RuleJsonContent = new List<FeatureFlagRuleJsonContent> 
+                        {
+                            new FeatureFlagRuleJsonContent 
+                            {
+                                Operation = "EndsWith",
+                                Property = "外放地址",
+                                Value = "?from=csdn"
+                            }
+                        },
+                        ValueOptionsVariationRuleValues = new List<VariationOptionPercentageRollout> 
+                        {
+                            new VariationOptionPercentageRollout 
+                            {
+                                RolloutPercentage = new double[2] {0, 1},
+                                ValueOption = new VariationOption()
+                                {
+                                    DisplayOrder = 2,
+                                    LocalId = 2,
+                                    VariationValue = "程序员话术版1"
+                                }
+                            }
+                        }
+                    },
+                    new FeatureFlagTargetUsersWhoMatchTheseRuleParam
+                    {
+                        RuleName = "RRCPJL 规则",
+                        RuleJsonContent = new List<FeatureFlagRuleJsonContent>
+                        {
+                            new FeatureFlagRuleJsonContent
+                            {
+                                Operation = "EndsWith",
+                                Property = "外放地址",
+                                Value = "?from=rrcpjl"
+                            }
+                        },
+                        ValueOptionsVariationRuleValues = new List<VariationOptionPercentageRollout>
+                        {
+                            new VariationOptionPercentageRollout
+                            {
+                                RolloutPercentage = new double[2] {0, 0.5},
+                                ValueOption = new VariationOption()
+                                {
+                                    DisplayOrder = 1,
+                                    LocalId = 1,
+                                    VariationValue = "产品经理话术版1"
+                                }
+                            },
+                            new VariationOptionPercentageRollout
+                            {
+                                RolloutPercentage = new double[2] {0.5, 0.5},
+                                ValueOption = new VariationOption()
+                                {
+                                    DisplayOrder = 2,
+                                    LocalId = 2,
+                                    VariationValue = "程序员话术版1"
+                                }
+                            },
+                            new VariationOptionPercentageRollout
+                            {
+                                RolloutPercentage = new double[2] {0, 0.5},
+                                ValueOption = new VariationOption()
+                                {
+                                    DisplayOrder = 3,
+                                    LocalId = 3,
+                                    VariationValue = "产品经理话术版2"
+                                }
+                            }
+                        }
+                    }
+                },
+                VariationOptions = new List<VariationOption>()
+                {
+                    new VariationOption()
+                    {
+                        DisplayOrder = 1,
+                        LocalId = 1,
+                        VariationValue = "产品经理话术版1"
+                    },
+                    new VariationOption()
+                    {
+                        DisplayOrder = 2,
+                        LocalId = 2,
+                        VariationValue = "程序员话术版1"
+                    },
+                    new VariationOption()
+                    {
+                        DisplayOrder = 3,
+                        LocalId = 3,
+                        VariationValue = "产品经理话术版2"
+                    },
+                },
+                TargetIndividuals = new List<TargetIndividualForVariationOption>()
+            };
+            return await _mongoFeatureFlagsService.CreateAsync(newFeatureFlag);
+        }
+
         public async Task<FeatureFlag> CreateFeatureFlagAsync(CreateFeatureFlagViewModel param, string currentUserId,
             int projectId, int accountId)
         {

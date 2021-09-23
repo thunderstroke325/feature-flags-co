@@ -121,10 +121,10 @@ namespace FeatureFlags.APIs.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             var account = new AccountViewModel 
             {
-                OrganizationName = "Default organization"
+                OrganizationName = model.OrgName
             };
 
-            await _accountService.CreateAccountAsync(user.Id, account);
+            await _accountService.CreateAccountAsync(user.Id, account, true);
 
             return Ok(new Response { Code = "Success", Message = "User created successfully!" });
         }

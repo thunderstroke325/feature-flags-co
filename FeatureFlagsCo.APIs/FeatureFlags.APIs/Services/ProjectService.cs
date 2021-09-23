@@ -14,7 +14,7 @@ namespace FeatureFlags.APIs.Services
 
         public Task<IEnumerable<ProjectViewModel>> GetProjects(int accountId);
 
-        Task<ProjectViewModel> CreateProjectAsync(string currentUserId, int accountId, ProjectViewModel param);
+        Task<ProjectViewModel> CreateProjectAsync(string currentUserId, int accountId, ProjectViewModel param, bool isInitializingAccount = false);
 
         // Remove all projects of an account
         // The currentUser must be the owner/admin of the account, must be checked before calling this method
@@ -113,7 +113,7 @@ namespace FeatureFlags.APIs.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<ProjectViewModel> CreateProjectAsync(string currentUserId, int accountId, ProjectViewModel param)
+        public async Task<ProjectViewModel> CreateProjectAsync(string currentUserId, int accountId, ProjectViewModel param, bool isInitializingAccount = false)
         {
             var newProject = await _repository.CreateAsync<Project>(new Project
             {
@@ -137,7 +137,7 @@ namespace FeatureFlags.APIs.Services
                 ProjectId = newProject.Id,
                 Description = "production",
                 Name = "Production"
-            }, accountId);
+            }, accountId, currentUserId, isInitializingAccount);
             envs.Add(prodEnv);
 
             var testEnv = await _environmentService.CreateEnvAsync(new EnvironmentViewModel
@@ -145,7 +145,7 @@ namespace FeatureFlags.APIs.Services
                 ProjectId = newProject.Id,
                 Description = "test",
                 Name = "Test"
-            }, accountId);
+            }, accountId, currentUserId, isInitializingAccount);
 
             envs.Add(testEnv);
 

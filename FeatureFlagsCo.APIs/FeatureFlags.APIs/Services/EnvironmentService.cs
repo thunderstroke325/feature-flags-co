@@ -22,7 +22,7 @@ namespace FeatureFlags.APIs.Services
         // The currentUser must be the owner/admin of the account, or owner/admin of the project, must be checked before calling this method
         public Task RemoveEnvAsync(int environmentId);
 
-        public Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param, int accountId);
+        public Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param, int accountId, string currentUserId, bool isInitializingAccount = false);
 
         Task<bool> CheckIfUserHasRightToReadEnvAsync(string userId, int envId);
 
@@ -34,13 +34,17 @@ namespace FeatureFlags.APIs.Services
         private readonly ApplicationDbContext _dbContext;
         private readonly IGenericRepository _repository;
         private readonly UserManager<ApplicationUser> _userManager;
-
-        public EnvironmentService(ApplicationDbContext context, IGenericRepository repository,
-           UserManager<ApplicationUser> userManager)
+        private readonly INoSqlService _noSqlDbService;
+        public EnvironmentService(
+            ApplicationDbContext context,
+            IGenericRepository repository,
+            UserManager<ApplicationUser> userManager,
+            INoSqlService noSqlDbService)
         {
             _dbContext = context;
             _repository = repository;
             _userManager = userManager;
+            _noSqlDbService = noSqlDbService;
         }
 
         public async Task<IEnumerable<EnvironmentViewModel>> GetEnvs(int accountId, int projectId)
@@ -87,9 +91,9 @@ namespace FeatureFlags.APIs.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param, int accountId) 
+        public async Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param, int accountId, string currentUserId, bool isInitializingAccount = false) 
         {
-            var prodEnv = await _repository.CreateAsync<Environment>(new Environment
+            var env = await _repository.CreateAsync<Environment>(new Environment
             {
                 ProjectId = param.ProjectId,
                 Description = param.Description,
@@ -97,21 +101,35 @@ namespace FeatureFlags.APIs.Services
                 Name = param.Name,
                 Secret = FeatureFlagKeyExtension.GenerateEnvironmentKey(param.Id, accountId, param.ProjectId)
             });
+
+            // create demo FF
+            if (isInitializingAccount) 
+            {
+                var demoFFVM = new CreateFeatureFlagViewModel 
+                { 
+                    Name = "演示专用功能标记",
+                    Status = "Enabled",
+                    EnvironmentId = env.Id
+                };
+
+                await _noSqlDbService.CreateDemoFeatureFlagAsync(demoFFVM, currentUserId, param.ProjectId, accountId);
+            }
+
             if(param.Id <= 0)
             {
-                prodEnv.Secret = FeatureFlagKeyExtension.GenerateEnvironmentKey(prodEnv.Id, accountId, param.ProjectId);
-                prodEnv.MobileSecret = FeatureFlagKeyExtension.GenerateEnvironmentKey(prodEnv.Id, accountId, param.ProjectId);
-                await _repository.UpdateAsync<Environment>(prodEnv);
+                env.Secret = FeatureFlagKeyExtension.GenerateEnvironmentKey(env.Id, accountId, param.ProjectId);
+                env.MobileSecret = FeatureFlagKeyExtension.GenerateEnvironmentKey(env.Id, accountId, param.ProjectId);
+                await _repository.UpdateAsync<Environment>(env);
             }
 
             return new EnvironmentViewModel
             {
-                Id = prodEnv.Id,
-                ProjectId = prodEnv.ProjectId,
-                Description = prodEnv.Description,
-                MobileSecret = prodEnv.MobileSecret,
-                Name = prodEnv.Name,
-                Secret = prodEnv.Secret
+                Id = env.Id,
+                ProjectId = env.ProjectId,
+                Description = env.Description,
+                MobileSecret = env.MobileSecret,
+                Name = env.Name,
+                Secret = env.Secret
             };
         }
 

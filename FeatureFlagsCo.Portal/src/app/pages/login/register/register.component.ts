@@ -17,6 +17,7 @@ export class RegisterComponent implements OnInit {
 
   isLoading: boolean = false;
   phoneNumber: string = null;
+  orgName: string = null;
 
   get password() {
     if (!this.registerForm || !this.registerForm.value) return '';
@@ -48,6 +49,7 @@ export class RegisterComponent implements OnInit {
       email: new FormControl(null, [Validators.required, Validators.email]),
       password: new FormControl(null, [Validators.required, Validators.minLength(5)]),
       _password: new FormControl(null, [Validators.required]),
+      orgName: new FormControl(this.orgName, [Validators.required]),
       phoneNumber: new FormControl(this.phoneNumber, [Validators.required]),
     }, {
       validators: repeatPasswordValidator

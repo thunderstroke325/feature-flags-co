@@ -91,7 +91,6 @@ namespace FeatureFlags.APIs.Models
     }
 
 
-
     public class VariationOption
     {
         public int LocalId { get; set; }

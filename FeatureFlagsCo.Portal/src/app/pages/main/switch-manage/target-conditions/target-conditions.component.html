@@ -8,6 +8,9 @@
 <ng-template #conditionTemplate>
     <ng-container *ngIf="!isLoading; else loadingTem;">
         <div class="detail-body">
+          <div id="demo-link" *ngIf="featureDetail?.ff?.keyName === '演示专用功能标记'">
+            <a target="_blank" href="https://www.feature-flags.co/demo.html?envKey={{currentProjectEnv?.envSecret}}">Demo 地址</a>
+          </div>
             <button *ngIf="!approvalRequestEnabled" class="save"nz-button nzType="primary" (click)="onSaveConditionsOld()">保存设置</button>
             <nz-button-group class="save" *ngIf="approvalRequestEnabled">
               <button nz-button nzType="primary" (click)="onPreSaveConditions()">保存设置</button>
