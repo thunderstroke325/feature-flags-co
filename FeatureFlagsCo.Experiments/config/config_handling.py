@@ -4,7 +4,9 @@ from configparser import SafeConfigParser
 
 def get_config_value(module, variable):
     _curr_path = os.getcwd()
-    _config_path = os.path.join(_curr_path, 'config/config.ini')
+ #   _config_path = os.path.join(_curr_path, 'config/config.ini')
+    _config_path = '/home/liang/projets/FF/feature-flags-co/FeatureFlagsCo.Experiments/config/config.ini'
+
     _conf_value = None
     try:
         _parser = SafeConfigParser()
