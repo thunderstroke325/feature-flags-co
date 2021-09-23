@@ -4,3 +4,6 @@ elasticsearch_dsl
 numpy
 scipy
 requests
+pika
+flake8
+autopep8
