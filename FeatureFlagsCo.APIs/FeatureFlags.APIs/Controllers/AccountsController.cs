@@ -66,7 +66,7 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPut]
         [Route("")]
-        public async Task<dynamic> UpdateAccount([FromBody]AccountViewModel param)   
+        public async Task<dynamic> UpdateAccount([FromBody]AccountViewModel param)
         {
             var account = await _repository.SelectByIdAsync<Account>(param.Id);
 
@@ -82,6 +82,7 @@ namespace FeatureFlags.APIs.Controllers
                 }
 
                 account.OrganizationName = param.OrganizationName;
+                account.UpdatedAt = DateTime.UtcNow;
                 return await _repository.UpdateAsync<Account>(account);
             }
 

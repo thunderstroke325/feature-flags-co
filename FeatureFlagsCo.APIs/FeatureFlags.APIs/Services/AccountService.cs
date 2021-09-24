@@ -4,6 +4,7 @@ using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Account;
 using FeatureFlags.APIs.ViewModels.Project;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -57,10 +58,12 @@ namespace FeatureFlags.APIs.Repositories
 
         public async Task<AccountViewModel> CreateAccountAsync(string currentUserId, AccountViewModel param, bool isInitializingAccount = false)
         {
-
+            var now = DateTime.UtcNow;
             var newAccount = await _repository.CreateAsync<Account>(new Account
             {
-                OrganizationName = param.OrganizationName
+                OrganizationName = param.OrganizationName,
+                CreatedAt = now,
+                UpdatedAt = now
             });
             
             // set current user as the account owner
