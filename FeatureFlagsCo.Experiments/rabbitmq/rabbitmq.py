@@ -16,10 +16,15 @@ class RabbitMQ:
         _mq_passwd = get_config_value('rabbitmqpasswd', 'mq_passwd')
         self.__init__(_mq_host, _mq_port, _mq_username, _mq_passwd)
 
-    def __init__(self, host, port=5672, username='guest', passwd='guest'):
-        credentials = pika.PlainCredentials(username, passwd)
+    def __init__(self,
+                 mq_host='localhost',
+                 mq_port=5672,
+                 mq_username='guest',
+                 mq_passwd='guest'
+                 ):
+        credentials = pika.PlainCredentials(mq_username, mq_passwd)
         self._channel = pika.BlockingConnection(
-            pika.ConnectionParameters(host=host, port=port,
+            pika.ConnectionParameters(host=mq_host, port=mq_port,
                                       credentials=credentials)).channel()
 
     @property
@@ -28,8 +33,6 @@ class RabbitMQ:
 
 
 class RabbitMQConsumer(ABC, RabbitMQ):
-    def __init__(self, host, port=5672, username='guest', passwd='guest'):
-        super().__init__(host, port, username, passwd)
 
     @abstractmethod
     def handle_body(self, body):
@@ -63,8 +66,6 @@ class RabbitMQConsumer(ABC, RabbitMQ):
 
 
 class RabbitMQSender(RabbitMQ):
-    def __init__(self, host, port=5672, username='guest', passwd='guest'):
-        super().__init__(host, port, username, passwd)
 
     def send(self, topic, routing_key, *jsons):
         self.channel.exchange_declare(exchange=topic, exchange_type='topic')

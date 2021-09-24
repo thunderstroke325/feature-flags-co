@@ -162,6 +162,16 @@ services:
       - docker
       - development
   
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - ffc
+    ports:
+      - 6379:6379
+
+  
 
   api:
     build:

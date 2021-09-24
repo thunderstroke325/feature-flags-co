@@ -3,13 +3,17 @@ import logging
 import os
 import sys
 
+import redis
+
 from rabbitmq.rabbitmq import RabbitMQConsumer
 
 
 class SimpleConsumer(RabbitMQConsumer):
 
     def handle_body(self, body):
-        print(" [x] %r" % body)
+        r = redis.Redis(host='localhost', port=6379)
+        print(" [mq] %r" % body)
+        print(" [redis] %r" % r.get(body['id']).decode())
 
 
 if __name__ == '__main__':
