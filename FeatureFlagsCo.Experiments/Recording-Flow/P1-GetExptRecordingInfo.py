@@ -11,6 +11,7 @@ _mq_port = get_config_value('rabbitmqport', 'mq_port')
 _mq_username= get_config_value('rabbitmqusername', 'mq_username')
 _mq_passwd = get_config_value('rabbitmqpasswd', 'mq_passwd')
 
+
 def GetExptRecordingInfo():
     credentials = pika.PlainCredentials(_mq_username, _mq_passwd)
     parameters = pika.ConnectionParameters(_mq_host,
@@ -31,6 +32,7 @@ def GetExptRecordingInfo():
 
     print(' [*] Waiting for messages. To exit press CTRL+C')
     channel.start_consuming()
+
 
 if __name__ == '__main__':
     try:
