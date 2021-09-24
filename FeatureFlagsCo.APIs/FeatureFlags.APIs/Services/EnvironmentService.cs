@@ -35,15 +35,19 @@ namespace FeatureFlags.APIs.Services
         private readonly IGenericRepository _repository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly INoSqlService _noSqlDbService;
+        private readonly IEnvironmentUserPropertyService _environmentService;
+
         public EnvironmentService(
             ApplicationDbContext context,
             IGenericRepository repository,
             UserManager<ApplicationUser> userManager,
+            IEnvironmentUserPropertyService environmentService,
             INoSqlService noSqlDbService)
         {
             _dbContext = context;
             _repository = repository;
             _userManager = userManager;
+            _environmentService = environmentService;
             _noSqlDbService = noSqlDbService;
         }
 
@@ -105,6 +109,15 @@ namespace FeatureFlags.APIs.Services
             // create demo FF
             if (isInitializingAccount) 
             {
+                // set customized user properties
+                var userProperty = new EnvironmentUserProperty
+                {
+                    EnvironmentId = env.Id,
+                    Properties = new List<string> { "外放地址" }
+                };
+
+                await _environmentService.CreateOrUpdateCosmosDBEnvironmentUserPropertiesForCRUDAsync(userProperty);
+
                 var demoFFVM = new CreateFeatureFlagViewModel 
                 { 
                     Name = "演示专用功能标记",
