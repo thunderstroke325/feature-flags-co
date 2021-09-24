@@ -3,6 +3,7 @@ import logging
 from abc import ABC, abstractmethod
 
 import pika
+import redis
 from pika.adapters.blocking_connection import BlockingChannel
 
 from config.config_handling import get_config_value
@@ -11,25 +12,37 @@ from config.config_handling import get_config_value
 class RabbitMQ:
     def __int__(self):
         _mq_host = get_config_value('rabbitmq', 'mq_host')
-        _mq_port = get_config_value('rabbitmqport', 'mq_port')
-        _mq_username = get_config_value('rabbitmqusername', 'mq_username')
-        _mq_passwd = get_config_value('rabbitmqpasswd', 'mq_passwd')
-        self.__init__(_mq_host, _mq_port, _mq_username, _mq_passwd)
+        _mq_port = get_config_value('rabbitmq', 'mq_port')
+        _mq_username = get_config_value('rabbitmq', 'mq_username')
+        _mq_passwd = get_config_value('rabbitmq', 'mq_passwd')
+        _redis_host = get_config_value('redis', 'redis_host')
+        _redis_port = get_config_value('redis', 'redis_port')
+        _redis_passwd = get_config_value('redis', 'redis_passwd')
+        self.__init__(_mq_host, _mq_port, _mq_username, _mq_passwd, _redis_host,
+                      _redis_port, _redis_passwd)
 
     def __init__(self,
                  mq_host='localhost',
                  mq_port=5672,
                  mq_username='guest',
-                 mq_passwd='guest'
+                 mq_passwd='guest',
+                 redis_host='localhost',
+                 redis_port='6379',
+                 redis_passwd=None
                  ):
         credentials = pika.PlainCredentials(mq_username, mq_passwd)
         self._channel = pika.BlockingConnection(
             pika.ConnectionParameters(host=mq_host, port=mq_port,
                                       credentials=credentials)).channel()
+        self._redis = redis.Redis(host=redis_host, port=redis_port, password=redis_passwd)
 
     @property
     def channel(self) -> BlockingChannel:
         return self._channel
+
+    @property
+    def redis(self) -> redis.Redis:
+        return self._redis
 
 
 class RabbitMQConsumer(ABC, RabbitMQ):

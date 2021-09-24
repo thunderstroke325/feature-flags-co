@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import json
 import logging
 import os
 import sys
@@ -11,15 +12,13 @@ from rabbitmq.rabbitmq import RabbitMQConsumer
 class SimpleConsumer(RabbitMQConsumer):
 
     def handle_body(self, body):
-        r = redis.Redis(host='localhost', port=6379)
         print(" [mq] %r" % body)
-        print(" [redis] %r" % r.get(body['id']).decode())
-
+        print(" [redis] %r" % json.loads(self.redis.get(body['id']).decode()))
 
 if __name__ == '__main__':
     logging.basicConfig(encoding='utf-8', level=logging.INFO)
     try:
-        SimpleConsumer('localhost').consumer('topic_ff', '', 'es.#')
+        SimpleConsumer().consumer('topic', 'py.1')
     except KeyboardInterrupt:
         logging.info('Interrupted')
         try:
