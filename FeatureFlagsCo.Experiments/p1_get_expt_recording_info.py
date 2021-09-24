@@ -5,20 +5,21 @@ import sys
 from rabbitmq.rabbitmq import RabbitMQConsumer, RabbitMQSender
 
 
-class GetExptRecordingInfo(RabbitMQConsumer):
+class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
     def handle_body(self, body):
         if type(body) is dict:
-            key, value = body.get('ExptID', None), body
+            key, end, value = body.get('ExptID', None), body.get('EndExptTime', None), body
             if key:
-                jsons = [key]
-                RabbitMQSender() \
-                    .send(topic='Q2', routing_key='py.ExperimentResults', *jsons)
+                if end:
+                    jsons = [key]
+                    RabbitMQSender() \
+                        .send(topic='Q2', routing_key='py.ExperimentResults', *jsons)
                 self.redis.set(key, str.encode(json.dumps(value)))
 
 
 if __name__ == '__main__':
     try:
-        GetExptRecordingInfo().consumer(topic='Q1', queue='py.ExptRecordingInfo')
+        P1GetExptRecordingInfoConsumer().consumer(topic='Q1', queue='py.ExptRecordingInfo')
     except KeyboardInterrupt:
         print('Interrupted')
         try:
