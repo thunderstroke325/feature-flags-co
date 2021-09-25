@@ -9,7 +9,8 @@ from rabbitmq.rabbitmq import RabbitMQConsumer, RabbitMQSender
 class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
     def handle_body(self, body):
         if type(body) is dict:
-            key, end, value = body.get('ExptID', None), body.get('EndExptTime', None), body
+            key, end, value = body.get('ExptID', None), body.get(
+                'EndExptTime', None), body
             if key:
                 if end:
                     jsons = [key]
@@ -23,7 +24,8 @@ if __name__ == '__main__':
     logging.basicConfig(format=FORMAT, encoding='utf-8', level=logging.INFO)
     while True:
         try:
-            P1GetExptRecordingInfoConsumer().consumer(topic='Q1', queue='py.experiments.recordinginfo')
+            P1GetExptRecordingInfoConsumer().consumer(
+                'py.experiments.recordinginfo', ('Q1', []))
             break
         except KeyboardInterrupt:
             logging.info('#######Interrupted#########')

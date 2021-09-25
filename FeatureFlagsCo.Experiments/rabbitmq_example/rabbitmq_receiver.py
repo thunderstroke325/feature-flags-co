@@ -11,7 +11,11 @@ from rabbitmq.rabbitmq import RabbitMQConsumer
 
 class SimpleConsumer(RabbitMQConsumer):
 
-    def handle_body(self, body):
+    def handle_body(self, body, **properties):
+        routing_key = properties.get(
+            'routing_key', None) if properties else None
+        if routing_key:
+            print(" [from] %r" % routing_key)
         print(" [mq] %r" % body)
         print(" [redis] %r" % json.loads(self.redis.get(body['id']).decode()))
 
@@ -22,7 +26,7 @@ if __name__ == '__main__':
                         datefmt='%m-%d %H:%M')
     while True:
         try:
-            SimpleConsumer().consumer('topic', 'py.1')
+            SimpleConsumer().consumer('py.1', ('topic', []))
             break
         except KeyboardInterrupt:
             logging.info('#######Interrupted#########')

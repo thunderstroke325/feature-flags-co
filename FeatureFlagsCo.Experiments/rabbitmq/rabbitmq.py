@@ -34,7 +34,8 @@ class RabbitMQ:
         self._channel = pika.BlockingConnection(
             pika.ConnectionParameters(host=mq_host, port=mq_port,
                                       credentials=credentials)).channel()
-        self._redis = redis.Redis(host=redis_host, port=redis_port, password=redis_passwd)
+        self._redis = redis.Redis(
+            host=redis_host, port=redis_port, password=redis_passwd)
 
     @property
     def channel(self) -> BlockingChannel:
@@ -48,30 +49,35 @@ class RabbitMQ:
 class RabbitMQConsumer(ABC, RabbitMQ):
 
     @abstractmethod
-    def handle_body(self, body):
+    def handle_body(self, body, **properties):
         pass
 
-    def consumer(self, topic, queue='', *binding_keys):
-        self.channel.exchange_declare(exchange=topic, exchange_type='topic')
-        # direct queue mode
-        if queue:
-            result = self.channel.queue_declare(queue, durable=True)
-            queue_name = result.method.queue
-            super().channel.queue_bind(
-                exchange=topic, queue=queue_name)
-            logging.info("topic: %r, queue: %r, direct queue mode" % (topic, queue))
-        # topic mode
-        else:
-            result = self.channel.queue_declare('', exclusive=True)
-            queue_name = result.method.queue
-            for binding_key in set(binding_keys):
-                super().channel.queue_bind(
-                    exchange=topic, queue=queue_name, routing_key=binding_key)
-                logging.info(
-                    "topic: %r, binding_key: %r, topic mode" % (topic, binding_key))
+    def consumer(self, queue='', *bindings):
+        if bindings and len(bindings) > 0:
+            for topic, binding_keys in bindings:
+                self.channel.exchange_declare(
+                    exchange=topic, exchange_type='topic')
+                # direct queue mode
+                if queue:
+                    result = self.channel.queue_declare(queue, durable=True)
+                    queue_name = result.method.queue
+                    super().channel.queue_bind(
+                        exchange=topic, queue=queue_name)
+                    logging.info(
+                        "topic: %r, queue: %r, direct queue mode" % (topic, queue))
+                # topic mode
+                else:
+                    result = self.channel.queue_declare('', exclusive=True)
+                    queue_name = result.method.queue
+                    for binding_key in set(binding_keys):
+                        super().channel.queue_bind(
+                            exchange=topic, queue=queue_name, routing_key=binding_key)
+                    logging.info("topic: %r, binding_key: %r, topic mode" % (
+                        topic, binding_key))
 
         def callback(ch, method, properties, body):
-            self.handle_body(json.loads(body.decode()))
+            self.handle_body(json.loads(body.decode()),
+                             routing_key=method.routing_key)
 
         self.channel.basic_consume(
             queue=queue_name, on_message_callback=callback, auto_ack=True)
@@ -81,7 +87,8 @@ class RabbitMQConsumer(ABC, RabbitMQ):
 class RabbitMQSender(RabbitMQ):
 
     def send(self, topic, routing_key, *jsons):
-        self.channel.exchange_declare(exchange=topic, exchange_type='topic')
+        self.channel.exchange_declare(
+            exchange=topic, exchange_type='topic')
         logging.info("topic: %r, routing_key: %r" % (topic, routing_key))
         for json_body in jsons:
             body = str.encode(json.dumps(json_body))
