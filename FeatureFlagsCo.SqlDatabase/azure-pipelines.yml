@@ -21,7 +21,7 @@ stages:
       - task: MSBuild@1
         displayName: 'Build database'
         inputs:
-          solution: '**/*.sln'
+          solution: '**/FeatureFlagsCo.SqlDatabase/FeatureFlagsCo.SqlDatabase.sqlproj'
           msbuildArchitecture: 'x64'
 
       - script: |
