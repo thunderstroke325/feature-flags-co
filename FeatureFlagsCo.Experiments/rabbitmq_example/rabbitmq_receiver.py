@@ -15,13 +15,20 @@ class SimpleConsumer(RabbitMQConsumer):
         print(" [mq] %r" % body)
         print(" [redis] %r" % json.loads(self.redis.get(body['id']).decode()))
 
+
 if __name__ == '__main__':
-    logging.basicConfig(encoding='utf-8', level=logging.INFO)
-    try:
-        SimpleConsumer().consumer('topic', 'py.1')
-    except KeyboardInterrupt:
-        logging.info('Interrupted')
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%m-%d %H:%M')
+    while True:
         try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
+            SimpleConsumer().consumer('topic', 'py.1')
+            break
+        except KeyboardInterrupt:
+            logging.info('#######Interrupted#########')
+            try:
+                sys.exit(0)
+            except SystemExit:
+                os._exit(0)
+        except Exception as e:
+            logging.exception("#######unexpected#########")
