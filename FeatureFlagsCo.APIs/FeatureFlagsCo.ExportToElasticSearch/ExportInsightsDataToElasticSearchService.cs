@@ -65,10 +65,10 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
                     
                     // Q4 同步feature flag 数据
                     _channel.ExchangeDeclare(exchange: "Q4", type: "topic");
-                    var queueName = _channel.QueueDeclare(queue:"es.experiments.ffs", durable: true).QueueName;
+                    var queueName = _channel.QueueDeclare(queue:"es.experiments.events.ff", durable: true).QueueName;
                     _channel.QueueBind(queue: queueName,
                         exchange: "Q4",
-                        routingKey: "es.experiments.ffs.#");
+                        routingKey: "es.experiments.events.ff.#");
 
                     var consumer = new EventingBasicConsumer(_channel);
                     consumer.Received += async (model, ea) =>

@@ -71,11 +71,11 @@ namespace FeatureFlags.APIs.Services
             // Q5 数据发送至es, py
             _channel.ExchangeDeclare(exchange: "Q5", type: "topic");
             _channel.BasicPublish(exchange: "Q5",
-                                  routingKey: "es.experiments.events",
+                                  routingKey: "es.experiments.events.user",
                                   basicProperties: null,
                                   body: body);
             _channel.BasicPublish(exchange: "Q5",
-                                  routingKey: "py.experiments.events",
+                                  routingKey: "py.experiments.events.user",
                                   basicProperties: null,
                                   body: body);
             //_channel.BasicPublish(exchange: "",

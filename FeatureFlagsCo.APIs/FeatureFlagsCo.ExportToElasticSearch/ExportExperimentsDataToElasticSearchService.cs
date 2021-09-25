@@ -65,10 +65,10 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
                     
                     // Q5 同步user event 数据
                     _channel.ExchangeDeclare(exchange: "Q5", type: "topic");
-                    var queueName = _channel.QueueDeclare(queue: "es.experiments.events", durable: true).QueueName;
+                    var queueName = _channel.QueueDeclare(queue: "es.experiments.events.user", durable: true).QueueName;
                     _channel.QueueBind(queue: queueName,
                         exchange: "Q5",
-                        routingKey: "es.experiments.events.#");
+                        routingKey: "es.experiments.events.user.#");
                     var consumer = new EventingBasicConsumer(_channel);
                     consumer.Received += async (model, ea) =>
                     {

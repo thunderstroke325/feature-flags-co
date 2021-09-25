@@ -77,12 +77,12 @@ namespace FeatureFlags.APIs.Services
             // Q4 数据发送至es, py
             _channel.ExchangeDeclare(exchange: "Q4", type: "topic");
             _channel.BasicPublish(exchange: "Q4",
-                                  routingKey: "es.experiments.ffs",
+                                  routingKey: "es.experiments.events.ff",
                                   basicProperties: null,
                                   body: body);
             
             _channel.BasicPublish(exchange: "Q4",
-                                  routingKey: "py.experiments.ffs",
+                                  routingKey: "py.experiments.events.ff",
                                   basicProperties: null,
                                   body: body);
             //_channel.BasicPublish(exchange: "",
