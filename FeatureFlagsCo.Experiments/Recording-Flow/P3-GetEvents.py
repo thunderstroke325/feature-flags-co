@@ -1,6 +1,9 @@
 ###############################
-# Dataset received from Q4 & Q5
+# Get events from Rabbitmq and 
+# store userful info to Redis 
 ###############################
+
+# Dataset received from Q4 & Q5
 FFevent1 = {
         "_index" : "ffvariationrequestindex",
         "_type" : "_doc",
@@ -46,7 +49,7 @@ Exptevent1 = {
         "_index" : "experiments",
         "_type" : "_doc",
         "_id" : "4cf8a6a0-28d7-4e7e-bb1d-5bcc8040ce95",
-        "_score" : 1.0761821,
+        "_score" : 1.0761821,     
         "_source" : {
           "Route" : "index",
           "Secret" : "YjA1LTNiZDUtNCUyMDIxMDkwNDIyMTMxNV9fMzhfXzQ4X18xMDNfX2RlZmF1bHRfNzc1Yjg=",
@@ -58,7 +61,12 @@ Exptevent1 = {
             "FFUserEmail" : "u_group0_0@testliang.com",
             "FFUserCountry" : "China",
             "FFUserKeyId" : "u_group0_0@testliang.com",
-            "FFUserCustomizedProperties" : [ ]
+            "FFUserCustomizedProperties" : [ 
+                            {
+              "Name" : "age",
+              "Value" : "16"
+            }
+            ]
           },
           "AppType" : "Javascript",
           "CustomizedProperties" : [
@@ -103,23 +111,65 @@ Exptevent2 = {
         }
       }
 
-###################################################
+################################
 # Receive message from Rabbitmq
-###################################################
+################################
+#  ACTION : Get from Q4/Q5 > Event
+messageQueue = 'Q4'
+if messageQueue == 'Q4':
+    event = FFevent1
+elif messageQueue == 'Q5':
+    event = Exptevent1
 
-#  ACTION : Get > Event
-
-
-###################################################
+########################################
 # Python Code to store message to Redis 
-###################################################
+########################################
 
-if event["_index"] =  "ffvariationrequestindex" : 
-    
-    # ACTION: Get > list_flags 
-    list_acitve_flagsevents = {}
-    if event["FeatureFlagId"] in list_actvie_flags:
-        # ACTION: Get > flagevents[''] 
-else:
-
-
+if event["_index"] ==  "ffvariationrequestindex" : 
+    # ACTION: Get from Redis > dict_flag_acitveExpts 
+    dict_flag_acitveExpts = {'FF_38_48_103_PayButton': 
+                                ['FF_38_48_103_PayButton_expt1', 
+                                'FF_38_48_103_PayButton_expt2'
+                                ]
+                            }    
+    if event["FeatureFlagId"] in dict_flag_acitveExpts.keys():
+        # ACTION: Send FlagId to Redis, Get from Redis, can be empty list [] > list_FFevents 
+        list_FFevents =  [
+            {
+                "FeatureFlagId" : FFevent1["_souce"]["FeatureFlagId"],
+                "UserKeyId" : FFevent1["_souce"]["UserKeyId"],
+                "VariationLocalId" : FFevent1["_souce"]["VariationLocalId"],
+                "TimeStamp" : FFevent1["_souce"]["TimeStamp"]
+            }
+        ]
+        dict_to_add = {
+                "FeatureFlagId" : event["_souce"]["FeatureFlagId"],
+                "UserKeyId" : event["_souce"]["UserKeyId"],
+                "VariationLocalId" : event["_souce"]["VariationLocalId"],
+                "TimeStamp" : event["_souce"]["TimeStamp"]
+        }
+        list_FFevents =  list_FFevents + [dict_to_add] 
+        # ACTION : Send to Redis > list_FFevents related to an FlagID
+elif event["_index"] ==  "experiments":
+    # ACTION: Get from Redis > dict_customEvent_acitveExpts 
+    dict_customEvent_acitveExpts = {'PayButtonTrack': 
+                                ['FF_38_48_103_PayButton_expt1', 
+                                'FF_38_48_103_PayButtonColor_expt1'
+                                ]
+                            }    
+    if event["EventName"] in dict_customEvent_acitveExpts.keys():
+        # ACTION: Send EventName to Redis, Get from Redis, can be empty list [] > list_Exptevents 
+        list_Exptevents =  [
+            {
+                "EventName" : Exptevent1["_souce"]["EventName"],
+                "UserKeyId" : Exptevent1["_souce"]["User"]["FFUserKeyId"],
+                "TimeStamp" : Exptevent1["_souce"]["TimeStamp"]
+            }
+        ]        
+        Exptevent2 = {
+                "EventName" : event["_souce"]["EventName"],
+                "UserKeyId" : event["_souce"]["User"]["FFUserKeyId"],
+                "TimeStamp" : event["_souce"]["TimeStamp"]
+        }
+        list_Exptevents = list_Exptevents + [Exptevent2]
+        # ACTION : Send to Redis > list_Exptevents related to an EventName
