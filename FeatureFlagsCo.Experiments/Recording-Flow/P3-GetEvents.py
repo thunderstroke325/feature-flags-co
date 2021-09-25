@@ -152,7 +152,7 @@ if event["_index"] ==  "ffvariationrequestindex" :
         # ACTION : Send to Redis > list_FFevents related to an FlagID
 elif event["_index"] ==  "experiments":
     # ACTION: Get from Redis > dict_customEvent_acitveExpts 
-    dict_customEvent_acitveExpts = {'PayButtonTrack': 
+    dict_customEvent_acitveExpts = {'clickButtonPayTrack': 
                                 ['FF_38_48_103_PayButton_expt1', 
                                 'FF_38_48_103_PayButtonColor_expt1'
                                 ]
