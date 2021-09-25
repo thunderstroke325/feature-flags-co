@@ -62,10 +62,10 @@ stages:
               inputs:
                 azureSubscription: 'azure-china-devops'
                 AuthenticationType: 'server'
-                ServerName: 'ffc-sqlsrv-ce2-dev.database.chinacloudapi.cn,1433'
+                ServerName: '52.131.239.36,1433'
                 DatabaseName: 'ffc-sqldb-ce2'
-                SqlUsername: 'ffc-sqlsrv-ce2-dev'
-                SqlPassword: '$(SqlPassword)'
+                SqlUsername: 'sa'
+                SqlPassword: '$(SqlPassword_Dev)'
                 deployType: 'DacpacTask'
                 DeploymentAction: 'Publish'
                 DacpacFile: '$(System.DefaultWorkingDirectory)/drop/templates/FeatureFlagsCo.SqlDatabase.dacpac'
