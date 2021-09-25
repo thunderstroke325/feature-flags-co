@@ -29,22 +29,22 @@ namespace FeatureFlags.APIs.Services
             _connection.ConnectionShutdown += Connection_ConnectionShutdown;
             _connection.ConnectionBlocked += Connection_ConnectionBlocked;
             _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "experiments",
-                                    durable: false,
-                                    exclusive: false,
-                                    autoDelete: false,
-                                    arguments: null);
+            // _channel.QueueDeclare(queue: "experiments",
+            //                         durable: false,
+            //                         exclusive: false,
+            //                         autoDelete: false,
+            //                         arguments: null);
             _channel.CallbackException += Channel_CallbackException;
         }
 
         private void Channel_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
         {
             _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "experiments",
-                                    durable: false,
-                                    exclusive: false,
-                                    autoDelete: false,
-                                    arguments: null);
+            // _channel.QueueDeclare(queue: "experiments",
+            //                         durable: false,
+            //                         exclusive: false,
+            //                         autoDelete: false,
+            //                         arguments: null);
         }
 
         private void Connection_ConnectionBlocked(object sender, RabbitMQ.Client.Events.ConnectionBlockedEventArgs e)
@@ -68,9 +68,14 @@ namespace FeatureFlags.APIs.Services
         {
 
             var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
-
-            _channel.BasicPublish(exchange: "",
-                                  routingKey: "experiments",
+            // Q5 数据发送至es, py
+            _channel.ExchangeDeclare(exchange: "Q5", type: "topic");
+            _channel.BasicPublish(exchange: "Q5",
+                                  routingKey: "es.experiments.events",
+                                  basicProperties: null,
+                                  body: body);
+            _channel.BasicPublish(exchange: "Q5",
+                                  routingKey: "py.experiments.events",
                                   basicProperties: null,
                                   body: body);
             //_channel.BasicPublish(exchange: "",

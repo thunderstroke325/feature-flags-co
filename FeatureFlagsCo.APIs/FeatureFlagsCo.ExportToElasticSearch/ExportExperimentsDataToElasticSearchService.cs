@@ -62,13 +62,13 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
 
 
                     Console.WriteLine("Connection and channel created");
-
-                    _channel.QueueDeclare(queue: "experiments",
-                                         durable: false,
-                                         exclusive: false,
-                                         autoDelete: false,
-                                         arguments: null);
-
+                    
+                    // Q5 同步user event 数据
+                    _channel.ExchangeDeclare(exchange: "Q5", type: "topic");
+                    var queueName = _channel.QueueDeclare(queue: "es.experiments.events", durable: true).QueueName;
+                    _channel.QueueBind(queue: queueName,
+                        exchange: "Q5",
+                        routingKey: "es.experiments.events.#");
                     var consumer = new EventingBasicConsumer(_channel);
                     consumer.Received += async (model, ea) =>
                     {
@@ -97,8 +97,8 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
                         }
 
                     };
-                    _channel.BasicConsume(queue: "experiments",
-                                         autoAck: false,
+                    _channel.BasicConsume(queue: queueName,
+                                         autoAck: true,
                                          consumer: consumer);
 
                     break;

@@ -29,11 +29,11 @@ namespace FeatureFlags.APIs.Services
             _connection.ConnectionShutdown += Connection_ConnectionShutdown;
             _connection.ConnectionBlocked += Connection_ConnectionBlocked;
             _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "hello",
-                                    durable: false,
-                                    exclusive: false,
-                                    autoDelete: false,
-                                    arguments: null);
+            // _channel.QueueDeclare(queue: "hello",
+            //                         durable: false,
+            //                         exclusive: false,
+            //                         autoDelete: false,
+            //                         arguments: null);
             //this.SendMessage(new MessageModel
             //{
             //    Labels = new List<MessageLabel> { new MessageLabel { LabelName = "API Init", LabelValue = DateTime.UtcNow.ToLongDateString() } },
@@ -46,11 +46,11 @@ namespace FeatureFlags.APIs.Services
         private void Channel_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
         {
             _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "hello",
-                                    durable: false,
-                                    exclusive: false,
-                                    autoDelete: false,
-                                    arguments: null);
+            // _channel.QueueDeclare(queue: "hello",
+            //                         durable: false,
+            //                         exclusive: false,
+            //                         autoDelete: false,
+            //                         arguments: null);
         }
 
         private void Connection_ConnectionBlocked(object sender, RabbitMQ.Client.Events.ConnectionBlockedEventArgs e)
@@ -74,9 +74,15 @@ namespace FeatureFlags.APIs.Services
         {
 
             var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
-
-            _channel.BasicPublish(exchange: "",
-                                  routingKey: "hello",
+            // Q4 数据发送至es, py
+            _channel.ExchangeDeclare(exchange: "Q4", type: "topic");
+            _channel.BasicPublish(exchange: "Q4",
+                                  routingKey: "es.experiments.ffs",
+                                  basicProperties: null,
+                                  body: body);
+            
+            _channel.BasicPublish(exchange: "Q4",
+                                  routingKey: "py.experiments.ffs",
                                   basicProperties: null,
                                   body: body);
             //_channel.BasicPublish(exchange: "",

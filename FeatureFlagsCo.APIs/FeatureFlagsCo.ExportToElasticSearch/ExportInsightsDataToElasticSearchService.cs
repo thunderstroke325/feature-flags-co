@@ -37,7 +37,7 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
             if (_channel != null)
             {
                 _channel.Close();
-                _channel.QueueDelete("hello");
+                // _channel.QueueDelete("hello");
             }
             if (_connection != null)
                 _connection.Close();
@@ -62,12 +62,13 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
 
 
                     Console.WriteLine("Connection and channel created");
-
-                    _channel.QueueDeclare(queue: "hello",
-                                         durable: false,
-                                         exclusive: false,
-                                         autoDelete: false,
-                                         arguments: null);
+                    
+                    // Q4 同步feature flag 数据
+                    _channel.ExchangeDeclare(exchange: "Q4", type: "topic");
+                    var queueName = _channel.QueueDeclare(queue:"es.experiments.ffs", durable: true).QueueName;
+                    _channel.QueueBind(queue: queueName,
+                        exchange: "Q4",
+                        routingKey: "es.experiments.ffs.#");
 
                     var consumer = new EventingBasicConsumer(_channel);
                     consumer.Received += async (model, ea) =>
@@ -97,8 +98,8 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
                         }
 
                     };
-                    _channel.BasicConsume(queue: "hello",
-                                         autoAck: false,
+                    _channel.BasicConsume(queue: queueName,
+                                         autoAck: true,
                                          consumer: consumer);
 
                     break;
