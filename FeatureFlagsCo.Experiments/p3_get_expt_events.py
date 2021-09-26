@@ -14,13 +14,12 @@ class P3GetEventsConsumer(RabbitMQConsumer):
         if type(body) is dict and routing_key:
             if routing_key.contains('py.experiments.events.ff') and body['_index'] == 'ffvariationrequestindex':
                 # Q4
-                dict_flag_acitveExpts = json.loads(self.redis.get(
-                    'dict_ff_act_expts_%s_%s' % (body['EnvId'], body['FeatureFlagId'])).decode())
-                if body['FeatureFlagId'] in dict_flag_acitveExpts.keys():
+                dict_flag_acitveExpts = self.redis_get(
+                    'dict_ff_act_expts_%s_%s' % (body['EnvId'], body['FeatureFlagId']))
+                if dict_flag_acitveExpts and body['FeatureFlagId'] in dict_flag_acitveExpts.keys():
                     id = '%s_%s' % (body['EnvId'], body['FeatureFlagId'])
-                    value = self.redis.get(id)
-                    list_ff_events = json.loads(
-                        value.decode()) if value else []
+                    value = self.redi_get(id)
+                    list_ff_events = value if value else []
                     dict_to_add = {
                         # 'FeatureFlagId': body['FeatureFlagId'],
                         'UserKeyId': body['UserKeyId'],
@@ -28,24 +27,22 @@ class P3GetEventsConsumer(RabbitMQConsumer):
                         'TimeStamp': body['TimeStamp']
                     }
                     list_ff_events = list_ff_events + [dict_to_add]
-                    self.redis.set(id, str.encode(json.dumps(list_ff_events)))
+                    self.redis_set(id, list_ff_events)
             elif routing_key.contains('py.experiments.events.user') and body['_index'] == 'experiments':
                 # Q5
-                dict_customEvent_acitveExpts = json.loads(self.redis.get(
-                    'dict_event_act_expts_%s_%s' % (body['EnvironmentId'], body['EventName'])).decode())
-                if body["EventName"] in dict_customEvent_acitveExpts.keys():
+                dict_customEvent_acitveExpts = self.redis_get(
+                    'dict_event_act_expts_%s_%s' % (body['EnvironmentId'], body['EventName']))
+                if dict_customEvent_acitveExpts and body['EventName'] in dict_customEvent_acitveExpts.keys():
                     id = '%s_%s' % (body['EnvironmentId'], body['EventName'])
-                    value = self.redis.get(id)
-                    list_user_events = json.loads(
-                        value.decode()) if value else []
+                    value = self.redis_get(id)
+                    list_user_events = value if value else []
                     dict_to_add = {
-                        # "EventName": body["EventName"],
-                        'UserKeyI': body["User"]["FFUserKeyId"],
-                        'TimeStamp': body["TimeStamp"]
+                        # 'EventName': body['EventName'],
+                        'UserKeyI': body['User']['FFUserKeyId'],
+                        'TimeStamp': body['TimeStamp']
                     }
                     list_user_events = list_user_events + [dict_to_add]
-                    self.redis.set(id, str.encode(
-                        json.dumps(list_user_events)))
+                    self.redis_set(id, list_user_events)
 
 
 if __name__ == '__main__':
@@ -64,4 +61,4 @@ if __name__ == '__main__':
             except SystemExit:
                 os._exit(0)
         except Exception as e:
-            logging.exception("#######unexpected#########")
+            logging.exception('#######unexpected#########')

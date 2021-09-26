@@ -14,7 +14,7 @@ from rabbitmq.rabbitmq import RabbitMQConsumer, RabbitMQSender
 class P2GetExptResult(RabbitMQConsumer):
 
     # cal Confidence interval
-    def __mean_confidence_interval(data, confidence=0.95):
+    def __mean_confidence_interval(self, data, confidence=0.95):
         a = 1.0 * np.array(data)
         n = len(a)
         m, se = np.mean(a), sp.stats.sem(a)
@@ -22,7 +22,7 @@ class P2GetExptResult(RabbitMQConsumer):
         return m, m-h, m+h
 
     # cal Expt Result from list of FlagsEvents and list of CustomEvents:
-    def __calc_experiment_result(expt, expt_id, ff_events_agg, user_events_agg):
+    def __calc_experiment_result(self, expt, expt_id, ff_events_agg, user_events_agg):
         # Stat of Flag
         var_baseline = expt['Flag']['BaselineVariation']
         dict_var_user = {}
@@ -73,17 +73,17 @@ class P2GetExptResult(RabbitMQConsumer):
                             min, 2), 1 if round(max, 2) > 1 else round(max, 2)]
                     pValue = -1
                     output.append({'variation': item,
-                                'conversion': dict_expt_occurence[item],
-                                'uniqueUsers': dict_var_occurence[item],
-                                'conversionRate':   round(rate, 2),
-                                'changeToBaseline': -1,
-                                'confidenceInterval': confidenceInterval,
-                                'pValue': -1,
-                                'isBaseline': True if expt['Flag']['BaselineVariation'] == item else False,
-                                'isWinner': False,
-                                'isInvalid': True
-                                }
-                                )
+                                   'conversion': dict_expt_occurence[item],
+                                   'uniqueUsers': dict_var_occurence[item],
+                                   'conversionRate':   round(rate, 2),
+                                   'changeToBaseline': -1,
+                                   'confidenceInterval': confidenceInterval,
+                                   'pValue': -1,
+                                   'isBaseline': True if expt['Flag']['BaselineVariation'] == item else False,
+                                   'isWinner': False,
+                                   'isInvalid': True
+                                   }
+                                  )
         else:
             BaselineRate = dict_expt_occurence[var_baseline] / \
                 dict_var_occurence[var_baseline]
@@ -104,17 +104,17 @@ class P2GetExptResult(RabbitMQConsumer):
                     pValue = round(
                         1-stats.ttest_ind(dist_baseline, dist_item).pvalue, 2)
                     output.append({'variation': item,
-                                'conversion': dict_expt_occurence[item],
-                                'uniqueUsers': dict_var_occurence[item],
-                                'conversionRate':   round(rate, 3),
-                                'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
-                                'confidenceInterval': confidenceInterval,
-                                'pValue': -1 if math.isnan(pValue) else pValue,
-                                'isBaseline': True if expt['Flag']['BaselineVariation'] == item else False,
-                                'isWinner': False,
-                                'isInvalid': True if (pValue < 0.95) or math.isnan(pValue) else False
-                                }
-                                )
+                                   'conversion': dict_expt_occurence[item],
+                                   'uniqueUsers': dict_var_occurence[item],
+                                   'conversionRate':   round(rate, 3),
+                                   'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
+                                   'confidenceInterval': confidenceInterval,
+                                   'pValue': -1 if math.isnan(pValue) else pValue,
+                                   'isBaseline': True if expt['Flag']['BaselineVariation'] == item else False,
+                                   'isWinner': False,
+                                   'isInvalid': True if (pValue < 0.95) or math.isnan(pValue) else False
+                                   }
+                                  )
             # Get winner variation
             listValid = [output.index(
                 item) for item in output if item['isInvalid'] == False]
@@ -134,107 +134,121 @@ class P2GetExptResult(RabbitMQConsumer):
         logging.info(output)
 
         output_to_mq = {
-            "ExperimentId": expt_id,
-            "StartTime": expt["StartExptTime"],
-            "EndTime": datetime.now(),
-            "Results": output
+            'ExperimentId': expt_id,
+            'IterationId': expt['IterationId'],
+            'StartTime': expt['StartExptTime'],
+            'EndTime': datetime.now(),
+            'Results': output
         }
         return output_to_mq
 
     def handle_body(self, body, **properties):
         starttime = datetime.now()
         expt_id = body
-        value = self.redis.get(expt_id)
-        fmt='%y-%m-%dT%H:%M:%S.%f'
+        expt = self.redis_get(expt_id)
+        fmt = '%y-%m-%dT%H:%M:%S.%f'
+        # Time to take decision to wait or not the upcomming event data
         para_delay_reception = 1
         para_wait_processing = 5
-        if value:
-            expt = json.loads(value.decode())
-            ExptEndTime =   datetime.strptime(expt['EndExptTime'])
-            flag_id = expt["Flag"]["Id"]
-            event_name = expt["EventName"]
-            env_id = expt["EnvId"]
+        # If experiment info exist
+        if expt:
+            ExptEndTime = datetime.strptime(expt['EndExptTime'])
+            flag_id = expt['Flag']['Id']
+            event_name = expt['EventName']
+            env_id = expt['EnvId']
             env_ff_id = '%s_%s' % (env_id, flag_id)
             env_event_id = '%s_%s' % (env_id, event_name)
-            value_events_ff = self.redis.get(env_ff_id)
-            list_ff_events = json.loads(
-                value_events_ff.decode()) if value_events_ff else []
-            value_user_events = self.redis.get(env_event_id)
-            list_user_events = json.loads(
-                value_user_events.decode()) if value_user_events else []
+
+            # Get list of events from Redis
+            value_events_ff = self.redis_get(env_ff_id)
+            list_ff_events = value_events_ff if value_events_ff else []
+            value_user_events = self.redis_get(env_event_id)
+            list_user_events = value_user_events if value_user_events else []
+
+            # Filter Event according to Experiment StartTime
             list_ff_events = [ff_event for ff_event in list_ff_events if datetime.strptime(
                 ff_event['TimeStamp'], fmt) >= datetime.strptime(expt['StartExptTime'], fmt)]
             list_user_events = [user_event for user_event in list_user_events if datetime.strptime(
                 user_event['TimeStamp'], fmt) >= datetime.strptime(expt['StartExptTime'], fmt)]
-            if expt["EndExptTime"]:
+            # Filter Event according to Experiment EndTime
+            if expt['EndExptTime']:
                 list_ff_events = [ff_event for ff_event in list_ff_events if datetime.strptime(
                     ff_event['TimeStamp'], fmt) <= ExptEndTime]
                 list_user_events = [user_event for user_event in list_user_events if datetime.strptime(
                     user_event['TimeStamp'], fmt) <= ExptEndTime]
-                ########TO DO :::: if empty list ? #########################
-                latest_ff_event_time = datetime.strptime(list_ff_events[-1]['TimeStamp'], fmt)
-                latest_user_event_time = datetime.strptime(list_user_events[-1]['TimeStamp'], fmt)
-                latest_event_end_time = max([latest_ff_event_time, latest_user_event_time])
-                interval = ExptEndTime - latest_event_end_time
-                if ( interval > datetime.timedelta(minutes=para_delay_reception) ) \
-                        and ( (datetime.now() - ExptEndTime) <  \
-                            datetime.timedelta(minutes=para_wait_processing) ) :
-                            # ACTION  : calculate result and send expt_id back to Q2
-            # expt not active
-            if expt["EndExptTime"] and (not list_ff_events or not list_user_events):
-                # Update dict_flag_acitveExpts
-                # ACTION : Get from Redis > dict_flag_acitveExpts
-                id = 'dict_ff_act_expts_%s_%s' % (
-                    expt['EnvId'], expt['FeatureFlagId'])
-                dict_flag_acitveExpts = json.loads(self.redis.get(id).decode())
-                dict_flag_acitveExpts[expt['FeatureFlagId']].remove(
-                    expt['ExptId'])
-                self.redis.set(id, str.encode(
-                    json.dumps(dict_flag_acitveExpts)))
-                # Update dict_flag_acitveExpts
-                # ACTION : Get from Redis > dict_flag_acitveExpts
-                id = 'dict_ff_act_expts_%s_%s' % (
-                    expt['EnvId'], expt['EventName'])
-                dict_customEvent_acitveExpts = json.loads(
-                    self.redis.get(id).decode())
-                dict_customEvent_acitveExpts[expt['EventName']].remove(
-                    expt['ExptId'])
-                self.redis.set(id, str.encode(
-                    json.dumps(dict_customEvent_acitveExpts)))
-                # ACTION: Delete in Redis > list_FFevent related to FlagID
-                # ACTION: Delete in Redis > list_Exptevent related to EventName
-                logging.info('Update info and delete stopped Experiment data')
-                if not dict_flag_acitveExpts.get(expt['FeatureFlagId'], None):
-                    id = '%s_%s' % (expt['EnvId'], expt['FeatureFlagId'])
-                    self.redis.delete(id)
-                    # TODO move to somewhere
-                if not dict_customEvent_acitveExpts.get(expt['Event'], None):
-                    id = '%s_%s' % (expt['EnvId'], expt['EventName'])
-                    self.redis.delete(id)
-                    # TODO move to somewhere
 
+            # Start To Calculate Experiment Result
+            if list_ff_events and list_user_events:
+                # User's flags event aggregation
+                df_ff_events = pd.DataFrame(list_ff_events)
+                ff_events_agg = df_ff_events.sort_values('TimeStamp').groupby(
+                    'UserKeyId').last().reset_index().to_dict(orient='record')
+                # User's custom event aggregation
+                df_user_events = pd.DataFrame(list_user_events)
+                user_events_agg = df_user_events.sort_values('TimeStamp').groupby(
+                    'UserKeyId').last().reset_index().to_dict(orient='record')
+                # call function to calculate experiment result
+                output_to_mq = self.__calc_experiment_result(
+                    expt, expt_id, ff_events_agg, user_events_agg)
+                # send result to Q3
+                RabbitMQSender() \
+                    .send(topic='Q3', routing_key='py.experiments.experiment.results', *[output_to_mq])
+
+            # experiment not finished
+            if not expt['EndExptTime']:
+                # send back exptId to Q2
+                RabbitMQSender() \
+                    .send(topic='Q2', routing_key='py.experiments.experiment', *[expt_id])
+                logging.info('send back to Q2 ExptID')
+           # experiment finished
             else:
-                if list_ff_events and list_user_events:
-                    df_ff_events = pd.DataFrame(list_ff_events)
-                    ff_events_agg = df_ff_events.sort_values('TimeStamp').groupby(
-                        "UserKeyId").last().reset_index().to_dict(orient='record')
-
-                    df_user_events = pd.DataFrame(list_user_events)
-                    user_events_agg = df_user_events.sort_values('TimeStamp').groupby(
-                        "UserKeyId").last().reset_index().to_dict(orient='record')
-
-                    output_to_mq = self.__calc_experiment_result(expt, expt_id, ff_events_agg, user_events_agg)
-
-                    RabbitMQSender() \
-                        .send(topic='Q3', routing_key='py.experiments.experiment.results', *[output_to_mq])
-
+                ########TO DO :::: if empty list ? #########################
+                latest_ff_event_time = datetime.strptime(
+                    list_ff_events[-1]['TimeStamp'], fmt)
+                latest_user_event_time = datetime.strptime(
+                    list_user_events[-1]['TimeStamp'], fmt)
+                latest_event_end_time = max(
+                    [latest_ff_event_time, latest_user_event_time])
+                interval = ExptEndTime - latest_event_end_time
+                # If last event not received since N minutes, still wait M minutes after ExtpEndTime
+                if (interval > datetime.timedelta(minutes=para_delay_reception)) \
+                        and ((datetime.now() - ExptEndTime) <
+                             datetime.timedelta(minutes=para_wait_processing)):
+                    # send back exptId to Q2
                     RabbitMQSender() \
                         .send(topic='Q2', routing_key='py.experiments.experiment', *[expt_id])
                     logging.info('send back to Q2 ExptID')
-
-                    endtime = datetime.now()
-                    logging.info('processing time:')
-                    logging.info((endtime-starttime))
+                # last event received within N minutes, no potential recepton delay, proceed data deletion
+                else:
+                    # ACTION : Get from Redis > dict_flag_acitveExpts
+                    # Update dict_flag_acitveExpts
+                    id = 'dict_ff_act_expts_%s_%s' % (
+                        expt['EnvId'], expt['FeatureFlagId'])
+                    dict_flag_acitveExpts = self.redis_get(id)
+                    dict_flag_acitveExpts[expt['FeatureFlagId']].remove(
+                        expt['ExptId'])
+                    self.redis_set(id, dict_flag_acitveExpts)
+                    # ACTION : Get from Redis > dict_customEvent_acitveExpts
+                    # Update dict_customEvent_acitveExpts
+                    id = 'dict_event_act_expts_%s_%s' % (
+                        expt['EnvId'], expt['EventName'])
+                    dict_customEvent_acitveExpts = self.redis_get(id)
+                    dict_customEvent_acitveExpts[expt['EventName']].remove(
+                        expt['ExptId'])
+                    self.redis_set(id, dict_customEvent_acitveExpts)
+                    # ACTION: Delete in Redis > list_FFevent related to FlagID
+                    # ACTION: Delete in Redis > list_Exptevent related to EventName
+                    logging.info(
+                        'Update info and delete stopped Experiment data')
+                    if not dict_flag_acitveExpts.get(expt['FeatureFlagId'], None):
+                        self.redis.delete(env_ff_id)
+                        # TODO move to somewhere
+                    if not dict_customEvent_acitveExpts.get(expt['Event'], None):
+                        self.redis.delete(env_event_id)
+                        # TODO move to somewhere
+        endtime = datetime.now()
+        logging.info('processing time:')
+        logging.info((endtime-starttime))
 
 
 if __name__ == '__main__':
@@ -252,4 +266,4 @@ if __name__ == '__main__':
             except SystemExit:
                 os._exit(0)
         except Exception as e:
-            logging.exception("#######unexpected#########")
+            logging.exception('#######unexpected#########')

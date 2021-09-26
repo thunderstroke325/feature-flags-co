@@ -45,6 +45,16 @@ class RabbitMQ:
     def redis(self) -> redis.Redis:
         return self._redis
 
+    def redis_get(self, id):
+        value = self.redis.get(id)
+        return json.loads(value.decode()) if value else None
+
+    def redis_set(self, id, value):
+        self.redis.set(id, str.encode(json.dumps(value)))
+
+    def redis_del(self, *id):
+        self.redis.delete(id)
+
 
 class RabbitMQConsumer(ABC, RabbitMQ):
 
