@@ -26,7 +26,8 @@ if __name__ == '__main__':
                         datefmt='%m-%d %H:%M')
     while True:
         try:
-            SimpleConsumer().consumer('py.1', ('topic', []))
+            SimpleConsumer().consumer(
+                '', ('topic1', ['py.#']), ('topic2', ['py.#']))
             break
         except KeyboardInterrupt:
             logging.info('#######Interrupted#########')

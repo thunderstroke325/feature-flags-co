@@ -7,21 +7,22 @@ from rabbitmq.rabbitmq import RabbitMQConsumer, RabbitMQSender
 
 
 class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
-    def handle_body(self, body):
+    def handle_body(self, body, **properties):
         if type(body) is dict:
             key, end, value = body.get('ExptID', None), body.get(
                 'EndExptTime', None), body
             if key:
-                if end:
+                if not end:
                     jsons = [key]
                     RabbitMQSender() \
-                        .send(topic='Q2', routing_key='py.experiments.experimentresults', *jsons)
+                        .send(topic='Q2', routing_key='py.experiments.experiment', *jsons)
                 self.redis.set(key, str.encode(json.dumps(value)))
 
 
 if __name__ == '__main__':
-    FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
-    logging.basicConfig(format=FORMAT, encoding='utf-8', level=logging.INFO)
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                        datefmt='%m-%d %H:%M')
     while True:
         try:
             P1GetExptRecordingInfoConsumer().consumer(

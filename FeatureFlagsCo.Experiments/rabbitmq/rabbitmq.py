@@ -54,26 +54,28 @@ class RabbitMQConsumer(ABC, RabbitMQ):
 
     def consumer(self, queue='', *bindings):
         if bindings and len(bindings) > 0:
+            if queue:
+                result = self.channel.queue_declare(queue, durable=True)
+            else:
+                result = self.channel.queue_declare('', exclusive=True)
+            queue_name = result.method.queue
             for topic, binding_keys in bindings:
                 self.channel.exchange_declare(
                     exchange=topic, exchange_type='topic')
-                # direct queue mode
                 if queue:
-                    result = self.channel.queue_declare(queue, durable=True)
+                    # direct queue mode
                     queue_name = result.method.queue
                     super().channel.queue_bind(
                         exchange=topic, queue=queue_name)
                     logging.info(
-                        "topic: %r, queue: %r, direct queue mode" % (topic, queue))
-                # topic mode
+                        "topic: %r, queue: %r, direct queue mode" % (topic, queue_name))
                 else:
-                    result = self.channel.queue_declare('', exclusive=True)
-                    queue_name = result.method.queue
+                    # topic mode
                     for binding_key in set(binding_keys):
                         super().channel.queue_bind(
                             exchange=topic, queue=queue_name, routing_key=binding_key)
-                    logging.info("topic: %r, binding_key: %r, topic mode" % (
-                        topic, binding_key))
+                        logging.info("topic: %r, queue: %r, binding_key: %r, topic mode" % (
+                            topic, queue_name, binding_key))
 
         def callback(ch, method, properties, body):
             self.handle_body(json.loads(body.decode()),

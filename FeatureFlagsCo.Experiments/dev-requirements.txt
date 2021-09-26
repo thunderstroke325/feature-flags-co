@@ -3,8 +3,10 @@ elasticsearch
 elasticsearch_dsl
 numpy
 scipy
+pandas
 requests
 pika
 redis
 flake8
 autopep8
+pylint
