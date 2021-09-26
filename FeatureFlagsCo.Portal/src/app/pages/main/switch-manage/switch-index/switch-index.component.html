@@ -22,8 +22,8 @@
                 </div>
             </div>
             <div class="switch-list" #listRef>
-              <div *ngFor="let switch of switchLists" class="switch" (click)="onIntoSwitchDetail(switch)">
-                <ng-container *ngIf="switch.name.includes(nameSearchValue) && switch.status?.includes(showType)">
+              <ng-container *ngFor="let switch of switchLists">
+                <div class="switch" *ngIf="switch.name.includes(nameSearchValue) && switch.status?.includes(showType)" (click)="onIntoSwitchDetail(switch)">
                   <section>
                     <div class="title">
                         {{switch.name}}
@@ -38,8 +38,8 @@
                       <button nz-button [nzType]="switch.status === 'Enabled' ? 'primary' : 'default'" (click)="onChangeSwitchStatus(switch, 'Enabled', $event)">开</button>
                       <button nz-button [nzType]="switch.status === 'Disabled' ? 'primary' : 'default'" (click)="onChangeSwitchStatus(switch, 'Disabled', $event)">关</button>
                   </nz-button-group>
-                </ng-container>
-              </div>
+                </div>
+              </ng-container>
 
               <div class="mask" *ngIf="isInitLoading">
                   <nz-spin></nz-spin>
