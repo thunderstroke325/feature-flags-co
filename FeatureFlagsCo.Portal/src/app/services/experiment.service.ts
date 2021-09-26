@@ -42,7 +42,7 @@ export class ExperimentService {
 
     // 获取 experiment 结果
     getExperimentResult(envId: number, params): Observable<any> {
-      const url = this.baseUrl + `/${envId}`;
+      const url = this.baseUrl + `/launchQuery/${envId}`;
       return this.http.post(url, params);
     }
 }

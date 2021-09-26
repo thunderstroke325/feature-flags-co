@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.ViewModels.Experiments
 {
-    public class ExperimentResult
+    public class ExperimentResultViewModel
     {
         public float ChangeToBaseline { get; set; }
         public long Conversion { get; set; }

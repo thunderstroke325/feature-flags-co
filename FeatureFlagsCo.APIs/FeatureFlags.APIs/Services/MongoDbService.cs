@@ -19,6 +19,7 @@ namespace FeatureFlags.APIs.Services
         private readonly MongoDbEnvironmentUserService _mongoEnvironmentUsersService;
         private readonly MongoDbEnvironmentUserPropertyService _mongoEnvironmentUserPropertiesService;
         private readonly MongoDbFeatureTriggerService _mongoDbFeatureTriggerService;
+        private readonly MongoDbExperimentService _mongoDbExperimentService;
 
         private readonly IJwtUtilsService _jwtUtilsService;
 
@@ -27,14 +28,53 @@ namespace FeatureFlags.APIs.Services
             MongoDbEnvironmentUserService mongoEnvironmentUsersService,
             MongoDbEnvironmentUserPropertyService mongoEnvironmentUserPropertiesService,
             MongoDbFeatureTriggerService mongoDbFeatureTriggerService,
+            MongoDbExperimentService mongoDbExperimentService,
             IJwtUtilsService jwtUtilsService)
         {
             _mongoFeatureFlagsService = mongoFeatureFlagsService;
             _mongoEnvironmentUsersService = mongoEnvironmentUsersService;
             _mongoEnvironmentUserPropertiesService = mongoEnvironmentUserPropertiesService;
             _mongoDbFeatureTriggerService = mongoDbFeatureTriggerService;
+            _mongoDbExperimentService = mongoDbExperimentService;
             _jwtUtilsService = jwtUtilsService;
         }
+
+        #region experiments
+
+        public async Task<Experiment> GetExperimentByIdAsync(string exptId) 
+        {
+            return await _mongoDbExperimentService.GetAsync(exptId);
+        }
+
+        public async Task<Experiment> GetExperimentByFeatureFlagAndEvent(string featureFlagId, string eventName)
+        {
+            return (await _mongoDbExperimentService.GetByFeatureFlagAndEventAsync(featureFlagId, eventName)).FirstOrDefault();
+        }
+
+        public async Task<Experiment> UpsertExperimentAsync(Experiment item)
+        {
+            return await _mongoDbExperimentService.UpsertItemAsync(item);
+        }
+
+        public async Task<Experiment> CreateExperimentAsync(Experiment item)
+        {
+            return await _mongoDbExperimentService.CreateAsync(item);
+        }
+
+        public async Task<Experiment> ArchiveExperimentAsync(string exptId)
+        {
+            var experiment = await _mongoDbExperimentService.GetAsync(exptId);
+            if (experiment != null)
+            {
+                experiment.IsArvhived = true;
+                await _mongoDbExperimentService.UpsertItemAsync(experiment);
+                return experiment;
+            }
+
+            return null;
+        }
+
+        #endregion
 
         public async Task SaveEnvironmentDataAsync(int accountId, int projectId, int envId,
             EnvironmentDataViewModel data)
