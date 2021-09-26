@@ -16,7 +16,7 @@ class P3GetEventsConsumer(RabbitMQConsumer):
                 # Q4
                 dict_flag_acitveExpts = self.redis_get(
                     'dict_ff_act_expts_%s_%s' % (body['EnvId'], body['FeatureFlagId']))
-                if dict_flag_acitveExpts and body['FeatureFlagId'] in dict_flag_acitveExpts.keys():
+                if dict_flag_acitveExpts and dict_flag_acitveExpts.get(body['FeatureFlagId'], None):
                     id = '%s_%s' % (body['EnvId'], body['FeatureFlagId'])
                     value = self.redi_get(id)
                     list_ff_events = value if value else []
@@ -32,7 +32,7 @@ class P3GetEventsConsumer(RabbitMQConsumer):
                 # Q5
                 dict_customEvent_acitveExpts = self.redis_get(
                     'dict_event_act_expts_%s_%s' % (body['EnvironmentId'], body['EventName']))
-                if dict_customEvent_acitveExpts and body['EventName'] in dict_customEvent_acitveExpts.keys():
+                if dict_customEvent_acitveExpts and dict_customEvent_acitveExpts.get(body['EventName'], None):
                     id = '%s_%s' % (body['EnvironmentId'], body['EventName'])
                     value = self.redis_get(id)
                     list_user_events = value if value else []
