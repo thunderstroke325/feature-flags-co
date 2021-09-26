@@ -25,6 +25,7 @@ class P2GetExptResult(RabbitMQConsumer):
         starttime = datetime.now()
         expt_id = body
         value = self.redis.get(expt_id)
+        fmt='%y-%m-%dT%H:%M:%S.%f'
         if value:
             expt = json.loads(value.decode())
             flag_id = expt["Flag"]["Id"]
@@ -39,32 +40,19 @@ class P2GetExptResult(RabbitMQConsumer):
             list_user_events = json.loads(
                 value_user_events.decode()) if value_user_events else []
             list_ff_events = [ff_event for ff_event in list_ff_events if datetime.strptime(
-                ff_event['TimeStamp'], fmt='yyyy-MM-ddTHH:mm:ss.fffff') >= datetime.strptime(
-                expt['StartExptTime'], fmt='yyyy-MM-ddTHH:mm:ss.fffff')]
+                ff_event['TimeStamp'], fmt) >= datetime.strptime(expt['StartExptTime'], fmt)]
             list_user_events = [user_event for user_event in list_user_events if datetime.strptime(
-                user_event['TimeStamp'], fmt='yyyy-MM-ddTHH:mm:ss.fffff') >= datetime.strptime(
-                expt['StartExptTime'], fmt='yyyy-MM-ddTHH:mm:ss.fffff')]
+                user_event['TimeStamp'], fmt) >= datetime.strptime(expt['StartExptTime'], fmt)]
             if expt["EndExptTime"]:
                 list_ff_events = [ff_event for ff_event in list_ff_events if datetime.strptime(
-                    ff_event['TimeStamp'], fmt='yyyy-MM-ddTHH:mm:ss.fffff') <= datetime.strptime(
-                    expt['EndExptTime'], fmt='yyyy-MM-ddTHH:mm:ss.fffff')]
+                    ff_event['TimeStamp'], fmt) <= datetime.strptime(expt['EndExptTime'], fmt)]
                 list_user_events = [user_event for user_event in list_user_events if datetime.strptime(
-                    user_event['TimeStamp'], fmt='yyyy-MM-ddTHH:mm:ss.fffff') <= datetime.strptime(
-                    expt['EndExptTime'], fmt='yyyy-MM-ddTHH:mm:ss.fffff')]
-                ###########################????? #################################
-                ###########################????? #################################
-                ###########################????? #################################
-                ###########################????? #################################
-                ###########################????? #################################
-                ###########################????? #################################
-                latest_ff_event_time = datetime.strptime(
-                    list_ff_events[-1]['EndExptTime'], fmt='yyyy-MM-ddTHH:mm:ss.ffff')
-                latest_user_event_time = datetime.strptime(
-                    list_user_events[-1]['EndExptTime'], fmt='yyyy-MM-ddTHH:mm:ss.ffff')
-                latest_event_end_time = max(
-                    [latest_ff_event_time, latest_user_event_time])
-                interval = datetime.strptime(
-                    expt["EndExptTime"], fmt="fmt='yyyy-MM-ddTHH:mm:ss.fffff'") - latest_event_end_time
+                    user_event['TimeStamp'], fmt) <= datetime.strptime(expt['EndExptTime'], fmt)]
+                latest_ff_event_time = datetime.strptime(list_ff_events[-1]['TimeStamp'], fmt)
+                latest_user_event_time = datetime.strptime(list_user_events[-1]['TimeStamp'], fmt)
+                latest_event_end_time = max([latest_ff_event_time, latest_user_event_time])
+                interval = datetime.strptime(expt["EndExptTime"], fmt) - latest_event_end_time
+                ########## ? if interval >
             # expt not active
             if expt["EndExptTime"] and (not list_ff_events or not list_user_events):
                 # Update dict_flag_acitveExpts
@@ -88,8 +76,7 @@ class P2GetExptResult(RabbitMQConsumer):
                     json.dumps(dict_customEvent_acitveExpts)))
                 # ACTION: Delete in Redis > list_FFevent related to FlagID
                 # ACTION: Delete in Redis > list_Exptevent related to EventName
-
-                print('Update info and delete stopped Experiment data')
+                logging.info('Update info and delete stopped Experiment data')
                 if not dict_flag_acitveExpts.get(expt['FeatureFlagId'], None):
                     id = '%s_%s' % (expt['EnvId'], expt['FeatureFlagId'])
                     self.redis.delete(id)
