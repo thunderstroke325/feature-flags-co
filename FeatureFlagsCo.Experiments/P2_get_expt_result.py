@@ -22,7 +22,7 @@ class P2GetExptResult(RabbitMQConsumer):
         return m, m-h, m+h
 
     # cal Expt Result from list of FlagsEvents and list of CustomEvents:
-    def __calc_experiment_result(expt, expt_id, ff_events_agg, user_events_agg)
+    def __calc_experiment_result(expt, expt_id, ff_events_agg, user_events_agg):
         # Stat of Flag
         var_baseline = expt['Flag']['BaselineVariation']
         dict_var_user = {}
