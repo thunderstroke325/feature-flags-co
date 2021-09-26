@@ -18,7 +18,7 @@ namespace FeatureFlags.APIs.Services
         Task<Experiment> GetExperimentByFeatureFlagAndEvent(string featureFlagId, string eventName);
         Task<Experiment> UpsertExperimentAsync(Experiment item);
         Task<Experiment> CreateExperimentAsync(Experiment item);
-        Task<Experiment> ArchiveExperimentAsync(string exptId);
+        Task<Experiment> ArchiveExperimentAsync(string exptId, DateTime stopTime);
         #endregion
         Task<List<T>> GetEnvironmentDataAsync<T>(int envId);
         Task SaveEnvironmentDataAsync(int accountId, int projectId, int envId, EnvironmentDataViewModel data);

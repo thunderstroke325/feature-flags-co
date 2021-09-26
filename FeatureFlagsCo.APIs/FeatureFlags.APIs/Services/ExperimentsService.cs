@@ -47,8 +47,9 @@ namespace FeatureFlags.APIs.Services
             if (experiment != null)
             {
                 // If the experiment has active iteration
+                var operationTime = DateTime.UtcNow;
                 experiment.Iterations.ForEach(i => {
-                    if (i.EndTime.HasValue && i.EndTime.Value > DateTime.MinValue) 
+                    if (!i.EndTime.HasValue) 
                     {
                         var message = new ExperimentIterationMessageViewModel
                         {
@@ -56,7 +57,7 @@ namespace FeatureFlags.APIs.Services
                             EnvId = experiment.EnvId,
                             IterationId = i.Id,
                             StartExptTime = i.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
-                            EndExptTime = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
+                            EndExptTime = operationTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                             EventName = experiment.EventName,
                             Flag = new ExperimentFeatureFlagViewModel
                             {
@@ -67,11 +68,12 @@ namespace FeatureFlags.APIs.Services
                         };
 
                         // TODO send message to Q1
+                        // SUNDIAN
                     }
                 });
 
 
-                await _noSqlDbService.ArchiveExperimentAsync(experimentId);
+                await _noSqlDbService.ArchiveExperimentAsync(experimentId, operationTime);
             };
         }
 
@@ -112,10 +114,11 @@ namespace FeatureFlags.APIs.Services
 
             if (experiment != null)
             {
+                var operationTime = DateTime.UtcNow;
                 var iteration = new ExperimentIteration
                 {
                     Id = Guid.NewGuid().ToString(),
-                    StartTime = DateTime.UtcNow,
+                    StartTime = operationTime,
                     // EndTime, Don't need set end time as this is a start experiment signal
                     Results = new List<IterationResult>()
                 };
@@ -125,7 +128,30 @@ namespace FeatureFlags.APIs.Services
                     experiment.Iterations = new List<ExperimentIteration>();
                 }
 
-                experiment.Iterations.ForEach(i => i.EndTime = DateTime.UtcNow);
+                experiment.Iterations.ForEach(i => {
+                    if (!i.EndTime.HasValue)
+                    {
+                        i.EndTime = operationTime;
+                        var message = new ExperimentIterationMessageViewModel
+                        {
+                            ExptId = experiment.Id,
+                            EnvId = experiment.EnvId,
+                            IterationId = i.Id,
+                            StartExptTime = i.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
+                            EndExptTime = operationTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
+                            EventName = experiment.EventName,
+                            Flag = new ExperimentFeatureFlagViewModel
+                            {
+                                Id = experiment.Flag.Id,
+                                BaselineVariation = experiment.Flag.BaselineVariation,
+                                Variations = experiment.Flag.Variations
+                            }
+                        };
+
+                        // TODO send message to Q1
+                        // SUNDIAN
+                    }
+                });
 
                 experiment.Iterations.Add(iteration);
 
@@ -147,6 +173,7 @@ namespace FeatureFlags.APIs.Services
                 };
 
                 // TODO send message to Q1
+                // SUNDIAN
 
                 return iteration;
             }      
@@ -183,7 +210,7 @@ namespace FeatureFlags.APIs.Services
                 };
 
                 // TODO send message to Q1
-
+                // SUNDIAN
 
                 return iteration;
             }

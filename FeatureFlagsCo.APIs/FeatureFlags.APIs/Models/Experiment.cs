@@ -12,6 +12,9 @@ namespace FeatureFlags.APIs.Models
         public ExperimentFeatureFlag Flag { get; set; }
         public List<ExperimentIteration> Iterations { get; set; }
         public bool IsArvhived { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
         public override string GetCollectionName()
         {
             return "Experiments";

@@ -51,22 +51,29 @@ namespace FeatureFlags.APIs.Services
             return (await _mongoDbExperimentService.GetByFeatureFlagAndEventAsync(featureFlagId, eventName)).FirstOrDefault();
         }
 
+        // This method is used for updating Experiment
         public async Task<Experiment> UpsertExperimentAsync(Experiment item)
         {
+            item.UpdatedAt = DateTime.UtcNow;
             return await _mongoDbExperimentService.UpsertItemAsync(item);
         }
 
         public async Task<Experiment> CreateExperimentAsync(Experiment item)
         {
+            var now = DateTime.UtcNow;
+            item.CreatedAt = now;
+            item.UpdatedAt = now;
             return await _mongoDbExperimentService.CreateAsync(item);
         }
 
-        public async Task<Experiment> ArchiveExperimentAsync(string exptId)
+        public async Task<Experiment> ArchiveExperimentAsync(string exptId, DateTime stopTime)
         {
             var experiment = await _mongoDbExperimentService.GetAsync(exptId);
             if (experiment != null)
             {
                 experiment.IsArvhived = true;
+                experiment.UpdatedAt = DateTime.UtcNow;
+                experiment.Iterations.ForEach(i => i.EndTime = stopTime);
                 await _mongoDbExperimentService.UpsertItemAsync(experiment);
                 return experiment;
             }
