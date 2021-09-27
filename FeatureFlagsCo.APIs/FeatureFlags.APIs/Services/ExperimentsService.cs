@@ -54,7 +54,7 @@ namespace FeatureFlags.APIs.Services
                         var message = new ExperimentIterationMessageViewModel
                         {
                             ExptId = experiment.Id,
-                            EnvId = experiment.EnvId,
+                            EnvId = experiment.EnvId.ToString(),
                             IterationId = i.Id,
                             StartExptTime = i.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                             EndExptTime = operationTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
@@ -135,7 +135,7 @@ namespace FeatureFlags.APIs.Services
                         var message = new ExperimentIterationMessageViewModel
                         {
                             ExptId = experiment.Id,
-                            EnvId = experiment.EnvId,
+                            EnvId = experiment.EnvId.ToString(),
                             IterationId = i.Id,
                             StartExptTime = i.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                             EndExptTime = operationTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
@@ -160,7 +160,7 @@ namespace FeatureFlags.APIs.Services
                 var message = new ExperimentIterationMessageViewModel
                 {
                     ExptId = experiment.Id,
-                    EnvId = envId,
+                    EnvId = envId.ToString(),
                     IterationId = iteration.Id,
                     StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                     EventName = experiment.EventName,
@@ -196,7 +196,7 @@ namespace FeatureFlags.APIs.Services
                 var message = new ExperimentIterationMessageViewModel
                 {
                     ExptId = experiment.Id,
-                    EnvId = envId,
+                    EnvId = envId.ToString(),
                     IterationId = iteration.Id,
                     StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                     EndExptTime = iteration.EndTime.Value.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),

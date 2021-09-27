@@ -8,7 +8,7 @@ namespace FeatureFlags.APIs.ViewModels.Experiments
     public class ExperimentIterationMessageViewModel
     {
         public string ExptId { get; set; }
-        public int EnvId { get; set; }
+        public string EnvId { get; set; }
         public string EventName { get; set; }
         public string StartExptTime { get; set; }
         public string EndExptTime { get; set; }
