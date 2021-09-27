@@ -25,9 +25,10 @@ if __name__ == '__main__':
                         format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%m-%d %H:%M')
     while True:
+        consumer = SimpleConsumer()
         try:
-            SimpleConsumer().consumer(
-                '', ('topic1', ['py.#']), ('topic2', ['py.#']))
+            consumer.consumer(
+                'py.1', ('topic1', []), ('topic2', []))
             break
         except KeyboardInterrupt:
             logging.info('#######Interrupted#########')
@@ -37,3 +38,6 @@ if __name__ == '__main__':
                 os._exit(0)
         except Exception as e:
             logging.exception("#######unexpected#########")
+        finally:
+            consumer.channel.close()
+            consumer.channel.connection.close()

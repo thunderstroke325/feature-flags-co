@@ -1,4 +1,5 @@
 
+from config.config_handling import get_config_value
 import json
 import logging
 import os
@@ -51,6 +52,15 @@ if __name__ == '__main__':
                         datefmt='%m-%d %H:%M')
     while True:
         try:
+            mq_host = get_config_value('rabbitmq', 'mq_host')
+            mq_port = get_config_value('rabbitmq', 'mq_port')
+            mq_username = get_config_value('rabbitmq', 'mq_username')
+            mq_passwd = get_config_value('rabbitmq', 'mq_passwd')
+            redis_host = get_config_value('redis', 'redis_host')
+            redis_port = get_config_value('redis', 'redis_port')
+            redis_passwd = get_config_value('redis', 'redis_passwd')
+            consumer = P3GetEventsConsumer(
+                mq_host, mq_port, mq_username, mq_port, redis_host, redis_port, redis_passwd)
             P3GetEventsConsumer().consumer(
                 '', ('Q4', ['py.experiments.events.ff.#']), ('Q5', ['py.experiments.events.user.#']))
             break
@@ -62,3 +72,5 @@ if __name__ == '__main__':
                 os._exit(0)
         except Exception as e:
             logging.exception('#######unexpected#########')
+            consumer.channel.close()
+            consumer.channel.connection.close()

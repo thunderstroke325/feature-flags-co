@@ -10,10 +10,9 @@ if __name__ == '__main__':
                         datefmt='%m-%d %H:%M')
     sender1 = RabbitMQSender()
     sender2 = RabbitMQSender()
-    routing_key = 'py.1'
     json_body_1 = {'id': 123, 'value': 'event%s' % 123}
     json_body_2 = {'id': 456, 'value': 'event%s' % 456}
     sender1.redis.set(json_body_1['id'], str.encode(json.dumps(json_body_1)))
     sender2.redis.set(json_body_2['id'], str.encode(json.dumps(json_body_2)))
-    sender1.send('topic1', routing_key, json_body_1)
-    sender2.send('topic2', routing_key, json_body_2)
+    sender1.send('topic1', "py.1", json_body_1)
+    sender2.send('topic2', "py.1", json_body_2)

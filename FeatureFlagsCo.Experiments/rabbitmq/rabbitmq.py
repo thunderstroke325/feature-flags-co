@@ -2,6 +2,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 
+
 import pika
 import redis
 from pika.adapters.blocking_connection import BlockingChannel
@@ -10,16 +11,6 @@ from config.config_handling import get_config_value
 
 
 class RabbitMQ:
-    def __int__(self):
-        _mq_host = get_config_value('rabbitmq', 'mq_host')
-        _mq_port = get_config_value('rabbitmq', 'mq_port')
-        _mq_username = get_config_value('rabbitmq', 'mq_username')
-        _mq_passwd = get_config_value('rabbitmq', 'mq_passwd')
-        _redis_host = get_config_value('redis', 'redis_host')
-        _redis_port = get_config_value('redis', 'redis_port')
-        _redis_passwd = get_config_value('redis', 'redis_passwd')
-        self.__init__(_mq_host, _mq_port, _mq_username, _mq_passwd, _redis_host,
-                      _redis_port, _redis_passwd)
 
     def __init__(self,
                  mq_host='localhost',
@@ -65,35 +56,36 @@ class RabbitMQConsumer(ABC, RabbitMQ):
     def consumer(self, queue='', *bindings):
         if bindings and len(bindings) > 0:
             if queue:
-                result = self.channel.queue_declare(queue, durable=True)
+                exclusive = False
+                result = self.channel.queue_declare(
+                    queue, durable=True, exclusive=exclusive)
             else:
-                result = self.channel.queue_declare('', exclusive=True)
+                exclusive = True
+                result = self.channel.queue_declare('', exclusive=exclusive)
             queue_name = result.method.queue
             for topic, binding_keys in bindings:
                 self.channel.exchange_declare(
                     exchange=topic, exchange_type='topic')
-                if queue:
-                    # direct queue mode
-                    queue_name = result.method.queue
+                for binding_key in set(binding_keys):
                     super().channel.queue_bind(
-                        exchange=topic, queue=queue_name)
+                        exchange=topic, queue=queue_name, routing_key=binding_key)
                     logging.info(
-                        "topic: %r, queue: %r, direct queue mode" % (topic, queue_name))
-                else:
-                    # topic mode
-                    for binding_key in set(binding_keys):
-                        super().channel.queue_bind(
-                            exchange=topic, queue=queue_name, routing_key=binding_key)
-                        logging.info("topic: %r, queue: %r, binding_key: %r, topic mode" % (
-                            topic, queue_name, binding_key))
+                        "topic: %r, queue: %r, routing_key: %r" % (topic, queue_name, binding_key))
+                if not binding_keys:
+                    super().channel.queue_bind(exchange=topic, queue=queue_name)
+                    logging.info("topic: %r, queue: %r" % (topic, queue_name))
+            for method, properties, body in self.channel.consume(queue_name,
+                                                                 auto_ack=True,
+                                                                 exclusive=exclusive):
 
-        def callback(ch, method, properties, body):
-            self.handle_body(json.loads(body.decode()),
-                             routing_key=method.routing_key)
-
-        self.channel.basic_consume(
-            queue=queue_name, on_message_callback=callback, auto_ack=True)
-        self.channel.start_consuming()
+                self.handle_body(json.loads(body.decode()),
+                                 routing_key=method.routing_key)
+                # def callback(ch, method, properties, body):
+                #     self.handle_body(json.loads(body.decode()),
+                #                      routing_key=method.routing_key)
+                # self.channel.basic_consume(
+                #     queue=queue_name, on_message_callback=callback, auto_ack=True)
+                # self.channel.start_consuming()
 
 
 class RabbitMQSender(RabbitMQ):

@@ -1,3 +1,4 @@
+from config.config_handling import get_config_value
 import json
 import os
 import sys
@@ -45,7 +46,16 @@ if __name__ == '__main__':
                         datefmt='%m-%d %H:%M')
     while True:
         try:
-            P1GetExptRecordingInfoConsumer().consumer(
+            mq_host = get_config_value('rabbitmq', 'mq_host')
+            mq_port = get_config_value('rabbitmq', 'mq_port')
+            mq_username = get_config_value('rabbitmq', 'mq_username')
+            mq_passwd = get_config_value('rabbitmq', 'mq_passwd')
+            redis_host = get_config_value('redis', 'redis_host')
+            redis_port = get_config_value('redis', 'redis_port')
+            redis_passwd = get_config_value('redis', 'redis_passwd')
+            consumer = P1GetExptRecordingInfoConsumer(
+                mq_host, mq_port, mq_username, mq_port, redis_host, redis_port, redis_passwd)
+            consumer.consumer(
                 'py.experiments.recordinginfo', ('Q1', []))
             break
         except KeyboardInterrupt:
@@ -56,3 +66,6 @@ if __name__ == '__main__':
                 os._exit(0)
         except Exception as e:
             logging.exception('#######unexpected#########')
+        finally:
+            consumer.channel.close()
+            consumer.channel.connection.close()

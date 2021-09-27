@@ -1,3 +1,5 @@
+from time import sleep
+from config.config_handling import get_config_value
 import json
 import logging
 import os
@@ -11,7 +13,22 @@ import pandas as pd
 from rabbitmq.rabbitmq import RabbitMQConsumer, RabbitMQSender
 
 
-class P2GetExptResult(RabbitMQConsumer):
+class P2GetExptResultConsumer(RabbitMQConsumer):
+
+    def __init__(self,
+                 mq_host='localhost',
+                 mq_port=5672,
+                 mq_username='guest',
+                 mq_passwd='guest',
+                 redis_host='localhost',
+                 redis_port='6379',
+                 redis_passwd=None,
+                 wait_timeout=30.0
+                 ):
+        super().__init__(mq_host, mq_port, mq_username,
+                         mq_passwd, redis_host, redis_port, redis_passwd)
+        self._last_expt_id = ''
+        self._wait_timeout = wait_timeout
 
     # cal Confidence interval
     def __mean_confidence_interval(data, confidence=0.95):
@@ -266,6 +283,10 @@ class P2GetExptResult(RabbitMQConsumer):
         fmt = '%y-%m-%dT%H:%M:%S.%f'
         # If experiment info exist
         if value:
+            # if expt is the same, wait for a while
+            if expt_id == self._last_expt_id:
+                sleep(self._wait_timeout)
+            self._last_expt_id = expt_id
             # Parse experiment info
             expt, ExptStartTime, ExptEndTime, _, _, _, list_ff_events, list_user_events = self.__parse_event_from_redis(
                 value, fmt)
@@ -300,7 +321,16 @@ if __name__ == '__main__':
                         datefmt='%m-%d %H:%M')
     while True:
         try:
-            P2GetExptResult().consumer('py.experiments.experiment', ('Q2', []))
+            mq_host = get_config_value('rabbitmq', 'mq_host')
+            mq_port = get_config_value('rabbitmq', 'mq_port')
+            mq_username = get_config_value('rabbitmq', 'mq_username')
+            mq_passwd = get_config_value('rabbitmq', 'mq_passwd')
+            redis_host = get_config_value('redis', 'redis_host')
+            redis_port = get_config_value('redis', 'redis_port')
+            redis_passwd = get_config_value('redis', 'redis_passwd')
+            consumer = P2GetExptResultConsumer(
+                mq_host, mq_port, mq_username, mq_port, redis_host, redis_port, redis_passwd)
+            consumer().consumer('py.experiments.experiment', ('Q2', []))
             break
         except KeyboardInterrupt:
             logging.info('#######Interrupted#########')
@@ -310,3 +340,5 @@ if __name__ == '__main__':
                 os._exit(0)
         except Exception as e:
             logging.exception('#######unexpected#########')
+            consumer.channel.close()
+            consumer.channel.connection.close()
