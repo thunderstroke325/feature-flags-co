@@ -14,7 +14,7 @@ class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
         dict_acitveExpts = dict_from_redis if dict_from_redis else {}
         list_act_Expts = dict_acitveExpts.get(key, [])
         list_act_Expts.append(expt_id)
-        dict_acitveExpts[key] = list
+        dict_acitveExpts[key] = list_act_Expts
         self.redis_set(dict_expt_id, dict_acitveExpts)
 
     def handle_body(self, body, **properties):
