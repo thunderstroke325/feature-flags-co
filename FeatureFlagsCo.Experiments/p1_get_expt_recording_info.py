@@ -25,9 +25,9 @@ class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
                 if not end:
                     # set up link between ff and his active expts
                     ff_env_id = 'dict_ff_act_expts_%s_%s' % (
-                        body['EnvId'], body['Flag']['Id'])
+                        body['EnvId'], body['FlagId'])
                     self.__setup_relation_between_obj_expt(
-                        ff_env_id, body['Flag']['Id'], key)
+                        ff_env_id, body['FlagId'], key)
                     # set up link between event and his active expts
                     event_env_id = 'dict_event_act_expts_%s_%s' % (
                         body['EnvId'], body['EventName'])
@@ -54,7 +54,7 @@ if __name__ == '__main__':
             redis_port = get_config_value('redis', 'redis_port')
             redis_passwd = get_config_value('redis', 'redis_passwd')
             consumer = P1GetExptRecordingInfoConsumer(
-                mq_host, mq_port, mq_username, mq_port, redis_host, redis_port, redis_passwd)
+                mq_host, mq_port, mq_username, mq_passwd, redis_host, redis_port, redis_passwd)
             consumer.consumer(
                 'py.experiments.recordinginfo', ('Q1', []))
             break
