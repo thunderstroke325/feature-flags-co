@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { forkJoin, Subject } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType, IVariationOption, IFftiuParams, IRulePercentageRollout, IPrequisiteFeatureFlag } from '../types/switch-new';
@@ -9,6 +9,7 @@ import { FfcAngularSdkService } from 'ffc-angular-sdk';
 import { PendingChange } from '../types/pending-changes';
 import { TeamService } from 'src/app/services/team.service';
 import { IAccount, IProjectEnv } from 'src/app/config/types';
+import { environment } from './../../../../../environments/environment';
 
 @Component({
   selector: 'conditions',
@@ -41,7 +42,7 @@ export class TargetConditionsComponent implements OnInit {
     private ffcAngularSdkService: FfcAngularSdkService,
     private teamService: TeamService
   ) {
-    this.approvalRequestEnabled = this.ffcAngularSdkService.variation('approval-request') === 'true';
+    this.approvalRequestEnabled = environment.name === 'Standalone' ? false : this.ffcAngularSdkService.variation('approval-request') === 'true';
     this.ListenerResolveData();
   }
 

@@ -8,6 +8,7 @@ import { CSwitchParams, IVariationOption } from '../types/switch-new';
 import { differenceInCalendarDays } from 'date-fns';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { environment } from './../../../../../environments/environment';
 
 @Component({
   selector: 'experimentation',
@@ -31,7 +32,7 @@ export class ExperimentationComponent implements OnInit {
     private experimentService: ExperimentService,
     private ffcAngularSdkService: FfcAngularSdkService
   ) {
-    this.experimentation = this.ffcAngularSdkService.variation('experimentation');
+    this.experimentation = environment.name === 'Standalone' ? 'temporary version' : this.ffcAngularSdkService.variation('experimentation');
 
     this.route.data.pipe(map(res => res.switchInfo))
     .subscribe((result: CSwitchParams) => {

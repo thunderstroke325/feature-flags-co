@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FfcAngularSdkService } from 'ffc-angular-sdk';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { FlagTriggerService } from 'src/app/services/flag-trigger.service';
 import { FlagTriggerAction, FlagTriggerStatus, FlagTriggerType, IFlagTrigger } from '../../types/flag-triggers';
@@ -12,14 +11,11 @@ import * as moment from 'moment';
 })
 export class FlagTriggersComponent implements OnInit {
 
-  isEnabled: boolean = false;
   isCreationModalVisible: boolean = false;
   isCreationLoading: boolean = false;
   constructor(
     private flagTriggerService: FlagTriggerService,
-    private message: NzMessageService,
-    private ffcAngularSdkService: FfcAngularSdkService) {
-      this.isEnabled = this.ffcAngularSdkService.variation('flag-trigger') === 'true';
+    private message: NzMessageService) {
   }
 
   @Input() featureFlagId: string;
@@ -57,13 +53,10 @@ export class FlagTriggersComponent implements OnInit {
     switch(enumType){
       case 'action':
         return this.flagTriggerActions.find(f => f.id === enu).label;
-        break;
       case 'type':
         return this.flagTriggerTypes.find(f => f.id === enu).label;
-        break;
       case 'status':
         return this.flagTriggerStatus.find(f => f.id === enu).label;
-        break;
     }
   }
 

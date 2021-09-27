@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { btnsConfig } from './btns';
 import { FfcAngularSdkService } from 'ffc-angular-sdk';
+import { environment } from './../../../../../../environments/environment';
 
 @Component({
   selector: 'app-nav-btns',
@@ -19,15 +20,7 @@ export class NavBtnsComponent {
     private router: Router,
     private ffcAngularSdkService: FfcAngularSdkService
   ){
-    const flagTriggersEnabled = this.ffcAngularSdkService.variation('flag-trigger') === 'true';
-    if (!flagTriggersEnabled) {
-      const idx = this.navConfig.findIndex(n => n.id === 'triggers');
-      if (idx > -1) {
-        this.navConfig.splice(idx, 1);
-      }
-    }
-
-    const experimentation  = this.ffcAngularSdkService.variation('experimentation');
+    const experimentation  = environment.name === 'Standalone' ? 'temporary version' : this.ffcAngularSdkService.variation('experimentation');
     if (experimentation === 'hide') {
       const idx = this.navConfig.findIndex(n => n.id === 'experimentations');
       if (idx > -1) {
