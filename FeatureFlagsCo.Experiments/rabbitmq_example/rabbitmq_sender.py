@@ -15,4 +15,4 @@ if __name__ == '__main__':
     sender1.redis.set(json_body_1['id'], str.encode(json.dumps(json_body_1)))
     sender2.redis.set(json_body_2['id'], str.encode(json.dumps(json_body_2)))
     sender1.send('topic1', "py.1", json_body_1)
-    sender2.send('topic2', "py.1", json_body_2)
+    sender2.send('topic2', "py.2", json_body_2)

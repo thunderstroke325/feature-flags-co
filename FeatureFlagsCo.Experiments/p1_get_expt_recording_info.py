@@ -19,7 +19,7 @@ class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
 
     def handle_body(self, body, **properties):
         if type(body) is dict:
-            key, end, value = body.get('ExptID', None), body.get(
+            key, end, value = body.get('ExptId', None), body.get(
                 'EndExptTime', None), body
             if key:
                 if not end:
@@ -33,10 +33,13 @@ class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
                         body['EnvId'], body['EventName'])
                     self.__setup_relation_between_obj_expt(
                         event_env_id, body['EventName'], key)
-                    jsons = [key]
-                    RabbitMQSender() \
-                        .send(topic='Q2', routing_key='py.experiments.experiment', *jsons)
-
+                    RabbitMQSender(self._mq_host,
+                                   self._mq_port,
+                                   self._mq_username,
+                                   self._mq_passwd,
+                                   self._redis_host,
+                                   self._redis_port,
+                                   self._redis_passwd).send('Q2', 'py.experiments.experiment', key)
                 self.redis_set(key, value)
 
 
@@ -44,28 +47,12 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%m-%d %H:%M')
-    while True:
-        try:
-            mq_host = get_config_value('rabbitmq', 'mq_host')
-            mq_port = get_config_value('rabbitmq', 'mq_port')
-            mq_username = get_config_value('rabbitmq', 'mq_username')
-            mq_passwd = get_config_value('rabbitmq', 'mq_passwd')
-            redis_host = get_config_value('redis', 'redis_host')
-            redis_port = get_config_value('redis', 'redis_port')
-            redis_passwd = get_config_value('redis', 'redis_passwd')
-            consumer = P1GetExptRecordingInfoConsumer(
-                mq_host, mq_port, mq_username, mq_passwd, redis_host, redis_port, redis_passwd)
-            consumer.consumer(
-                'py.experiments.recordinginfo', ('Q1', []))
-            break
-        except KeyboardInterrupt:
-            logging.info('#######Interrupted#########')
-            try:
-                sys.exit(0)
-            except SystemExit:
-                os._exit(0)
-        except Exception as e:
-            logging.exception('#######unexpected#########')
-        finally:
-            consumer.channel.close()
-            consumer.channel.connection.close()
+    mq_host = get_config_value('rabbitmq', 'mq_host')
+    mq_port = get_config_value('rabbitmq', 'mq_port')
+    mq_username = get_config_value('rabbitmq', 'mq_username')
+    mq_passwd = get_config_value('rabbitmq', 'mq_passwd')
+    redis_host = get_config_value('redis', 'redis_host')
+    redis_port = get_config_value('redis', 'redis_port')
+    redis_passwd = get_config_value('redis', 'redis_passwd')
+    P1GetExptRecordingInfoConsumer(
+        mq_host, mq_port, mq_username, mq_passwd, redis_host, redis_port, redis_passwd).run('p1.experiments.consumer', ('Q1', ['py.experiments.recordinginfo.#']))

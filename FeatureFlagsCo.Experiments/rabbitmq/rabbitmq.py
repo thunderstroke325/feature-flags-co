@@ -1,6 +1,8 @@
 import json
 import logging
 from abc import ABC, abstractmethod
+import os
+import sys
 
 
 import pika
@@ -18,15 +20,33 @@ class RabbitMQ:
                  mq_username='guest',
                  mq_passwd='guest',
                  redis_host='localhost',
-                 redis_port='6379',
-                 redis_passwd=None
+                 redis_port=6379,
+                 redis_passwd=''
                  ):
-        credentials = pika.PlainCredentials(mq_username, mq_passwd)
+        self._mq_host = mq_host
+        self._mq_port = mq_port
+        self._mq_username = mq_username
+        self._mq_passwd = mq_passwd
+        self._redis_host = redis_host
+        self._redis_port = redis_port
+        self._redis_passwd = redis_passwd
+        self._init_mq_connection(mq_host, mq_port, mq_username, mq_passwd)
+        self._init__redis_connection(
+            redis_host, redis_port, redis_passwd)
+
+    def _init_mq_connection(self,
+                            host,
+                            port,
+                            username,
+                            passwd):
+        credentials = pika.PlainCredentials(username, passwd)
         self._channel = pika.BlockingConnection(
-            pika.ConnectionParameters(host=mq_host, port=mq_port,
+            pika.ConnectionParameters(host=host, port=port,
                                       credentials=credentials)).channel()
+
+    def _init__redis_connection(self, host, port, password):
         self._redis = redis.Redis(
-            host=redis_host, port=redis_port, password=redis_passwd)
+            host=host, port=port, password=password)
 
     @property
     def channel(self) -> BlockingChannel:
@@ -44,7 +64,7 @@ class RabbitMQ:
         self.redis.set(id, str.encode(json.dumps(value)))
 
     def redis_del(self, *id):
-        self.redis.delete(id)
+        self.redis.delete(*id)
 
 
 class RabbitMQConsumer(ABC, RabbitMQ):
@@ -86,6 +106,35 @@ class RabbitMQConsumer(ABC, RabbitMQ):
                 # self.channel.basic_consume(
                 #     queue=queue_name, on_message_callback=callback, auto_ack=True)
                 # self.channel.start_consuming()
+
+    def run(self, queue, *bindings):
+        while True:
+            try:
+                if not self.channel or self.channel.is_closed:
+                    self._init_mq_connection(
+                        self._mq_host, self._mq_port, self._mq_username, self._mq_passwd)
+                if not self.redis or not self.redis.ping():
+                    self._init__redis_connection(
+                        self._redis_host, self._redis_port, self._redis_passwd)
+                self.consumer(queue, *bindings)
+                break
+            except KeyboardInterrupt:
+                logging.info('#######Interrupted#########')
+                try:
+                    sys.exit(0)
+                except SystemExit:
+                    os._exit(0)
+            except:
+                logging.exception('#######unexpected#########')
+            finally:
+                try:
+                    if self.channel.connection.is_open:
+                        self.channel.connection.close()
+                except:
+                    logging.exception('#######unexpected#########')
+                finally:
+                    self._channel = None
+                    self._redis = None
 
 
 class RabbitMQSender(RabbitMQ):
