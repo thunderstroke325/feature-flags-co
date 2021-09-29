@@ -31,7 +31,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         self._wait_timeout = wait_timeout
 
     # cal Confidence interval
-    def __mean_confidence_interval(data, confidence=0.95):
+    def __mean_confidence_interval(self, data, confidence=0.95):
         a = 1.0 * np.array(data)
         n = len(a)
         m, se = np.mean(a), sp.stats.sem(a)
@@ -107,17 +107,17 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         for var in expt['Variations']:
             if var not in dict_var_occurence.keys():
                 output.append({'variation': var,
-                                        'conversion': -1,
-                                        'uniqueUsers': -1,
-                                        'conversionRate':   -1,
-                                        'changeToBaseline': -1,
-                                        'confidenceInterval': -1,
-                                        'pValue': -1,
-                                        'isBaseline': True if
-                                        var_baseline == var else False,
-                                        'isWinner': False,
-                                        'isInvalid': True
-                                        })     
+                               'conversion': -1,
+                               'uniqueUsers': -1,
+                               'conversionRate': -1,
+                               'changeToBaseline': -1,
+                               'confidenceInterval': -1,
+                               'pValue': -1,
+                               'isBaseline': True if
+                               var_baseline == var else False,
+                               'isWinner': False,
+                               'isInvalid': True
+                               })
             else:
                 # If  (baseline variation usage = 0) or (baseline variation customer event = 0 )
                 if var_baseline not in list(dict_var_occurence.keys()) or \
@@ -136,42 +136,43 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                     min, 3), 1 if round(max, 3) > 1 else round(max, 3)]
                             pValue = -1
                             output.append({'variation': item,
-                                            'conversion': dict_expt_occurence[item],
-                                            'uniqueUsers': dict_var_occurence[item],
-                                            'conversionRate':   round(rate, 3),
-                                            'changeToBaseline': -1,
-                                            'confidenceInterval': confidenceInterval,
-                                            'pValue': -1,
-                                            'isBaseline': True if
-                                            var_baseline == item else False,
-                                            'isWinner': False,
-                                            'isInvalid': True
-                                            })
+                                           'conversion': dict_expt_occurence[item],
+                                           'uniqueUsers': dict_var_occurence[item],
+                                           'conversionRate':   round(rate, 3),
+                                           'changeToBaseline': -1,
+                                           'confidenceInterval': confidenceInterval,
+                                           'pValue': -1,
+                                           'isBaseline': True if
+                                           var_baseline == item else False,
+                                           'isWinner': False,
+                                           'isInvalid': True
+                                           })
                         else:
                             output.append({'variation': item,
-                                                'conversion': 0,
-                                                'uniqueUsers': 0,
-                                                'conversionRate':   0,
-                                                'changeToBaseline': -1,
-                                                'confidenceInterval': -1,
-                                                'pValue': -1,
-                                                'isBaseline': True if
-                                                var_baseline == item else False,
-                                                'isWinner': False,
-                                                'isInvalid': True
-                                                })                
+                                           'conversion': 0,
+                                           'uniqueUsers': 0,
+                                           'conversionRate':   0,
+                                           'changeToBaseline': -1,
+                                           'confidenceInterval': -1,
+                                           'pValue': -1,
+                                           'isBaseline': True if
+                                           var_baseline == item else False,
+                                           'isWinner': False,
+                                           'isInvalid': True
+                                           })
                 else:
                     BaselineRate = dict_expt_occurence[var_baseline] / \
                         dict_var_occurence[var_baseline]
                     # Preprare Baseline data sample distribution for Pvalue Calculation
                     dist_baseline = [1 for i in range(dict_expt_occurence[var_baseline])] + [
                         0 for i in range(dict_var_occurence[var_baseline] -
-                                            dict_expt_occurence[var_baseline])]
+                                         dict_expt_occurence[var_baseline])]
                     for item in dict_var_occurence.keys():
                         if item in dict_expt_occurence.keys():
                             dist_item = [1 for i in range(dict_expt_occurence[item])] + [
                                 0 for i in range(dict_var_occurence[item]-dict_expt_occurence[item])]
-                            rate, min, max = __mean_confidence_interval(dist_item)
+                            rate, min, max = self.__mean_confidence_interval(
+                                dist_item)
                             if math.isnan(min) or math.isnan(max):
                                 confidenceInterval = [-1, -1]
                             else:
@@ -180,31 +181,31 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                             pValue = round(
                                 1-stats.ttest_ind(dist_baseline, dist_item).pvalue, 2)
                             output.append({'variation': item,
-                                            'conversion': dict_expt_occurence[item],
-                                            'uniqueUsers': dict_var_occurence[item],
-                                            'conversionRate':   round(rate, 3),
-                                            'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
-                                            'confidenceInterval': confidenceInterval,
-                                            'pValue': -1 if math.isnan(pValue) else pValue,
-                                            'isBaseline': True if
-                                            var_baseline == item else False,
-                                            'isWinner': False,
-                                            'isInvalid': True if (pValue < 0.95)
-                                            or math.isnan(pValue) else False
-                                            })
+                                           'conversion': dict_expt_occurence[item],
+                                           'uniqueUsers': dict_var_occurence[item],
+                                           'conversionRate':   round(rate, 3),
+                                           'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
+                                           'confidenceInterval': confidenceInterval,
+                                           'pValue': -1 if math.isnan(pValue) else pValue,
+                                           'isBaseline': True if
+                                           var_baseline == item else False,
+                                           'isWinner': False,
+                                           'isInvalid': True if (pValue < 0.95)
+                                           or math.isnan(pValue) else False
+                                           })
                         else:
                             output.append({'variation': item,
-                                                'conversion': 0,
-                                                'uniqueUsers': 0,
-                                                'conversionRate':   0,
-                                                'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
-                                                'confidenceInterval': -1,
-                                                'pValue': -1,
-                                                'isBaseline': True if
-                                                var_baseline == item else False,
-                                                'isWinner': False,
-                                                'isInvalid': True
-                                                })    
+                                           'conversion': 0,
+                                           'uniqueUsers': 0,
+                                           'conversionRate':   0,
+                                           'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
+                                           'confidenceInterval': -1,
+                                           'pValue': -1,
+                                           'isBaseline': True if
+                                           var_baseline == item else False,
+                                           'isWinner': False,
+                                           'isInvalid': True
+                                           })
                     # Get winner variation
                     listValid = [output.index(
                         item) for item in output if item['isInvalid'] == False]

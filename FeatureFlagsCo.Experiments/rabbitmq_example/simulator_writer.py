@@ -6,8 +6,8 @@ from rabbitmq.rabbitmq import RabbitMQSender
 
 __CONST_Q1_START = {
     "ExptId": 'FF__38__48__103__PayButton_exp1',
-    "IterationId": 1,
-    "EnvId": 103,
+    "IterationId": "1",
+    "EnvId": "103",
     "FlagId": "FF__38__48__103__PayButton",
     "BaselineVariation": "1",
     "Variations": ["1", "2", "3"],
@@ -18,8 +18,8 @@ __CONST_Q1_START = {
 
 __CONST_Q1_END = {
     "ExptId": 'FF__38__48__103__PayButton_exp1',
-    "IterationId": 1,
-    "EnvId": 103,
+    "IterationId": "1",
+    "EnvId": "103",
     "FlagId": "FF__38__48__103__PayButton",
     "BaselineVariation": "1",
     "Variations": ["1", "2", "3"],
