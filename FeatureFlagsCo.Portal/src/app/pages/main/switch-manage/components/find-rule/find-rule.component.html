@@ -1,26 +1,57 @@
 <section class="body">
-    <div class="rule-title">
-        <span>规则{{index+1}}</span>
-        <i nz-icon
-           nz-popconfirm
-           nzPopconfirmTitle="确认删除该规则吗?"
-           nzPopconfirmPlacement="left"
-           nzType="delete"
-           nzTheme="outline"
-           (nzOnConfirm)="confirm()"></i>
-    </div>
+  <nz-card style="margin-bottom: 10px;font-size: 16px;" [nzTitle]="'规则 '+(index+1)" [nzExtra]="deleteRuleAction">
     <ng-container *ngFor="let ruleContent of ruleContentList; let key=index; let first=first; let last=last;">
-        <app-rule [ruleContent]="ruleContent"
-                  [isFirst]="first"
-                  [isLast]="last"
-                  [properties]="properties"
-                  (addRule)="onAddRule()"
-                  (deleteRule)="onDeleteRuleItem(key)"
-                  (ruleChange)="onRuleChange($event, key)"></app-rule>
+      <app-rule [ruleContent]="ruleContent"
+                [isFirst]="first"
+                [isLast]="last"
+                [properties]="properties"
+                (addRule)="onAddRule()"
+                (deleteRule)="onDeleteRuleItem(key)"
+                (ruleChange)="onRuleChange($event, key)"></app-rule>
     </ng-container>
 
     <app-serve-multistates [isSingle]="true"
-                [variationOptions]="variationOptions"
-                [rulePercentageRollouts]="rulePercentageRollouts"
-                (onPercentageChange)="onPercentageChangeMultistates.next($event)"></app-serve-multistates>
+                           [variationOptions]="variationOptions"
+                           [rulePercentageRollouts]="rulePercentageRollouts"
+                           (onPercentageChange)="onPercentageChangeMultistates.next($event)">
+
+    </app-serve-multistates>
+  </nz-card>
+  <ng-template #deleteRuleAction>
+    <div class="rule-title">
+      <i nz-icon
+         style="color: #9A95CC"
+         nz-popconfirm
+         nzPopconfirmTitle="确认删除该规则吗?"
+         nzType="delete"
+         nzTheme="fill"
+         nzPopconfirmPlacement="bottomRight"
+         [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+         (nzOnConfirm)="confirm()"></i>
+    </div>
+  </ng-template>
+<!--    <div class="rule-title">-->
+<!--        <span>规则{{index+1}}</span>-->
+<!--        <i nz-icon-->
+<!--           nz-popconfirm-->
+<!--           nzPopconfirmTitle="确认删除该规则吗?"-->
+<!--           nzPopconfirmPlacement="left"-->
+<!--           nzType="delete"-->
+<!--           nzTheme="outline"-->
+<!--           (nzOnConfirm)="confirm()"></i>-->
+<!--    </div>-->
+<!--    <ng-container *ngFor="let ruleContent of ruleContentList; let key=index; let first=first; let last=last;">-->
+<!--        <app-rule [ruleContent]="ruleContent"-->
+<!--                  [isFirst]="first"-->
+<!--                  [isLast]="last"-->
+<!--                  [properties]="properties"-->
+<!--                  (addRule)="onAddRule()"-->
+<!--                  (deleteRule)="onDeleteRuleItem(key)"-->
+<!--                  (ruleChange)="onRuleChange($event, key)"></app-rule>-->
+<!--    </ng-container>-->
+
+<!--    <app-serve-multistates [isSingle]="true"-->
+<!--                [variationOptions]="variationOptions"-->
+<!--                [rulePercentageRollouts]="rulePercentageRollouts"-->
+<!--                (onPercentageChange)="onPercentageChangeMultistates.next($event)"></app-serve-multistates>-->
 </section>

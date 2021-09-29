@@ -1,7 +1,7 @@
-<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzWidth]="500" (nzOnClose)="onClose()">
+<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" nzTitle="添加成员" [nzFooter]="confirm" [nzWidth]="500" (nzOnClose)="onClose()">
     <ng-container *nzDrawerContent>
         <div class="member-drawer-layout">
-            <form nz-form [formGroup]="memberForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
+            <form  id="myForm" nz-form [formGroup]="memberForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
 
                 <nz-form-item>
                     <nz-form-label>邮箱</nz-form-label>
@@ -19,10 +19,12 @@
                     </nz-select>
                   </nz-form-control>
               </nz-form-item>
-
-                <button nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">添加</button>
+<!--              <button nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>-->
             </form>
         </div>
     </ng-container>
+  <ng-template #confirm>
+    <button form="myForm" style="float: right" nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>
+  </ng-template>
 </nz-drawer>
 

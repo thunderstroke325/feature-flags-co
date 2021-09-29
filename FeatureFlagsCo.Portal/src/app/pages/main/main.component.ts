@@ -8,6 +8,7 @@ import { IAuthProps, IAccount, IProject, IProjectEnv } from 'src/app/config/type
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
 import { IMenuItem } from 'src/app/share/uis/menu/menu';
+// import { IHeaderItem } from 'src/app/share/uis/header/header';
 import { QUICK_COMBAT_DOCUMENT, INTEGRATION_OF_CLOUD_SERVICE_PROVIDERS, AGILE_SWITCH_BOLIERPLATE } from 'src/app/config';
 import { AccountService } from 'src/app/services/account.service';
 import { getAuth } from 'src/app/utils';

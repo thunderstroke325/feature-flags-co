@@ -1,21 +1,21 @@
 import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { IAuthProps, IAccount, IProject, IEnvironment, IProjectEnv } from 'src/app/config/types';
-import { IMenuItem } from './menu';
 import { getAuth } from 'src/app/utils';
 import { AccountService } from 'src/app/services/account.service';
 import { ProjectService } from 'src/app/services/project.service';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-menu',
-  templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.less']
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.less']
 })
-export class MenuComponent implements OnInit {
+export class HeaderComponent implements OnInit {
 
 
-  @Input() menus: IMenuItem[];
+  // @Input() menus: IMenuItem[];
   @Output() logout = new EventEmitter();
+
 
   get projects() {
     return this.projectService.projects || [];
@@ -36,22 +36,22 @@ export class MenuComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // this.auth = getAuth();
-    // this.projectService.currentProjectEnvChanged$
-    //   .pipe()
-    //   .subscribe(
-    //     res => {
-    //       const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
-    //       this.currentAccount = currentAccountProjectEnv.account;
-    //       this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
-    //       this.setSelectedProjectAndEnv();
-    //     }
-    //   );
-    //
-    // const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
-    // this.currentAccount = currentAccountProjectEnv.account;
-    // this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
-    // this.setSelectedProjectAndEnv();
+    this.auth = getAuth();
+    this.projectService.currentProjectEnvChanged$
+      .pipe()
+      .subscribe(
+        res => {
+          const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+          this.currentAccount = currentAccountProjectEnv.account;
+          this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
+          this.setSelectedProjectAndEnv();
+        }
+      );
+
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    this.currentAccount = currentAccountProjectEnv.account;
+    this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
+    this.setSelectedProjectAndEnv();
   }
 
   private setSelectedProjectAndEnv() {
@@ -99,8 +99,4 @@ export class MenuComponent implements OnInit {
     this.selectedEnv = env;
   }
 
-  onMenuItemSelected(menu: IMenuItem) {
-    if (menu.path) return;
-    window.open(menu.target);
-  }
 }

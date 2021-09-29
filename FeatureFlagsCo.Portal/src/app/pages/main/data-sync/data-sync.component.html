@@ -1,12 +1,12 @@
 <section class="body">
   <div class="content">
     <nz-spin [nzSpinning]="isDownloading" nzTip="下载中...">
-      <h2 nz-typography>数据同步只针对当前选择的项目和环境（左上角显示的项目和环境），包括以下数据：</h2>
-      <nz-list nzItemLayout="vertical">
+      <div class="data-sync-title" nz-typography>数据同步只针对当前选择的项目和环境（右上角显示的项目和环境），包括以下数据：</div>
+      <nz-list nzItemLayout="vertical" [nzSplit]="false" class="data-sync-list">
         <nz-list-item>
           <nz-list-item-meta>
             <nz-list-item-meta-title>
-              开关
+              <p>开关</p>
             </nz-list-item-meta-title>
             <nz-list-item-meta-description>
               当前环境下的所有开关，包括已经存档的开关
@@ -16,7 +16,7 @@
         <nz-list-item>
           <nz-list-item-meta>
             <nz-list-item-meta-title>
-              开关用户
+              <p>开关用户</p>
             </nz-list-item-meta-title>
             <nz-list-item-meta-description>
               包括当前环境下的所有开关用户
@@ -26,7 +26,7 @@
         <nz-list-item>
           <nz-list-item-meta>
             <nz-list-item-meta-title>
-              开关用户属性
+              <p>开关用户属性</p>
             </nz-list-item-meta-title>
             <nz-list-item-meta-description>
               包括所有自定义的用户属性
@@ -35,12 +35,12 @@
         </nz-list-item>
       </nz-list>
       <nz-divider></nz-divider>
-      <nz-space [nzSize]="40">
-        <button (click)="onDownload()" *nzSpaceItem nz-button class="submit" nz-button nzType="default">
+      <nz-space [nzSize]="20">
+        <button (click)="onDownload()" *nzSpaceItem nz-button class="submit" nz-button nzType="primary">
           <i nz-icon nzType="download" nzTheme="outline"></i>
           下载
         </button>
-        <button (click)="openUploadForm()" *nzSpaceItem nz-button class="submit" nz-button nzType="default">
+        <button (click)="openUploadForm()" *nzSpaceItem nz-button class="submit" style="background-color: #9A95CC;color: #fff" nz-button nzType="default">
           <i nz-icon nzType="upload" nzTheme="outline"></i>
           上传
         </button>

@@ -127,8 +127,12 @@ export class SwitchSettingComponent implements OnDestroy {
   // 存档
   onArchiveClick() {
     this.modal.create({
-      nzContent: '确定存档（软删除）开关吗？存档后开关将从开关列表中移出，并且调用SDK的返回值将为关闭开关后设定的默认值。',
+      nzContent: '<div>确定存档（软删除）开关吗？存档后开关将从开关列表中移出，并且调用SDK的返回值将为关闭开关后设定的默认值。</div>',
       nzOkText: '确认存档',
+      nzTitle: '存档开关（软存档）',
+      nzCentered: true,
+      nzWidth: 700,
+      nzBodyStyle: {minHeight: '100px'},
       nzOnOk: () => {
         this.switchServe.archiveEnvFeatureFlag(this.currentSwitch.id, this.currentSwitch.name)
           .subscribe(

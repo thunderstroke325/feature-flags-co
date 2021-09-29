@@ -3,31 +3,31 @@
         <app-nav-btns name="header" [routeUrl]="'setting'" [id]="currentSwitch?.id"></app-nav-btns>
         <div class="setting-body" name="detail" *ngIf="currentSwitch">
             <div class="info-item">
-                <p>名称</p>
+                <div class="label">名称</div>
                 <input class="name half" nz-input placeholder="开关名称..." [(ngModel)]="currentSwitch.name" />
             </div>
             <div class="info-item">
-                <p>Key Name</p>
+                <div class="label">Key Name</div>
                 <div nz-typography nzCopyable [nzCopyText]="currentSwitch.keyName">
                   <input nz-input class="key half" [disabled]="true" placeholder="KeyName..." [(ngModel)]="currentSwitch.keyName" />
                 </div>
             </div>
             <nz-divider></nz-divider>
             <div class="info-item">
-              <p>返回状态管理</p>
-              <div nz-row>
-                <div class="wrap-right" nz-col nzSpan="24">
+              <div style="display: flex;flex-direction: row;justify-content: space-between;align-items: center;margin-bottom: 25px;">
+                <div class="label" style="margin: 0">返回状态管理</div>
+                <div class="wrap-right">
                   <button nz-button nzType="primary" (click)="addVariationOptionRow()">
                     <i nz-icon nzType="plus" nzTheme="outline"></i>
                     添加状态
                   </button>
                 </div>
               </div>
-              <nz-table id="multistatetable" #editRowTable [nzData]="variationOptions" nzBordered [nzFrontPagination]="false" [nzSize]="'small'" [nzShowPagination]="false">
+              <nz-table id="multistatetable" #editRowTable [nzData]="variationOptions" [nzFrontPagination]="false" [nzSize]="'small'" [nzShowPagination]="false">
                 <thead>
-                  <tr>
-                    <th [nzAlign]="'center'">返回值</th>
-                    <th [nzAlign]="'center'"></th>
+                  <tr class="table-th-style">
+                    <th>返回值</th>
+                    <th nzAlign="center">操作</th>
                   </tr>
                 </thead>
                 <tbody cdkDropList (cdkDropListDropped)="drop($event)">
@@ -37,10 +37,10 @@
                         {{ variationOption.variationValue || 'Click to edit' }}
                       </div>
                       <input [hidden]="variationOptionEditId !== variationOption.localId" type="text" nz-input [(ngModel)]="variationOption.variationValue" (blur)="stopEditVariationOption()" /> -->
-                      <input type="text" nz-input [(ngModel)]="variationOption.variationValue" (blur)="stopEditVariationOption()" />
+                      <input type="text" style="width: 400px" nz-input [(ngModel)]="variationOption.variationValue" (blur)="stopEditVariationOption()" />
                     </td>
                     <td [nzAlign]="'center'">
-                      <a nz-popconfirm nzPopconfirmTitle="确定删除吗? 删除后将不可恢复！" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariationOptionRow(variationOption.localId)"><i nz-icon nzType="delete" nzTheme="fill"></i></a>
+                      <a nz-popconfirm nzPopconfirmTitle="确定删除吗? 删除后将不可恢复！" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariationOptionRow(variationOption.localId)"><i nz-icon style="color: #9A95CC" nzType="delete" nzTheme="fill"></i></a>
                     </td>
                   </tr>
                 </tbody>
@@ -50,7 +50,7 @@
                 <button class="submit" nz-button nzType="primary" (click)="onSaveSwitch()">提交</button>
             </div>
 
-            <button nz-button nzType="primary" nzDanger (click)="onArchiveClick()">
+            <button nz-button style="background-color: rgba(255, 0, 0, 0.5);color: #fff" nzType="default" (click)="onArchiveClick()">
                 存档开关（软删除）
             </button>
         </div>

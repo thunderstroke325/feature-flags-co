@@ -29,6 +29,8 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzTableModule } from 'ng-zorro-antd/table';
+import {NzTabsModule} from "ng-zorro-antd/tabs";
+import {NzSwitchModule} from "ng-zorro-antd/switch";
 
 @NgModule({
   declarations: [
@@ -62,6 +64,8 @@ import { NzTableModule } from 'ng-zorro-antd/table';
     NzDividerModule,
     NzSpinModule,
     NzToolTipModule,
+    NzTabsModule,
+    NzSwitchModule,
     NzTableModule
   ],
   exports: [

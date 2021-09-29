@@ -5,8 +5,28 @@
 .user-properties-list {
   max-height: calc(100% - 50px);
   overflow: auto;
-  border: 1px solid rgb(240, 240, 240);
   margin-bottom: 18px;
+  margin-top: 15px;
+
+  .table-th-style th{
+    background-color: #DDDCEB;
+  }
+
+  .table-operate{
+    display: flex;
+    flex-direction: row;
+    color: #9A95CC;
+    align-items: center;
+
+    .table-operate-edit{
+      margin-right: 15px;
+      color: #9A95CC;
+    }
+    .table-operate-icon{
+      font-size: 18px;
+      //color: #9A95CC;
+    }
+  }
 
   .prop-item {
     display: flex;
