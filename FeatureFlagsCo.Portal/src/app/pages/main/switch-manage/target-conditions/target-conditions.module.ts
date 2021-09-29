@@ -11,6 +11,8 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { SafeHtmlPipe } from 'src/app/share/pipes/safe-html.pipe';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import {NzSwitchModule} from 'ng-zorro-antd/switch';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [TargetConditionsComponent, SafeHtmlPipe ],
@@ -23,7 +25,9 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
     NzDropDownModule,
     NzModalModule,
     NzSelectModule,
-    TargetConditionsRoutingModule
+    TargetConditionsRoutingModule,
+    NzSwitchModule,
+    FormsModule
   ]
 })
 export class TargetConditionsModule { }

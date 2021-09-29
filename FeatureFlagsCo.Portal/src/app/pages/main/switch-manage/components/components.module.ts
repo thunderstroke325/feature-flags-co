@@ -25,6 +25,9 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
+import {NzTabsModule} from "ng-zorro-antd/tabs";
+import {NzSwitchModule} from "ng-zorro-antd/switch";
+import {NzTableModule} from "ng-zorro-antd/table";
 
 @NgModule({
   declarations: [
@@ -54,7 +57,10 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
     NzTagModule,
     NzModalModule,
     NzTypographyModule,
-    NzDividerModule
+    NzDividerModule,
+    NzTabsModule,
+    NzSwitchModule,
+    NzTableModule
   ],
   exports: [
     NavBtnsComponent,

@@ -1,31 +1,81 @@
 <section class="body">
-    <ng-container *ngFor="let item of upperFeatures; let key=index;">
-        <div class="switch-item">
-            <div class="select">
-              <nz-select
-               nzPlaceHolder="Select feature flag"
-               nzAllowClear
-               nzShowSearch
-               nzServerSearch
-               [compareWith]="compareWithPrequisiteFeatureFlag"
-               [(ngModel)]="item.selectedFeatureFlag"
-               (ngModelChange)="onSelectChange(item, $event)"
-               (nzOnSearch)="onSearch($event)">
-                <ng-container *ngFor="let feature of featureList">
-                    <nz-option *ngIf="!isLoading" nzCustomContent [nzDisabled]="selectedFeatureFlagIDs.includes(feature.id)" [nzValue]="feature" [nzLabel]="feature.name">{{feature.name}}</nz-option>
-                </ng-container>
-                <nz-option *ngIf="isLoading" nzDisabled nzCustomContent>
-                    <i nz-icon nzType="loading" class="loading-icon"></i> Loading Data...
-                </nz-option>
-              </nz-select>
-            </div>
-            <div class="select">
-                <nz-select [(ngModel)]="item.valueOptionsVariationValue" [compareWith]="compareWithVariationOption" (ngModelChange)="onVariationValueChange()">
-                    <nz-option *ngFor="let option of item.selectedFeatureFlag?.variationOptions" [nzValue]="option" [nzLabel]="option.variationValue"></nz-option>
-                </nz-select>
-            </div>
-            <i nz-icon nzType="delete" nzTheme="outline" (click)="onDeleteSwitch(key)"></i>
+  <div class="title">
+    <div class="label">
+      <div>上游开关</div>
+      <div style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin: 20px 0;">若下方上游开关不符合条件，则此开关处于关闭状态</div>
+    </div>
+    <button nz-button nzType="primary" (click)="onAddUpperSwitch()">
+      <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>
+      添加上游开关</button>
+  </div>
+  <nz-table #basicTable [nzData]="upperFeatures" [nzFrontPagination]="false" >
+    <thead>
+    <tr class="table-th-style">
+      <th>上游开关名称</th>
+      <th>版本</th>
+      <th nzWidth="200px" nzAlign="center">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of basicTable.data;let key=index;" class="table-tr-pointer">
+      <td>
+        <div class="select">
+          <nz-select
+            nzPlaceHolder="Select feature flag"
+            nzAllowClear
+            nzShowSearch
+            nzServerSearch
+            style="width: 400px"
+            [compareWith]="compareWithPrequisiteFeatureFlag"
+            [(ngModel)]="item.selectedFeatureFlag"
+            (ngModelChange)="onSelectChange(item, $event)"
+            (nzOnSearch)="onSearch($event)">
+            <ng-container *ngFor="let feature of featureList">
+              <nz-option *ngIf="!isLoading" nzCustomContent [nzDisabled]="selectedFeatureFlagIDs.includes(feature.id)" [nzValue]="feature" [nzLabel]="feature.name">{{feature.name}}</nz-option>
+            </ng-container>
+            <nz-option *ngIf="isLoading" nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i> Loading Data...
+            </nz-option>
+          </nz-select>
         </div>
-    </ng-container>
-    <button nz-button nzType="primary" (click)="onAddUpperSwitch()">添加上游开关</button>
+      </td>
+      <td>
+        <div class="select">
+          <nz-select style="width: 400px" [(ngModel)]="item.valueOptionsVariationValue" [compareWith]="compareWithVariationOption" (ngModelChange)="onVariationValueChange()">
+            <nz-option *ngFor="let option of item.selectedFeatureFlag?.variationOptions" [nzValue]="option" [nzLabel]="option.variationValue"></nz-option>
+          </nz-select>
+        </div>
+      </td>
+      <td style="text-align: center;"><i style="color: #9A95CC" nz-icon nzType="delete" nzTheme="outline" (click)="onDeleteSwitch(key)"></i></td>
+    </tr>
+    </tbody>
+  </nz-table>
+<!--    <ng-container *ngFor="let item of upperFeatures; let key=index;">-->
+<!--        <div class="switch-item">-->
+<!--            <div class="select">-->
+<!--              <nz-select-->
+<!--               nzPlaceHolder="Select feature flag"-->
+<!--               nzAllowClear-->
+<!--               nzShowSearch-->
+<!--               nzServerSearch-->
+<!--               [compareWith]="compareWithPrequisiteFeatureFlag"-->
+<!--               [(ngModel)]="item.selectedFeatureFlag"-->
+<!--               (ngModelChange)="onSelectChange(item, $event)"-->
+<!--               (nzOnSearch)="onSearch($event)">-->
+<!--                <ng-container *ngFor="let feature of featureList">-->
+<!--                    <nz-option *ngIf="!isLoading" nzCustomContent [nzDisabled]="selectedFeatureFlagIDs.includes(feature.id)" [nzValue]="feature" [nzLabel]="feature.name">{{feature.name}}</nz-option>-->
+<!--                </ng-container>-->
+<!--                <nz-option *ngIf="isLoading" nzDisabled nzCustomContent>-->
+<!--                    <i nz-icon nzType="loading" class="loading-icon"></i> Loading Data...-->
+<!--                </nz-option>-->
+<!--              </nz-select>-->
+<!--            </div>-->
+<!--            <div class="select">-->
+<!--                <nz-select [(ngModel)]="item.valueOptionsVariationValue" [compareWith]="compareWithVariationOption" (ngModelChange)="onVariationValueChange()">-->
+<!--                    <nz-option *ngFor="let option of item.selectedFeatureFlag?.variationOptions" [nzValue]="option" [nzLabel]="option.variationValue"></nz-option>-->
+<!--                </nz-select>-->
+<!--            </div>-->
+<!--            <i nz-icon nzType="delete" nzTheme="outline" (click)="onDeleteSwitch(key)"></i>-->
+<!--        </div>-->
+<!--    </ng-container>-->
 </section>

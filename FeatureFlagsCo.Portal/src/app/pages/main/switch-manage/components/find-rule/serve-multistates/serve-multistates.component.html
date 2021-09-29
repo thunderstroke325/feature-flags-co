@@ -1,9 +1,9 @@
 <section class="body">
     <div class="tip" *ngIf="!isSingle">SERVE</div>
     <div class="select" [class.single-select]="isSingle">
-        <nz-select [(ngModel)]="selectedValueOptionId" (ngModelChange)="modelChange()">
+        <nz-select [(ngModel)]="selectedValueOptionId" (ngModelChange)="modelChange()" nzPlaceHolder="Select target user">
             <nz-option *ngFor="let variationOption of variationOptions; let i = index" nzCustomContent [nzValue]="variationOption.localId" [nzLabel]="variationOption.variationValue">
-                <i class="tip-{{i % 10}}" nz-icon nzType="border" nzTheme="outline"></i> {{variationOption.variationValue}}
+                {{variationOption.variationValue}}
             </nz-option>
             <nz-option *ngIf="variationOptions.length > 1" [nzValue]="-1" [nzLabel]="'Percentage rollout'"></nz-option>
         </nz-select>
@@ -12,15 +12,21 @@
             <div class="percentage">
                 <div class="item" *ngFor="let rule of rulePercentageRolloutValues; let i = index">
                     <span>
-                        <i class="tip-{{i % 10}}" nz-icon nzType="border" nzTheme="outline"></i> {{rule.valueOption.variationValue}}
+                        {{rule.valueOption.variationValue}}
                     </span>
                     <div class="percentage-number">
-                        <input type="number" [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()" nz-input/>%
+                      <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
+                        <input style="width: 75px" type="number" nz-input [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()"/>
+                      </nz-input-group>
+                      <ng-template #suffixTemplateInfo>
+<!--                        <div class="suffix-percentage">%</div>-->
+                        <button style="background-color: #DDDCEB" nz-button nzType="default" nzSearch>%</button>
+                      </ng-template>
                     </div>
                 </div>
-                <div class="item">
-                    <span></span>
-                    <span>100%</span>
+                <div class="total-percentage">
+                  <nz-divider style="margin: 15px 0"></nz-divider>
+                  <div class="hundred-percent">100%</div>
                 </div>
             </div>
         </div>

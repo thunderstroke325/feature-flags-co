@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { ShareModule } from 'src/app/share/share.module';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 
 @NgModule({
@@ -25,7 +26,8 @@ import { ShareModule } from 'src/app/share/share.module';
     NzDrawerModule,
     NzButtonModule,
     NzSpinModule,
-    SwitchUserRoutingModule
+    SwitchUserRoutingModule,
+    NzIconModule
   ]
 })
 export class SwitchUserModule { }

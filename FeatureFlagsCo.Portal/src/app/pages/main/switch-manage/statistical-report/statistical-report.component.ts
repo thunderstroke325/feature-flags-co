@@ -33,6 +33,12 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
   private yname: string = '';
 
   public isLoading: boolean = false;
+  public navReportConfig: object[] = [
+    {keyValue: 'P7D', labelValue: '查看最近7天'},
+    {keyValue: 'P1D', labelValue: '查看最近24小时'},
+    {keyValue: 'PT2H', labelValue: '查看最近2小时'},
+    {keyValue: 'PT30M', labelValue: '查看最近30分钟'},
+  ];
 
   constructor(
     private route: ActivatedRoute,

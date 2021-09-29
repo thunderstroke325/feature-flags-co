@@ -1,51 +1,24 @@
 section.rule-item {
-    display: grid;
-    grid-template-columns: 1fr 1fr 80px;
-    height: max-content;
+    display: flex;
+    flex-direction: row;
     padding: 10px 20px 10px 0px;
 
-    .key {
-        display: grid;
-        grid-template-columns: 70px 1fr 1fr;
+  .tip {
+    font-size: 16px;
+    min-width: 40px;
+    line-height: 32px;
+  }
 
-        .tip {
-            width: 30px;
-            height: 30px;
-            background: #DEB887;
-            border-radius: 50%;
-            color: white;
-            font-weight: 900;
-            line-height: 30px;
-            text-align: center;
-        }
+  .select {
+    width: 200px;
+    padding-right: 10px;
 
-        .and-tip {
-            height: 30px;
-            font-weight: 900;
-            line-height: 30px;
-            color: #00000080;
-        }
-
-        .select {
-            width: 100%;
-            padding-right: 10px;
-
-            nz-select {
-                width: 100%;
-            }
-        }
+    nz-select {
+      width: 100%;
     }
-
-    .value {
-        width: 100%;
-
-        nz-select {
-            width: 100%;
-        }
-    }
+  }
 
     .operator {
-        justify-self: end;
         display: flex;
         align-items: center;
 

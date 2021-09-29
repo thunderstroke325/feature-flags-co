@@ -15,7 +15,7 @@ export class TeamComponent implements OnInit {
 
   private destory$: Subject<void> = new Subject();
 
-  public searhTerm: string = '';
+  public searchTeam: string = '';
 
   public teamMembers: IAccountUser[] = [];
   public searchResult: IAccountUser[] = [];
@@ -43,10 +43,10 @@ export class TeamComponent implements OnInit {
   }
 
   doSearch() {
-    if (this.searhTerm === '' || this.searhTerm == null) {
+    if (this.searchTeam === '' || this.searchTeam == null) {
       this.searchResult = this.teamMembers;
     } else {
-      this.searchResult = this.teamMembers.filter(member => member.email.toLowerCase().indexOf(this.searhTerm.toLowerCase()) !== -1)
+      this.searchResult = this.teamMembers.filter(member => member.email.toLowerCase().indexOf(this.searchTeam.toLowerCase()) !== -1)
     }
   }
 

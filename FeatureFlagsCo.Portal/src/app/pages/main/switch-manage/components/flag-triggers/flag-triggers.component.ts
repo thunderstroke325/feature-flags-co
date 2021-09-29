@@ -86,6 +86,17 @@ export class FlagTriggersComponent implements OnInit {
   cancelCreation() {
     this.isCreationModalVisible = false;
   }
+  onChangeTriggerStatus(trigger: IFlagTrigger): void{
+    if (trigger.statusName === 'Enabled'){
+      this.toggleTriggerStatus(trigger, FlagTriggerStatus.Disabled, () => {
+        this.message.success('成功关闭触发器！');
+      });
+    }else if (trigger.statusName === 'Disabled' ){
+      this.toggleTriggerStatus(trigger, FlagTriggerStatus.Enabled, () => {
+        this.message.success('成功激活触发器！');
+      });
+    }
+  }
 
   disableTrigger(trigger: IFlagTrigger){
     this.toggleTriggerStatus(trigger, FlagTriggerStatus.Disabled, () => {

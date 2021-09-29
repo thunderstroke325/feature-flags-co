@@ -1,14 +1,14 @@
 <section class="menu-body">
-    <div class="top-title" >
-      <div>
-        <div class="title">{{currentProjectEnv?.projectName}}</div>
-        <div class="title">{{currentProjectEnv?.envName}}</div>
-      </div>
-      <i nz-icon nzType="swap" nzTheme="outline" (click)="envModalVisible=true"></i>
-    </div>
+<!--    <div class="top-title" >-->
+<!--      <div>-->
+<!--        <div class="title">{{currentProjectEnv?.projectName}}</div>-->
+<!--        <div class="title">{{currentProjectEnv?.envName}}</div>-->
+<!--      </div>-->
+<!--      <i nz-icon nzType="swap" nzTheme="outline" (click)="envModalVisible=true"></i>-->
+<!--    </div>-->
     <div class="menu-list">
-        <ul nz-menu nzMode="inline" style="width: 240px;" nzTheme="dark">
-
+        <ul nz-menu nzMode="inline" style="height: 100%;">
+          <div style="height: 40px"></div>
             <ng-container *ngTemplateOutlet="menuTpl; context: { $implicit: menus }"></ng-container>
             <ng-template #menuTpl let-menus>
               <ng-container *ngFor="let menu of menus">
@@ -63,15 +63,15 @@
           </ul>
 
     </div>
-    <div class="user-info">
-      <div>
-        <div class="title">{{currentAccount?.organizationName}}</div>
-        <div class="title"><span>{{auth?.email}}</span>
-        <i class="icon-logout" nz-icon nzType="logout" nzTheme="outline" (click)="logout.emit()"></i>
-          <!-- <i nz-icon nzType="caret-up" nzTheme="outline" nz-dropdown [nzDropdownMenu]="menu" nzPlacement="topCenter"></i> -->
-        </div>
-      </div>
-    </div>
+<!--    <div class="user-info">-->
+<!--      <div>-->
+<!--        <div class="title">{{currentAccount?.organizationName}}</div>-->
+<!--        <div class="title"><span>{{auth?.email}}</span>-->
+<!--        <i class="icon-logout" nz-icon nzType="logout" nzTheme="outline" (click)="logout.emit()"></i>-->
+<!--          &lt;!&ndash; <i nz-icon nzType="caret-up" nzTheme="outline" nz-dropdown [nzDropdownMenu]="menu" nzPlacement="topCenter"></i> &ndash;&gt;-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
 </section>
 
 <!-- <nz-dropdown-menu #menu="nzDropdownMenu">

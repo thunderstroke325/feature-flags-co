@@ -40,11 +40,15 @@
           <div class="search">
               <div nz-row>
                   <div class="search-wrap ant-col ant-col-12" nz-col nzSpan="12">
-                    <input nz-input type="text" [(ngModel)]="searchValue">
-                    <button nz-button (click)="onSearchClick()" (key.enter)="onSearchClick()">查找</button>
+                    <input style="margin-right: 20px;" nz-input type="text" placeholder="按名字查找" [(ngModel)]="searchValue">
+                    <button nz-button nzType="primary" (click)="onSearchClick()" (key.enter)="onSearchClick()">
+                      <i nz-icon nzType="search" nzTheme="outline"></i>
+                      查找
+                    </button>
                   </div>
                   <div class="wrap-right ant-col ant-col-12" nz-col nzSpan="12">
                     <button nz-button nzType="primary" (click)="onPropsSettingClick()">
+                      <i nz-icon nzType="setting" nzTheme="fill"></i>
                       属性管理
                     </button>
                   </div>
@@ -53,6 +57,7 @@
           <div class="list">
               <nz-table #basicTable
                 [nzData]="list"
+                [nzScroll]="{ y: '520px' }"
                 [nzFrontPagination]="false"
                 [nzLoading]="isLoading"
                 [nzTotal]="totalCount"
@@ -60,19 +65,19 @@
                 [nzPageIndex]="pageIndex + 1"
                 (nzQueryParams)="onQueryChange($event)">
                 <thead>
-                    <tr>
+                    <tr class="table-th-style">
                       <th>名称</th>
                       <th>Key Name</th>
                       <th>Email</th>
-                      <!-- <th>国家</th> -->
+                      <th nzAlign="center">操作</th>
                     </tr>
                 </thead>
-                <tbody>
-                  <tr *ngFor="let user of basicTable.data" (click)="onRowClick(user)" class="table-tr-pointer">
+                <tbody style="width: calc(100% - 200px);">
+                  <tr *ngFor="let user of basicTable.data" class="table-tr-pointer">
                     <td>{{ user.name }}</td>
                     <td>{{ user.keyId }}</td>
                     <td>{{ user.email }}</td>
-                    <!-- <td>{{ user.country }} </td> -->
+                    <td style="text-align: center"><a nz-button nzType="link" style="color: #9A95CC;" (click)="onRowClick(user)">详情</a></td>
                   </tr>
                 </tbody>
               </nz-table>

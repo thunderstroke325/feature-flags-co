@@ -66,11 +66,18 @@ export class UpperSwitchComponent {
 
   // 添加上游开关
   onAddUpperSwitch() {
-    this.upperFeatures.push({
+    this.upperFeatures = [
+      ...this.upperFeatures,
+      {
       prerequisiteFeatureFlagId: null,
       selectedFeatureFlag: null,
       valueOptionsVariationValue: null
-    });
+    }];
+    // this.upperFeatures.push({
+    //   prerequisiteFeatureFlagId: null,
+    //   selectedFeatureFlag: null,
+    //   valueOptionsVariationValue: null
+    // });
   }
 
   // 删除开关

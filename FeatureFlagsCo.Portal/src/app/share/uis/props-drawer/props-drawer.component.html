@@ -1,31 +1,52 @@
 <nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" nzTitle="开关用户自定义属性管理" [nzWidth]="550"
     (nzOnClose)="close.emit()">
+  <ng-container *nzDrawerContent>
     <div *ngIf="loading" class="loader"><nz-spin nzSimple></nz-spin></div>
     <div *ngIf="!loading">
+      <button nz-button (click)="onAddClick()" nzType="primary">
+        <i nz-icon nzType="plus" nzTheme="outline"></i>
+        添加新属性
+      </button>
       <div *ngIf="list?.length > 0" class="user-properties-list">
-        <div *ngFor="let prop of list; index as index" class="prop-item">
-          <section>
-              {{prop}}
-          </section>
+        <nz-table #basicTable [nzData]="list" [nzHideOnSinglePage]="true" nzTableLayout="fixed">
+          <thead>
+          <tr class="table-th-style">
+            <th>名称</th>
+            <th style="padding-left: 30px">操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let prop of basicTable.data; index as index" class="table-tr-pointer">
+            <td nzEllipsis>{{prop}}</td>
+            <td class="table-operate">
+              <a nz-button nzType="link" class="table-operate-edit" (click)="onEditClick(prop, index)">
+                <i nz-icon nzType="edit" class="table-operate-icon" nzTheme="outline"></i>编辑
+              </a>
+              <i nz-icon nzType="delete" class="table-operate-icon" nzTheme="outline" (click)="onDeleteClick(index)"></i>
+            </td>
+          </tr>
+          </tbody>
+        </nz-table>
+<!--        <div *ngFor="let prop of list; index as index" class="prop-item">-->
+<!--          <section>-->
+<!--              {{prop}}-->
+<!--          </section>-->
 
-          <section>
-              <button nz-button (click)="onEditClick(prop, index)">
-                  编辑
-              </button>
-              <button nz-button (click)="onDeleteClick(index)">
-                  删除
-              </button>
-          </section>
-        </div>
+<!--          <section>-->
+<!--              <button nz-button (click)="onEditClick(prop, index)">-->
+<!--                  编辑-->
+<!--              </button>-->
+<!--              <button nz-button (click)="onDeleteClick(index)">-->
+<!--                  删除-->
+<!--              </button>-->
+<!--          </section>-->
+<!--        </div>-->
       </div>
       <div *ngIf="!list || list?.length === 0">
         <h4 nz-typography>尚无任何自定义属性</h4>
       </div>
-
-      <button nz-button (click)="onAddClick()" nzType="primary">
-        添加新属性
-      </button>
     </div>
+  </ng-container>
 </nz-drawer>
 
 <nz-modal [(nzVisible)]="editVisible" nzTitle="属性名称" (nzOnCancel)="editVisible = false" (nzOnOk)="handleOk()">

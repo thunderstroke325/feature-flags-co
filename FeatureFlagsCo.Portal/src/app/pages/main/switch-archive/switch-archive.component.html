@@ -8,23 +8,41 @@
                   </div>
               </div>
           </div>
-          <div class="switch-list" #listRef>
-            <div *ngFor="let switch of switchs" class="switch">
-              <section>
-                <div class="title">
-                    {{switch.name}}
-                </div>
-                <div class="description">
-                    {{switch.keyName}}
-                </div>
-              </section>
-              <span>存档日期：{{getLocalDate(switch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</span>
+          <div class="switch-list">
+            <nz-table #basicTable [nzData]="switchs">
+              <thead>
+              <tr class="table-th-style">
+                <th>名称</th>
+                <th>状态</th>
+                <th>最近修改</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let switch of basicTable.data" class="table-tr-pointer">
+                <td>{{switch.name}}</td>
+                <td>
+                  <nz-switch [ngModel]="switch.status !== 'Disabled'" [nzDisabled]="switch.status !== 'Disabled'" [nzControl]="true" [nzLoading]="switchLoading" (click)="onUnarchiveClick(switch)" nzCheckedChildren="在档" nzUnCheckedChildren="复位"></nz-switch>
+                </td>
+                <td>{{getLocalDate(switch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
+              </tr>
+              </tbody>
+            </nz-table>
+<!--            <div *ngFor="let switch of switchs" class="switch">-->
+<!--              <section>-->
+<!--                <div class="title">-->
+<!--                    {{switch.name}}-->
+<!--                </div>-->
+<!--                <div class="description">-->
+<!--                    {{switch.keyName}}-->
+<!--                </div>-->
+<!--              </section>-->
+<!--              <span>存档日期：{{getLocalDate(switch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</span>-->
 
-              <nz-button-group>
-                <button nz-button [nzType]="'primary'">在档</button>
-                <button nz-button [nzType]="'default'" (click)="onUnarchiveClick(switch)">复位</button>
-              </nz-button-group>
-            </div>
+<!--              <nz-button-group>-->
+<!--                <button nz-button [nzType]="'primary'">在档</button>-->
+<!--                <button nz-button [nzType]="'default'" (click)="onUnarchiveClick(switch)">复位</button>-->
+<!--              </nz-button-group>-->
+<!--            </div>-->
 
             <div class="mask" *ngIf="isLoading">
                 <nz-spin></nz-spin>

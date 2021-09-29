@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HeaderComponent } from './uis/header/header.component';
 import { MenuComponent } from './uis/menu/menu.component';
 import { OverlayModule } from '@angular/cdk/overlay';
 
@@ -34,7 +35,7 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzUploadModule } from 'ng-zorro-antd/upload';
 
 @NgModule({
-  declarations: [MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent],
+  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -63,6 +64,7 @@ import { NzUploadModule } from 'ng-zorro-antd/upload';
   ],
   exports: [
     CommonModule,
+    HeaderComponent,
     MenuComponent,
     ReactiveFormsModule,
     FormsModule,

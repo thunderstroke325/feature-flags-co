@@ -11,27 +11,29 @@
           <div id="demo-link" *ngIf="featureDetail?.ff?.keyName === '演示专用功能标记'">
             <a target="_blank" href="https://www.feature-flags.co/demo.html?envKey={{currentProjectEnv?.envSecret}}">点击查看 Demo</a>
           </div>
-            <button *ngIf="!approvalRequestEnabled" class="save"nz-button nzType="primary" (click)="onSaveConditionsOld()">保存设置</button>
-            <nz-button-group class="save" *ngIf="approvalRequestEnabled">
-              <button nz-button nzType="primary" (click)="onPreSaveConditions()">保存设置</button>
-              <button nz-button nz-dropdown [nzDropdownMenu]="menu1" nzPlacement="bottomRight">
-                <i nz-icon nzType="ellipsis"></i>
-              </button>
-            </nz-button-group>
-            <nz-dropdown-menu #menu1="nzDropdownMenu">
-              <ul nz-menu>
-                <li nz-menu-item (click)="onRequestApproval()">请求审阅</li>
-              </ul>
-            </nz-dropdown-menu>
-            <div class="item">
-                <p class="label">开启或关闭开关</p>
-                <nz-button-group>
-                    <button nz-button [nzType]="switchStatus === 'Enabled' ? 'primary' : 'default'"  (click)="onChangeSwitchStatus('Enabled')">开</button>
-                    <button nz-button [nzType]="switchStatus === 'Disabled' ? 'primary' : 'default'"  (click)="onChangeSwitchStatus('Disabled')">关</button>
+            <div class="item" style="display: flex;flex-direction: row;justify-content: space-between;">
+              <div class="item-short">
+                <div class="label">开启或关闭开关</div>
+                <nz-switch [ngModel]="switchStatus === 'Enabled'" (click)="onChangeSwitchStatus(switchStatus)" nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
+              </div>
+              <div>
+                <button *ngIf="!approvalRequestEnabled" nz-button nzType="primary" (click)="onSaveConditionsOld()">保存设置</button>
+                <nz-button-group *ngIf="approvalRequestEnabled">
+                  <button nz-button nzType="primary" (click)="onPreSaveConditions()">保存设置</button>
+                  <button nz-button nz-dropdown [nzDropdownMenu]="menu1" nzPlacement="bottomRight"><i nz-icon nzType="ellipsis"></i></button>
                 </nz-button-group>
+                <nz-dropdown-menu #menu1="nzDropdownMenu">
+                  <ul nz-menu>
+                    <li nz-menu-item (click)="onRequestApproval()">请求审阅</li>
+                  </ul>
+                </nz-dropdown-menu>
+              </div>
             </div>
             <div class="item">
-                <p class="label">上游开关(若下方上游开关不符合条件，则此开关处于关闭状态)</p>
+<!--                <div class="label">-->
+<!--                  <div>上游开关</div>-->
+<!--                  <div style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin: 20px 0;">若下方上游开关不符合条件，则此开关处于关闭状态</div>-->
+<!--                </div>-->
                 <upper-switch [featureList]="featureList" [upperFeatures]="upperFeatures" (search)="onSearchPrequisiteFeatureFlags($event)" (onUpperSwicthChange)="onUpperSwicthChange($event)"></upper-switch>
             </div>
             <div class="item">
@@ -45,8 +47,12 @@
                                 (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)"></target-user>
                 </div>
             </div>
-            <div class="item">
-                <p class="label">使用匹配条件找到目标用户</p>
+            <div>
+              <div class="item" style="display: flex;flex-direction: row;justify-content: space-between;">
+                <div class="label">使用匹配条件找到目标用户</div>
+                <button nz-button nzType="primary" (click)="onAddRule()">
+                  <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>添加规则</button>
+              </div>
                 <ng-container *ngFor="let condition of featureDetail?.getFftuwmtr(); let key=index;">
                     <div class="content">
                         <find-rule [data]="condition"
@@ -60,10 +66,9 @@
                                    (onPercentageChangeMultistates)="onPercentageChangeMultistates($event, key)"></find-rule>
                     </div>
                 </ng-container>
-                <button nz-button nzType="primary" (click)="onAddRule()">添加规则</button>
             </div>
-            <div class="item ">
-              <p class="label">默认返回值</p>
+            <div class="item item-short">
+              <div class="label" style="align-self: flex-start">默认返回值</div>
               <app-serve-multistates [isSingle]="true"
                           [variationOptions]="variationOptions"
                           [rulePercentageRollouts]="featureDetail?.getFFDefaultRulePercentageRollouts()"
@@ -73,7 +78,7 @@
             <div class="item">
               <div class="default">
                 <span class="label">如果开关关闭了，应返回</span>
-                <button style="margin-left:10px" nz-button nz-dropdown nzTrigger="click" [nzDropdownMenu]="ddm">
+                <button nz-button nz-dropdown nzTrigger="click" [nzDropdownMenu]="ddm">
                   {{featureDetail?.getFFVariationOptionWhenDisabled()?.variationValue}}
                   <i nz-icon nzType="down"></i>
                 </button>

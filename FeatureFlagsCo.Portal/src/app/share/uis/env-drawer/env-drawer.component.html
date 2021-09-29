@@ -1,7 +1,7 @@
-<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzWidth]="500" (nzOnClose)="onClose()">
+<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzTitle]="isEditing ? '编辑环境':'添加环境'" [nzFooter]="create" [nzWidth]="500" (nzOnClose)="onClose()">
     <ng-container *nzDrawerContent>
         <div class="env-drawer-layout">
-            <form nz-form [formGroup]="envForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
+            <form id="myForm" nz-form [formGroup]="envForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
 
                 <nz-form-item>
                     <nz-form-label>环境名称</nz-form-label>
@@ -19,21 +19,21 @@
                       </nz-input-group>
                   </nz-form-control>
               </nz-form-item>
-
-              <button nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">{{isEditing
-                  ? '更新' : '创建'}}</button>
             </form>
 
             <ng-container *ngIf="env && env.id">
-              <nz-divider></nz-divider>
               <section>
                 <nz-space [nzSize]="'middle'">
-                  <button *nzSpaceItem nz-button [nzType]="'default'" (click)="onRegenerate(envKeySecret)">重新生成 Secret</button>
-                  <button *nzSpaceItem nz-button [nzType]="'default'" (click)="onRegenerate(envKeyMobileSecret)">重新生成 Mobile Secret</button>
+                  <button *nzSpaceItem nz-button [nzType]="'primary'" (click)="onRegenerate(envKeySecret)">重新生成 Secret</button>
+                  <button *nzSpaceItem style="background-color: #9A95CC;color: #fff;" nz-button [nzType]="'default'" (click)="onRegenerate(envKeyMobileSecret)">重新生成 Mobile Secret</button>
                 </nz-space>
               </section>
           </ng-container>
         </div>
     </ng-container>
+  <ng-template #create>
+    <button form="myForm" nz-button style="float: right"  class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">
+      {{isEditing ? '更新' : '创建'}}</button>
+  </ng-template>
 </nz-drawer>
 

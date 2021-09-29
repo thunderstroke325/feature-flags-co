@@ -1,34 +1,30 @@
 <section>
-  <div nz-row style="width: 780px">
-    <div nz-col nzSpan="12">
-      <h5 nz-typography>机构</h5>
-    </div>
-    <div class="wrap-right" nz-col nzSpan="12">
-      <button nz-button nzType="primary" (click)="onCreateAccountClick()">
-        <i nz-icon nzType="plus" nzTheme="outline"></i>
-        创建机构
-      </button>
-    </div>
+  <div class="title">
+    <div>机构名称</div>
   </div>
-  <form nz-form [formGroup]="validateOrgForm" class="" [nzLayout]="'vertical'" (ngSubmit)="submitOrgForm()">
+  <form nz-form [formGroup]="validateOrgForm" [nzLayout]="'inline'" (ngSubmit)="submitOrgForm()" style="width: 100%">
     <nz-form-item>
-        <nz-form-label>机构名称</nz-form-label>
-        <nz-form-control nzErrorTip="请输入机构名称！">
-          <nz-input-group nzPrefixIcon="bank">
+        <nz-form-control style="width: 400px" nzErrorTip="请输入机构名称！" class="form-item-content">
+          <nz-input-group nzPrefixIcon="bank" style="color: #9A95CC;">
               <input type="text" nz-input formControlName="organizationName" placeholder="机构名称" />
           </nz-input-group>
-      </nz-form-control>
+        </nz-form-control>
     </nz-form-item>
-    <button nz-button class="" [nzType]="'primary'" [nzLoading]="isLoading">更新机构名称</button>
+    <nz-form-item>
+      <button nz-button class="btn-change-account-name" [nzType]="'primary'" [nzLoading]="isLoading">更新机构名称</button>
+    </nz-form-item>
   </form>
 </section>
-<nz-divider></nz-divider>
 
 <section>
-  <h5 nz-typography>切换机构</h5>
-  <nz-select nzShowSearch nzPlaceHolder="选择机构" [(ngModel)]="currentAccount" (ngModelChange)="onAccountChange()">
+  <div class="title-change-account">切换机构</div>
+  <nz-select style="width: 400px;margin-right: 18px;" nzShowSearch nzPlaceHolder="选择机构" [(ngModel)]="currentAccount" (ngModelChange)="onAccountChange()">
     <nz-option *ngFor="let account of allAccounts" [nzLabel]="account.organizationName" [nzValue]="account"></nz-option>
   </nz-select>
+  <button nz-button nzType="primary" (click)="onCreateAccountClick()">
+    <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>
+    创建机构
+  </button>
 </section>
 
 <app-account-drawer [visible]="creatAccountFormVisible" (close)="onCreateAccountClosed($event)"></app-account-drawer>
