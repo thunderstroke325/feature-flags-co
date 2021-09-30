@@ -11,6 +11,9 @@ from pika.adapters.blocking_connection import BlockingChannel
 
 from config.config_handling import get_config_value
 
+logger = logging.getLogger("rabbitmq")
+logger.setLevel(logging.INFO)
+
 
 class RabbitMQ:
 
@@ -89,17 +92,22 @@ class RabbitMQConsumer(ABC, RabbitMQ):
                 for binding_key in set(binding_keys):
                     super().channel.queue_bind(
                         exchange=topic, queue=queue_name, routing_key=binding_key)
-                    logging.info(
-                        "topic: %r, queue: %r, routing_key: %r" % (topic, queue_name, binding_key))
+                    logger.info(
+                        "#######get topic: %r, queue: %r, routing_key: %r#######" % (topic, queue_name, binding_key))
                 if not binding_keys:
                     super().channel.queue_bind(exchange=topic, queue=queue_name)
-                    logging.info("topic: %r, queue: %r" % (topic, queue_name))
+                    logger.info("#######get topic: %r, queue: %r#######" %
+                                (topic, queue_name))
+
+            self.channel.basic_qos(prefetch_count=1)
             for method, properties, body in self.channel.consume(queue_name,
-                                                                 auto_ack=True,
+                                                                 auto_ack=False,
                                                                  exclusive=exclusive):
 
                 self.handle_body(json.loads(body.decode()),
-                                 routing_key=method.routing_key)
+                                 routing_key=method.routing_key,
+                                 delivery=method.delivery_tag)
+                self.channel.basic_ack(method.delivery_tag)
                 # def callback(ch, method, properties, body):
                 #     self.handle_body(json.loads(body.decode()),
                 #                      routing_key=method.routing_key)
@@ -119,19 +127,19 @@ class RabbitMQConsumer(ABC, RabbitMQ):
                 self.consumer(queue, *bindings)
                 break
             except KeyboardInterrupt:
-                logging.info('#######Interrupted#########')
+                logger.info('#######Interrupted#########')
                 try:
                     sys.exit(0)
                 except SystemExit:
                     os._exit(0)
             except:
-                logging.exception('#######unexpected#########')
+                logger.exception('#######unexpected#########')
             finally:
                 try:
                     if self.channel.connection.is_open:
                         self.channel.connection.close()
                 except:
-                    logging.exception('#######unexpected#########')
+                    logger.exception('#######unexpected#########')
                 finally:
                     self._channel = None
                     self._redis = None
@@ -142,10 +150,26 @@ class RabbitMQSender(RabbitMQ):
     def send(self, topic, routing_key, *jsons):
         self.channel.exchange_declare(
             exchange=topic, exchange_type='topic')
-        logging.info("topic: %r, routing_key: %r" % (topic, routing_key))
-        for json_body in jsons:
-            body = str.encode(json.dumps(json_body))
-            self.channel.basic_publish(
-                exchange=topic, routing_key=routing_key, body=body)
-
-        self.channel.connection.close()
+        logger.info("#######send topic: %r, routing_key: %r#######" %
+                    (topic, routing_key))
+        try:
+            for json_body in jsons:
+                body = str.encode(json.dumps(json_body))
+                self.channel.basic_publish(
+                    exchange=topic,
+                    routing_key=routing_key,
+                    body=body,
+                    # make message persistent
+                    properties=pika.BasicProperties(delivery_mode=2)
+                )
+        except:
+            logger.exception('#######unexpected#########')
+        finally:
+            try:
+                if self.channel.connection.is_open:
+                    self.channel.connection.close()
+            except:
+                logger.exception('#######unexpected#########')
+            finally:
+                self._channel = None
+                self._redis = None

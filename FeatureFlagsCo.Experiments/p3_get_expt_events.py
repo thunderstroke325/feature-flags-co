@@ -6,6 +6,9 @@ import os
 import sys
 from rabbitmq.rabbitmq import RabbitMQConsumer
 
+logger = logging.getLogger("p3_get_expt_events")
+logger.setLevel(logging.INFO)
+
 
 class P3GetEventsConsumer(RabbitMQConsumer):
 
@@ -29,6 +32,7 @@ class P3GetEventsConsumer(RabbitMQConsumer):
                     }
                     list_ff_events = list_ff_events + [dict_to_add]
                     self.redis_set(id, list_ff_events)
+                    logger.info('Added ff event')
             elif 'py.experiments.events.user' in routing_key:
                 # Q5
                 dict_customEvent_acitveExpts = self.redis_get(
@@ -44,10 +48,11 @@ class P3GetEventsConsumer(RabbitMQConsumer):
                     }
                     list_user_events = list_user_events + [dict_to_add]
                     self.redis_set(id, list_user_events)
+                    logger.info('Added user event')
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
+    logging.basicConfig(level=logging.ERROR,
                         format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%m-%d %H:%M')
     mq_host = get_config_value('rabbitmq', 'mq_host')

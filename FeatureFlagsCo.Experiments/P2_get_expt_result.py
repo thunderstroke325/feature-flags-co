@@ -12,6 +12,9 @@ import math
 import pandas as pd
 from rabbitmq.rabbitmq import RabbitMQConsumer, RabbitMQSender
 
+logger = logging.getLogger("P2_get_expt_result")
+logger.setLevel(logging.INFO)
+
 
 class P2GetExptResultConsumer(RabbitMQConsumer):
 
@@ -73,8 +76,8 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
             else:
                 dict_var_occurence[value] = dict_var_occurence[value] + 1
                 dict_var_user[value] = dict_var_user[value] + [user]
-        logging.info('dictionary of flag var:occurence')
-        logging.info(dict_var_occurence)
+        logger.info('dictionary of flag var:occurence')
+        logger.info(dict_var_occurence)
 
         # dictionary {
         #              'Var1' : list_of_unique_user,
@@ -99,8 +102,8 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                     else:
                         dict_expt_occurence[it] = 1 + \
                             dict_expt_occurence[it]
-        logging.info('dictionary of expt var:occurence')
-        logging.info(dict_expt_occurence)
+        logger.info('dictionary of expt var:occurence')
+        logger.info(dict_expt_occurence)
 
         # list of results by flag-variation
         output = []
@@ -219,8 +222,8 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                         # when baseline has the highest conversion rate
                         if output[maxRateIndex]['changeToBaseline'] > 0:
                             output[maxRateIndex]['isWinner'] = True
-        logging.info('ExptResults:')
-        logging.info(output)
+        logger.info('ExptResults:')
+        logger.info(output)
         # result to send to rabbitmq
         output_to_mq = {
             'ExperimentId': expt_id,
@@ -276,9 +279,8 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         elif not list_ff_events and not list_user_events:
             latest_event_end_time = ExptStartTime
         else:
-            latest_event_end_time =  \
-                datetime.strptime(
-                    (list_user_events + list_ff_events)[-1]['TimeStamp'], fmt)
+            latest_event_end_time = datetime.strptime(
+                (list_user_events + list_ff_events)[-1]['TimeStamp'], fmt)
 
         interval = ExptEndTime - latest_event_end_time
         # a delay to acept events after deadline
@@ -292,7 +294,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                            self._redis_host,
                            self._redis_port,
                            self._redis_passwd).send('Q2', 'py.experiments.experiment', expt_id)
-            logging.info('send back to Q2 ExptID')
+            logger.info('#########send back to Q2 %r#########' % expt_id)
         # last event received within N minutes, no potential recepton delay, proceed data deletion
         else:
             # ACTION : Get from Redis > dict_flag_acitveExpts
@@ -314,7 +316,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                 self.redis_set(id, dict_customEvent_acitveExpts)
             # ACTION: Delete in Redis > list_FFevent related to FlagID
             # ACTION: Delete in Redis > list_Exptevent related to EventName
-            logging.info('Update info and delete stopped Experiment data')
+            logger.info('Update info and delete stopped Experiment data')
             if not dict_flag_acitveExpts.get(expt['FlagId'], None):
                 id = '%s_%s' % (expt['EnvId'], expt['FlagId'])
                 self.redis_del(id)
@@ -331,6 +333,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         fmt = '%Y-%m-%dT%H:%M:%S.%f'
         # If experiment info exist
         if value:
+            logger.info("########p2 gets %r#########" % value)
             # if expt is the same, wait for a while
             if expt_id == self._last_expt_id:
                 sleep(self._wait_timeout)
@@ -351,6 +354,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                            self._redis_host,
                            self._redis_port,
                            self._redis_passwd).send('Q3', 'py.experiments.experiment.results', output_to_mq)
+            logger.info('########p2 sends %r result to Q3#########' % expt_id)
 
             # experiment not finished
             if not expt['EndExptTime']:
@@ -362,20 +366,22 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                self._redis_host,
                                self._redis_port,
                                self._redis_passwd).send('Q2', 'py.experiments.experiment', expt_id)
-                logging.info('send back to Q2 ExptID')
+                logger.info(
+                    '#########p2 sends %r back to Q2########' % expt_id)
             # experiment finished
             else:
                 # Decision to delete or not event related data
                 self.__update_redis_with_EndExpt(list_ff_events, list_user_events,
                                                  fmt, ExptStartTime, ExptEndTime, expt_id, expt)
+                logger.info('######### p2 %r finished #########' % expt_id)
                 endtime = datetime.now()
                 delta = endtime - starttime
-                logging.info('processing time in seconds: %r' %
-                             delta.total_seconds())
+                logger.info('######### p2 processing time in seconds: %r #########' %
+                            delta.total_seconds())
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
+    logging.basicConfig(level=logging.ERROR,
                         format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%m-%d %H:%M')
     mq_host = get_config_value('rabbitmq', 'mq_host')

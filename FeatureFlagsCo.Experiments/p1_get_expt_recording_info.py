@@ -6,6 +6,9 @@ import logging
 
 from rabbitmq.rabbitmq import RabbitMQConsumer, RabbitMQSender
 
+logger = logging.getLogger("p1_get_expt_recording_info")
+logger.setLevel(logging.INFO)
+
 
 class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
 
@@ -22,6 +25,8 @@ class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
             key, end, value = body.get('ExptId', None), body.get(
                 'EndExptTime', None), body
             if key:
+                logger.info('p1########p1 gets %r#########' % body)
+                self.redis_set(key, value)
                 if not end:
                     # set up link between ff and his active expts
                     ff_env_id = 'dict_ff_act_expts_%s_%s' % (
@@ -40,11 +45,11 @@ class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
                                    self._redis_host,
                                    self._redis_port,
                                    self._redis_passwd).send('Q2', 'py.experiments.experiment', key)
-                self.redis_set(key, value)
+                    logger.info('########p1 send %r to Q2########' % key)
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
+    logging.basicConfig(level=logging.ERROR,
                         format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%m-%d %H:%M')
     mq_host = get_config_value('rabbitmq', 'mq_host')

@@ -1,7 +1,8 @@
 
 
+from config.config_handling import get_config_value
 import logging
-from time import sleep
+from time import sleep, time
 from rabbitmq.rabbitmq import RabbitMQSender
 
 __CONST_Q1_START = {
@@ -79,15 +80,46 @@ if __name__ == '__main__':
                         format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%m-%d %H:%M')
 
+    mq_host = get_config_value('rabbitmq', 'mq_host')
+    mq_port = get_config_value('rabbitmq', 'mq_port')
+    mq_username = get_config_value('rabbitmq', 'mq_username')
+    mq_passwd = get_config_value('rabbitmq', 'mq_passwd')
+    redis_host = get_config_value('redis', 'redis_host')
+    redis_port = get_config_value('redis', 'redis_port')
+    redis_passwd = get_config_value('redis', 'redis_passwd')
     # Q1 start
-    RabbitMQSender().send('Q1', 'py.experiments.recordinginfo', __CONST_Q1_START)
+    RabbitMQSender(mq_host,
+                   mq_port,
+                   mq_username,
+                   mq_passwd,
+                   redis_host,
+                   redis_port,
+                   redis_passwd).send('Q1', 'py.experiments.recordinginfo', __CONST_Q1_START)
+    sleep(30)
 
     for i in range(100):
         # Q4
-        RabbitMQSender().send('Q4', 'py.experiments.events.ff', __CONST_Q4)
+        RabbitMQSender(mq_host,
+                       mq_port,
+                       mq_username,
+                       mq_passwd,
+                       redis_host,
+                       redis_port,
+                       redis_passwd).send('Q4', 'py.experiments.events.ff', __CONST_Q4)
         # Q5
-        RabbitMQSender().send('Q5', 'py.experiments.events.user', __CONST_Q5)
+        RabbitMQSender(mq_host,
+                       mq_port,
+                       mq_username,
+                       mq_passwd,
+                       redis_host,
+                       redis_port,
+                       redis_passwd).send('Q5', 'py.experiments.events.user', __CONST_Q5)
 
-    sleep(60)
-    # Q1 end
-    RabbitMQSender().send('Q1', 'py.experiments.recordinginfo', __CONST_Q1_END)
+    sleep(30)
+    RabbitMQSender(mq_host,
+                   mq_port,
+                   mq_username,
+                   mq_passwd,
+                   redis_host,
+                   redis_port,
+                   redis_passwd).send('Q1', 'py.experiments.recordinginfo', __CONST_Q1_END)
