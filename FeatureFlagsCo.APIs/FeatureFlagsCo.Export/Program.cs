@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FeatureFlagsCo.ExportToElasticSearch
+namespace FeatureFlagsCo.Export
 {
     class Program
     {

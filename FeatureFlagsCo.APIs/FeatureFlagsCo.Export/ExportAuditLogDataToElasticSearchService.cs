@@ -12,24 +12,26 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FeatureFlagsCo.MQ.ExportToElasticSearch
+namespace FeatureFlagsCo.MQ.Export
 {
-    public interface IExportInsightsDataToElasticSearchService
+    public interface IExportAuditLogDataToElasticSearchService
     {
         void Init();
     }
-    public class ExportInsightsDataToElasticSearchService: IExportInsightsDataToElasticSearchService
+    public class ExportAuditLogDataToElasticSearchService : IExportAuditLogDataToElasticSearchService
     {
         private readonly ConnectionFactory _factory;
         private IConnection _connection;
         private IModel _channel;
         private readonly string _esHost;
-        public ExportInsightsDataToElasticSearchService(string rabbitConnectStr = "amqp://localhost:5672/", string esHost = "http://localhost:9200")
+        private string _queueName;
+        public ExportAuditLogDataToElasticSearchService(string rabbitConnectStr = "amqp://localhost:5672/", string esHost = "http://localhost:9200")
         {
             _factory = new ConnectionFactory();
             _factory.Uri = new Uri(rabbitConnectStr);
             _esHost = esHost;
 
+            _queueName = "auditlog" + (Environment.MachineName ?? "");
             Init();
         }
         public void Init()
@@ -37,7 +39,7 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
             if (_channel != null)
             {
                 _channel.Close();
-                _channel.QueueDelete("hello");
+                _channel.QueueDelete(_queueName);
             }
             if (_connection != null)
                 _connection.Close();
@@ -63,7 +65,7 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
 
                     Console.WriteLine("Connection and channel created");
 
-                    _channel.QueueDeclare(queue: "hello",
+                    _channel.QueueDeclare(queue: _queueName,
                                          durable: false,
                                          exclusive: false,
                                          autoDelete: false,
@@ -79,7 +81,7 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
                             var body = ea.Body.ToArray();
                             message = Encoding.UTF8.GetString(body);
                             Console.WriteLine(message);
-                            var messageModel = JsonConvert.DeserializeObject<MessageModel>(message);
+                            var messageModel = JsonConvert.DeserializeObject<AuditLogMessageModel>(message);
                             await WriteToElasticSearchAsync(messageModel, _esHost);
                             _channel.BasicAck(ea.DeliveryTag, false);
                         }
@@ -97,7 +99,7 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
                         }
 
                     };
-                    _channel.BasicConsume(queue: "hello",
+                    _channel.BasicConsume(queue: _queueName,
                                          autoAck: false,
                                          consumer: consumer);
 
@@ -111,24 +113,9 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
             }
         }
 
-        private async Task WriteToElasticSearchAsync(MessageModel message, string esHost)
+        private async Task WriteToElasticSearchAsync(AuditLogMessageModel message, string esHost)
         {
             Console.WriteLine("WriteToElasticSearchAsync");
-            var streams = new ExpandoObject();
-            if (message.Labels != null && message.Labels.Count > 0)
-            {
-                foreach (var lable in message.Labels)
-                {
-                    streams.TryAdd(lable.LabelName, lable.LabelValue);
-                }
-            }
-            dynamic bodyCore = streams;
-            //dynamic body = new
-            //{
-            //    streams = new List<dynamic> {
-            //            bodyCore
-            //        }
-            //};
             int i = 0;
             while (i < 5)
             {
@@ -137,8 +124,9 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
                 {
                     try
                     {
+
                         client.DefaultRequestHeaders.Accept.TryParseAdd("application/json");
-                        HttpContent content = new StringContent(JsonConvert.SerializeObject(bodyCore));
+                        HttpContent content = new StringContent(JsonConvert.SerializeObject(message));
                         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
                         if (esHost.Contains("@")) // esHost contains username and password 
                         {
@@ -154,8 +142,7 @@ namespace FeatureFlagsCo.MQ.ExportToElasticSearch
                                                         "Basic", Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{userName}:{password}")));
                         }
                         //由HttpClient发出异步Post请求
-                        //HttpResponseMessage res = await client.PutAsync($"{esHost}/{message.IndexTarget}/_create/{message.FeatureFlagId}", content);
-                        HttpResponseMessage res = await client.PostAsync($"{esHost}/{message.IndexTarget}/_doc/", content);
+                        HttpResponseMessage res = await client.PostAsync($"{esHost}/auditlog/_doc/", content);
                         Console.WriteLine("Code:" + res.StatusCode.ToString());
                         if (res.StatusCode == System.Net.HttpStatusCode.Created)
                         {

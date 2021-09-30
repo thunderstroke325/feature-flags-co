@@ -3,7 +3,6 @@ using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlagsCo.MQ;
-using FeatureFlagsCo.MQ.ExportToElasticSearch;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -26,6 +25,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FeatureFlagsCo.FeatureInsights;
 using FeatureFlagsCo.FeatureInsights.ElasticSearch;
+using FeatureFlagsCo.MQ.Export;
 
 namespace FeatureFlags.AdminWebAPIs
 {

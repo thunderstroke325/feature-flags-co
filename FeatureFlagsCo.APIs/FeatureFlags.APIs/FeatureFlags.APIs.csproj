@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FeatureFlagsCo.ExportToElasticSearch\FeatureFlagsCo.MQ.ExportToElasticSearch.csproj" />
+    <ProjectReference Include="..\FeatureFlagsCo.Export\FeatureFlagsCo.MQ.Export.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.FeatureInsights.ElasticSearch\FeatureFlagsCo.FeatureInsights.ElasticSearch.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.FeatureInsights\FeatureFlagsCo.FeatureInsights.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.MQ\FeatureFlagsCo.MQ.csproj" />
