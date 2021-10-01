@@ -327,7 +327,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                 self.redis_del(id)
                 # TODO move to somewhere
 
-def handle_body(self, body, **properties):
+    def handle_body(self, body, **properties):
         starttime = datetime.now()
         expt_id = body
         value = self.redis_get(expt_id)
