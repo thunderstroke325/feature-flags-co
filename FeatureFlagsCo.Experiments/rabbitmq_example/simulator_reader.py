@@ -4,6 +4,9 @@ import os
 import sys
 from rabbitmq.rabbitmq import RabbitMQConsumer
 
+logger = logging.getLogger("simulator_reader")
+logger.setLevel(logging.INFO)
+
 
 class Q3SimpleConsumer(RabbitMQConsumer):
 
@@ -11,12 +14,12 @@ class Q3SimpleConsumer(RabbitMQConsumer):
         routing_key = properties.get(
             'routing_key', None) if properties else None
         if routing_key:
-            logging.info("[Q3: Listen From -> ] %r" % routing_key)
-        logging.info(" [mq] %r" % body)
+            logger.info("[Q3: Listen From -> ] %r" % routing_key)
+        logger.info(" [mq] %r" % body)
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
+    logging.basicConfig(level=logging.ERROR,
                         format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%m-%d %H:%M')
     mq_host = get_config_value('rabbitmq', 'mq_host')

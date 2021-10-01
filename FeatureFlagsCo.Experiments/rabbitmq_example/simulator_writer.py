@@ -74,9 +74,11 @@ __CONST_Q5 = {
     "AccountId": "38"
 }
 
+logger = logging.getLogger("simulator_writer")
+logger.setLevel(logging.INFO)
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO,
+    logging.basicConfig(level=logging.ERROR,
                         format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%m-%d %H:%M')
 
@@ -95,6 +97,7 @@ if __name__ == '__main__':
                    redis_host,
                    redis_port,
                    redis_passwd).send('Q1', 'py.experiments.recordinginfo', __CONST_Q1_START)
+    logger.info('send to Q1 expt start')
     sleep(30)
 
     for i in range(100):
@@ -106,6 +109,7 @@ if __name__ == '__main__':
                        redis_host,
                        redis_port,
                        redis_passwd).send('Q4', 'py.experiments.events.ff', __CONST_Q4)
+        logger.info('send to Q1 ff event')
         # Q5
         RabbitMQSender(mq_host,
                        mq_port,
@@ -114,6 +118,7 @@ if __name__ == '__main__':
                        redis_host,
                        redis_port,
                        redis_passwd).send('Q5', 'py.experiments.events.user', __CONST_Q5)
+        logger.info('send to Q1 user event')
 
     sleep(30)
     RabbitMQSender(mq_host,
@@ -123,3 +128,4 @@ if __name__ == '__main__':
                    redis_host,
                    redis_port,
                    redis_passwd).send('Q1', 'py.experiments.recordinginfo', __CONST_Q1_END)
+    logger.info('send to Q1 expt end')

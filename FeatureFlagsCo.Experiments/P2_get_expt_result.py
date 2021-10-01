@@ -297,13 +297,15 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
             logger.info('#########send back to Q2 %r#########' % expt_id)
         # last event received within N minutes, no potential recepton delay, proceed data deletion
         else:
+            # del expt
+            self.redis_del(expt_id)
+            # TODO move to somewhere
             # ACTION : Get from Redis > dict_flag_acitveExpts
             id = 'dict_ff_act_expts_%s_%s' % (
                 expt['EnvId'], expt['FlagId'])
             dict_flag_acitveExpts = self.redis_get(id)
             if dict_flag_acitveExpts:
-                dict_flag_acitveExpts[expt['FlagId']].remove(
-                    expt['ExptId'])
+                dict_flag_acitveExpts[expt['FlagId']].remove(expt_id)
                 self.redis_set(id, dict_flag_acitveExpts)
             # Update dict_flag_acitveExpts
             # ACTION : Get from Redis > dict_flag_acitveExpts
@@ -311,8 +313,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                 expt['EnvId'], expt['EventName'])
             dict_customEvent_acitveExpts = self.redis_get(id)
             if dict_customEvent_acitveExpts:
-                dict_customEvent_acitveExpts[expt['EventName']].remove(
-                    expt['ExptId'])
+                dict_customEvent_acitveExpts[expt['EventName']].remove(expt_id)
                 self.redis_set(id, dict_customEvent_acitveExpts)
             # ACTION: Delete in Redis > list_FFevent related to FlagID
             # ACTION: Delete in Redis > list_Exptevent related to EventName
