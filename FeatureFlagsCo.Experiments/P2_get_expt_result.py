@@ -327,18 +327,25 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                 self.redis_del(id)
                 # TODO move to somewhere
 
-    def handle_body(self, body, **properties):
+def handle_body(self, body, **properties):
         starttime = datetime.now()
         expt_id = body
         value = self.redis_get(expt_id)
         fmt = '%Y-%m-%dT%H:%M:%S.%f'
+        # Create or Get last_exec_time for each expt_id
+        dict_from_redis = self.redis_get('dict_expt_last_exec_time')
+        dict_expt_last_exec_time = dict_from_redis if dict_from_redis else {}
+        last_exec_time = dict_expt_last_exec_time.get(expt_id,None)
+        if not last_exec_time:
+            last_exec_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
+        interval = datetime.now() - datetime.strptime(last_exec_time, fmt)
+        if interval.total_seconds() < self._wait_timeout:
+            sleep(self._wait_timeout - interval.total_seconds() )
+        dict_expt_last_exec_time[expt_id] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
+        self.redis_set('dict_expt_last_exec_time', dict_expt_last_exec_time)
         # If experiment info exist
         if value:
             logger.info("########p2 gets %r#########" % value)
-            # if expt is the same, wait for a while
-            if expt_id == self._last_expt_id:
-                sleep(self._wait_timeout)
-            self._last_expt_id = expt_id
             # Parse experiment info
             expt, ExptStartTime, ExptEndTime, _, _, _, list_ff_events, list_user_events = self.__parse_event_from_redis(
                 value, fmt)
