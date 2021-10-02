@@ -327,6 +327,14 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                 self.redis_del(id)
                 # TODO move to somewhere
 
+            # del expt expired time
+            dict_from_redis = self.redis_get('dict_expt_last_exec_time')
+            if dict_from_redis:
+                expt_last_exec_time = dict_from_redis.get(expt_id, None)
+                if expt_last_exec_time:
+                    dict_from_redis.pop(expt_id, None)
+                    self.redis_set('dict_expt_last_exec_time', dict_from_redis)
+
     def handle_body(self, body, **properties):
         starttime = datetime.now()
         expt_id = body
@@ -335,13 +343,14 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         # Create or Get last_exec_time for each expt_id
         dict_from_redis = self.redis_get('dict_expt_last_exec_time')
         dict_expt_last_exec_time = dict_from_redis if dict_from_redis else {}
-        last_exec_time = dict_expt_last_exec_time.get(expt_id,None)
+        last_exec_time = dict_expt_last_exec_time.get(expt_id, None)
         if not last_exec_time:
             last_exec_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
         interval = datetime.now() - datetime.strptime(last_exec_time, fmt)
         if interval.total_seconds() < self._wait_timeout:
-            sleep(self._wait_timeout - interval.total_seconds() )
-        dict_expt_last_exec_time[expt_id] = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
+            sleep(self._wait_timeout - interval.total_seconds())
+        dict_expt_last_exec_time[expt_id] = datetime.now().strftime(
+            "%Y-%m-%dT%H:%M:%S.%f")
         self.redis_set('dict_expt_last_exec_time', dict_expt_last_exec_time)
         # If experiment info exist
         if value:

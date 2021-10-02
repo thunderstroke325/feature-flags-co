@@ -69,6 +69,7 @@ services:
     profiles:
       - docker
       - development
+      - backend
 
   mongodb:
     image: mongo
@@ -170,6 +171,10 @@ services:
       - ffc
     ports:
       - 6379:6379
+    profiles:
+      - docker
+      - development
+      - backend
 
   
 

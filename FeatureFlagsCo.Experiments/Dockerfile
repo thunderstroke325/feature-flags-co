@@ -1,8 +1,8 @@
-FROM tiangolo/uwsgi-nginx-flask:python3.9
-ENV UWSGI_CHEAPER 2
-ENV UWSGI_PROCESSES 16
-ENV NGINX_WORKER_PROCESSES auto
-ENV LISTEN_PORT 80
-EXPOSE 80
-COPY . /app
+FROM python:3.9-slim
+ARG exptenv=local
+RUN apt update && apt install -y supervisor
+COPY . /expt
+COPY ./env/docker-${exptenv}-config.ini /expt/config/config.ini
+WORKDIR /expt
 RUN pip install -r docker-requirements.txt
+CMD ["/usr/bin/supervisord","-c","supervisord.conf"]

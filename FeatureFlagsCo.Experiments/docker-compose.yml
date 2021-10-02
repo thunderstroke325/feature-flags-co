@@ -6,8 +6,22 @@ services:
   #     - "5000:5000"
   # redis:
   #   image: "redis:alpine"
-  ffc-experiments:
+  ffc-experiment-local:
     build:
       context: ../FeatureFlagsCo.Experiments
+      args: 
+        exptenv: local
       dockerfile: Dockerfile
     image: ffc-experiments
+    profiles: 
+      - local
+    networks:
+      - featureflagsco_ffc
+    volumes:
+      - ./log:/var/log/
+
+networks:
+  featureflagsco_ffc:
+    external: true
+
+
