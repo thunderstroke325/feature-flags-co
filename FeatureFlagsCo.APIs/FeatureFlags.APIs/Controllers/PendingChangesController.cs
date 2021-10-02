@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using FeatureFlags.APIs.Authentication;
+using FeatureFlags.APIs.ViewModels.FeatureFlagCommit;
 
 namespace FeatureFlags.APIs.Controllers
 {
@@ -25,34 +26,33 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IDistributedCache _redisCache;
         private readonly IEnvironmentService _envService;
         private readonly INoSqlService _noSqlDbService;
-        private readonly FFPendingChangesService _pendingChangesService;
+        private readonly MongoDbFeatureFlagCommitService _featureFlagCommitService;
 
         public PendingChangesController(
             ILogger<PendingChangesController> logger,
             IDistributedCache redisCache,
             IEnvironmentService envService,
             INoSqlService noSqlDbService,
-            FFPendingChangesService pendingChangesService)
+            MongoDbFeatureFlagCommitService featureFlagCommitService)
         {
             _logger = logger;
             _redisCache = redisCache;
             _envService = envService;
             _noSqlDbService = noSqlDbService;
-            _pendingChangesService = pendingChangesService;
+            _featureFlagCommitService = featureFlagCommitService;
         }
 
         [HttpPost]
         [Route("")]
-        public async Task<dynamic> CreatePendingChanges([FromBody] FFPendingChanges param)
+        public async Task<IActionResult> CreatePendingChanges([FromBody] CreateApproveRequestParam param)
         {
             try
             {
                 var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
-                if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId) || await _noSqlDbService.GetFlagAsync(param.FeatureFlagId) == null)
+                if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.FeatureFlagParam.EnvironmentId))
                 {
-                    var pendingChanges = await _pendingChangesService.CreateAsync(param);
-                    await _redisCache.SetStringAsync(pendingChanges.Id, JsonConvert.SerializeObject(pendingChanges));
-                    return pendingChanges;
+                    await _noSqlDbService.CreateApproveRequestAsync(param, currentUserId);
+                    return StatusCode(StatusCodes.Status200OK);
                 }
 
                 return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
@@ -60,6 +60,32 @@ namespace FeatureFlags.APIs.Controllers
             catch (Exception exp)
             {
                 _logger.LogError(exp, JsonConvert.SerializeObject(param));
+
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
+            }
+        }
+
+        [HttpPost]
+        [Route("/ApplyRequest")]
+        public async Task<IActionResult> ApplyRequestAsync(ApplyRequestParam arParam)
+        {
+            try
+            {
+                var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+                if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, arParam.EnvironmentId))
+                {
+                    var arResult = await _noSqlDbService.ApplyApprovalRequestAsync(arParam, currentUserId);
+                    if(arResult != null && arResult.Id == arParam.FeatureFlagId)
+                    {
+                        await _redisCache.SetStringAsync(arResult.Id, JsonConvert.SerializeObject(arResult));
+                        return StatusCode(StatusCodes.Status200OK);
+                    }
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, JsonConvert.SerializeObject(arParam));
 
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
             }

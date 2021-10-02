@@ -173,7 +173,7 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddSingleton<MongoDbEnvironmentUserService>();
             services.AddSingleton<MongoDbEnvironmentUserPropertyService>();
             services.AddSingleton<MongoDbFeatureTriggerService>();
-            services.AddSingleton<FFPendingChangesService>();
+            services.AddSingleton<MongoDbFeatureFlagCommitService>();
             services.AddSingleton<INoSqlService, MongoDbService>();
             services.AddSingleton<IExperimentsService, ExperimentsService>();
             services.AddSingleton<MongoDbExperimentService>();

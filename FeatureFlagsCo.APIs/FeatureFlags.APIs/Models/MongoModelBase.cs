@@ -15,7 +15,7 @@ namespace FeatureFlags.APIs.Models
         public string _Id { get; set; }
 
         [JsonProperty("id")]
-        public string Id { get { return _Id; } }
+        public string Id { get; set; }
 
         public abstract string GetCollectionName();
     }

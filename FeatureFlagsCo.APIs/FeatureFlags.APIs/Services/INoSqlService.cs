@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.ViewModels.FeatureFlagTrigger;
+using FeatureFlags.APIs.ViewModels.FeatureFlagCommit;
 
 namespace FeatureFlags.APIs.Services
 {
@@ -20,6 +21,17 @@ namespace FeatureFlags.APIs.Services
         Task<Experiment> CreateExperimentAsync(Experiment item);
         Task<Experiment> ArchiveExperimentAsync(string exptId, DateTime stopTime);
         #endregion
+
+        #region approval
+        Task<List<FeatureFlagCommit>> GetApprovalRequestsAsync(string featureFlagId);
+        Task<bool> CreateApproveRequestAsync(CreateApproveRequestParam param, string userId);
+        Task<FeatureFlagCommit> GetApprovalRequestAsync(string featureFlagCommitId);
+        Task<bool> ApproveApprovalRequestAsync(ApproveRequestParam arParam, string userId);
+        Task<bool> ChangeApprovalRequestAsync(ChangeRequestParam arParam, string userId);
+        Task<bool> DeclineApprovalRequestAsync(DeclineRequestParam arParam, string userId);
+        Task<FeatureFlag> ApplyApprovalRequestAsync(ApplyRequestParam arParam, string userId);
+        #endregion
+
         Task<List<T>> GetEnvironmentDataAsync<T>(int envId);
         Task SaveEnvironmentDataAsync(int accountId, int projectId, int envId, EnvironmentDataViewModel data);
 
