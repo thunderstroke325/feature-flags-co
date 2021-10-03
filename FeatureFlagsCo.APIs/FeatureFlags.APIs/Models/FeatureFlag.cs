@@ -10,6 +10,9 @@ namespace FeatureFlags.APIs.Models
 {
     public class FeatureFlag: MongoModelBase
     {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string _Id { get; set; }
         public int EnvironmentId { get; set; }
         public bool IsArchived { get; set; }
         public FeatureFlagBasicInfo FF { get; set; }

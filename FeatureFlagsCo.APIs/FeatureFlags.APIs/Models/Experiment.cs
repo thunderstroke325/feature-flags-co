@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +9,9 @@ namespace FeatureFlags.APIs.Models
 {
     public class Experiment : MongoModelBase
     {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string _Id { get; set; }
         public int EnvId { get; set; }
         public string EventName { get; set; }
         public ExperimentFeatureFlag Flag { get; set; }
