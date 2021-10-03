@@ -32,7 +32,7 @@ class P3GetEventsConsumer(RabbitMQConsumer):
                     }
                     list_ff_events = list_ff_events + [dict_to_add]
                     self.redis_set(id, list_ff_events)
-                    logger.info('Added ff event')
+                    logger.info('Added ff event: %r' % dict_to_add)
             elif 'py.experiments.events.user' in routing_key:
                 # Q5
                 dict_customEvent_acitveExpts = self.redis_get(
@@ -48,7 +48,7 @@ class P3GetEventsConsumer(RabbitMQConsumer):
                     }
                     list_user_events = list_user_events + [dict_to_add]
                     self.redis_set(id, list_user_events)
-                    logger.info('Added user event')
+                    logger.info('Added user event: %r' % dict_to_add)
 
 
 if __name__ == '__main__':

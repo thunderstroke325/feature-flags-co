@@ -48,8 +48,15 @@ class RabbitMQ:
                                       credentials=credentials)).channel()
 
     def _init__redis_connection(self, host, port, password):
+        try:
+            ssl = True if int(port) == 6380 else False
+        except:
+            ssl = False
         self._redis = redis.Redis(
-            host=host, port=port, password=password)
+            host=host,
+            port=port,
+            password=password,
+            ssl=ssl)
 
     @property
     def channel(self) -> BlockingChannel:

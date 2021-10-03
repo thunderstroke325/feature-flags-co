@@ -334,6 +334,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                 if expt_last_exec_time:
                     dict_from_redis.pop(expt_id, None)
                     self.redis_set('dict_expt_last_exec_time', dict_from_redis)
+            logger.info('######### p2 %r finished #########' % expt_id)
 
     def handle_body(self, body, **properties):
         starttime = datetime.now()
@@ -390,11 +391,10 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                 # Decision to delete or not event related data
                 self.__update_redis_with_EndExpt(list_ff_events, list_user_events,
                                                  fmt, ExptStartTime, ExptEndTime, expt_id, expt)
-                logger.info('######### p2 %r finished #########' % expt_id)
-                endtime = datetime.now()
-                delta = endtime - starttime
-                logger.info('######### p2 processing time in seconds: %r #########' %
-                            delta.total_seconds())
+            endtime = datetime.now()
+            delta = endtime - starttime
+            logger.info('######### p2 processing time in seconds: %r #########' %
+                        delta.total_seconds())
 
 
 if __name__ == '__main__':
