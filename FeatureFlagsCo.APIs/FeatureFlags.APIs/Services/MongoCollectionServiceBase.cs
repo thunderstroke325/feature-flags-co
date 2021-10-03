@@ -21,16 +21,16 @@ namespace FeatureFlags.APIs.Services
         }
 
         public async Task<T> GetAsync(string id) =>
-            await _collection.Find<T>(book => book._Id == id).FirstOrDefaultAsync();
+            await _collection.Find<T>(book => book.Id == id).FirstOrDefaultAsync();
 
 
         public async Task<T> UpsertItemAsync(T item)
         {
-            var existingItem = await GetAsync(item._Id);
+            var existingItem = await GetAsync(item.Id);
             if (existingItem != null)
             {
-                item._Id = existingItem._Id;
-                return await UpdateAsync(item._Id, item);
+                item.Id = existingItem.Id;
+                return await UpdateAsync(item.Id, item);
             }
             else
             {
@@ -46,13 +46,13 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<T> UpdateAsync(string id, T item)
         {
-            return await _collection.FindOneAndReplaceAsync(p => p._Id == id, item);
+            return await _collection.FindOneAndReplaceAsync(p => p.Id == id, item);
         }
 
         public async Task RemoveAsync(T bookIn) =>
-            await _collection.DeleteOneAsync(book => book._Id == bookIn.Id);
+            await _collection.DeleteOneAsync(book => book.Id == bookIn.Id);
 
         public async Task RemoveAsync(string id) =>
-            await _collection.DeleteOneAsync(book => book._Id == id);
+            await _collection.DeleteOneAsync(book => book.Id == id);
     }
 }
