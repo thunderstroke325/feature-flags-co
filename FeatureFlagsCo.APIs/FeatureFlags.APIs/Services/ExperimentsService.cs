@@ -101,7 +101,7 @@ namespace FeatureFlags.APIs.Services
                 
             }
 
-            param.ExptId = experiment._Id;
+            param.ExptId = experiment.Id;
             
             return param;
         }

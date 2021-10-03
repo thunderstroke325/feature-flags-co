@@ -9,9 +9,6 @@ namespace FeatureFlags.APIs.Models
 {
     public class Experiment : MongoModelBase
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string _Id { get; set; }
         public int EnvId { get; set; }
         public string EventName { get; set; }
         public ExperimentFeatureFlag Flag { get; set; }
@@ -20,18 +17,19 @@ namespace FeatureFlags.APIs.Models
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
         public override string GetCollectionName()
         {
             return "Experiments";
         }
     }
 
-    public class ExperimentIteration 
+    public class ExperimentIteration
     {
         public string Id { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-
+        public DateTime? UpdatedAt { get; set; }
         public List<IterationResult> Results { get; set; }
 
         //public string FeatureFlagVersion { get; set; } TODO to be added feature flag version is established
