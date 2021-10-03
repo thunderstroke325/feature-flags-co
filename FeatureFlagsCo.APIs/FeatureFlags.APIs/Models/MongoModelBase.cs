@@ -8,12 +8,8 @@ using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Models
 {
-    public abstract class MongoModelBase
+    public abstract class MongoModelBase 
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string _Id { get; set; }
-
         [JsonProperty("id")]
         public string Id { get; set; }
 
