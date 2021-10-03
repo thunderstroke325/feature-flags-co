@@ -16,12 +16,12 @@ services:
     profiles: 
       - local
     networks:
-      - featureflagsco_ffc
+      - ffc-network
     volumes:
       - ./log:/var/log/
 
 networks:
-  featureflagsco_ffc:
+  ffc-network:
     external: true
 
 
