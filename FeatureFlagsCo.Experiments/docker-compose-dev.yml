@@ -6,8 +6,13 @@ services:
   #     - "5000:5000"
   # redis:
   #   image: "redis:alpine"
-  ffc-experiments:
+  ffc-experiment-dev:
     build:
       context: ../FeatureFlagsCo.Experiments
+      args: 
+        exptenv: dev
       dockerfile: Dockerfile
-    image: ffc-experiments-dev
+    image: ffc-experiments
+
+
+

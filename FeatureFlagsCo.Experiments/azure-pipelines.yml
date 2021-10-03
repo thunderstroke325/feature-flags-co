@@ -34,13 +34,21 @@ stages:
               inputs:
                 targetType: 'inline'
                 script: |
-                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticurl}}','http://52.131.239.36:9200' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
-                  
-                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticusername}}','elastic' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{elasticurl}}','http://52.131.239.36:9200' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{elasticusername}}','elastic' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{elasticpassword}}','$(ES_Password_Dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{elasticpassword}}','$(ES_Password_Dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
 
-                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticpassword}}','$(ES_Password_Dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
-                  
-                  $a = Get-Content $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{mq_host}}','$(mq_host_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{mq_port}}','$(mq_port_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{mq_username}}','$(mq_username_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{mq_passwd}}','$(mq_passwd_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{redis_host}}','$(redis_host_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{redis_port}}','$(redis_port_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{redis_passwd}}','$(redis_passwd_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{wait_timeout}}','$(wait_timeout_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+
+                  $a = Get-Content $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
                   Write-Host $a
                   
             - task: DockerCompose@0
@@ -77,64 +85,64 @@ stages:
 
 
 
-- stage: 'Production'
-  condition: succeeded()
-  jobs:
-  - deployment: 'DeployToProduction'
-    environment: 'Approval_ExperimentService'
-    strategy:
-        runOnce:
-          deploy:
-            steps:
-            - checkout: self
+# - stage: 'Production'
+#   condition: succeeded()
+#   jobs:
+#   - deployment: 'DeployToProduction'
+#     environment: 'Approval_ExperimentService'
+#     strategy:
+#         runOnce:
+#           deploy:
+#             steps:
+#             - checkout: self
 
-            - task: Bash@3
-              inputs:
-                targetType: 'inline'
-                script: 'ls $(System.DefaultWorkingDirectory)'
+#             - task: Bash@3
+#               inputs:
+#                 targetType: 'inline'
+#                 script: 'ls $(System.DefaultWorkingDirectory)'
 
-            - task: PowerShell@2
-              inputs:
-                targetType: 'inline'
-                script: |
-                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticurl}}','http://52.130.248.239:9200' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
+#             - task: PowerShell@2
+#               inputs:
+#                 targetType: 'inline'
+#                 script: |
+#                   (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticurl}}','http://52.130.248.239:9200' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
                   
-                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticusername}}','elastic' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
+#                   (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticusername}}','elastic' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
 
-                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticpassword}}','$(ES_Password)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
+#                   (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini -Raw) -replace '{{elasticpassword}}','$(ES_Password)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
                   
-                  $a = Get-Content $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
-                  Write-Host $a
-            - task: DockerCompose@0
-              inputs:
+#                   $a = Get-Content $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\config\config.ini
+#                   Write-Host $a
+#             - task: DockerCompose@0
+#               inputs:
 
-                containerregistrytype: 'Azure Container Registry'
-                azureSubscription: 'azure-china-devops'
-                azureContainerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
-                dockerComposeFile: '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Experiments/docker-compose.yml'
-                action: 'Build services'
-                includeLatestTag: true
-                additionalImageTags: $(Build.BuildId)
-                projectName: 'ffc-experiments'
+#                 containerregistrytype: 'Azure Container Registry'
+#                 azureSubscription: 'azure-china-devops'
+#                 azureContainerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
+#                 dockerComposeFile: '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Experiments/docker-compose.yml'
+#                 action: 'Build services'
+#                 includeLatestTag: true
+#                 additionalImageTags: $(Build.BuildId)
+#                 projectName: 'ffc-experiments'
 
-            - task: DockerCompose@0
-              inputs:
-                containerregistrytype: 'Azure Container Registry'
-                azureSubscription: 'azure-china-devops'
-                azureContainerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
-                dockerComposeFile: '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Experiments/docker-compose.yml'
-                action: 'Push services'
-                includeLatestTag: true
-                additionalImageTags: $(Build.BuildId)
-                projectName: 'ffc-experiments'
+#             - task: DockerCompose@0
+#               inputs:
+#                 containerregistrytype: 'Azure Container Registry'
+#                 azureSubscription: 'azure-china-devops'
+#                 azureContainerRegistry: '{"loginServer":"ffc0acr0ce2.azurecr.cn", "id" : "/subscriptions/2679f75f-10cb-466f-b2b4-ea24653a0e5c/resourceGroups/feature-flags-co/providers/Microsoft.ContainerRegistry/registries/ffc0acr0ce2"}'
+#                 dockerComposeFile: '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Experiments/docker-compose.yml'
+#                 action: 'Push services'
+#                 includeLatestTag: true
+#                 additionalImageTags: $(Build.BuildId)
+#                 projectName: 'ffc-experiments'
 
 
-            - task: AzureRmWebAppDeployment@4
-              inputs:
-                ConnectionType: 'AzureRM'
-                azureSubscription: 'azure-china-devops'
-                appType: 'webAppContainer'
-                WebAppName: 'ffc-webapp-expeirmentservice-ce2'
-                DockerNamespace: 'ffc0acr0ce2.azurecr.cn'
-                DockerRepository: 'ffc-experiments'
-                DockerImageTag: '$(Build.BuildId)'
+#             - task: AzureRmWebAppDeployment@4
+#               inputs:
+#                 ConnectionType: 'AzureRM'
+#                 azureSubscription: 'azure-china-devops'
+#                 appType: 'webAppContainer'
+#                 WebAppName: 'ffc-webapp-expeirmentservice-ce2'
+#                 DockerNamespace: 'ffc0acr0ce2.azurecr.cn'
+#                 DockerRepository: 'ffc-experiments'
+#                 DockerImageTag: '$(Build.BuildId)'
