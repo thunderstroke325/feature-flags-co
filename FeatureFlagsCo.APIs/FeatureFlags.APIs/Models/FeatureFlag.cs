@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Models
 {
-    public class FeatureFlag: MongoModelBase
+    public class FeatureFlag
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string _Id { get; set; }
+        [JsonProperty("id")]
+        public string Id { get; set; }
         public int EnvironmentId { get; set; }
         public bool IsArchived { get; set; }
         public FeatureFlagBasicInfo FF { get; set; }
@@ -23,10 +25,10 @@ namespace FeatureFlags.APIs.Models
         public string Version { get; set; }
         public DateTime? EffeciveDate { get; set; }
 
-        public override string GetCollectionName()
-        {
-            return "FeatureFlags";
-        }
+        //public override string GetCollectionName()
+        //{
+        //    return "FeatureFlags";
+        //}
     }
 
 

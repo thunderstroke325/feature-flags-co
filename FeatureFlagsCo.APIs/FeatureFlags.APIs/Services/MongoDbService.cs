@@ -21,7 +21,7 @@ namespace FeatureFlags.APIs.Services
         private readonly MongoDbEnvironmentUserPropertyService _mongoEnvironmentUserPropertiesService;
         private readonly MongoDbFeatureTriggerService _mongoDbFeatureTriggerService;
         private readonly MongoDbExperimentService _mongoDbExperimentService;
-        private readonly MongoDbFeatureFlagCommitService _mongoDbFeatureFlagCommitService;
+        //private readonly MongoDbFeatureFlagCommitService _mongoDbFeatureFlagCommitService;
 
         private readonly IJwtUtilsService _jwtUtilsService;
 
@@ -31,7 +31,7 @@ namespace FeatureFlags.APIs.Services
             MongoDbEnvironmentUserPropertyService mongoEnvironmentUserPropertiesService,
             MongoDbFeatureTriggerService mongoDbFeatureTriggerService,
             MongoDbExperimentService mongoDbExperimentService,
-            MongoDbFeatureFlagCommitService mongoDbFeatureFlagCommitService,
+            //MongoDbFeatureFlagCommitService mongoDbFeatureFlagCommitService,
             IJwtUtilsService jwtUtilsService)
         {
             _mongoFeatureFlagsService = mongoFeatureFlagsService;
@@ -39,7 +39,7 @@ namespace FeatureFlags.APIs.Services
             _mongoEnvironmentUserPropertiesService = mongoEnvironmentUserPropertiesService;
             _mongoDbFeatureTriggerService = mongoDbFeatureTriggerService;
             _mongoDbExperimentService = mongoDbExperimentService;
-            _mongoDbFeatureFlagCommitService = mongoDbFeatureFlagCommitService;
+            //_mongoDbFeatureFlagCommitService = mongoDbFeatureFlagCommitService;
             _jwtUtilsService = jwtUtilsService;
         }
 
@@ -89,123 +89,123 @@ namespace FeatureFlags.APIs.Services
 
 
         #region approval
-        public async Task<List<FeatureFlagCommit>> GetApprovalRequestsAsync(string featureFlagId)
-        {
-            // Get all feature flag commit based on review status = Pending | Approved
-            return await _mongoDbFeatureFlagCommitService.GetApprovalRequestsAsync(featureFlagId, 0, 100);
-        }
-        public async Task<FeatureFlagCommit> GetApprovalRequestAsync(string featureFlagCommitId)
-        {
-            return await _mongoDbFeatureFlagCommitService.GetAsync(featureFlagCommitId);
-        }
-        public async Task<bool> CreateApproveRequestAsync(CreateApproveRequestParam param, string userId)
-        {
-            var oldFF = await _mongoFeatureFlagsService.GetAsync(param.FeatureFlagParam.Id);
+        //public async Task<List<FeatureFlagCommit>> GetApprovalRequestsAsync(string featureFlagId)
+        //{
+        //    // Get all feature flag commit based on review status = Pending | Approved
+        //    return await _mongoDbFeatureFlagCommitService.GetApprovalRequestsAsync(featureFlagId, 0, 100);
+        //}
+        //public async Task<FeatureFlagCommit> GetApprovalRequestAsync(string featureFlagCommitId)
+        //{
+        //    return await _mongoDbFeatureFlagCommitService.GetAsync(featureFlagCommitId);
+        //}
+        //public async Task<bool> CreateApproveRequestAsync(CreateApproveRequestParam param, string userId)
+        //{
+        //    var oldFF = await _mongoFeatureFlagsService.GetAsync(param.FeatureFlagParam.Id);
 
-            var ffc = new FeatureFlagCommit();
-            ffc.CreatedFromFeatureFlag(param.FeatureFlagParam);
-            ffc.Version = Guid.NewGuid().ToString();
-            ffc.RequestUserId = userId;
-            ffc.CreatedAt = DateTime.UtcNow;
-            ffc.FeatureFlagId = param.FeatureFlagParam.Id;
-            ffc.Id = Guid.NewGuid().ToString();
-            ffc.ActivityLogs = new System.Collections.Generic.List<ActivityLog>()
-            {
-                new ActivityLog
-                {
-                    ActivityType = ActivityTypeEnum.Create,
-                    Comment = param.Comment,
-                    CreatedAt = DateTime.UtcNow,
-                    UserId = userId
-                }
-            };
-            await _mongoDbFeatureFlagCommitService.CreateAsync(ffc);
-            return true;
-        }
-        public async Task<bool> ApproveApprovalRequestAsync(ApproveRequestParam arParam, string userId)
-        {
-            var ffc = await GetApprovalRequestAsync(arParam.FeatureFlagCommitId);
-            ffc.ApprovalRequest.ApprovedByUserIds.Add(userId);
-            ffc.ApprovalRequest.ReviewStatus = ReviewStatusEnum.Approved;
-            ffc.ActivityLogs.Add(new ActivityLog
-            {
-                Comment = arParam.Comment,
-                ActivityType = ActivityTypeEnum.Approve,
-                CreatedAt = DateTime.UtcNow,
-                UserId = userId
-            });
-            await _mongoDbFeatureFlagCommitService.UpdateAsync(ffc.Id, ffc);
-            return true;
-        }
-        public async Task<bool> ChangeApprovalRequestAsync(ChangeRequestParam arParam, string userId)
-        {
-            var ffc = await GetApprovalRequestAsync(arParam.FeatureFlagCommitId);
-            if (ffc.ApprovalRequest.ReviewStatus != ReviewStatusEnum.Approved)
-                return false;
-            if (ffc.ApprovalRequest.ApprovedByUserIds.Contains(userId))
-                ffc.ApprovalRequest.ApprovedByUserIds.Remove(userId);
-            if (ffc.ApprovalRequest.ApprovedByUserIds == null ||
-                ffc.ApprovalRequest.ApprovedByUserIds.Count == 0)
-                ffc.ApprovalRequest.ReviewStatus = ReviewStatusEnum.Pending;
-            ffc.ActivityLogs.Add(new ActivityLog
-            {
-                Comment = arParam.Comment,
-                ActivityType = ActivityTypeEnum.ChangeRequest,
-                CreatedAt = DateTime.UtcNow,
-                UserId = userId
-            });
-            await _mongoDbFeatureFlagCommitService.UpdateAsync(ffc.Id, ffc);
-            return true;
-        }
-        public async Task<bool> DeclineApprovalRequestAsync(DeclineRequestParam arParam, string userId)
-        {
-            var ffc = await GetApprovalRequestAsync(arParam.FeatureFlagCommitId);
-            ffc.ApprovalRequest.ApprovedByUserIds.Add(userId);
-            ffc.ApprovalRequest.ReviewStatus = ReviewStatusEnum.Declined;
-            ffc.ActivityLogs.Add(new ActivityLog
-            {
-                Comment = arParam.Comment,
-                ActivityType = ActivityTypeEnum.Decline,
-                CreatedAt = DateTime.UtcNow,
-                UserId = userId
-            });
-            await _mongoDbFeatureFlagCommitService.UpdateAsync(ffc.Id, ffc);
-            return true;
-        }
-        public async Task<FeatureFlag> ApplyApprovalRequestAsync(ApplyRequestParam arParam, string userId)
-        {
-            var ffc = await GetApprovalRequestAsync(arParam.FeatureFlagCommitId);
-            if (ffc.ApprovalRequest.ApprovedByUserIds.Contains(userId))
-            {
-                ffc.ApprovalRequest.ReviewStatus = ReviewStatusEnum.Applied;
-                ffc.EffeciveDate = DateTime.UtcNow;
-                ffc.ActivityLogs.Add(new ActivityLog
-                {
-                    Comment = arParam.Comment,
-                    ActivityType = ActivityTypeEnum.Apply,
-                    CreatedAt = DateTime.UtcNow,
-                    UserId = userId
-                });
-                await _mongoDbFeatureFlagCommitService.UpdateAsync(ffc.Id, ffc);
+        //    var ffc = new FeatureFlagCommit();
+        //    ffc.CreatedFromFeatureFlag(param.FeatureFlagParam);
+        //    ffc.Version = Guid.NewGuid().ToString();
+        //    ffc.RequestUserId = userId;
+        //    ffc.CreatedAt = DateTime.UtcNow;
+        //    ffc.FeatureFlagId = param.FeatureFlagParam.Id;
+        //    ffc.Id = Guid.NewGuid().ToString();
+        //    ffc.ActivityLogs = new System.Collections.Generic.List<ActivityLog>()
+        //    {
+        //        new ActivityLog
+        //        {
+        //            ActivityType = ActivityTypeEnum.Create,
+        //            Comment = param.Comment,
+        //            CreatedAt = DateTime.UtcNow,
+        //            UserId = userId
+        //        }
+        //    };
+        //    await _mongoDbFeatureFlagCommitService.CreateAsync(ffc);
+        //    return true;
+        //}
+        //public async Task<bool> ApproveApprovalRequestAsync(ApproveRequestParam arParam, string userId)
+        //{
+        //    var ffc = await GetApprovalRequestAsync(arParam.FeatureFlagCommitId);
+        //    ffc.ApprovalRequest.ApprovedByUserIds.Add(userId);
+        //    ffc.ApprovalRequest.ReviewStatus = ReviewStatusEnum.Approved;
+        //    ffc.ActivityLogs.Add(new ActivityLog
+        //    {
+        //        Comment = arParam.Comment,
+        //        ActivityType = ActivityTypeEnum.Approve,
+        //        CreatedAt = DateTime.UtcNow,
+        //        UserId = userId
+        //    });
+        //    await _mongoDbFeatureFlagCommitService.UpdateAsync(ffc.Id, ffc);
+        //    return true;
+        //}
+        //public async Task<bool> ChangeApprovalRequestAsync(ChangeRequestParam arParam, string userId)
+        //{
+        //    var ffc = await GetApprovalRequestAsync(arParam.FeatureFlagCommitId);
+        //    if (ffc.ApprovalRequest.ReviewStatus != ReviewStatusEnum.Approved)
+        //        return false;
+        //    if (ffc.ApprovalRequest.ApprovedByUserIds.Contains(userId))
+        //        ffc.ApprovalRequest.ApprovedByUserIds.Remove(userId);
+        //    if (ffc.ApprovalRequest.ApprovedByUserIds == null ||
+        //        ffc.ApprovalRequest.ApprovedByUserIds.Count == 0)
+        //        ffc.ApprovalRequest.ReviewStatus = ReviewStatusEnum.Pending;
+        //    ffc.ActivityLogs.Add(new ActivityLog
+        //    {
+        //        Comment = arParam.Comment,
+        //        ActivityType = ActivityTypeEnum.ChangeRequest,
+        //        CreatedAt = DateTime.UtcNow,
+        //        UserId = userId
+        //    });
+        //    await _mongoDbFeatureFlagCommitService.UpdateAsync(ffc.Id, ffc);
+        //    return true;
+        //}
+        //public async Task<bool> DeclineApprovalRequestAsync(DeclineRequestParam arParam, string userId)
+        //{
+        //    var ffc = await GetApprovalRequestAsync(arParam.FeatureFlagCommitId);
+        //    ffc.ApprovalRequest.ApprovedByUserIds.Add(userId);
+        //    ffc.ApprovalRequest.ReviewStatus = ReviewStatusEnum.Declined;
+        //    ffc.ActivityLogs.Add(new ActivityLog
+        //    {
+        //        Comment = arParam.Comment,
+        //        ActivityType = ActivityTypeEnum.Decline,
+        //        CreatedAt = DateTime.UtcNow,
+        //        UserId = userId
+        //    });
+        //    await _mongoDbFeatureFlagCommitService.UpdateAsync(ffc.Id, ffc);
+        //    return true;
+        //}
+        //public async Task<FeatureFlag> ApplyApprovalRequestAsync(ApplyRequestParam arParam, string userId)
+        //{
+        //    var ffc = await GetApprovalRequestAsync(arParam.FeatureFlagCommitId);
+        //    if (ffc.ApprovalRequest.ApprovedByUserIds.Contains(userId))
+        //    {
+        //        ffc.ApprovalRequest.ReviewStatus = ReviewStatusEnum.Applied;
+        //        ffc.EffeciveDate = DateTime.UtcNow;
+        //        ffc.ActivityLogs.Add(new ActivityLog
+        //        {
+        //            Comment = arParam.Comment,
+        //            ActivityType = ActivityTypeEnum.Apply,
+        //            CreatedAt = DateTime.UtcNow,
+        //            UserId = userId
+        //        });
+        //        await _mongoDbFeatureFlagCommitService.UpdateAsync(ffc.Id, ffc);
 
-                var ff = await _mongoFeatureFlagsService.GetAsync(ffc.FeatureFlagId);
-                ff.FF = ffc.FF;
-                ff.FFP = ffc.FFP;
-                ff.FFTUWMTR = ffc.FFTUWMTR;
-                ff.EffeciveDate = ffc.EffeciveDate;
-                ff.TargetIndividuals = ffc.TargetIndividuals;
-                ff.VariationOptions = ffc.VariationOptions;
-                ff.Version = ffc.Version;
-                return ff;
-            }
-            return null;
-        }
-        private async Task BackupFeatureflagDirectlyUpdateAsync(FeatureFlag ff)
-        {
-            var ffc = new FeatureFlagCommit();
-            ffc.CreatedFromFeatureFlag(ff);
-            await _mongoDbFeatureFlagCommitService.CreateAsync(ffc);
-        }
+        //        var ff = await _mongoFeatureFlagsService.GetAsync(ffc.FeatureFlagId);
+        //        ff.FF = ffc.FF;
+        //        ff.FFP = ffc.FFP;
+        //        ff.FFTUWMTR = ffc.FFTUWMTR;
+        //        ff.EffeciveDate = ffc.EffeciveDate;
+        //        ff.TargetIndividuals = ffc.TargetIndividuals;
+        //        ff.VariationOptions = ffc.VariationOptions;
+        //        ff.Version = ffc.Version;
+        //        return ff;
+        //    }
+        //    return null;
+        //}
+        //private async Task BackupFeatureflagDirectlyUpdateAsync(FeatureFlag ff)
+        //{
+        //    var ffc = new FeatureFlagCommit();
+        //    ffc.CreatedFromFeatureFlag(ff);
+        //    await _mongoDbFeatureFlagCommitService.CreateAsync(ffc);
+        //}
         #endregion
 
 
@@ -618,7 +618,7 @@ namespace FeatureFlags.APIs.Services
             param._Id = originFF._Id;
             await _mongoFeatureFlagsService.UpdateAsync(param.Id, param);
 
-            await BackupFeatureflagDirectlyUpdateAsync(param);
+            //await BackupFeatureflagDirectlyUpdateAsync(param);
 
             return param;
         }

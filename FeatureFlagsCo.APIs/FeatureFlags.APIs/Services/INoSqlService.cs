@@ -23,13 +23,13 @@ namespace FeatureFlags.APIs.Services
         #endregion
 
         #region approval
-        Task<List<FeatureFlagCommit>> GetApprovalRequestsAsync(string featureFlagId);
-        Task<bool> CreateApproveRequestAsync(CreateApproveRequestParam param, string userId);
-        Task<FeatureFlagCommit> GetApprovalRequestAsync(string featureFlagCommitId);
-        Task<bool> ApproveApprovalRequestAsync(ApproveRequestParam arParam, string userId);
-        Task<bool> ChangeApprovalRequestAsync(ChangeRequestParam arParam, string userId);
-        Task<bool> DeclineApprovalRequestAsync(DeclineRequestParam arParam, string userId);
-        Task<FeatureFlag> ApplyApprovalRequestAsync(ApplyRequestParam arParam, string userId);
+        //Task<List<FeatureFlagCommit>> GetApprovalRequestsAsync(string featureFlagId);
+        //Task<bool> CreateApproveRequestAsync(CreateApproveRequestParam param, string userId);
+        //Task<FeatureFlagCommit> GetApprovalRequestAsync(string featureFlagCommitId);
+        //Task<bool> ApproveApprovalRequestAsync(ApproveRequestParam arParam, string userId);
+        //Task<bool> ChangeApprovalRequestAsync(ChangeRequestParam arParam, string userId);
+        //Task<bool> DeclineApprovalRequestAsync(DeclineRequestParam arParam, string userId);
+        //Task<FeatureFlag> ApplyApprovalRequestAsync(ApplyRequestParam arParam, string userId);
         #endregion
 
         Task<List<T>> GetEnvironmentDataAsync<T>(int envId);
