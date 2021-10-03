@@ -1,6 +1,5 @@
 *.log
 .DS_Store
 .idea
-FeatureFlagsCo.Experiments/api/__pycache__
-FeatureFlagsCo.Experiments/config/__pycache__
-FeatureFlagsCo.Experiments/__pycache__
+__pycache__
+.vscode

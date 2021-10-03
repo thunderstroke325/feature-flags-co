@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  # web:
+  #   build: .
+  #   ports:
+  #     - "5000:5000"
+  # redis:
+  #   image: "redis:alpine"
+  ffc-experiment-local:
+    build:
+      context: ../FeatureFlagsCo.Experiments
+      args: 
+        exptenv: local
+      dockerfile: Dockerfile.local
+    image: ffc-experiments
+    profiles: 
+      - local
+    networks:
+      - ffc-network
+    volumes:
+      - ./log:/var/log/
+
+networks:
+  ffc-network:
+    external: true
+
+

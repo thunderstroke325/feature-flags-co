@@ -3,6 +3,7 @@ version: "3.2"
 
 networks:
   ffc:
+    name: ffc-network
 
 services:
   # loki:
@@ -69,6 +70,7 @@ services:
     profiles:
       - docker
       - development
+      - backend
 
   mongodb:
     image: mongo
@@ -161,6 +163,20 @@ services:
     profiles:
       - docker
       - development
+  
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - ffc
+    ports:
+      - 6379:6379
+    profiles:
+      - docker
+      - development
+      - backend
+
   
 
   api:
