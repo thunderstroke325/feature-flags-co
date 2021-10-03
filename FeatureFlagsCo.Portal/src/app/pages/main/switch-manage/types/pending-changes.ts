@@ -7,6 +7,7 @@ import { ruleType, ruleValueConfig } from "../components/find-rule/ruleConfig";
 import { IFfParams, IFfpParams, IFftuwmtrParams, IJsonContent, IPrequisiteFeatureFlag, IRulePercentageRollout, IUserType, IVariationOption } from "./switch-new";
 
 export enum InstructionKindEnum {
+  UpdateStatus = 'updateStatus',
   AddUserTargets = 'addUserTargets',
   RemoveUserTargets = 'removeUserTargets',
   AddRule = 'addRule',
@@ -40,10 +41,12 @@ export interface IInstruction {
   rolloutWeights?: {[key: string]: number};
   rolloutVariationPercentage?: any[]; // dont't need to push to server
   targetUsers?: string[];
+  status?: string;
   extra?: any; // dont't need to push to server
 }
 
 interface IOriginalFFData {
+  status: string,
   targetIndividuals: {[key: string]: IUserType[]};
   fftuwmtr: IFftuwmtrParams[];
   fallThroughVariations: IRulePercentageRollout[];
@@ -101,14 +104,16 @@ export class PendingChange {
     variationOptionWhenDisabled: IVariationOption,
     fallThroughVariations: IRulePercentageRollout[],
     fftuwmtr: IFftuwmtrParams[],
-    prerequisiteFeatures: IFfpParams[]
+    prerequisiteFeatures: IFfpParams[],
+    status: string
     ) {
     this.originalFFData = {
       targetIndividuals: Object.assign({}, targetIndividuals),
       fallThroughVariations: fallThroughVariations.map(f => Object.assign({}, f)),
       variationOptionWhenDisabled: Object.assign({}, variationOptionWhenDisabled),
       fftuwmtr: this.preprocessFftuwmtr(fftuwmtr),
-      prerequisiteFeatures: prerequisiteFeatures.map(f => Object.assign({}, f))
+      prerequisiteFeatures: prerequisiteFeatures.map(f => Object.assign({}, f)),
+      status: status
     };
   }
 
@@ -140,8 +145,18 @@ export class PendingChange {
     return clauseStr;
   }
 
+  private getStatusLabel(status: string): string {
+    if (status === 'Enabled') return '开';
+    if (status === 'Disabled') return '关';
+    return '';
+  }
+
   private categorizeInstructions() {
     const categories = {
+      'status': {
+        'category': '状态',
+        'changes': []
+      },
       'prerequisite': {
         'category': '上游开关',
         'changes': []
@@ -166,6 +181,9 @@ export class PendingChange {
 
     this.data.instructions.forEach(ins => {
       switch(ins.kind) {
+        case InstructionKindEnum.UpdateStatus:
+          categories['prerequisite'].changes.push(`更新开关状态到 <span class="ant-tag">${this.getStatusLabel(ins.status)}</span>`);
+          break;
         case InstructionKindEnum.AddPrerequisiteFeature:
           categories['prerequisite'].changes.push(`添加上游开关 <a target="_blank" href="${this.parentUrl + ins.extra.selectedFeatureFlag.id}">${ins.extra.selectedFeatureFlag.name}</a>`);
           break;
@@ -205,6 +223,7 @@ export class PendingChange {
     });
 
     this.categorizedInstructions = [
+      categories['status'],
       categories['prerequisite'], categories['individualUsers'], categories['rules'], categories['fallThrough'], categories['off']
     ];
   }
@@ -214,7 +233,8 @@ export class PendingChange {
     variationOptionWhenDisabled: IVariationOption,
     fallThroughVariations: IRulePercentageRollout[],
     fftuwmtr: IFftuwmtrParams[],
-    prerequisiteFeatures: IFfpParams[]
+    prerequisiteFeatures: IFfpParams[],
+    status: string
     ) {
       this.data.instructions = [];
 
@@ -223,8 +243,18 @@ export class PendingChange {
       this.generateFallThroughVariationInstruction(fallThroughVariations);
       this.generateFftuwmtrInstruction(fftuwmtr);
       this.generatePrerequisiteFeaturesInstruction(prerequisiteFeatures);
+      this.generateStatusInstruction(status);
 
       this.categorizeInstructions();
+  }
+
+  private generateStatusInstruction(status: string) {
+    if (this.originalFFData.status !== status) {
+      this.upInsertInstruction({
+        kind: InstructionKindEnum.UpdateStatus,
+        status
+      });
+    }
   }
 
   private upInsertInstruction(instruction: IInstruction, compareFun?: (a: IInstruction, b: IInstruction) => boolean) {
