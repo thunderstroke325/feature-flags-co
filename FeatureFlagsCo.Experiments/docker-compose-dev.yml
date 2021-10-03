@@ -12,7 +12,7 @@ services:
       args: 
         exptenv: dev
       dockerfile: Dockerfile
-    image: ffc-experiments
+    image: ffc-experiments-dev
 
 
 
