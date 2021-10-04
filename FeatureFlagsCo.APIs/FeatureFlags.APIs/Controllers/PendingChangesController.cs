@@ -42,6 +42,56 @@ namespace FeatureFlags.APIs.Controllers
             _featureFlagCommitService = featureFlagCommitService;
         }
 
+        
+        [HttpGet]
+        [Route("GetApprovalRequests")]
+        public async Task<IActionResult> GetApprovalRequests(string featureFlagId)
+        {
+            try
+            {
+                var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+                var ffcs = await _noSqlDbService.GetApprovalRequestsAsync(featureFlagId);
+                if (ffcs != null && ffcs.Count > 0)
+                {
+                    if (!(await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, ffcs[0].EnvironmentId)))
+                    {
+                        return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
+                    }
+                }
+                return StatusCode(StatusCodes.Status200OK, ffcs);
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, JsonConvert.SerializeObject(new { featureFlagId = featureFlagId }));
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
+            }
+        }
+
+        [HttpGet]
+        [Route("GetApprovalRequests")]
+        public async Task<IActionResult> GetApprovalRequest(string featureFlagId)
+        {
+            try
+            {
+                var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+                var ffc = await _noSqlDbService.GetApprovalRequestAsync(featureFlagId);
+                if (ffc != null)
+                {
+                    if (!(await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, ffc.EnvironmentId)))
+                    {
+                        return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
+                    }
+                }
+                return StatusCode(StatusCodes.Status200OK, ffc);
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, JsonConvert.SerializeObject(new { featureFlagId = featureFlagId }));
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
+            }
+        }
+
+
         [HttpPost]
         [Route("")]
         public async Task<IActionResult> CreatePendingChanges([FromBody] CreateApproveRequestParam param)
@@ -75,6 +125,64 @@ namespace FeatureFlags.APIs.Controllers
                 if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvironmentId))
                 {
                     var result = await _noSqlDbService.ApproveApprovalRequestAsync(param, currentUserId);
+                    if (result == true)
+                    {
+                        return StatusCode(StatusCodes.Status200OK);
+                    }
+                    else
+                    {
+                        _logger.LogError("Unkown approve request error", JsonConvert.SerializeObject(param));
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Unknown approve request error");
+                    }
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, JsonConvert.SerializeObject(param));
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
+            }
+        }
+
+        [HttpPost]
+        [Route("ChangeApprovalRequest")]
+        public async Task<IActionResult> ChangeApprovalRequest(ChangeRequestParam param)
+        {
+            try
+            {
+                var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+                if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvironmentId))
+                {
+                    var result = await _noSqlDbService.ChangeApprovalRequestAsync(param, currentUserId);
+                    if (result == true)
+                    {
+                        return StatusCode(StatusCodes.Status200OK);
+                    }
+                    else
+                    {
+                        _logger.LogError("Unkown approve request error", JsonConvert.SerializeObject(param));
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Unknown approve request error");
+                    }
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, JsonConvert.SerializeObject(param));
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
+            }
+        }
+
+        [HttpPost]
+        [Route("DeclineApprovalRequest")]
+        public async Task<IActionResult> DeclineApprovalRequest(DeclineRequestParam param)
+        {
+            try
+            {
+                var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+                if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvironmentId))
+                {
+                    var result = await _noSqlDbService.DeclineApprovalRequestAsync(param, currentUserId);
                     if (result == true)
                     {
                         return StatusCode(StatusCodes.Status200OK);
