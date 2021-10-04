@@ -66,16 +66,45 @@ namespace FeatureFlags.APIs.Controllers
         }
 
         [HttpPost]
-        [Route("/ApplyRequest")]
-        public async Task<IActionResult> ApplyRequestAsync(ApplyRequestParam arParam)
+        [Route("ApproveRequest")]
+        public async Task<IActionResult> ApproveRequest(ApproveRequestParam param)
         {
             try
             {
                 var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
-                if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, arParam.EnvironmentId))
+                if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvironmentId))
                 {
-                    var arResult = await _noSqlDbService.ApplyApprovalRequestAsync(arParam, currentUserId);
-                    if(arResult != null && arResult.Id == arParam.FeatureFlagId)
+                    var result = await _noSqlDbService.ApproveApprovalRequestAsync(param, currentUserId);
+                    if (result == true)
+                    {
+                        return StatusCode(StatusCodes.Status200OK);
+                    }
+                    else
+                    {
+                        _logger.LogError("Unkown approve request error", JsonConvert.SerializeObject(param));
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Unknown approve request error");
+                    }
+                }
+                return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, JsonConvert.SerializeObject(param));
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
+            }
+        }
+
+        [HttpPost]
+        [Route("ApplyRequest")]
+        public async Task<IActionResult> ApplyRequest(ApplyRequestParam param)
+        {
+            try
+            {
+                var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+                if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvironmentId))
+                {
+                    var arResult = await _noSqlDbService.ApplyApprovalRequestAsync(param, currentUserId);
+                    if(arResult != null && arResult.Id == param.FeatureFlagId)
                     {
                         await _redisCache.SetStringAsync(arResult.Id, JsonConvert.SerializeObject(arResult));
                         return StatusCode(StatusCodes.Status200OK);
@@ -85,7 +114,7 @@ namespace FeatureFlags.APIs.Controllers
             }
             catch (Exception exp)
             {
-                _logger.LogError(exp, JsonConvert.SerializeObject(arParam));
+                _logger.LogError(exp, JsonConvert.SerializeObject(param));
 
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
             }

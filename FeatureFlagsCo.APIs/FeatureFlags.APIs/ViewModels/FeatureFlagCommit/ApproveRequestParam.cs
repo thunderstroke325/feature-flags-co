@@ -7,7 +7,9 @@ namespace FeatureFlags.APIs.ViewModels.FeatureFlagCommit
 {
     public class ApproveRequestParam
     {
+        public string FeatureFlagId { get; set; }
         public string FeatureFlagCommitId { get; set; }
         public string Comment { get; set; }
+        public int EnvironmentId { get; set; }
     }
 }
