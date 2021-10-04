@@ -1,24 +1,26 @@
-﻿using FeatureFlags.APIs.ViewModels;
-using FeatureFlagsCo.MQ;
+using System;
+using System.Text;
+using FeatureFlags.APIs.ViewModels;
+using FeatureFlags.APIs.ViewModels.Experiments;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
 {
+    public interface IExperimentStartEndMqService
+    {
+        void SendMessage(ExperimentIterationMessageViewModel message);
+    }
 
-    public class ExperimentstRabbitMqService : IExperimentMqService
+    public class ExperimentStartEndMqService : IExperimentStartEndMqService
     {
         private readonly ConnectionFactory _connectionFactory;
         private readonly IOptions<MySettings> _mySettings;
         private IConnection _connection;
         private IModel _channel;
-        public ExperimentstRabbitMqService(IOptions<MySettings> mySettings)
+
+        public ExperimentStartEndMqService(IOptions<MySettings> mySettings)
         {
             _mySettings = mySettings;
 
@@ -29,22 +31,12 @@ namespace FeatureFlags.APIs.Services
             _connection.ConnectionShutdown += Connection_ConnectionShutdown;
             _connection.ConnectionBlocked += Connection_ConnectionBlocked;
             _channel = _connection.CreateModel();
-            // _channel.QueueDeclare(queue: "experiments",
-            //                         durable: false,
-            //                         exclusive: false,
-            //                         autoDelete: false,
-            //                         arguments: null);
             _channel.CallbackException += Channel_CallbackException;
         }
-
+        
         private void Channel_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
         {
             _channel = _connection.CreateModel();
-            // _channel.QueueDeclare(queue: "experiments",
-            //                         durable: false,
-            //                         exclusive: false,
-            //                         autoDelete: false,
-            //                         arguments: null);
         }
 
         private void Connection_ConnectionBlocked(object sender, RabbitMQ.Client.Events.ConnectionBlockedEventArgs e)
@@ -64,31 +56,15 @@ namespace FeatureFlags.APIs.Services
             _connection = _connectionFactory.CreateConnection();
         }
 
-        public void SendMessage(ExperimentMessageModel message)
+        public void SendMessage(ExperimentIterationMessageViewModel message)
         {
-
             var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
-            // Q5 数据发送至es, py
-            _channel.ExchangeDeclare(exchange: "Q5", type: "topic");
-            _channel.BasicPublish(exchange: "Q5",
-                routingKey: "es.experiments.events.user",
+            // Q4 数据发送至es
+            _channel.ExchangeDeclare(exchange: "Q1", type: "topic");
+            _channel.BasicPublish(exchange: "Q1",
+                routingKey: "py.experiments.recordinginfo",
                 basicProperties: null,
                 body: body);
-            _channel.BasicPublish(exchange: "Q5",
-                routingKey: "py.experiments.events.user",
-                basicProperties: null,
-                body: body);
-
-            // _channel.BasicPublish(exchange: "",
-            //                       routingKey: "experiments",
-            //                       basicProperties: null,
-            //                       body: body);
-            //_channel.BasicPublish(exchange: "",
-            //                      routingKey: "experiments",
-            //                      basicProperties: null,
-            //                      body: body);
-
-            //Console.WriteLine(message);
         }
     }
 }

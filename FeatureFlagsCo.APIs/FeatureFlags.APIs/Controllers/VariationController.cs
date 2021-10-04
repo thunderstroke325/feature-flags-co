@@ -28,19 +28,22 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IVariationService _variationService;
         private readonly IOptions<MySettings> _mySettings;
         private readonly IInsighstMqService _insightsService;
+        private readonly IFeatureFlagMqService _featureFlagMqService;
 
         public VariationController(
             ILogger<VariationController> logger, 
             IDistributedCache redisCache,
             IVariationService variationService,
             IOptions<MySettings> mySettings,
-            IInsighstMqService insightsService)
+            IInsighstMqService insightsService,
+            IFeatureFlagMqService featureFlagMqService)
         {
             _logger = logger;
             _redisCache = redisCache;
             _variationService = variationService;
             _mySettings = mySettings;
             _insightsService = insightsService;
+            _featureFlagMqService = featureFlagMqService;
         }
 
         [HttpPost]
@@ -120,12 +123,27 @@ namespace FeatureFlags.APIs.Controllers
 
         private void SendToRabbitMQ(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, Tuple<VariationOption, bool> returnResult)
         {
+            var ffEvent = new FeatureFlagMessageModel()
+            {
+                RequestPath = "/Variation/GetMultiOptionVariation",
+                FeatureFlagId = ffIdVM.FeatureFlagId,
+                EnvId = ffIdVM.EnvId,
+                AccountId = ffIdVM.AccountId,
+                ProjectId = ffIdVM.ProjectId,
+                FeatureFlagKeyName = param.FeatureFlagKeyName,
+                UserKeyId = param.FFUserKeyId,
+                FFUserName = param.FFUserName,
+                VariationLocalId = returnResult.Item1.LocalId.ToString(),
+                VariationValue = returnResult.Item1.VariationValue,
+                TimeStamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
+            };
+            
             var labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
                          {
                               new FeatureFlagsCo.MQ.MessageLabel
                               {
-                                   LabelName = "RequestPath",
-                                    LabelValue = "/Variation/GetMultiOptionVariation"
+                                  LabelName = "RequestPath",
+                                  LabelValue = "/Variation/GetMultiOptionVariation"
                               },
                               new FeatureFlagsCo.MQ.MessageLabel
                               {
@@ -189,7 +207,7 @@ namespace FeatureFlags.APIs.Controllers
                     });
                 }
             }
-
+            _featureFlagMqService.SendMessage(ffEvent);
             _insightsService.SendMessage(new FeatureFlagsCo.MQ.MessageModel
             {
                 SendDateTime = DateTime.UtcNow,

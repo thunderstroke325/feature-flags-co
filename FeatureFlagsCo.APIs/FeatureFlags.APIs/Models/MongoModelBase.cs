@@ -10,7 +10,8 @@ namespace FeatureFlags.APIs.Models
 {
     public abstract class MongoModelBase 
     {
-        [JsonProperty("id")]
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
         public abstract string GetCollectionName();

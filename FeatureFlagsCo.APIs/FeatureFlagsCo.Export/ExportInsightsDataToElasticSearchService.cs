@@ -63,6 +63,18 @@ namespace FeatureFlagsCo.MQ.Export
 
                     Console.WriteLine("Connection and channel created");
 
+                    // Q4 同步feature flag 数据
+                    _channel.ExchangeDeclare(exchange: "Q4", type: "topic");
+                    var queueName = _channel.QueueDeclare(queue: "hello",
+                        durable: false,
+                        exclusive: false,
+                        autoDelete: false,
+                        arguments: null).QueueName;
+
+                    _channel.QueueBind(queue: queueName,
+                        exchange: "Q4",
+                        routingKey: "es.experiments.events.ff.#");
+
                     _channel.QueueDeclare(queue: "hello",
                                          durable: false,
                                          exclusive: false,

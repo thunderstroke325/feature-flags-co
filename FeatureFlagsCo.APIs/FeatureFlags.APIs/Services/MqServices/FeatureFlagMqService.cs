@@ -1,24 +1,21 @@
-﻿using FeatureFlags.APIs.ViewModels;
+using System;
+using System.Text;
+using FeatureFlags.APIs.ViewModels;
 using FeatureFlagsCo.MQ;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
 {
-
-    public class InsighstRabbitMqService : IInsighstMqService
+    public class FeatureFlagMqService : IFeatureFlagMqService
     {
         private readonly ConnectionFactory _connectionFactory;
         private readonly IOptions<MySettings> _mySettings;
         private IConnection _connection;
         private IModel _channel;
-        public InsighstRabbitMqService(IOptions<MySettings> mySettings)
+
+        public FeatureFlagMqService(IOptions<MySettings> mySettings)
         {
             _mySettings = mySettings;
 
@@ -29,28 +26,12 @@ namespace FeatureFlags.APIs.Services
             _connection.ConnectionShutdown += Connection_ConnectionShutdown;
             _connection.ConnectionBlocked += Connection_ConnectionBlocked;
             _channel = _connection.CreateModel();
-            // _channel.QueueDeclare(queue: "hello",
-            //                         durable: false,
-            //                         exclusive: false,
-            //                         autoDelete: false,
-            //                         arguments: null);
-            //this.SendMessage(new MessageModel
-            //{
-            //    Labels = new List<MessageLabel> { new MessageLabel { LabelName = "API Init", LabelValue = DateTime.UtcNow.ToLongDateString() } },
-            //    Message = "InsighstRabbitMqService Connected",
-            //    SendDateTime = DateTime.UtcNow
-            //});
             _channel.CallbackException += Channel_CallbackException;
         }
 
         private void Channel_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
         {
             _channel = _connection.CreateModel();
-            // _channel.QueueDeclare(queue: "hello",
-            //                         durable: false,
-            //                         exclusive: false,
-            //                         autoDelete: false,
-            //                         arguments: null);
         }
 
         private void Connection_ConnectionBlocked(object sender, RabbitMQ.Client.Events.ConnectionBlockedEventArgs e)
@@ -70,31 +51,15 @@ namespace FeatureFlags.APIs.Services
             _connection = _connectionFactory.CreateConnection();
         }
 
-        public void SendMessage(MessageModel message)
+        public void SendMessage(FeatureFlagMessageModel message)
         {
-
             var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
-            // Q4 数据发送至es
+            // Q4 数据发送至py
             _channel.ExchangeDeclare(exchange: "Q4", type: "topic");
             _channel.BasicPublish(exchange: "Q4",
-                routingKey: "es.experiments.events.ff",
+                routingKey: "py.experiments.events.ff",
                 basicProperties: null,
                 body: body);
-            // _channel.BasicPublish(exchange: "",
-            //                       routingKey: "hello",
-            //                       basicProperties: null,
-            //                       body: body);
-            //_channel.BasicPublish(exchange: "",
-            //                      routingKey: "hello",
-            //                      basicProperties: null,
-            //                      body: body);
-
-            //Console.WriteLine(message);
-        }
-
-        public Task SendMessageAsync(MessageModel message)
-        {
-            throw new NotImplementedException();
         }
     }
 }

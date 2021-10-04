@@ -58,7 +58,7 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("")]
-        public async Task<dynamic> CreateExperiment([FromBody]ExperimentQueryViewModel param)
+        public async Task<dynamic> CreateExperiment([FromBody]ExperimentViewModel param)
         {
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))

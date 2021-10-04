@@ -11,7 +11,13 @@ namespace FeatureFlags.APIs.Models
     {
         public int EnvId { get; set; }
         public string EventName { get; set; }
-        public ExperimentFeatureFlag Flag { get; set; }
+
+        public string FlagId { get; set; }
+
+        public string BaselineVariation { get; set; }
+
+        public List<string> Variations { get; set; }
+
         public List<ExperimentIteration> Iterations { get; set; }
         public bool IsArvhived { get; set; }
 
@@ -22,6 +28,16 @@ namespace FeatureFlags.APIs.Models
         {
             return "Experiments";
         }
+    }
+
+    public class ExperimentResult
+    {
+        public string ExperimentId { get; set; }
+        public string IterationId { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; } // updated time, not the end time of the iteration
+        public List<IterationResult> Results { get; set; }
+
     }
 
     public class ExperimentIteration
@@ -48,12 +64,5 @@ namespace FeatureFlags.APIs.Models
         public string Variation { get; set; }
 
         public List<float> ConfidenceInterval { get; set; }
-    }
-
-    public class ExperimentFeatureFlag
-    {
-        public string Id { get; set; }
-        public string BaselineVariation { get; set; }
-        public List<string> Variations { get; set; }
     }
 }

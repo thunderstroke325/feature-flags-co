@@ -234,6 +234,9 @@ namespace FeatureFlags.AdminWebAPIs
             var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
             services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
             services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
+            services.AddSingleton<IFeatureFlagMqService, FeatureFlagMqService>();
+            services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
+            services.AddSingleton<IExperimentResultService, ExperimentResultService>();
             services.AddSingleton<IAuditLogMqService, AuditLogMqService>();
             
 
