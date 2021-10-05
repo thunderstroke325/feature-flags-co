@@ -31,6 +31,8 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import {NzTabsModule} from "ng-zorro-antd/tabs";
 import {NzSwitchModule} from "ng-zorro-antd/switch";
+import {NzCollapseModule} from "ng-zorro-antd/collapse";
+
 
 @NgModule({
   declarations: [
@@ -66,7 +68,8 @@ import {NzSwitchModule} from "ng-zorro-antd/switch";
     NzToolTipModule,
     NzTabsModule,
     NzSwitchModule,
-    NzTableModule
+    NzTableModule,
+    NzCollapseModule
   ],
   exports: [
     NavBtnsComponent,

@@ -65,7 +65,8 @@ export class UpperSwitchComponent {
   @Output() onUpperSwicthChange = new EventEmitter<IFfpParams[]>();         // 修改设置
 
   // 添加上游开关
-  onAddUpperSwitch() {
+  onAddUpperSwitch(event) {
+    event.stopPropagation()
     this.upperFeatures = [
       ...this.upperFeatures,
       {

@@ -39,7 +39,7 @@
                         <nz-option [nzValue]="item" [nzLabel]="item"></nz-option>
                     </ng-container>
         </nz-select> -->
-        <nz-select style="width: 200px;margin-right: 10px;" nzMode="tags" nzPlaceHolder="Tag Mode" [(ngModel)]="ruleContent.multipleValue" (ngModelChange)="onModelChange()">
+        <nz-select style="min-width: 200px;margin-right: 10px;" nzMode="tags" nzPlaceHolder="Tag Mode" [(ngModel)]="ruleContent.multipleValue" (ngModelChange)="onModelChange()">
           <nz-option *ngFor="let option of listOfOption" [nzLabel]="option.label" [nzValue]="option.value"></nz-option>
         </nz-select>
       </ng-container>
