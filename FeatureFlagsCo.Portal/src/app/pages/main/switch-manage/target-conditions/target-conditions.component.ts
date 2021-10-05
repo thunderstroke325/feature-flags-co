@@ -139,7 +139,11 @@ export class TargetConditionsComponent implements OnInit {
   // 切换开关状态
   public onChangeSwitchStatus(type: 'Enabled' | 'Disabled') {
     this.switchStatus = type;
-    this.featureDetail.setFeatureStatus(type);
+    if (type === 'Enabled'){
+      this.featureDetail.setFeatureStatus('Disabled');
+    } else if (type === 'Disabled'){
+      this.featureDetail.setFeatureStatus('Enabled');
+    }
   }
 
   // 初始化上游开关

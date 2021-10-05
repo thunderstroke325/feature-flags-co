@@ -1,13 +1,17 @@
 <section class="body">
-  <div class="title">
-    <div class="label">
-      <div>上游开关</div>
-      <div style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin: 20px 0;">若下方上游开关不符合条件，则此开关处于关闭状态</div>
-    </div>
-    <button nz-button nzType="primary" (click)="onAddUpperSwitch()">
-      <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>
-      添加上游开关</button>
-  </div>
+  <nz-collapse [nzBordered]="false" [nzGhost]="true">
+    <ng-template #collapseTitle>
+        <span style="font-size: 14px;font-weight: bold;">上游开关</span>
+        <p style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin-left: 24px">若下方上游开关不符合条件，则此开关处于关闭状态</p>
+    </ng-template>
+    <ng-template #collapseAction>
+      <button style="position: relative;top: -50px;" nz-button nzType="primary" (click)="onAddUpperSwitch($event)">
+        <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>
+        添加上游开关
+      </button>
+    </ng-template>
+
+  <nz-collapse-panel [nzHeader]="collapseTitle" [nzExtra]="collapseAction">
   <nz-table #basicTable [nzData]="upperFeatures" [nzFrontPagination]="false" >
     <thead>
     <tr class="table-th-style">
@@ -24,8 +28,7 @@
             nzPlaceHolder="Select feature flag"
             nzAllowClear
             nzShowSearch
-            nzServerSearch
-            style="width: 400px"
+            nzServerSearc
             [compareWith]="compareWithPrequisiteFeatureFlag"
             [(ngModel)]="item.selectedFeatureFlag"
             (ngModelChange)="onSelectChange(item, $event)"
@@ -41,7 +44,7 @@
       </td>
       <td>
         <div class="select">
-          <nz-select style="width: 400px" [(ngModel)]="item.valueOptionsVariationValue" [compareWith]="compareWithVariationOption" (ngModelChange)="onVariationValueChange()">
+          <nz-select [(ngModel)]="item.valueOptionsVariationValue" [compareWith]="compareWithVariationOption" (ngModelChange)="onVariationValueChange()">
             <nz-option *ngFor="let option of item.selectedFeatureFlag?.variationOptions" [nzValue]="option" [nzLabel]="option.variationValue"></nz-option>
           </nz-select>
         </div>
@@ -50,32 +53,6 @@
     </tr>
     </tbody>
   </nz-table>
-<!--    <ng-container *ngFor="let item of upperFeatures; let key=index;">-->
-<!--        <div class="switch-item">-->
-<!--            <div class="select">-->
-<!--              <nz-select-->
-<!--               nzPlaceHolder="Select feature flag"-->
-<!--               nzAllowClear-->
-<!--               nzShowSearch-->
-<!--               nzServerSearch-->
-<!--               [compareWith]="compareWithPrequisiteFeatureFlag"-->
-<!--               [(ngModel)]="item.selectedFeatureFlag"-->
-<!--               (ngModelChange)="onSelectChange(item, $event)"-->
-<!--               (nzOnSearch)="onSearch($event)">-->
-<!--                <ng-container *ngFor="let feature of featureList">-->
-<!--                    <nz-option *ngIf="!isLoading" nzCustomContent [nzDisabled]="selectedFeatureFlagIDs.includes(feature.id)" [nzValue]="feature" [nzLabel]="feature.name">{{feature.name}}</nz-option>-->
-<!--                </ng-container>-->
-<!--                <nz-option *ngIf="isLoading" nzDisabled nzCustomContent>-->
-<!--                    <i nz-icon nzType="loading" class="loading-icon"></i> Loading Data...-->
-<!--                </nz-option>-->
-<!--              </nz-select>-->
-<!--            </div>-->
-<!--            <div class="select">-->
-<!--                <nz-select [(ngModel)]="item.valueOptionsVariationValue" [compareWith]="compareWithVariationOption" (ngModelChange)="onVariationValueChange()">-->
-<!--                    <nz-option *ngFor="let option of item.selectedFeatureFlag?.variationOptions" [nzValue]="option" [nzLabel]="option.variationValue"></nz-option>-->
-<!--                </nz-select>-->
-<!--            </div>-->
-<!--            <i nz-icon nzType="delete" nzTheme="outline" (click)="onDeleteSwitch(key)"></i>-->
-<!--        </div>-->
-<!--    </ng-container>-->
+  </nz-collapse-panel>
+  </nz-collapse>
 </section>

@@ -13,6 +13,7 @@ import { SafeHtmlPipe } from 'src/app/share/pipes/safe-html.pipe';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import {NzSwitchModule} from 'ng-zorro-antd/switch';
 import { FormsModule } from '@angular/forms';
+import {NzCollapseModule} from "ng-zorro-antd/collapse";
 
 @NgModule({
   declarations: [TargetConditionsComponent, SafeHtmlPipe ],
@@ -27,7 +28,8 @@ import { FormsModule } from '@angular/forms';
     NzSelectModule,
     TargetConditionsRoutingModule,
     NzSwitchModule,
-    FormsModule
+    FormsModule,
+    NzCollapseModule
   ]
 })
 export class TargetConditionsModule { }

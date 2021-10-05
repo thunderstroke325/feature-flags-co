@@ -29,15 +29,13 @@
                 </nz-dropdown-menu>
               </div>
             </div>
-            <div class="item">
-<!--                <div class="label">-->
-<!--                  <div>上游开关</div>-->
-<!--                  <div style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin: 20px 0;">若下方上游开关不符合条件，则此开关处于关闭状态</div>-->
-<!--                </div>-->
+            <div class="item" style="margin: 0">
                 <upper-switch [featureList]="featureList" [upperFeatures]="upperFeatures" (search)="onSearchPrequisiteFeatureFlags($event)" (onUpperSwicthChange)="onUpperSwicthChange($event)"></upper-switch>
             </div>
             <div class="item">
-                <p class="label">目标用户</p>
+              <nz-collapse [nzBordered]="false" [nzGhost]="true">
+                <ng-template #collapseTitle><span style="font-size: 14px;font-weight: bold;">目标用户</span></ng-template>
+                <nz-collapse-panel [nzHeader]="collapseTitle">
                 <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
                   <target-user [type]="variationOption.variationValue"
                                 [tipIdx]="i"
@@ -46,6 +44,8 @@
                                 (search)="onSearchUser($event)"
                                 (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)"></target-user>
                 </div>
+                </nz-collapse-panel>
+              </nz-collapse>
             </div>
             <div>
               <div class="item" style="display: flex;flex-direction: row;justify-content: space-between;">
