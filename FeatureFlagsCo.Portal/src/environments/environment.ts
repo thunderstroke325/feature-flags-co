@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   projectEnvKey: '',
-  url: ' https://api.feature-flags.co',
+  url: 'https://ffc-api-ce2-dev.chinacloudsites.cn',
   name: 'Development',
   statisticUrl: null
 };
