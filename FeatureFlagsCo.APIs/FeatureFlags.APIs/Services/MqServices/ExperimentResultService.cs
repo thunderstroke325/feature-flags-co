@@ -19,18 +19,16 @@ namespace FeatureFlags.APIs.Services
     public class ExperimentResultService : IExperimentResultService
     {
         private readonly ConnectionFactory _factory;
-        private readonly IOptions<MySettings> _mySettings;
         private readonly IExperimentsService _experimentService;
         private IConnection _connection;
         private IModel _channel;
 
-        public ExperimentResultService(IOptions<MySettings> mySettings, IExperimentsService experimentService)
+        public ExperimentResultService(string rabbitConnectStr, IExperimentsService experimentService)
         {
-            _mySettings = mySettings;
             _factory = new ConnectionFactory();
-            _factory.Uri = new Uri(_mySettings.Value.InsightsRabbitMqUrl);
-
+            _factory.Uri = new Uri(rabbitConnectStr);
             _experimentService = experimentService;
+            Init();
         }
 
         public void Init()
@@ -38,7 +36,7 @@ namespace FeatureFlags.APIs.Services
             if (_channel != null)
             {
                 _channel.Close();
-                _channel.QueueDelete("experiment.result.reader");
+                // _channel.QueueDelete("experiment.result.reader");
             }
 
             if (_connection != null)
@@ -101,7 +99,7 @@ namespace FeatureFlags.APIs.Services
                             Console.WriteLine(message);
                         }
                     };
-                    _channel.BasicConsume(queue: "queueName",
+                    _channel.BasicConsume(queue: queueName,
                         autoAck: false,
                         consumer: consumer);
                     break;

@@ -318,11 +318,11 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
             # ACTION: Delete in Redis > list_FFevent related to FlagID
             # ACTION: Delete in Redis > list_Exptevent related to EventName
             logger.info('Update info and delete stopped Experiment data')
-            if not dict_flag_acitveExpts.get(expt['FlagId'], None):
+            if dict_flag_acitveExpts and not dict_flag_acitveExpts.get(expt['FlagId'], None):
                 id = '%s_%s' % (expt['EnvId'], expt['FlagId'])
                 self.redis_del(id)
                 # TODO move to somewhere
-            if not dict_customEvent_acitveExpts.get(expt['EventName'], None):
+            if dict_customEvent_acitveExpts and not dict_customEvent_acitveExpts.get(expt['EventName'], None):
                 id = '%s_%s' % (expt['EnvId'], expt['EventName'])
                 self.redis_del(id)
                 # TODO move to somewhere

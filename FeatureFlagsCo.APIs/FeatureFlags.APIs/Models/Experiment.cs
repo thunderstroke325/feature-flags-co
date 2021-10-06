@@ -62,7 +62,6 @@ namespace FeatureFlags.APIs.Models
         public float PValue { get; set; }
         public long UniqueUsers { get; set; }
         public string Variation { get; set; }
-
         public List<float> ConfidenceInterval { get; set; }
     }
 }

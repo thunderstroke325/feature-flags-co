@@ -236,20 +236,21 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
             services.AddSingleton<IFeatureFlagMqService, FeatureFlagMqService>();
             services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
-            services.AddSingleton<IExperimentResultService, ExperimentResultService>();
             services.AddSingleton<IAuditLogMqService, AuditLogMqService>();
-            
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
             services.AddSingleton<IExportExperimentsDataToElasticSearchService>(new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddSingleton<IExportAuditLogDataToElasticSearchService>(new ExportAuditLogDataToElasticSearchService(insightsRabbitMqUrl, esHost));
-            
+
             services.AddScoped<IFeatureFlagsUsageService, ElasticSearchFeatureFlagsUsageService>();
             services.AddScoped<IExperimentationService, ExperimentationService>();
             services.AddScoped<IAuditLogSearchService, AuditLogSearchService>();
-
+            
+            var serviceProvider = services.BuildServiceProvider();
+            var exptsService = serviceProvider.GetService<IExperimentsService>();
+            services.AddSingleton<IExperimentResultService>(new ExperimentResultService(insightsRabbitMqUrl, exptsService));
             #endregion
         }
 

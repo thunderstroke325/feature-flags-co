@@ -39,7 +39,7 @@ namespace FeatureFlagsCo.MQ.Export
             if (_channel != null)
             {
                 _channel.Close();
-                _channel.QueueDelete(_queueName);
+                // _channel.QueueDelete(_queueName);
             }
             if (_connection != null)
                 _connection.Close();
