@@ -114,7 +114,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                'uniqueUsers': -1,
                                'conversionRate': -1,
                                'changeToBaseline': -1,
-                               'confidenceInterval': -1,
+                               'confidenceInterval': [-1, -1],
                                'pValue': -1,
                                'isBaseline': True if
                                var_baseline == var else False,
@@ -156,7 +156,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                            'uniqueUsers': 0,
                                            'conversionRate':   0,
                                            'changeToBaseline': -1,
-                                           'confidenceInterval': -1,
+                                           'confidenceInterval': [-1, -1],
                                            'pValue': -1,
                                            'isBaseline': True if
                                            var_baseline == item else False,
@@ -202,7 +202,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                            'uniqueUsers': 0,
                                            'conversionRate':   0,
                                            'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
-                                           'confidenceInterval': -1,
+                                           'confidenceInterval': [-1, -1],
                                            'pValue': -1,
                                            'isBaseline': True if
                                            var_baseline == item else False,
