@@ -164,10 +164,10 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         expt.selectedIteration.dateTimeInterval = `${moment(expt.selectedIteration.startTime).format('YYYY-MM-DD HH:mm')} - ${moment(expt.selectedIteration.endTime).format('YYYY-MM-DD HH:mm')}`
         expt.status = ExperimentStatus.NotRecording;
 
-        const idx = this.onGoingExperiments.findIndex(ex => ex.id === expt.id);
-        if (idx > -1) {
-          this.onGoingExperiments.splice(idx, 1);
-        }
+        // const idx = this.onGoingExperiments.findIndex(ex => ex.id === expt.id);
+        // if (idx > -1) {
+        //   this.onGoingExperiments.splice(idx, 1);
+        // }
       }
     });
   }
@@ -195,6 +195,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         const found = iteration.results.find(r => r.variation == option.localId);
 
         return !found ? this.createEmptyIterationResult(option, baselineVariation) : Object.assign({}, found, {
+          conversion: found.conversion === -1 ? '--' : found.conversion,
+          uniqueUsers: found.uniqueUsers === -1 ? '--' : found.uniqueUsers,
           variationValue: option.variationValue,
           pValue: found.pValue === -1 ? '--' : found.pValue,
           isEmpty: false,
