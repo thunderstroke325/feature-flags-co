@@ -70,8 +70,10 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
                 const iteration = res.find(r => r.id === expt.selectedIteration.id);
                 if (iteration) {
                   expt.selectedIteration.results = this.processIteration(iteration, expt.baselineVariation).results;
-                  expt.selectedIteration.updatedAt = iteration.updatedAt;
-                  expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
+                  if (iteration.updatedAt) {
+                    expt.selectedIteration.updatedAt = iteration.updatedAt;
+                    expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
+                  }
                 }
               });
             }
@@ -175,8 +177,10 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.experimentService.getIterationResults(this.switchServe.envId, [{ experimentId: expt.id, iterationId: expt.selectedIteration.id}]).subscribe(res => {
       if (res) {
         expt.selectedIteration.results = this.processIteration(res[0], expt.baselineVariation).results;
-        expt.selectedIteration.updatedAt = res[0].updatedAt;
-        expt.selectedIteration.updatedAtStr = moment(res[0].updatedAt).format('YYYY-MM-DD HH:mm');
+        if (res[0].updatedAt) {
+          expt.selectedIteration.updatedAt = res[0].updatedAt;
+          expt.selectedIteration.updatedAtStr = moment(res[0].updatedAt).format('YYYY-MM-DD HH:mm');
+        }
       }
 
       expt.isLoading  = false;
