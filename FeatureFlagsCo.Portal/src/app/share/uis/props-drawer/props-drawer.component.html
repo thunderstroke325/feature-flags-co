@@ -8,7 +8,7 @@
         添加新属性
       </button>
       <div *ngIf="list?.length > 0" class="user-properties-list">
-        <nz-table #basicTable [nzData]="list" [nzHideOnSinglePage]="true" nzTableLayout="fixed">
+        <nz-table #basicTable [nzData]="list" [nzHideOnSinglePage]="true" nzTableLayout="fixed" nzSize="small">
           <thead>
           <tr class="table-th-style">
             <th>名称</th>

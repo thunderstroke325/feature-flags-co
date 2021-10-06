@@ -3,10 +3,10 @@
         <app-nav-btns name="header" [routeUrl]="'report'" [id]="switchId"></app-nav-btns>
         <div class="content-body" name="detail" *ngIf="!hideContent">
           <div style="width: 100%; display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
-            <nz-button-group [nzSize]="'large'" style="width: fit-content;margin-top: 20px;font-size: 14px;">
+            <nz-button-group [nzSize]="'large'" style="width: fit-content;margin-top: 20px;font-size: 13px;">
               <div style="border-bottom: 1px solid rgba(0, 0, 0, 0.06);width: 100%">
                 <ng-container *ngFor="let btn of navReportConfig;">
-                  <a nz-button style="font-size: 14px;padding: 0 0 2px 0;margin-right: 32px;height: auto;
+                  <a nz-button style="font-size: 13px;padding: 0 0 2px 0;margin-right: 32px;height: auto;
                         border-bottom: 1px solid {{timeSpan=== btn.keyValue ? '#4CB287' : 'transparent'}};
                         color: {{timeSpan=== btn.keyValue ? '#4CB287' : '#000'}}" nzType='link'
                      (click)="onTimeSpanClcik(btn.keyValue)">{{btn.labelValue}}</a>

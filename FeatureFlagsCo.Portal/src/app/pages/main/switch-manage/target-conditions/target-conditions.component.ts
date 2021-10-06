@@ -30,6 +30,7 @@ export class TargetConditionsComponent implements OnInit {
   public isLoading: boolean = true;
   public variationOptions: IVariationOption[] = [];                         // multi state
   public targetIndividuals: {[key: string]: IUserType[]}  = {}; // multi state
+  public targetIndividualsActive: boolean = false;
 
   currentAccount: IAccount = null;
   currentProjectEnv: IProjectEnv = null;
@@ -84,12 +85,16 @@ export class TargetConditionsComponent implements OnInit {
       this.featureDetail = new CSwitchParams(result);
 
       this.variationOptions = this.featureDetail.getVariationOptions();
-
       this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
         acc[cur.localId] = this.featureDetail.getTargetIndividuals().filter(t => t.valueOption !== null).find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
         return acc;
       }, {});
-
+      for(const i in this.targetIndividuals){
+        if (this.targetIndividuals[i].length !== 0 ){
+          this.targetIndividualsActive = true;
+          break;
+        }
+      }
       if (this.featureDetail.getFFDefaultRulePercentageRollouts().length === 0) {
         this.featureDetail.setFFDefaultRulePercentageRollouts([
           {
@@ -127,7 +132,7 @@ export class TargetConditionsComponent implements OnInit {
         this.featureDetail.getUpperFeatures(),
         this.featureDetail.getFeatureStatus()
         );
-    })
+    });
   }
 
   // -------------------------------------------------------------------------------------------------

@@ -34,8 +34,8 @@
             </div>
             <div class="item">
               <nz-collapse [nzBordered]="false" [nzGhost]="true">
-                <ng-template #collapseTitle><span style="font-size: 14px;font-weight: bold;">目标用户</span></ng-template>
-                <nz-collapse-panel [nzHeader]="collapseTitle">
+                <ng-template #collapseTitle><span style="font-size: 13px;font-weight: bold;">目标用户</span></ng-template>
+                <nz-collapse-panel [nzHeader]="collapseTitle" [nzActive]="targetIndividualsActive">
                 <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
                   <target-user [type]="variationOption.variationValue"
                                 [tipIdx]="i"

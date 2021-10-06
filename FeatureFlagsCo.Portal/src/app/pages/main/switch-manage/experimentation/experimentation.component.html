@@ -210,7 +210,7 @@
                 <li *ngIf="!hasWinnerVariation"><i nz-icon nzType="info-circle" nzTheme="outline"></i> 需要更多的实验数据才能在统计学上确认表格中的结论</li>
               </ul>
             </div>
-            <nz-table #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experimentResult" style="margin-top: 20px;">
+            <nz-table #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experimentResult" style="margin-top: 20px;" nzSize="small">
               <thead>
                 <tr>
                   <th>特性</th>

@@ -1,7 +1,7 @@
 <section class="body">
   <nz-collapse [nzBordered]="false" [nzGhost]="true">
     <ng-template #collapseTitle>
-        <span style="font-size: 14px;font-weight: bold;">上游开关</span>
+        <span style="font-size: 13px;font-weight: bold;">上游开关</span>
         <p style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin-left: 24px">若下方上游开关不符合条件，则此开关处于关闭状态</p>
     </ng-template>
     <ng-template #collapseAction>
@@ -11,8 +11,8 @@
       </button>
     </ng-template>
 
-  <nz-collapse-panel [nzHeader]="collapseTitle" [nzExtra]="collapseAction">
-  <nz-table #basicTable [nzData]="upperFeatures" [nzFrontPagination]="false" >
+  <nz-collapse-panel [nzHeader]="collapseTitle" [nzExtra]="collapseAction" [nzActive]="upperFeatures.length!==0">
+  <nz-table #basicTable [nzData]="upperFeatures" [nzFrontPagination]="false" nzSize="small">
     <thead>
     <tr class="table-th-style">
       <th>上游开关名称</th>

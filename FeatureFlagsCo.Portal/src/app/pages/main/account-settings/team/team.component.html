@@ -16,7 +16,7 @@
           </div>
           <div class="list">
               <ng-container *ngIf="!isInitLoading; else loadingTem;">
-                  <nz-table #basicTable
+                  <nz-table #basicTable nzSize="small"
                           [nzData]="searchResult"
                           [nzScroll]="{ y: '450px' }"
                           [nzPageSize]="10"
