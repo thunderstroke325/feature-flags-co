@@ -1,0 +1,74 @@
+<div class="body">
+  <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
+    <div class="annotations">
+      <div class="annotation">
+        进行中
+        <div>{{ getExptCountByStatus(3) }} <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i></div>
+      </div>
+      <div class="annotation">
+        暂停
+        <div>{{ getExptCountByStatus(2) }} <i class="status paused" nz-icon nzType="pause-circle" nzTheme="outline"></i></div>
+      </div>
+      <div class="annotation">
+        未开始
+        <div>{{ getExptCountByStatus(1) }} <i class="status not-started" nz-icon nzType="field-time" nzTheme="outline"></i></div>
+      </div>
+    </div>
+    <nz-card style="margin-top: 20px;">
+      <div class="actions">
+        <div class="filters">
+          <div class="search-filter">
+            <input nz-input placeholder="通过开关名字查找" [(ngModel)]="searchText" (ngModelChange)="onSearch()"/>
+          </div>
+          <!-- <div class="select-filter">
+            <nz-select [(ngModel)]="showType">
+              <nz-option nzValue="" nzLabel="展示所有 Metric"></nz-option>
+              <nz-option [nzValue]="customEventType" nzLabel="展示自定义事件的 Metric"></nz-option>
+            </nz-select>
+          </div> -->
+        </div>
+
+        <div nz-col nzSpan="8" class="wrap-right">
+          <button nz-button nzType="primary" (click)="onCreateClick()">
+            <i nz-icon nzType="plus" nzTheme="outline"></i>
+            添加实验
+          </button>
+        </div>
+      </div>
+      <nz-table #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experimentList" style="margin-top: 20px;">
+        <thead>
+          <tr>
+            <th>数据实验</th>
+            <th>当前状态</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let data of borderedTable.data">
+            <tr>
+              <td (click)="goToFeatureFlag(data.featureFlagId)">
+                <a class="title">{{data.featureFlagName}}</a>
+                <div class="subtitle">{{data.metric.name}}</div>
+              </td>
+              <td>
+                <i class="status on-going" *ngIf="data.status === 3" nz-icon nzType="right-circle" nzTheme="outline"></i>
+                <i class="status paused" *ngIf="data.status === 2" nz-icon nzType="pause-circle" nzTheme="outline"></i>
+                <i class="status not-started" *ngIf="data.status === 1" nz-icon nzType="field-time" nzTheme="outline"></i>
+                {{data.statusName}}
+              </td>
+              <td style="text-align: right">
+                <nz-space [nzSize]="20">
+                  <a *nzSpaceItem (click)="goToFeatureFlag(data.featureFlagId)">查看开关</a>
+                  <!-- <a *nzSpaceItem (click)="goToMetric(data.metricId)">编辑 Metric</a> -->
+                </nz-space>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </nz-table>
+    </nz-card>
+  </nz-spin>
+</div>
+
+<app-experiment-drawer [visible]="detailViewVisible" (close)="onDetailViewClosed($event)" [experiment]="currentExperiment"></app-experiment-drawer>
+

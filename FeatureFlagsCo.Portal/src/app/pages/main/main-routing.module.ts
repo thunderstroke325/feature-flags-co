@@ -33,6 +33,13 @@ const routes: Routes = [
         },
       },
       {
+        path: 'experiments',
+        loadChildren: () => import("./experiments/experiments.module").then(m => m.ExperimentsModule),
+        data: {
+          breadcrumb: '数据实验'
+        },
+      },
+      {
         path: 'data-sync',
         loadChildren: () => import("./data-sync/data-sync.module").then(m => m.DataSyncModule),
         data: {

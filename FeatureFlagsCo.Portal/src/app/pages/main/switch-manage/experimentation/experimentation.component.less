@@ -7,9 +7,69 @@
       width: 100%;
       height: calc(100% - 24px);
       padding: 0px 10px 30px 2px;
-      margin-top: 24px;
+      margin-top: 12px;
       overflow: auto;
       position: relative;
+
+      .experiment {
+        .head {
+          .first-line {
+            display: flex;
+            justify-content: space-between;
+
+            .title-area {
+              display: flex;
+              justify-content: flex-start;
+
+              div.title {
+                margin-right: 20px;
+                font-size: 18px;
+                font-weight: 600;
+              }
+
+              .ant-tag {
+                padding-top: 3px;
+              }
+            }
+          }
+          .second-line {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+
+            button {
+              border-radius: 5px;
+            }
+
+            .anticon.status {
+              &.on-going {
+                color: #8EDABA;
+              }
+              &.paused {
+                color: #F97A7A;
+              }
+              &.not-started {
+                color: rgba(0, 0, 0, 0.85);
+              }
+              font-weight: 800;
+            }
+          }
+
+          .third-line {
+            margin-top: 15px;
+          }
+        }
+        .empty-experiment {
+          background-color: #DDDCEB;
+          height: 200px;
+          padding-top: 90px;
+          text-align: center;
+          border-radius: 3px;
+          button {
+            border-radius: 3px;
+          }
+        }
+      }
 
       ul {
         li {

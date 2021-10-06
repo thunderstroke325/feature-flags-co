@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { IExperiment, IExperimentIteration } from '../pages/main/switch-manage/types/experimentations';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,6 @@ import { environment } from 'src/environments/environment';
 export class ExperimentService {
 
   baseUrl: string = environment.url + '/api/experiments';
-  currentProjectEnvChanged$: Subject<void> = new Subject();
 
   constructor(
     private http: HttpClient
@@ -40,9 +40,36 @@ export class ExperimentService {
     return this.http.get<string[]>(url);
   }
 
-    // 获取 experiment 结果
-    getExperimentResult(envId: number, params): Observable<any> {
-      const url = this.baseUrl + `/launchQuery/${envId}`;
-      return this.http.post(url, params);
-    }
+  // 获取 experiment 结果
+  getExperimentResult(envId: number, params): Observable<any> {
+    const url = this.baseUrl + `/launchQuery/${envId}`;
+    return this.http.post(url, params);
+  }
+
+
+  // 获取 experiment 结果
+  createExperiment(params: IExperiment): Observable<any> {
+    const url = this.baseUrl;
+    return this.http.post(url, params);
+  }
+
+  getExperiments(params: any): Observable<any> {
+    const url = this.baseUrl;
+    return this.http.get(url, { params });
+  }
+
+  startIteration(envId: number, experimentId: string): Observable<any> {
+    const url = this.baseUrl + `/${envId}/${experimentId}`;
+    return this.http.put(url, {});
+  }
+
+  stopIteration(envId: number, experimentId: string, iterationId: string): Observable<any> {
+    const url = this.baseUrl + `/${envId}/${experimentId}/${iterationId}`;
+    return this.http.put(url, {});
+  }
+
+  getIterationResults(envId: number, params): Observable<IExperimentIteration[]> {
+    const url = this.baseUrl + `/${envId}`;
+    return this.http.post<IExperimentIteration[]>(url, params);
+  }
 }

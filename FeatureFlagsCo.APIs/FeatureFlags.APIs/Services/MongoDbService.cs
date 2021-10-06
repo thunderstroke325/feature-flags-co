@@ -45,14 +45,24 @@ namespace FeatureFlags.APIs.Services
 
         #region experiments
 
+        public async Task<List<Experiment>> GetExperimentsByIdsAsync(List<string> featureFlagIds) 
+        {
+            return await _mongoDbExperimentService.GetByIdsAsync(featureFlagIds);
+        }
+
         public async Task<Experiment> GetExperimentByIdAsync(string exptId)
         {
             return await _mongoDbExperimentService.GetAsync(exptId);
         }
 
-        public async Task<Experiment> GetExperimentByFeatureFlagAndEvent(string featureFlagId, string eventName)
+        public async Task<Experiment> GetExperimentByFeatureFlagAndMetricAsync(string featureFlagId, string metricId)
         {
-            return (await _mongoDbExperimentService.GetByFeatureFlagAndEventAsync(featureFlagId, eventName)).FirstOrDefault();
+            return (await _mongoDbExperimentService.GetByFeatureFlagAndMetricAsync(featureFlagId, metricId)).FirstOrDefault();
+        }
+
+        public async Task<List<Experiment>> GetExperimentByFeatureFlagAsync(string featureFlagId)
+        {
+            return await _mongoDbExperimentService.GetByFeatureFlagAsync(featureFlagId);
         }
 
         // This method is used for updating Experiment

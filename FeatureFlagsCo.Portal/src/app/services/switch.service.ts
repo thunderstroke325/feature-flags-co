@@ -115,7 +115,7 @@ export class SwitchService {
     });
   }
 
-  // 搜索用户
+  // 搜索上游开关
   public queryPrequisiteFeatureFlags(name: string = '', index: number = 0, size: number = 20): Observable<IPrequisiteFeatureFlag[]> {
     const url = environment.url + `/FeatureFlags/SearchPrequisiteFeatureFlags`;
     return this.http.get<IPrequisiteFeatureFlag[]>(url, {
@@ -126,6 +126,12 @@ export class SwitchService {
         "pageSize": size.toString()
       }
     });
+  }
+
+  // 搜索开关
+  public queryFeatureFlags(envId: number, params: any): Observable<any> {
+    const url = environment.url + `/FeatureFlags/search/${envId}`;
+    return this.http.get(url, { params });
   }
 
   // 修改开关

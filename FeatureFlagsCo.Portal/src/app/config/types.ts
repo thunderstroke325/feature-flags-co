@@ -15,6 +15,7 @@ export interface IAccountProjectEnv {
 
 export interface IAccountUser {
   userId: string,
+  userName: string,
   email: string,
   role: string,
   initialPassword: string

@@ -1,0 +1,76 @@
+.body {
+
+  .annotations {
+    display: flex;
+    justify-content: flex-start;
+
+    .annotation {
+      font-weight: 600;
+      font-size: 15px;
+      width: 120px;
+      height: 80px;
+      text-align: center;
+      background-color: #DDDCEB;
+      margin: 10px 50px 0px 0;
+      padding: 20px;
+      border-radius: 5px;
+    }
+  }
+
+  .anticon.status {
+    &.on-going {
+      color: #8EDABA;
+    }
+    &.paused {
+      color: #F97A7A;
+    }
+    &.not-started {
+      color: rgba(0, 0, 0, 0.85);
+    }
+    font-weight: 800;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+
+    .filters {
+      display: flex;
+      justify-content: space-between;
+
+      .search-filter {
+        margin-right: 20px;
+
+        input {
+          width: 400px;
+        }
+      }
+
+      .select-filter {
+        .ant-select {
+          min-width: 200px;
+        }
+      }
+    }
+  }
+
+  td:first-child {
+    cursor: pointer;
+  }
+
+  a {
+    color: green;
+    text-decoration: underline;
+   }
+
+  .title {
+    font-size: 15px;
+  }
+  .subtitle {
+    font-size: 13px;
+  }
+}
+
+
+
+

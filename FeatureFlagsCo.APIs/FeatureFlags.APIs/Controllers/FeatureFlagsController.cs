@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
@@ -9,6 +10,7 @@ using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
 using FeatureFlagsCo.MQ;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -29,12 +31,14 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IDistributedCache _redisCache;
         private readonly IEnvironmentService _envService;
         private readonly IAuditLogMqService _auditLogService;
+        private readonly MongoDbFeatureFlagService _mongoDbFeatureFlagService;
 
         public FeatureFlagsController(ILogger<FeatureFlagsController> logger, IGenericRepository repository,
             IFeatureFlagsService featureFlagService,
             INoSqlService noSqlDbService,
             IDistributedCache redisCache,
             IEnvironmentService envService,
+            MongoDbFeatureFlagService mongoDbFeatureFlagService,
             IAuditLogMqService auditLogService)
         {
             _logger = logger;
@@ -45,6 +49,8 @@ namespace FeatureFlags.APIs.Controllers
 
             _envService = envService;
             _auditLogService = auditLogService;
+
+            _mongoDbFeatureFlagService = mongoDbFeatureFlagService;
         }
 
 
@@ -236,6 +242,28 @@ namespace FeatureFlags.APIs.Controllers
         }
 
         #region multi variation options
+
+        [HttpGet]
+        [Route("search/{envId}")]
+        public async Task<dynamic> SearchFeatureFlags(int envId, [FromQuery] string searchText, [FromQuery] int page = 0)
+        {
+            try
+            {
+                var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+                if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
+                {
+                    return await _mongoDbFeatureFlagService.SearchActiveAsync(envId, searchText, page, 50);
+                }
+
+                return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, JsonConvert.SerializeObject(new { EnvId = envId, searchText = searchText, Page = page }));
+
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
+            }
+        }
 
         [HttpPut]
         [Route("UpdateMultiOptionSupportedFeatureFlag")]

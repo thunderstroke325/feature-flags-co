@@ -1,6 +1,7 @@
 ﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.APIs.ViewModels.Experiments;
+using FeatureFlags.APIs.ViewModels.Metrics;
 using FeatureFlagsCo.MQ;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -27,6 +28,9 @@ namespace FeatureFlags.APIs.Services
         Task<List<ExperimentResultViewModel>> GetExperimentResult(ExperimentQueryViewModel param);
 
         Task UpdateExperimentResultAsync(ExperimentResult param);
+
+        Task<List<ExperimentViewModel>> GetExperimentsByFeatureFlagIds(IEnumerable<string> featureFlagIds, bool shouldIncludeIterations);
+        Task<IEnumerable<ExperimentIteration>> GetIterationResults(int envId, List<ExperimentIterationTuple> experimentIterationTuples);
     }
 
     public class ExperimentsService : IExperimentsService
@@ -34,11 +38,13 @@ namespace FeatureFlags.APIs.Services
         private readonly IOptions<MySettings> _mySettings;
         private readonly INoSqlService _noSqlDbService;
         private readonly IInsighstMqService _insightsService;
+        private readonly MetricService _metricService;
         private readonly IExperimentStartEndMqService _experimentStartEndMqService;
 
         public ExperimentsService(
             INoSqlService noSqlDbService,
             IInsighstMqService insightsService,
+            MetricService metricService,
             IExperimentStartEndMqService experimentStartEndMqService,
             IOptions<MySettings> mySettings)
         {
@@ -46,6 +52,7 @@ namespace FeatureFlags.APIs.Services
             _insightsService = insightsService;
             _experimentStartEndMqService = experimentStartEndMqService;
             _mySettings = mySettings;
+            _metricService = metricService;
         }
 
         public async Task UpdateExperimentResultAsync(ExperimentResult param) 
@@ -61,11 +68,62 @@ namespace FeatureFlags.APIs.Services
             }
         }
 
+        public async Task<List<ExperimentViewModel>> GetExperimentsByFeatureFlagIds(IEnumerable<string> featureFlagIds, bool shouldIncludeIterations)
+        {
+            var experiments = new List<Experiment>();
+
+            foreach (var id in featureFlagIds) 
+            {
+                experiments.AddRange(await _noSqlDbService.GetExperimentByFeatureFlagAsync(id));
+            }
+
+            var metrics = (await _metricService.GetMetricsByIdsAsync(experiments.Select(ex => ex.MetricId)))
+                .Select(m => new MetricViewModel 
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    EventName = m.EventName,
+                    EventType = m.EventType,
+                    CustomEventTrackOption = m.CustomEventTrackOption
+                });
+
+            return experiments.OrderByDescending(ex => ex.CreatedAt).Select(r => {
+                ExperimentStatus status = ExperimentStatus.NotStarted;
+
+                if (r.Iterations.Count > 0) 
+                {
+                    var lastIteration = r.Iterations.Last();
+                    if (lastIteration.EndTime.HasValue)
+                    {
+                        status = ExperimentStatus.NotRecording;
+                    }
+                    else 
+                    {
+                        status = ExperimentStatus.Recording;
+                    }
+                }
+
+                var metric = metrics.FirstOrDefault(m => m.Id == r.MetricId);
+
+                return new ExperimentViewModel
+                {
+                    Id = r.Id,
+                    FeatureFlagId = r.FlagId,
+                    MetricId = r.MetricId,
+                    Metric = metric,
+                    Status = status,
+                    Iterations = shouldIncludeIterations ? r.Iterations : null,
+                    BaselineVariation = r.BaselineVariation
+                };
+            }).ToList(); 
+        }
+
         public async Task ArchiveExperiment(string experimentId)
         {
             var experiment = await _noSqlDbService.GetExperimentByIdAsync(experimentId);
             if (experiment != null)
             {
+                var metric = await _metricService.GetAsync(experiment.MetricId);
                 // If the experiment has active iteration
                 var operationTime = DateTime.UtcNow;
                 experiment.Iterations.ForEach(i =>
@@ -79,7 +137,7 @@ namespace FeatureFlags.APIs.Services
                             IterationId = i.Id,
                             StartExptTime = i.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                             EndExptTime = operationTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
-                            EventName = experiment.EventName,
+                            EventName = metric.EventName,
                             FlagId = experiment.Id,
                             BaselineVariation = experiment.BaselineVariation,
                             Variations = experiment.Variations
@@ -96,7 +154,7 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<ExperimentViewModel> CreateExperiment(ExperimentViewModel param)
         {
-            var experiment = await _noSqlDbService.GetExperimentByFeatureFlagAndEvent(param.FlagId, param.EventName);
+            var experiment = await _noSqlDbService.GetExperimentByFeatureFlagAndMetricAsync(param.FeatureFlagId, param.MetricId);
 
             if (experiment == null)
             {
@@ -104,9 +162,9 @@ namespace FeatureFlags.APIs.Services
                 experiment = new Experiment
                 {
                     EnvId = param.EnvId,
-                    EventName = param.EventName,
+                    MetricId = param.MetricId,
                     Iterations = new List<ExperimentIteration>(),
-                    FlagId = param.FlagId,
+                    FlagId = param.FeatureFlagId,
                     BaselineVariation = param.BaselineVariation,
                     Variations = param.Variations
                 };
@@ -114,7 +172,7 @@ namespace FeatureFlags.APIs.Services
                 experiment = await _noSqlDbService.CreateExperimentAsync(experiment);
             }
 
-            param.ExptId = experiment.Id;
+            param.Id = experiment.Id;
             
             return param;
         }
@@ -141,6 +199,8 @@ namespace FeatureFlags.APIs.Services
                     experiment.Iterations = new List<ExperimentIteration>();
                 }
 
+                var metric = await _metricService.GetAsync(experiment.MetricId);
+                // stop active iterations
                 experiment.Iterations.ForEach(i =>
                 {
                     if (!i.EndTime.HasValue)
@@ -149,11 +209,11 @@ namespace FeatureFlags.APIs.Services
                         var message = new ExperimentIterationMessageViewModel
                         {
                             ExptId = experiment.Id,
-                            EnvId = experiment.EnvId.ToString(),
+                            EnvId = envId.ToString(),
                             IterationId = i.Id,
                             StartExptTime = i.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                             EndExptTime = operationTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
-                            EventName = experiment.EventName,
+                            EventName = metric.EventName,
 
                             FlagId = experiment.FlagId,
                             BaselineVariation = experiment.BaselineVariation,
@@ -174,7 +234,7 @@ namespace FeatureFlags.APIs.Services
                     EnvId = envId.ToString(),
                     IterationId = iteration.Id,
                     StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
-                    EventName = experiment.EventName,
+                    EventName = metric.EventName,
                     FlagId = experiment.FlagId,
                     BaselineVariation = experiment.BaselineVariation,
                     Variations = experiment.Variations
@@ -183,6 +243,32 @@ namespace FeatureFlags.APIs.Services
                 _experimentStartEndMqService.SendMessage(message);
 
                 return iteration;
+            }
+
+            return null;
+        }
+
+        public async Task<IEnumerable<ExperimentIteration>> GetIterationResults(int envId, List<ExperimentIterationTuple> experimentIterationTuples)
+        {
+            var experiments = await _noSqlDbService.GetExperimentsByIdsAsync(experimentIterationTuples.Select(ex => ex.ExperimentId).ToList());
+
+            if (experiments != null)
+            {
+                var iterationIds = experimentIterationTuples.Select(ex => ex.IterationId).ToList();
+                return 
+                    experiments.SelectMany(ex => ex.Iterations)
+                    .Where(it => iterationIds.Contains(it.Id))
+                    .Select(it =>
+                        new ExperimentIteration 
+                        {
+                            Id = it.Id,
+                            StartTime = it.StartTime,
+                            EndTime = it.EndTime,
+                            UpdatedAt = it.UpdatedAt,
+                            Results = it.Results
+
+                        }
+                   );
             }
 
             return null;
@@ -199,6 +285,7 @@ namespace FeatureFlags.APIs.Services
                 iteration.EndTime = DateTime.UtcNow;
 
                 await _noSqlDbService.UpsertExperimentAsync(experiment);
+                var metric = await _metricService.GetAsync(experiment.MetricId);
 
                 var message = new ExperimentIterationMessageViewModel
                 {
@@ -207,7 +294,7 @@ namespace FeatureFlags.APIs.Services
                     IterationId = iteration.Id,
                     StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                     EndExptTime = iteration.EndTime.Value.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
-                    EventName = experiment.EventName,
+                    EventName = metric.EventName,
                     FlagId = experiment.FlagId,
                     BaselineVariation = experiment.BaselineVariation,
                     Variations = experiment.Variations

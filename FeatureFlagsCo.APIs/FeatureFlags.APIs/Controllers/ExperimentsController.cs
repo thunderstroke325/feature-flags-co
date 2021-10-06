@@ -1,10 +1,13 @@
 ﻿using FeatureFlags.APIs.Authentication;
+using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Experiments;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,15 +22,18 @@ namespace FeatureFlags.APIs.Controllers
         private readonly ILogger<ExperimentsController> _logger;
         private readonly IEnvironmentService _envService;
         private readonly IExperimentsService _experimentsService;
+        private readonly MongoDbFeatureFlagService _mongoDbFeatureFlagService;
 
         public ExperimentsController(
             ILogger<ExperimentsController> logger,
             IEnvironmentService envService,
+            MongoDbFeatureFlagService mongoDbFeatureFlagService,
             IExperimentsService experimentsService)
         {
             _logger = logger;
             _envService = envService;
             _experimentsService = experimentsService;
+            _mongoDbFeatureFlagService = mongoDbFeatureFlagService;
         }
 
         [HttpGet]
@@ -56,9 +62,59 @@ namespace FeatureFlags.APIs.Controllers
             return new List<ExperimentResultViewModel>();
         }
 
+        [HttpGet]
+        [Route("")]
+        public async Task<dynamic> GetExperiments([FromQuery] int envId, [FromQuery] string searchText, [FromQuery] string featureFlagId = "", [FromQuery] int page = 0)
+        {
+            try
+            {
+                var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+                if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
+                {
+                    var featureFlagIds = new List<string>();
+                    var featureFlags = new List<FeatureFlag>();
+
+                    if (!string.IsNullOrWhiteSpace(featureFlagId))
+                    {
+                        var featureFlag = await _mongoDbFeatureFlagService.GetAsync(featureFlagId);
+                        if (featureFlag != null) 
+                        {
+                            featureFlags.Add(featureFlag);
+                            featureFlagIds.Add(featureFlagId);
+                        }
+                    } 
+                    else 
+                    {
+                        featureFlags = await _mongoDbFeatureFlagService.SearchActiveAsync(envId, searchText, page, 50);
+                        featureFlagIds = featureFlags.Select(f => f.Id).ToList();
+                    }
+                    
+                    if (featureFlagIds.Any()) 
+                    {
+                        var experiments = await _experimentsService.GetExperimentsByFeatureFlagIds(featureFlagIds, !string.IsNullOrWhiteSpace(featureFlagId));
+                        experiments.ForEach(ex => {
+                            ex.FeatureFlagName = featureFlags.Find(f => f.Id == ex.FeatureFlagId)?.FF?.Name;
+                        });
+
+                        return experiments;
+                    }
+
+                    return new List<ExperimentViewModel>();
+                }
+
+                return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, JsonConvert.SerializeObject(new { EnvId = envId, searchText = searchText, Page = page }));
+
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
+            }
+        }
+
         [HttpPost]
         [Route("")]
-        public async Task<dynamic> CreateExperiment([FromBody]ExperimentViewModel param)
+        public async Task<dynamic> CreateExperiment([FromBody] ExperimentViewModel param)
         {
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
@@ -77,6 +133,20 @@ namespace FeatureFlags.APIs.Controllers
             if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
             {
                 return await _experimentsService.StartIteration(envId, experimentId);
+            }
+
+            return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+        }
+
+
+        [HttpPost]
+        [Route("{envId}")]
+        public async Task<dynamic> GetIterationResults(int envId, [FromBody]List<ExperimentIterationTuple> experimentIterationTuples)
+        {
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
+            {
+                return await _experimentsService.GetIterationResults(envId, experimentIterationTuples);
             }
 
             return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });

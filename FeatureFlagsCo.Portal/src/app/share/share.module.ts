@@ -32,9 +32,12 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { UploadDrawerComponent } from './uis/upload-drawer/upload-drawer.component';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzUploadModule } from 'ng-zorro-antd/upload';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { MetricDrawerComponent } from './uis/metric-drawer/metric-drawer.component';
+import { ExperimentDrawerComponent } from './uis/experiment-drawer/experiment-drawer.component';
 
 @NgModule({
-  declarations: [MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent],
+  declarations: [MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -59,6 +62,7 @@ import { NzUploadModule } from 'ng-zorro-antd/upload';
     NzSpinModule,
     NzRadioModule,
     NzUploadModule,
+    NzTagModule,
     ReactiveFormsModule
   ],
   exports: [
@@ -74,7 +78,9 @@ import { NzUploadModule } from 'ng-zorro-antd/upload';
     EnvDrawerComponent,
     MemberDrawerComponent,
     AccountDrawerComponent,
-    UploadDrawerComponent
+    UploadDrawerComponent,
+    MetricDrawerComponent,
+    ExperimentDrawerComponent
   ]
 })
 export class ShareModule { }

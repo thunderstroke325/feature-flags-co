@@ -1,0 +1,52 @@
+<div class="body">
+  <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
+    <nz-card style="margin-top: 20px;">
+      <div class="actions">
+        <div class="filters">
+          <div class="search-filter">
+            <input nz-input placeholder="按名字查找" [(ngModel)]="searchText" (ngModelChange)="onSearch()"/>
+          </div>
+          <div class="select-filter">
+            <nz-select [(ngModel)]="showType">
+              <nz-option nzValue="" nzLabel="展示所有 Metric"></nz-option>
+              <nz-option [nzValue]="customEventType" nzLabel="展示自定义事件的 Metric"></nz-option>
+            </nz-select>
+          </div>
+        </div>
+
+        <div nz-col nzSpan="8" class="wrap-right">
+          <button nz-button nzType="primary" (click)="onCreateOrEditClick()">
+            <i nz-icon nzType="plus" nzTheme="outline"></i>
+            添加 Metric
+          </button>
+        </div>
+      </div>
+      <nz-table #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="metricList" style="margin-top: 20px;">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>事件类型</th>
+            <th>维护人</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let data of borderedTable.data">
+            <tr>
+              <td (click)="onCreateOrEditClick(data)"><a class="title">{{data.name}}</a></td>
+              <td>
+                <nz-tag nzNoAnimation>
+                  <ng-container *ngIf="data.eventType === customEventType">
+                    自定义事件: {{ data.customEventTrackOption === customEventTrackConversion ? '转化率' : '数值' }}
+                  </ng-container>
+                </nz-tag>
+              </td>
+              <td>{{ data.maintainerName }}</td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </nz-table>
+    </nz-card>
+  </nz-spin>
+</div>
+
+<app-metric-drawer [visible]="detailViewVisible" (close)="onDetailViewClosed($event)" [metric]="currentMetric"></app-metric-drawer>

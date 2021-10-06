@@ -177,6 +177,7 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddSingleton<INoSqlService, MongoDbService>();
             services.AddSingleton<IExperimentsService, ExperimentsService>();
             services.AddSingleton<MongoDbExperimentService>();
+            services.AddSingleton<MetricService>();
 
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
             var cacheType = this.Configuration.GetSection("MySettings").GetSection("CacheType").Value;

@@ -28,7 +28,7 @@ export class NavBtnsComponent {
       }
     }
 
-    if (experimentation === 'temporary version') {
+    if (experimentation === 'temporary version' || experimentation === 'V2') {
       this.navConfig = this.navConfig.map(n => {
         return Object.assign({}, n, {
           label: n.id === 'experimentations' ? `${n.label}(公测版)` : n.label

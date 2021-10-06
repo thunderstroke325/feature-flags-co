@@ -10,7 +10,7 @@ namespace FeatureFlags.APIs.Models
     public class Experiment : MongoModelBase
     {
         public int EnvId { get; set; }
-        public string EventName { get; set; }
+        public string MetricId { get; set; }
 
         public string FlagId { get; set; }
 

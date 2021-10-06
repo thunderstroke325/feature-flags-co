@@ -1,0 +1,85 @@
+<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzWidth]="500" (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <div class="drawer-layout">
+      <form nz-form [formGroup]="metricForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
+        <h3>Metric 信息</h3>
+        <nz-form-item>
+            <nz-form-label>名称</nz-form-label>
+            <nz-form-control nzErrorTip="名称！">
+                <nz-input-group>
+                    <input type="text" nz-input formControlName="name" placeholder="名称" />
+                </nz-input-group>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>描述</nz-form-label>
+          <nz-form-control nzErrorTip="描述！">
+              <nz-input-group>
+                  <input type="text" nz-input formControlName="description" placeholder="描述" />
+              </nz-input-group>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>维护人</nz-form-label>
+          <nz-form-control nzErrorTip="维护人！">
+              <nz-input-group>
+                <nz-select
+                  nzPlaceHolder="选择维护人"
+                  nzAllowClear
+                  nzShowSearch
+                  nzServerSearch
+                  formControlName="maintainerUserId"
+                  (nzOnSearch)="onSearchMaintainer($event)"
+                >
+                  <ng-container *ngFor="let o of maintainerList">
+                    <nz-option *ngIf="!isMaintainersLoading" [nzValue]="o.userId" [nzLabel]="o.userName || o.email"></nz-option>
+                  </ng-container>
+                  <nz-option *ngIf="isMaintainersLoading" nzDisabled nzCustomContent>
+                    <i nz-icon nzType="loading" class="loading-icon"></i>
+                    数据加载中...
+                  </nz-option>
+                </nz-select>
+              </nz-input-group>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-divider></nz-divider>
+        <h3>事件相关信息</h3>
+        <nz-form-item>
+          <nz-form-label>事件类型</nz-form-label>
+          <nz-form-control nzErrorTip="事件类型！">
+            <nz-input-group>
+              <div class="">
+                <nz-select formControlName="eventType">
+                  <nz-option [nzValue]="customEventType" nzLabel="Custom - 自定义事件"></nz-option>
+                  <!-- <nz-option [nzValue]="pageViewEventType" nzLabel="Page view - 页面展示"></nz-option>
+                  <nz-option [nzValue]="clickEventType" nzLabel="Click - 点击事件"></nz-option> -->
+                </nz-select>
+              </div>
+            </nz-input-group>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control nzErrorTip="事件选项！">
+            <nz-radio-group formControlName="customEventTrackOption" class="custom-event-option">
+              <label nz-radio [nzValue]="customEventTrackConversion">转化率</label>
+              <!-- <label nz-radio [nzValue]="customEventTrackNumeric">数值</label> -->
+            </nz-radio-group>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>事件名称</nz-form-label>
+          <nz-form-control nzErrorTip="事件名称！">
+              <nz-input-group>
+                  <input type="text" nz-input formControlName="eventName" placeholder="事件名称" />
+              </nz-input-group>
+          </nz-form-control>
+          在代码中埋点时使用该事件名称。
+        </nz-form-item>
+
+        <button nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">{{isEditing
+            ? '更新' : '创建'}}</button>
+      </form>
+    </div>
+  </ng-container>
+</nz-drawer>
+

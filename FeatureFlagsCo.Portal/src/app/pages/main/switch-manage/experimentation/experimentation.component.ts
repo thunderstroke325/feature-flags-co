@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FfcAngularSdkService } from 'ffc-angular-sdk';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -9,13 +9,15 @@ import { differenceInCalendarDays } from 'date-fns';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { environment } from './../../../../../environments/environment';
+import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment } from '../types/experimentations';
+import * as moment from 'moment';
 
 @Component({
   selector: 'experimentation',
   templateUrl: './experimentation.component.html',
   styleUrls: ['./experimentation.component.less']
 })
-export class ExperimentationComponent implements OnInit {
+export class ExperimentationComponent implements OnInit, OnDestroy {
 
   featureFlagId: string;
   currentVariationOptions: IVariationOption[] = [];
@@ -25,6 +27,10 @@ export class ExperimentationComponent implements OnInit {
 
   hasInvalidVariation: boolean = false;
   hasWinnerVariation: boolean = false;
+
+  onGoingExperiments: IExperiment[] = [];
+  refreshIntervalId;
+  refreshInterval: number = 1000 * 60; // 1 minute
   constructor(
     private route: ActivatedRoute,
     private switchServe: SwitchService,
@@ -34,17 +40,42 @@ export class ExperimentationComponent implements OnInit {
   ) {
     this.experimentation = environment.name === 'Standalone' ? 'temporary version' : this.ffcAngularSdkService.variation('experimentation');
 
-    this.route.data.pipe(map(res => res.switchInfo))
-    .subscribe((result: CSwitchParams) => {
+    this.route.data.pipe(map(res => res.switchInfo)).subscribe((result: CSwitchParams) => {
       const featureDetail = new CSwitchParams(result);
       this.currentVariationOptions = featureDetail.getVariationOptions();
     })
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.refreshIntervalId);
   }
 
   ngOnInit(): void {
     this.featureFlagId = this.route.snapshot.paramMap.get('id');
     if(this.switchServe.envId) {
       this.initData();
+
+      this.refreshIntervalId = setInterval(() => {
+        const activeExperimentIteration = this.onGoingExperiments.map(expt => {
+          return {
+            experimentId: expt.id,
+            iterationId: expt.iterations.find(it => it.endTime === null)?.id
+          }
+        }).filter(expt => !!expt.iterationId);
+
+        this.experimentService.getIterationResults(this.switchServe.envId, activeExperimentIteration).subscribe(res => {
+          if (res && res.length > 0) {
+            this.onGoingExperiments.forEach(expt => {
+              const iteration = res.find(r => r.id === expt.selectedIteration.id);
+              if (iteration) {
+                expt.selectedIteration.results = this.processIteration(iteration, expt.baselineVariation).results;
+                expt.selectedIteration.updatedAt = iteration.updatedAt;
+                expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
+              }
+            });
+          }
+        });
+      }, this.refreshInterval);
     }
   }
 
@@ -65,7 +96,29 @@ export class ExperimentationComponent implements OnInit {
   dateRange:Date[] = [];
   lastSearchText = null;
 
+  experimentList: IExperiment[] = [];
   private initData() {
+    this.experimentService.getExperiments({envId: this.switchServe.envId, featureFlagId: this.featureFlagId}).subscribe(experiments => {
+      if (experiments) {
+        this.experimentList = experiments.map(experiment => {
+          const expt = Object.assign({}, experiment);
+
+          if (expt.iterations.length > 0) {
+            expt.iterations = expt.iterations.map(ex => this.processIteration(ex, expt.baselineVariation));
+            expt.selectedIteration = expt.iterations[expt.iterations.length -1];
+            if (expt.selectedIteration.updatedAt) {
+              expt.selectedIteration.updatedAtStr = moment(expt.selectedIteration.updatedAt).format('YYYY-MM-DD HH:mm');
+            }
+          }
+
+          expt.isLoading = false;
+          return expt;
+        });
+
+        this.onGoingExperiments = [...this.experimentList.filter(expt => expt.status === ExperimentStatus.Recording)];
+      }
+    });
+
     this.eventInputs.pipe(
       debounceTime(300),
       distinctUntilChanged()
@@ -88,6 +141,83 @@ export class ExperimentationComponent implements OnInit {
     });
   }
 
+  onStartIterationClick(expt: IExperiment) {
+    this.experimentService.startIteration(this.switchServe.envId, expt.id).subscribe(res => {
+      if (res) {
+        expt.iterations.push(this.processIteration(res, expt.baselineVariation));
+        expt.selectedIteration = expt.iterations[expt.iterations.length -1];
+        expt.status = ExperimentStatus.Recording;
+
+        this.onGoingExperiments = [...this.onGoingExperiments, expt];
+      }
+    });
+  }
+
+  onStopIterationClick(expt: IExperiment) {
+    this.experimentService.stopIteration(this.switchServe.envId, expt.id, expt.selectedIteration.id).subscribe(res => {
+      if (res) {
+        expt.selectedIteration.endTime = res.endTime;
+        expt.selectedIteration.dateTimeInterval = `${moment(expt.selectedIteration.startTime).format('YYYY-MM-DD HH:mm')} - ${moment(expt.selectedIteration.endTime).format('YYYY-MM-DD HH:mm')}`
+        expt.status = ExperimentStatus.NotRecording;
+
+        const idx = this.onGoingExperiments.findIndex(ex => ex.id === expt.id);
+        if (idx > -1) {
+          this.onGoingExperiments.splice(idx, 1);
+        }
+      }
+    });
+  }
+
+  onReloadIterationResultsClick(expt: IExperiment) {
+    expt.isLoading  = true;
+    this.experimentService.getIterationResults(this.switchServe.envId, [{ experimentId: expt.id, iterationId: expt.selectedIteration.id}]).subscribe(res => {
+      if (res) {
+        expt.selectedIteration.results = this.processIteration(res[0], expt.baselineVariation).results;
+        expt.selectedIteration.updatedAt = res[0].updatedAt;
+        expt.selectedIteration.updatedAtStr = moment(res[0].updatedAt).format('YYYY-MM-DD HH:mm');
+      }
+
+      expt.isLoading  = false;
+    }, _ => {
+      //this.message.error("数据加载失败，请重试!");
+      expt.isLoading  = false;
+    });
+  }
+
+  private processIteration(iteration: any, baselineVariation: string) {
+    const iterationResults = this.currentVariationOptions.map((option) => {
+        const found = iteration.results.find(r => r.variation == option.localId);
+
+        return !found ? this.createEmptyIterationResult(option, baselineVariation) : Object.assign({}, found, {
+          variationValue: option.variationValue,
+          pValue: found.pValue === -1 ? '--' : found.pValue,
+          isEmpty: false,
+        })
+      });
+
+    const hasInvalidVariation = iterationResults.findIndex(e => e.isInvalid && !e.isBaseline) > -1;
+    const hasWinnerVariation = iterationResults.findIndex(e => e.isWinner) > -1;
+
+    const iterationEndTime = iteration.endTime || new Date();
+    return Object.assign({}, iteration, {
+      hasInvalidVariation,
+      hasWinnerVariation,
+      results: iterationResults,
+      dateTimeInterval: `${moment(iteration.startTime).format('YYYY-MM-DD HH:mm')} - ${iteration.endTime? moment(iteration.endTime).format('YYYY-MM-DD HH:mm') : moment(new Date()).format('YYYY-MM-DD HH:mm') + ' (现在)'}`
+    });
+  }
+
+  private createEmptyIterationResult(option: IVariationOption, baselineVariation: string) {
+    return {
+      isEmpty: true,
+      variationValue: option.variationValue,
+      isBaseline: baselineVariation === `${option.localId}`
+     };
+  }
+
+  customEventType: EventType = EventType.Custom;
+  customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
+  /************************** above are for new experiment ****************************************/
   onDateRangeChange(result: Date[]): void {
     this.dateRange = [...result];
   }
@@ -159,77 +289,4 @@ export class ExperimentationComponent implements OnInit {
       isBaseline: this.selectedBaseline.localId === option.localId
      };
   }
-
-  dataSet = [
-    {
-        "changeToBaseline": 0.19,
-        "confidenceInterval": [
-            0.61,
-            0.90
-        ],
-        "conversion": 502,
-        "conversionRate": 0.86,
-        "isInvalid": false,
-        "isWinner": true,
-        "pValue": 0.46,
-        "uniqueUsers": 601,
-        "variation": "1"
-    },
-    {
-        "changeToBaseline": 0,
-        "confidenceInterval": [
-            0,
-            1
-        ],
-        "conversion": 57,
-        "conversionRate": 0.67,
-        "isInvalid": false,
-        "isWinner": false,
-        "pValue": 0,
-        "uniqueUsers": 302,
-        "variation": "2"
-    },
-    {
-        "changeToBaseline": 0,
-        "confidenceInterval": [
-            0.60,
-            0.82
-        ],
-        "conversion": 100,
-        "conversionRate": 0.67,
-        "isInvalid": false,
-        "isWinner": false,
-        "pValue": 0,
-        "uniqueUsers": 500,
-        "variation": "Blue"
-    },
-    {
-        "changeToBaseline": 0,
-        "confidenceInterval": [
-            0.60,
-            0.82
-        ],
-        "conversion": 100,
-        "conversionRate": 0.67,
-        "isInvalid": false,
-        "isWinner": false,
-        "pValue": 0,
-        "uniqueUsers": 500,
-        "variation": "Yellow"
-    },
-    {
-        "changeToBaseline": 0,
-        "confidenceInterval": [
-            0.60,
-            0.82
-        ],
-        "conversion": 100,
-        "conversionRate": 0.67,
-        "isInvalid": false,
-        "isWinner": false,
-        "pValue": 0,
-        "uniqueUsers": 500,
-        "variation": "Purple"
-    }
-  ]
 }

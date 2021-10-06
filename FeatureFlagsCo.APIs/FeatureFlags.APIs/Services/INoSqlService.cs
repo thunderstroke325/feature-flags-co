@@ -14,9 +14,11 @@ namespace FeatureFlags.APIs.Services
     public interface INoSqlService
     {
         #region experiments
-
+        Task<List<Experiment>> GetExperimentsByIdsAsync(List<string> featureFlagIds);
         Task<Experiment> GetExperimentByIdAsync(string exptId);
-        Task<Experiment> GetExperimentByFeatureFlagAndEvent(string featureFlagId, string eventName);
+        Task<Experiment> GetExperimentByFeatureFlagAndMetricAsync(string featureFlagId, string metricId);
+        Task<List<Experiment>> GetExperimentByFeatureFlagAsync(string featureFlagId);
+
         Task<Experiment> UpsertExperimentAsync(Experiment item);
         Task<Experiment> CreateExperimentAsync(Experiment item);
         Task<Experiment> ArchiveExperimentAsync(string exptId, DateTime stopTime);

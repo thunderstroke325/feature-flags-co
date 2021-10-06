@@ -1,0 +1,67 @@
+.drawer-layout {
+    height: 100%;
+
+    .ant-select {
+      width: 100%;
+
+      .ant-tag.status {
+        border-radius: 10px;
+        float: right;
+        margin-top: 4px;
+
+        &.on {
+          color: #389e0d;
+          background: #f6ffed;
+          border-color: #b7eb8f;
+        }
+        &.off {
+          color: #cf1322;
+          background: #fff1f0;
+          border-color: #ffa39e
+        }
+      }
+    }
+
+    .custom-event-option{
+      display: flex;
+      justify-content: flex-start;
+
+      label:first-child {
+        margin-right: 50px;
+      }
+    }
+}
+
+::ng-deep {
+  .ant-select-item-option-content {
+    display: flex !important;
+    justify-content: space-between !important;
+
+    .ant-tag.status {
+      border-radius: 10px;
+
+      &.on {
+        color: #389e0d;
+        background: #f6ffed;
+        border-color: #b7eb8f;
+      }
+      &.off {
+        color: #cf1322;
+        background: #fff1f0;
+        border-color: #ffa39e
+      }
+    }
+
+  }
+}
+
+.layout-form {
+    padding-bottom: 20px;
+    // border-bottom: 1px solid rgb(240, 240, 240);
+}
+
+.divide-line {
+    height: 1px;
+    background-color: rgb(240, 240, 240);
+    margin: 20px 0;
+}

@@ -112,15 +112,20 @@ export class MainComponent implements OnInit, OnDestroy {
         level: 1,
         line: true
       }, {
-      //   level: 1,
-      //   title: 'Project 管理',
-      //   path: '/account-manage'
-      // }, {
         level: 1,
         title: '账户管理',
         path: '/account-settings'
       }
     ];
+
+    if (this.ffcAngularSdkService.variation('experimentation') === 'V2') {
+      const experimentationItem = {
+        level: 1,
+        title: '数据实验',
+        path: '/experiments'
+      }
+      this.menus.splice(3, 0, experimentationItem);
+    }
   }
 
   // 跳转路由
