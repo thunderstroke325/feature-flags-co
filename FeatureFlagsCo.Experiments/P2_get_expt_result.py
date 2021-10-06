@@ -116,8 +116,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                'changeToBaseline': -1,
                                'confidenceInterval': [-1, -1],
                                'pValue': -1,
-                               'isBaseline': True if
-                               var_baseline == var else False,
+                               'isBaseline': True if var_baseline == var else False,
                                'isWinner': False,
                                'isInvalid': True
                                })
@@ -145,8 +144,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                            'changeToBaseline': -1,
                                            'confidenceInterval': confidenceInterval,
                                            'pValue': -1,
-                                           'isBaseline': True if
-                                           var_baseline == item else False,
+                                           'isBaseline': True if var_baseline == item else False,
                                            'isWinner': False,
                                            'isInvalid': True
                                            })
@@ -190,8 +188,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                            'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
                                            'confidenceInterval': confidenceInterval,
                                            'pValue': -1 if math.isnan(pValue) else pValue,
-                                           'isBaseline': True if
-                                           var_baseline == item else False,
+                                           'isBaseline': True if var_baseline == item else False,
                                            'isWinner': False,
                                            'isInvalid': True if (pValue < 0.95)
                                            or math.isnan(pValue) else False
@@ -201,11 +198,10 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                            'conversion': 0,
                                            'uniqueUsers': 0,
                                            'conversionRate':   0,
-                                           'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
+                                           'changeToBaseline': -1,
                                            'confidenceInterval': [-1, -1],
                                            'pValue': -1,
-                                           'isBaseline': True if
-                                           var_baseline == item else False,
+                                           'isBaseline': True if var_baseline == item else False,
                                            'isWinner': False,
                                            'isInvalid': True
                                            })
@@ -341,18 +337,21 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         expt_id = body
         value = self.redis_get(expt_id)
         fmt = '%Y-%m-%dT%H:%M:%S.%f'
-        # Create or Get last_exec_time for each expt_id
-        dict_from_redis = self.redis_get('dict_expt_last_exec_time')
-        dict_expt_last_exec_time = dict_from_redis if dict_from_redis else {}
-        last_exec_time = dict_expt_last_exec_time.get(expt_id, None)
-        if not last_exec_time:
-            last_exec_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
-        interval = datetime.now() - datetime.strptime(last_exec_time, fmt)
-        if interval.total_seconds() < self._wait_timeout:
-            sleep(self._wait_timeout - interval.total_seconds())
-        dict_expt_last_exec_time[expt_id] = datetime.now().strftime(
-            "%Y-%m-%dT%H:%M:%S.%f")
-        self.redis_set('dict_expt_last_exec_time', dict_expt_last_exec_time)
+        if expt_id == self._last_expt_id:
+            # Create or Get last_exec_time for each expt_id
+            dict_from_redis = self.redis_get('dict_expt_last_exec_time')
+            dict_expt_last_exec_time = dict_from_redis if dict_from_redis else {}
+            last_exec_time = dict_expt_last_exec_time.get(expt_id, None)
+            if not last_exec_time:
+                last_exec_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
+            interval = datetime.now() - datetime.strptime(last_exec_time, fmt)
+            if interval.total_seconds() < self._wait_timeout:
+                sleep(self._wait_timeout - interval.total_seconds())
+            dict_expt_last_exec_time[expt_id] = datetime.now().strftime(
+                "%Y-%m-%dT%H:%M:%S.%f")
+            self.redis_set('dict_expt_last_exec_time',
+                           dict_expt_last_exec_time)
+        self._last_expt_id = expt_id
         # If experiment info exist
         if value:
             logger.info("########p2 gets %r#########" % value)
