@@ -9,7 +9,18 @@
   <ng-container>
     <div class="detail-body" name="detail" *ngIf="featureFlagId">
       <div *ngIf="experimentation==='V2'">
-        <nz-spin [nzSpinning]="isLoadingResult" nzTip="数据加载中...">
+        <nz-empty *ngIf="!isLoadingExperiments && experimentList.length === 0"
+        [nzNotFoundContent]="contentTpl"
+        >
+          <ng-template #contentTpl>
+            <h2>
+              此开关暂时还没有实验，<a style="color: green;text-decoration: underline;" [routerLink]="['/experiments']">
+                请点击此处前往数据实验页面创建实验。
+              </a>
+            </h2>
+          </ng-template>
+        </nz-empty>
+        <nz-spin [nzSpinning]="isLoadingExperiments" nzTip="数据加载中..." style="margin-top:30px">
           <nz-card class="experiment" *ngFor="let experiment of experimentList" style="margin-top: 20px;">
             <div class="head">
               <div class="first-line">

@@ -101,7 +101,9 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   lastSearchText = null;
 
   experimentList: IExperiment[] = [];
+  isLoadingExperiments = false;
   private initData() {
+    this.isLoadingExperiments = true;
     this.experimentService.getExperiments({envId: this.switchServe.envId, featureFlagId: this.featureFlagId}).subscribe(experiments => {
       if (experiments) {
         this.experimentList = experiments.map(experiment => {
@@ -121,6 +123,9 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
         this.onGoingExperiments = [...this.experimentList.filter(expt => expt.status === ExperimentStatus.Recording)];
       }
+      this.isLoadingExperiments = false;
+    }, _ => {
+      this.isLoadingExperiments = false;
     });
 
     this.eventInputs.pipe(

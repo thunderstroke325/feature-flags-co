@@ -69,9 +69,9 @@ export class MetricsComponent implements OnInit, OnDestroy {
         if(result) {
           this.metricList = result;
           this.setMaintainerNames();
+        } else {
+          this.isLoading = false;
         }
-
-        this.isLoading = false;
       }, _ => {
         this.message.error("数据加载失败，请重试!");
         this.isLoading = false;
@@ -98,7 +98,12 @@ export class MetricsComponent implements OnInit, OnDestroy {
         this.metricList = this.metricList.map(m => {
           return Object.assign({}, m, { maintainerName: result.find(r => r.userId === m.maintainerUserId)?.userName});
         });
+        this.isLoading = false;
+      }, _ => {
+        this.isLoading = false;
       });
+    } else {
+      this.isLoading = false;
     }
   }
 
