@@ -9,7 +9,12 @@ namespace FeatureFlags.APIs.Services
 {
     public class MongoDbExperimentService : MongoCollectionServiceBase<Experiment>
     {
-        public MongoDbExperimentService(IMongoDbSettings settings) : base(settings) { }
+        public MongoDbExperimentService(IMongoDbSettings settings) : base(settings) 
+        {
+            // Create index on updatedAt
+            var indexKeysDefinition = Builders<Experiment>.IndexKeys.Descending(m => m.CreatedAt);
+            Task.Run(() => _collection.Indexes.CreateOneAsync(new CreateIndexModel<Experiment>(indexKeysDefinition))).Wait();
+        }
 
         public async Task<List<Experiment>> GetByIdsAsync(List<string> featureFlagIds)
         {

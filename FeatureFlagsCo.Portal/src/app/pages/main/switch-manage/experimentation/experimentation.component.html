@@ -57,7 +57,7 @@
               </div>
             </div>
             <div *ngIf="experiment.status === 1" class="empty-experiment">
-              <button nz-button nzType="primary" (click)="onStartExperimentClick(experiment)" [nzLoading]="isLoadingTwo">
+              <button nz-button nzType="primary" (click)="onStartIterationClick(experiment)" [nzLoading]="isLoadingTwo">
                 <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i>
                 开始实验
               </button>

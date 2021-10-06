@@ -63,18 +63,20 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
           }
         }).filter(expt => !!expt.iterationId);
 
-        this.experimentService.getIterationResults(this.switchServe.envId, activeExperimentIteration).subscribe(res => {
-          if (res && res.length > 0) {
-            this.onGoingExperiments.forEach(expt => {
-              const iteration = res.find(r => r.id === expt.selectedIteration.id);
-              if (iteration) {
-                expt.selectedIteration.results = this.processIteration(iteration, expt.baselineVariation).results;
-                expt.selectedIteration.updatedAt = iteration.updatedAt;
-                expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
-              }
-            });
-          }
-        });
+        if (activeExperimentIteration.length > 0) {
+          this.experimentService.getIterationResults(this.switchServe.envId, activeExperimentIteration).subscribe(res => {
+            if (res && res.length > 0) {
+              this.onGoingExperiments.forEach(expt => {
+                const iteration = res.find(r => r.id === expt.selectedIteration.id);
+                if (iteration) {
+                  expt.selectedIteration.results = this.processIteration(iteration, expt.baselineVariation).results;
+                  expt.selectedIteration.updatedAt = iteration.updatedAt;
+                  expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
+                }
+              });
+            }
+          });
+        }
       }, this.refreshInterval);
     }
   }
