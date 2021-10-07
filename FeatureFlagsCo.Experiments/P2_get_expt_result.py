@@ -151,7 +151,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                         else:
                             output.append({'variation': item,
                                            'conversion': 0,
-                                           'uniqueUsers': 0,
+                                           'uniqueUsers': dict_var_occurence[item],
                                            'conversionRate':   0,
                                            'changeToBaseline': -1,
                                            'confidenceInterval': [-1, -1],
@@ -196,7 +196,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                         else:
                             output.append({'variation': item,
                                            'conversion': 0,
-                                           'uniqueUsers': 0,
+                                           'uniqueUsers': dict_var_occurence[item],
                                            'conversionRate':   0,
                                            'changeToBaseline': -1,
                                            'confidenceInterval': [-1, -1],
