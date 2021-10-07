@@ -85,8 +85,13 @@ export class OverviewComponent implements OnInit, OnDestroy {
     this.detailViewVisible = false;
 
     if (data.data && data.data.id) {
-      const experiment = Object.assign({}, data.data, { statusName: this.getStatusName(data.data.status)})
-      this.experimentList = [experiment, ...this.experimentList];
+      if (!this.experimentList.find(expt => expt.id === data.data.id)) {
+        const experiment = Object.assign({}, data.data, { statusName: this.getStatusName(data.data.status)})
+        this.experimentList = [experiment, ...this.experimentList];
+        this.message.success('创建成功！');
+      } else {
+        this.message.warning("相同的实验已经存在");
+      }
     }
   }
 

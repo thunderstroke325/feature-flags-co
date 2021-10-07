@@ -173,6 +173,7 @@ namespace FeatureFlags.APIs.Services
             }
 
             param.Id = experiment.Id;
+            param.Status = ExperimentStatus.NotStarted;
             
             return param;
         }

@@ -159,8 +159,9 @@ export class ExperimentDrawerComponent implements OnInit {
       .subscribe(
         res => {
           this.isLoading = false;
+          res.metric = this.metricList.find(m => m.id === res.metricId);
+          res.featureFlagName = featureFlag.ff.name;
           this.close.emit({isEditing: false, data: res});
-          this.message.success('创建成功！');
         },
         err => {
           this.message.error('发生错误，请重试！');
