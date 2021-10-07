@@ -177,5 +177,18 @@ namespace FeatureFlags.APIs.Controllers
 
             return;
         }
+
+        [HttpDelete]
+        [Route("{envId}/{experimentId}/data")]
+        public async Task ArchiveExperimentData(int envId, string experimentId)
+        {
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
+            {
+                await _experimentsService.ArchiveExperimentData(experimentId);
+            }
+
+            return;
+        }
     }
 }

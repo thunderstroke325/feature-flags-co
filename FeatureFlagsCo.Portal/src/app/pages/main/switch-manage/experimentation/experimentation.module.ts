@@ -16,7 +16,8 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 
 @NgModule({
   declarations: [ExperimentationComponent, PercentagePipe],
@@ -33,6 +34,8 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
     NzSpinModule,
     NzToolTipModule,
     NzTagModule,
+    NzPopconfirmModule,
+    NzDropDownModule,
     ComponentsModule,
     ExperimentationRoutingModule
   ]

@@ -72,4 +72,14 @@ export class ExperimentService {
     const url = this.baseUrl + `/${envId}`;
     return this.http.post<IExperimentIteration[]>(url, params);
   }
+
+  archiveExperiment(envId: number, experimentId: string): Observable<any> {
+    const url = this.baseUrl + `/${envId}/${experimentId}`;
+    return this.http.delete(url);
+  }
+
+  archiveExperimentData(envId: number, experimentId: string): Observable<any> {
+    const url = this.baseUrl + `/${envId}/${experimentId}/data`;
+    return this.http.delete(url);
+  }
 }

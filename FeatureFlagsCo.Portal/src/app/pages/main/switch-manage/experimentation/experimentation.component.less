@@ -41,6 +41,17 @@
               border-radius: 5px;
             }
 
+            .right {
+              display: flex;
+              justify-content: flex-end;
+
+              .options {
+                border-radius: 19px;
+                font-weight: 700;
+                margin-left: 10px;
+              }
+            }
+
             .anticon.status {
               &.on-going {
                 color: #8EDABA;
@@ -56,10 +67,13 @@
           }
 
           .third-line {
+            display: flex;
+            justify-content: space-between;
             margin-top: 15px;
           }
         }
         .empty-experiment {
+          margin-top: 20px;
           background-color: #DDDCEB;
           height: 200px;
           padding-top: 90px;
@@ -160,6 +174,23 @@
       .BoxChart-box--median {
         background-color:rgb(248, 248, 248);height: 1.25rem;position: absolute;transform: translate(-50%);width: .2rem;
       }
+  }
+}
+
+::ng-deep {
+  .ant-dropdown-menu {
+    li {
+      padding: 10px 15px;
+
+      .title {
+        font-weight: 800;
+        font-size: 15px;
+      }
+      .subtitle {
+        font-size: 12px;
+        margin-top: 5px;
+      }
+    }
   }
 }
 

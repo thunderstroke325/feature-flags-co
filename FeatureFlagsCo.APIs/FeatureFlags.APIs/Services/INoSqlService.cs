@@ -22,6 +22,8 @@ namespace FeatureFlags.APIs.Services
         Task<Experiment> UpsertExperimentAsync(Experiment item);
         Task<Experiment> CreateExperimentAsync(Experiment item);
         Task<Experiment> ArchiveExperimentAsync(string exptId, DateTime stopTime);
+        Task<Experiment> ArchiveExperimentDataAsync(string exptId);
+
         #endregion
 
         #region approval

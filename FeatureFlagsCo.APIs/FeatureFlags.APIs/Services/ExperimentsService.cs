@@ -18,6 +18,7 @@ namespace FeatureFlags.APIs.Services
     public interface IExperimentsService
     {
         Task ArchiveExperiment(string experimentId);
+        Task ArchiveExperimentData(string experimentId);
         Task<ExperimentViewModel> CreateExperiment(ExperimentViewModel param);
         Task<ExperimentIteration> StartIteration(int envId, string experimentId);
         Task<ExperimentIteration> StopIteration(int envId, string exptId, string iterationId);
@@ -89,8 +90,9 @@ namespace FeatureFlags.APIs.Services
 
             return experiments.OrderByDescending(ex => ex.CreatedAt).Select(r => {
                 ExperimentStatus status = ExperimentStatus.NotStarted;
+                var iterations = r.Iterations.Where(it => !it.IsArvhived).ToList();
 
-                if (r.Iterations.Count > 0) 
+                if (iterations.Count > 0) 
                 {
                     var lastIteration = r.Iterations.Last();
                     if (lastIteration.EndTime.HasValue)
@@ -112,7 +114,7 @@ namespace FeatureFlags.APIs.Services
                     MetricId = r.MetricId,
                     Metric = metric,
                     Status = status,
-                    Iterations = shouldIncludeIterations ? r.Iterations : null,
+                    Iterations = shouldIncludeIterations ? iterations : null,
                     BaselineVariation = r.BaselineVariation
                 };
             }).ToList(); 
@@ -149,6 +151,40 @@ namespace FeatureFlags.APIs.Services
 
 
                 await _noSqlDbService.ArchiveExperimentAsync(experimentId, operationTime);
+            }
+        }
+
+        public async Task ArchiveExperimentData(string experimentId)
+        {
+            var experiment = await _noSqlDbService.GetExperimentByIdAsync(experimentId);
+            if (experiment != null)
+            {
+                var metric = await _metricService.GetAsync(experiment.MetricId);
+                // If the experiment has active iteration
+                var operationTime = DateTime.UtcNow;
+                experiment.Iterations.ForEach(i =>
+                {
+                    if (!i.EndTime.HasValue)
+                    {
+                        var message = new ExperimentIterationMessageViewModel
+                        {
+                            ExptId = experiment.Id,
+                            EnvId = experiment.EnvId.ToString(),
+                            IterationId = i.Id,
+                            StartExptTime = i.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
+                            EndExptTime = operationTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
+                            EventName = metric.EventName,
+                            FlagId = experiment.Id,
+                            BaselineVariation = experiment.BaselineVariation,
+                            Variations = experiment.Variations
+                        };
+
+                        _experimentStartEndMqService.SendMessage(message);
+                    }
+                });
+
+
+                await _noSqlDbService.ArchiveExperimentDataAsync(experimentId);
             }
         }
 
@@ -258,7 +294,7 @@ namespace FeatureFlags.APIs.Services
                 var iterationIds = experimentIterationTuples.Select(ex => ex.IterationId).ToList();
                 return 
                     experiments.SelectMany(ex => ex.Iterations)
-                    .Where(it => iterationIds.Contains(it.Id))
+                    .Where(it => !it.IsArvhived && iterationIds.Contains(it.Id))
                     .Select(it =>
                         new ExperimentIteration 
                         {

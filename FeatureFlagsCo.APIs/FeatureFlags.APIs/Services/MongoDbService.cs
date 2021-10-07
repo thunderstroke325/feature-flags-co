@@ -95,6 +95,20 @@ namespace FeatureFlags.APIs.Services
             return null;
         }
 
+        public async Task<Experiment> ArchiveExperimentDataAsync(string exptId)
+        {
+            var experiment = await _mongoDbExperimentService.GetAsync(exptId);
+            if (experiment != null)
+            {
+                experiment.UpdatedAt = DateTime.UtcNow;
+                experiment.Iterations.ForEach(it => it.IsArvhived = true);
+                await _mongoDbExperimentService.UpsertItemAsync(experiment);
+                return experiment;
+            }
+
+            return null;
+        }
+
         #endregion
 
 

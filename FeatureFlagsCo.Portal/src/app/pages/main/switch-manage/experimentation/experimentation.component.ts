@@ -30,7 +30,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   onGoingExperiments: IExperiment[] = [];
   refreshIntervalId;
-  refreshInterval: number = 1000 * 60; // 1 minute
+  refreshInterval: number = 1000 * 30; // 1 minute
   constructor(
     private route: ActivatedRoute,
     private switchServe: SwitchService,
@@ -125,6 +125,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       }
       this.isLoadingExperiments = false;
     }, _ => {
+      this.message.error("数据加载失败，请重试!");
       this.isLoadingExperiments = false;
     });
 
@@ -151,6 +152,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   onStartIterationClick(expt: IExperiment) {
+    expt.isLoading  = true;
     this.experimentService.startIteration(this.switchServe.envId, expt.id).subscribe(res => {
       if (res) {
         expt.iterations.push(this.processIteration(res, expt.baselineVariation));
@@ -159,10 +161,15 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
         this.onGoingExperiments = [...this.onGoingExperiments, expt];
       }
+      expt.isLoading  = false;
+    }, _ => {
+      this.message.error("操作失败，请重试!");
+      expt.isLoading  = false;
     });
   }
 
   onStopIterationClick(expt: IExperiment) {
+    expt.isLoading  = true;
     this.experimentService.stopIteration(this.switchServe.envId, expt.id, expt.selectedIteration.id).subscribe(res => {
       if (res) {
         expt.selectedIteration.endTime = res.endTime;
@@ -174,6 +181,11 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         //   this.onGoingExperiments.splice(idx, 1);
         // }
       }
+
+      expt.isLoading  = false;
+    }, _ => {
+      this.message.error("操作失败，请重试!");
+      expt.isLoading  = false;
     });
   }
 
@@ -191,6 +203,30 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       expt.isLoading  = false;
     }, _ => {
       //this.message.error("数据加载失败，请重试!");
+      expt.isLoading  = false;
+    });
+  }
+
+  onDeleteExptClick(expt: IExperiment) {
+    expt.isLoading  = true;
+    this.experimentService.archiveExperiment(this.switchServe.envId, expt.id).subscribe(res => {
+      this.experimentList = this.experimentList.filter(ex => ex.id !== expt.id);
+      expt.isLoading  = false;
+    }, _ => {
+      this.message.error("操作失败，请重试!");
+      expt.isLoading  = false;
+    });
+  }
+
+  onDeleteExptDataClick(expt: IExperiment) {
+    expt.isLoading  = true;
+    this.experimentService.archiveExperimentData(this.switchServe.envId, expt.id).subscribe(res => {
+      expt.selectedIteration = null;
+      expt.iterations = [];
+      expt.status = ExperimentStatus.NotStarted;
+      expt.isLoading  = false;
+    }, _ => {
+      this.message.error("操作失败，请重试!");
       expt.isLoading  = false;
     });
   }
@@ -224,6 +260,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     return {
       isEmpty: true,
       variationValue: option.variationValue,
+      confidenceInterval: [-1, -1],
       isBaseline: baselineVariation === `${option.localId}`
      };
   }
