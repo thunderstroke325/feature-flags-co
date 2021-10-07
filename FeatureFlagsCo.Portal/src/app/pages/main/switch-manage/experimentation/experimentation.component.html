@@ -34,7 +34,7 @@
                     </nz-tag>
                   </div>
                   <div *ngIf="experiment.status === 3">
-                    <span *ngIf="experiment?.selectedIteration?.updatedAtStr?.length > 0">结果最后更新于： {{updatedAtStr}}</span>
+                    <span style="margin-right:10px" *ngIf="experiment?.selectedIteration?.updatedAtStr?.length > 0">结果最后更新于： {{experiment?.selectedIteration?.updatedAtStr}}</span>
                     <button nz-button nzType="default" (click)="onReloadIterationResultsClick(experiment)">
                       <i *ngIf="!experiment.isLoading" nz-icon nzType="reload" nzTheme="outline"></i>
                       <i *ngIf="experiment.isLoading" nz-icon [nzType]="'sync'" [nzSpin]="true"></i>
