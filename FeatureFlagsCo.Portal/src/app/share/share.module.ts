@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HeaderComponent } from './uis/header/header.component';
 import { MenuComponent } from './uis/menu/menu.component';
 import { OverlayModule } from '@angular/cdk/overlay';
 
@@ -37,7 +38,7 @@ import { MetricDrawerComponent } from './uis/metric-drawer/metric-drawer.compone
 import { ExperimentDrawerComponent } from './uis/experiment-drawer/experiment-drawer.component';
 
 @NgModule({
-  declarations: [MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent],
+  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -67,6 +68,7 @@ import { ExperimentDrawerComponent } from './uis/experiment-drawer/experiment-dr
   ],
   exports: [
     CommonModule,
+    HeaderComponent,
     MenuComponent,
     ReactiveFormsModule,
     FormsModule,

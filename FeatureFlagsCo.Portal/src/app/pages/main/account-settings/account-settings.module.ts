@@ -22,7 +22,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';;
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { ShareModule } from 'src/app/share/share.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';

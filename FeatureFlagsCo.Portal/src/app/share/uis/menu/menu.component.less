@@ -1,10 +1,10 @@
 section.menu-body {
-    width: 100%;
+    width: 210px;
     height: 100%;
-    display: grid;
-    grid-template-rows: 70px auto 50px;
+    //display: grid;
+    //grid-template-rows: 70px auto 50px;
     overflow: hidden;
-    background: #001529;
+    background: #ffffff;
 
     .top-title {
         border-bottom: 1px solid #00000070;
@@ -16,7 +16,7 @@ section.menu-body {
 
         .title {
             flex: 1;
-            color: #ffffff;
+            color: #000000;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -31,8 +31,10 @@ section.menu-body {
     }
 
     .menu-list {
+        height: 100%;
         overflow-y: auto;
         overflow-x: hidden;
+        padding-left: 20px;
 
         .menu-item-line {
             height: 40px;
@@ -44,7 +46,7 @@ section.menu-body {
             .line {
                 flex: 1;
                 height: 1px;
-                background-color: #f0f0f0;
+                background-color: rgb(180,181,194,0.8);
                 border-radius: 2px;
             }
         }
@@ -98,7 +100,7 @@ section.menu-body {
         justify-content: space-between;
         align-items: center;
         position: relative;
-        font-size: 14px;
+        font-size: 13px;
         padding: 0px 20px;
         overflow: hidden;
         background: #00000030;
@@ -139,13 +141,13 @@ section.menu-body {
   .ant-table-tbody>tr.ant-table-row-hover:not(.ant-table-expanded-row)>td,
   .ant-table-thead>tr:hover:not(.ant-table-expanded-row)>td,
   .ant-table-tbody>tr:hover:not(.ant-table-expanded-row)>td {
-    background-color: #001529;
-    color: #fff;
+    background-color: #ffffff;
+    color: #000000;
   }
 
   .ant-table-row.active {
-    background-color: #001529;
-    color: #fff;
+    background-color: #ffffff;
+    color: #000000;
   }
 
   .ant-table-tbody>tr .ant-table-expanded-row-fixed {

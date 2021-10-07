@@ -65,12 +65,20 @@ export class UpperSwitchComponent {
   @Output() onUpperSwicthChange = new EventEmitter<IFfpParams[]>();         // 修改设置
 
   // 添加上游开关
-  onAddUpperSwitch() {
-    this.upperFeatures.push({
+  onAddUpperSwitch(event) {
+    event.stopPropagation()
+    this.upperFeatures = [
+      ...this.upperFeatures,
+      {
       prerequisiteFeatureFlagId: null,
       selectedFeatureFlag: null,
       valueOptionsVariationValue: null
-    });
+    }];
+    // this.upperFeatures.push({
+    //   prerequisiteFeatureFlagId: null,
+    //   selectedFeatureFlag: null,
+    //   valueOptionsVariationValue: null
+    // });
   }
 
   // 删除开关

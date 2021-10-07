@@ -1,14 +1,14 @@
 <section class="body">
     <div class="tip" *ngIf="!isSingle">SERVE</div>
     <div class="select" [class.single-select]="isSingle">
-        <nz-select  [nzCustomTemplate]="multipleTemplate" [(ngModel)]="variationRuleValue" (ngModelChange)="modelChange()">
+        <nz-select [nzCustomTemplate]="multipleTemplate" [(ngModel)]="variationRuleValue" (ngModelChange)="modelChange()">
             <nz-option nzCustomContent [nzValue]="true" [nzLabel]="'true'">
                 <i class="true-tip" nz-icon nzType="border" nzTheme="outline"></i>true
             </nz-option>
             <nz-option nzCustomContent [nzValue]="false" [nzLabel]="'false'">
                 <i class="false-tip" nz-icon nzType="border" nzTheme="outline"></i>false
             </nz-option>
-            <nz-option [nzValue]="'null'" [nzLabel]="'a percentage rollout'"></nz-option> 
+            <nz-option [nzValue]="'null'" [nzLabel]="'a percentage rollout'"></nz-option>
         </nz-select>
 
         <div class="percentage-body" *ngIf="variationRuleValue == 'null'">

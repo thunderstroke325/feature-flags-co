@@ -12,6 +12,8 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import {NzSwitchModule} from 'ng-zorro-antd/switch';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 
 @NgModule({
@@ -27,7 +29,9 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
     FormsModule,
     NzTableModule,
     NzSpinModule,
-    SwitchIndexRoutingModule
+    SwitchIndexRoutingModule,
+    NzSwitchModule,
+    NzIconModule
   ]
 })
 export class SwitchIndexModule { }

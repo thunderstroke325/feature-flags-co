@@ -1,10 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { SwitchService } from 'src/app/services/switch.service';
 import { IFfParams } from '../types/switch-new';
 import { AccountService } from 'src/app/services/account.service';
+import {NzTableQueryParams} from "ng-zorro-antd/table";
 
 @Component({
   selector: 'index',
@@ -13,13 +14,21 @@ import { AccountService } from 'src/app/services/account.service';
 })
 export class SwitchIndexComponent implements OnInit, OnDestroy {
 
+  @ViewChild('switchTable') elementView: ElementRef;
+  switchTableHeight: number;
+
   private destory$: Subject<void> = new Subject();
   private currentAccountId: number;
 
   nameSearchValue: string = '';
   showType: '' | 'Enabled' | 'Disabled' = '';
+  isLoading: boolean = true;
+  pageIndex: number = 0;
+  pageSize: number = 10;
 
   public switchLists: IFfParams[] = [];
+  public initSwitchLists: IFfParams[] = [];
+  public switchListsShowData: IFfParams[] = [];
   public createModalVisible: boolean = false;             // 创建开关的弹窗显示
   public isOkLoading: boolean = false;                    // 创建开关加载中动画
   public isInitLoading: boolean = true;                  // 数据加载中对话
@@ -39,21 +48,30 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
     this.currentAccountId = currentAccountProjectEnv.account.id;
     const envId = currentAccountProjectEnv.projectEnv.envId;
     this.switchServe.envId = envId;
-    this.initSwitchList(envId)
+    this.initSwitchList(envId);
   }
 
-  private initSwitchList(id: number) {
+  ngAfterViewInit(): void{
+    console.log('switchTableHeight==', this.elementView.nativeElement.offsetHeight);
+    this.switchTableHeight = this.elementView.nativeElement.offsetHeight;
+  }
+
+  private initSwitchList(id: number): void{
     this.isInitLoading = true;
     this.switchServe.getSwitchList(id).subscribe((result: IFfParams[]) => {
         this.isInitLoading = false;
-        if(result.length) {
+        if (result.length) {
+          this.initSwitchLists = result;
           this.switchLists = result;
+          this.totalCount = result.length;
+          this.switchListsShowData = result.slice(this.pageIndex * this.pageSize, this.pageIndex * this.pageSize + this.pageSize);
         } else {
-          //this.msg.info("当前 Project 没有开关，请添加!");
-          this.switchLists = [];
-          //this.createModalVisible = true;
+          // this.msg.info("当前 Project 没有开关，请添加!");
+          // this.initSwitchLists = [];
+          // this.createModalVisible = true;
         }
-    })
+        this.isLoading = false;
+    });
   }
 
   // 添加开关
@@ -62,19 +80,24 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
   }
 
   // 切换开关状态
-  onChangeSwitchStatus(data: IFfParams, status: 'Enabled' | 'Disabled', event: MouseEvent) {
-    event.stopPropagation && event.stopPropagation();
-      if(data.status === status){
-        return;
-      } else {
-        this.switchServe.changeSwitchStatus(data.id, status)
-          .subscribe(_ => {
-            this.msg.success("开关状态已切换!");
-          }, _ => {
-            this.msg.error("开关状态切换失败!");
-          });
-        data.status = status;
-      }
+  onChangeSwitchStatus(data: IFfParams): void {
+    if (data.status === 'Enabled' ){
+      this.switchServe.changeSwitchStatus(data.id, 'Disabled')
+        .subscribe(_ => {
+          this.msg.success('开关状态已切换至 Disabled!');
+          data.status = 'Disabled';
+        }, _ => {
+          this.msg.error('开关状态切换失败!');
+        });
+    }else if (data.status === 'Disabled'){
+      this.switchServe.changeSwitchStatus(data.id, 'Enabled')
+        .subscribe(_ => {
+          this.msg.success('开关状态已切换至 Enabled!');
+          data.status = 'Enabled';
+        }, _ => {
+          this.msg.error('开关状态切换失败!');
+        });
+    }
   }
 
   ngOnDestroy(): void {
@@ -122,5 +145,32 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
   getLocalDate(date: string) {
     if (!date) return '';
     return new Date(date);
+  }
+
+  // 分页
+  onChangePageIndex(params: number): void {
+    this.pageIndex = params - 1;
+    this.switchListsShowData = this.switchLists.slice( this.pageIndex  * this.pageSize, this.pageIndex * this.pageSize + this.pageSize);
+  }
+  // 根据开关筛选
+  onSearchByOnOff(params: string): void{
+    if (params === ''){
+      this.switchLists = this.initSwitchLists;
+      this.resetSwitchListsShowData();
+    }else {
+      this.switchLists = this.initSwitchLists.filter(e => e.status === params);
+      this.resetSwitchListsShowData();
+    }
+  }
+  // 根据 name 筛选
+  onSearchByName(params: string): void{
+    this.switchLists = this.initSwitchLists.filter(e => e.name.includes(this.nameSearchValue));
+    this.resetSwitchListsShowData();
+  }
+  resetSwitchListsShowData(): void{
+    this.totalCount = this.switchLists.length;
+    this.pageIndex = 0;
+    this.switchListsShowData = this.switchLists
+      .slice( this.pageIndex  * this.pageSize, this.pageIndex * this.pageSize + this.pageSize);
   }
 }

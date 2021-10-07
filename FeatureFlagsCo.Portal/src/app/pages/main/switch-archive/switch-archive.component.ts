@@ -19,6 +19,7 @@ export class SwitchArchiveComponent implements OnInit, OnDestroy {
   currentAccountId: number;
   searchValue: string = '';
   isLoading: boolean = false;
+  switchLoading: boolean = false;
   switchLists: ISwitchArchive[] = [];
 
   get switchs() {
@@ -61,9 +62,14 @@ export class SwitchArchiveComponent implements OnInit, OnDestroy {
 
   // 复位开关
   onUnarchiveClick(st: ISwitchArchive) {
+    this.switchLoading = true;
     this.modal.create({
-      nzContent: '确定复位开关吗？复位后开关状态为关闭， 以避免给线上环境造成影响。',
+      nzContent: '<div>确定复位开关吗？复位后开关状态为关闭， 以避免给线上环境造成影响。</div>',
       nzOkText: '确认复位',
+      nzTitle: '切换项目环境',
+      nzCentered: true,
+      nzWidth: 700,
+      nzBodyStyle: {minHeight: '100px'},
       nzOnOk: () => {
         this.switchService.unarchiveEnvFeatureFlag(st.id, st.name)
           .subscribe(
@@ -77,6 +83,7 @@ export class SwitchArchiveComponent implements OnInit, OnDestroy {
           );
       }
     });
+    this.switchLoading = false;
   }
 
   // 转换本地时间

@@ -1,0 +1,63 @@
+<section class="header-body">
+  <img class="header-logo" src="assets/ff_logo+text.png" alt="">
+  <div class="header-info" >
+    <!--    <div class="title">{{auth?.email}}(用户邮箱)</div>-->
+    <!--    <div class="title">({{currentAccount?.organizationName}})(机构名称)</div>-->
+    <a nz-button nzType="link" class="title" style="display: flex;flex-direction: row;" (click)="envModalVisible=true">
+      <div style="color: #4CB287;line-height: 32px;margin-right: 15px;">{{currentProjectEnv?.projectName}}</div>
+      <div style="color: #4CB287;line-height: 32px;">
+        {{currentProjectEnv?.envName}}
+        <i style="margin-left:7px" nz-icon nzType="swap" nzTheme="outline"></i>
+      </div>
+    </a>
+    <i class="user" nz-icon nzType="user" nz-dropdown [nzDropdownMenu]="menu"></i>
+    <nz-dropdown-menu #menu="nzDropdownMenu">
+      <ul nz-menu class="user-item">
+        <li nz-menu-item>{{currentAccount?.organizationName}}</li>
+        <li nz-menu-item>{{auth?.email}}</li>
+        <li nz-menu-item (click)="logout.emit()">登出</li>
+      </ul>
+    </nz-dropdown-menu>
+    <!--    <i nz-icon nzType="swap" nzTheme="outline" (click)="envModalVisible=true"></i>-->
+    <!--    <i class="icon-logout" nz-icon nzType="logout" nzTheme="outline" (click)="logout.emit()"></i>-->
+  </div>
+</section>
+
+
+<nz-modal [nzBodyStyle]="{minHeight:'300px'}" [nzWidth]="1000" [(nzVisible)]="envModalVisible" (nzOnCancel)="envModelCancel()" (nzOnOk)="envModalConfirm()">
+  <div *nzModalTitle class="model-title"> 切换项目环境 </div>
+  <ng-container *nzModalContent>
+    <div nz-row [nzGutter]="0" class="switch-env">
+      <div nz-col class="gutter-row" [nzSpan]="12">
+        <nz-table #projectTable [nzData]="availableProjects" [nzFrontPagination]="false" [nzScroll]="{ y: '400px' }">
+          <thead>
+          <tr class="table-th-style">
+            <th>项目</th>
+            <th nzWidth="40px"></th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let project of projectTable.data" (click)="onSelectProject(project)" [ngClass]="{'active': selectedProject?.id == project.id}">
+            <td [style]="selectedProject?.name == project.name?'color:#4CB287':''">{{ project.name }}</td>
+          </tr>
+          </tbody>
+        </nz-table>
+      </div>
+      <div nz-col class="gutter-row" [nzSpan]="12">
+        <nz-table #envTable [nzData]="availableEnvs" [nzFrontPagination]="false" [nzScroll]="{ y: '400px' }">
+          <thead>
+          <tr class="table-th-style">
+            <th>环境</th>
+            <th nzWidth="40px"></th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let env of envTable.data" (click)="onSelectEnv(env)" [ngClass]="{'active': selectedEnv?.id == env.id}">
+            <td [style]="selectedEnv?.name == env.name?'color:#4CB287':''">{{ env.name }}</td>
+          </tr>
+          </tbody>
+        </nz-table>
+      </div>
+    </div>
+  </ng-container>
+</nz-modal>

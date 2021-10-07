@@ -14,7 +14,7 @@
         <div>{{ getExptCountByStatus(1) }} <i class="status not-started" nz-icon nzType="field-time" nzTheme="outline"></i></div>
       </div>
     </div>
-    <nz-card style="margin-top: 20px;">
+    <div style="margin-top: 20px;">
       <div class="actions">
         <div class="filters">
           <div class="search-filter">
@@ -35,38 +35,37 @@
           </button>
         </div>
       </div>
-      <nz-table #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experimentList" style="margin-top: 20px;">
+      <nz-table #borderedTable
+                nzSize="small"
+                [nzFrontPagination]="false"
+                [nzShowPagination]="false"
+                [nzData]="experimentList"
+                style="margin-top: 20px;">
         <thead>
-          <tr>
+          <tr class="table-th-style">
             <th>数据实验</th>
+            <th>Metric 名称</th>
             <th>当前状态</th>
-            <th></th>
+            <th nzAlign="center">操作</th>
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngFor="let data of borderedTable.data">
-            <tr>
-              <td (click)="goToFeatureFlag(data.featureFlagId)">
-                <a class="title">{{data.featureFlagName}}</a>
-                <div class="subtitle">{{data.metric.name}}</div>
-              </td>
+            <tr *ngFor="let data of borderedTable.data">
+              <td>{{data.featureFlagName}}</td>
+              <td>{{data.metric.name}}</td>
               <td>
                 <i class="status on-going" *ngIf="data.status === 3" nz-icon nzType="right-circle" nzTheme="outline"></i>
                 <i class="status paused" *ngIf="data.status === 2" nz-icon nzType="pause-circle" nzTheme="outline"></i>
                 <i class="status not-started" *ngIf="data.status === 1" nz-icon nzType="field-time" nzTheme="outline"></i>
                 {{data.statusName}}
               </td>
-              <td style="text-align: right">
-                <nz-space [nzSize]="20">
-                  <a *nzSpaceItem (click)="goToFeatureFlag(data.featureFlagId)">查看开关</a>
-                  <!-- <a *nzSpaceItem (click)="goToMetric(data.metricId)">编辑 Metric</a> -->
-                </nz-space>
+              <td style="text-align: center">
+                <a style="color: #9A95CC" (click)="goToFeatureFlag(data.featureFlagId)">查看开关</a>
               </td>
             </tr>
-          </ng-container>
         </tbody>
       </nz-table>
-    </nz-card>
+    </div>
   </nz-spin>
 </div>
 

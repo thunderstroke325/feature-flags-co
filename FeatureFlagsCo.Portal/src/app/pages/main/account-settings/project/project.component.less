@@ -1,14 +1,13 @@
 .project-layout {
     height: 100%;
     overflow: hidden;
+    padding-right: 40px;
 }
 
 .operation-tools {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px;
-    border-bottom: 1px solid rgb(240, 240, 240);
 
     >section>input {
         margin-right: 8px;
@@ -16,15 +15,16 @@
 }
 
 .project-list {
-    height: calc(100% - 73px);
+    height: calc(100% - 32px);
     overflow: auto;
+    margin-top: 12px;
 
     .project {
         //border-bottom: 1px solid rgb(240, 240, 240);
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 12px;
+        padding-bottom: 12px;
 
         .ant-card-head-title {
           font-size: 20px !important;
@@ -42,12 +42,40 @@
             padding: 8px 0;
         }
 
-        .description {
-            color: #00000080;
-            width: 100%;
+        .description{
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          padding: 0 10px;
+
+          .desc-name{
+            margin-bottom: 8px;
+            font-size: 16px;
+          }
+          .desc-content{
+            color: rgba(0, 0, 0, 0.45);
+            margin-bottom: 12px;
+          }
+
+          .description-env {
+            max-width: 230px;
+            min-width: 100px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+
+          }
+          .description-secret{
+            overflow-wrap: break-word;
+            word-break: break-all;
+          }
+
+          .operation{
+            display: flex;
+            align-items: center;
+            width: 100px;
+            justify-content: flex-end;
+          }
         }
     }
 }

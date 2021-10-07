@@ -44,7 +44,7 @@ export interface BreadcrumbOption {
     <ng-content></ng-content>
     <ng-container *ngIf="nzAutoGenerate && breadcrumbs.length">
       <xu-breadcrumb-item *ngFor="let breadcrumb of breadcrumbs">
-        <a [attr.href]="breadcrumb.url" (click)="navigate(breadcrumb.url, $event)">{{ breadcrumb.label }}</a>
+        <a style="font-size: 20px" [attr.href]="breadcrumb.url" (click)="navigate(breadcrumb.url, $event)">{{ breadcrumb.label }}</a>
       </xu-breadcrumb-item>
     </ng-container>
   `

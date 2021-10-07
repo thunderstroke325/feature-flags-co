@@ -4,7 +4,7 @@
           <div class="search">
               <div nz-row>
                   <div class="search-wrap" nz-col nzSpan="12">
-                      <input nz-input placeholder="按邮箱查找" [(ngModel)]="searhTerm" (ngModelChange)="doSearch()"/>
+                      <input style="width: 400px" nz-input placeholder="按邮箱查找" [(ngModel)]="searchTeam" (ngModelChange)="doSearch()"/>
                   </div>
                   <div class="search-wrap wrap-right" nz-col nzSpan="12">
                     <button nz-button nzType="primary" (click)="addMember()">
@@ -16,37 +16,39 @@
           </div>
           <div class="list">
               <ng-container *ngIf="!isInitLoading; else loadingTem;">
-                  <nz-table #basicTable
+                  <nz-table #basicTable nzSize="small"
                           [nzData]="searchResult"
+                          [nzScroll]="{ y: '450px' }"
                           [nzPageSize]="10"
                           [nzHideOnSinglePage]="true"
                           [nzTotal]="teamMembers.length">
                       <thead>
-                          <tr>
+                          <tr class="table-th-style">
                               <th>邮箱</th>
                               <th>权限</th>
                               <th>初始密码</th>
-                              <th></th>
+                              <th nzAlign="center">操作</th>
                           </tr>
                       </thead>
                       <tbody>
-                          <ng-container *ngFor="let member of basicTable.data">
-                              <tr>
-                                  <td>{{ member.email }}</td>
-                                  <td>{{ member.role }}</td>
-                                  <td><span *ngIf="member.initialPassword?.length > 0" nz-typography nzCopyable nzCopyText="{{ member.initialPassword }}">{{ member.initialPassword }}</span></td>
-                                  <td>
-                                    <ng-container *ngIf="isMemberDeleteBtnVisible(member)">
-                                      <a nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="onDeleteMemberClick(member)" [nzIcon]="iconTplMember">
-                                        <i nz-icon nzType="delete" nzTheme="fill"></i>
-                                      </a>
-                                      <ng-template #iconTplMember>
-                                        <i nz-icon nzType="question-circle-o" style="color: red;"></i>
-                                      </ng-template>
-                                    </ng-container>
-                                  </td>
-                              </tr>
+                      <tr *ngFor="let member of basicTable.data">
+                        <td>{{ member.email }}</td>
+                        <td>{{ member.role }}</td>
+                        <td><span *ngIf="member.initialPassword?.length > 0" nz-typography nzCopyable nzCopyText="{{ member.initialPassword }}">{{ member.initialPassword }}</span></td>
+                        <td style="text-align: center">
+                          <ng-container *ngIf="isMemberDeleteBtnVisible(member)">
+                            <a nz-popconfirm nzPopconfirmTitle="确定删除吗?"
+                               nzPopconfirmPlacement="bottomRight"
+                               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                               (nzOnConfirm)="onDeleteMemberClick(member)" [nzIcon]="iconTplMember">
+                              <i nz-icon style="color: #9A95CC;margin-left: 10px;" nzType="delete" nzTheme="fill"></i>
+                            </a>
+                            <ng-template #iconTplMember>
+                              <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+                            </ng-template>
                           </ng-container>
+                        </td>
+                      </tr>
                       </tbody>
                   </nz-table>
               </ng-container>

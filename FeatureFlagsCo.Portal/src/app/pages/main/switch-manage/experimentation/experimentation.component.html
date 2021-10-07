@@ -33,13 +33,40 @@
                       </ng-container>
                     </nz-tag>
                   </div>
-                  <div *ngIf="experiment.status === 3">
-                    <span *ngIf="experiment?.selectedIteration?.updatedAtStr?.length > 0">结果最后更新于： {{updatedAtStr}}</span>
-                    <button nz-button nzType="default" (click)="onReloadIterationResultsClick(experiment)">
-                      <i *ngIf="!experiment.isLoading" nz-icon nzType="reload" nzTheme="outline"></i>
-                      <i *ngIf="experiment.isLoading" nz-icon [nzType]="'sync'" [nzSpin]="true"></i>
-                      点击刷新结果(每30秒会自动刷新)
-                    </button>
+                  <div style="display: flex;flex-direction: row">
+                    <div *ngIf="experiment.status === 3">
+                      <span *ngIf="experiment?.selectedIteration?.updatedAtStr?.length > 0">结果最后更新于： {{experiment?.selectedIteration?.updatedAtStr}}</span>
+                      <button style="margin-left: 15px" nz-button nzType="default" nz-tooltip nzTooltipTitle="每30秒会自动刷新" nzTooltipColor="#87d068" (click)="onReloadIterationResultsClick(experiment)">
+                        <i *ngIf="!experiment.isLoading" nz-icon nzType="reload" nzTheme="outline"></i>
+                        <i *ngIf="experiment.isLoading" nz-icon [nzType]="'sync'" [nzSpin]="true"></i>
+                        点击刷新结果
+                      </button>
+                    </div>
+<!--                    <button class="options" nz-button nzType="default" nz-dropdown [nzDropdownMenu]="options">-->
+                      <i nz-icon style="cursor: pointer;font-size: 25px; font-weight: bold; margin-left: 20px" nzType="ellipsis" [nzRotate]="90" nzTheme="outline" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
+<!--                    </button>-->
+
+                    <nz-dropdown-menu #options="nzDropdownMenu">
+                      <ul nz-menu nzSelectable style="min-width: 150px;">
+                        <li nz-menu-item nz-popconfirm nzPopconfirmTitle="确定删除吗? 将会删除所有实验数据，删除后不可恢复。"
+                            nzPopconfirmPlacement="bottomRight"
+                            [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                            style="width: 100%;display: flex;justify-content: center;"
+                            (nzOnConfirm)="onDeleteExptDataClick(experiment)">
+                          删除数据
+                        </li>
+                        <li nz-menu-item nz-popconfirm nzPopconfirmTitle="确定删除吗? 将会删除该实验及其实验数据，删除后不可恢复。"
+                            nzPopconfirmPlacement="bottomRight"
+                            [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                            style="width: 100%;display: flex;justify-content: center;"
+                            (nzOnConfirm)="onDeleteExptClick(experiment)">
+                          删除实验
+                        </li>
+                      </ul>
+                      <ng-template #iconTplExpt>
+                        <i nz-icon nzType="question-circle-o" style="color: red;"></i>
+                      </ng-template>
+                    </nz-dropdown-menu>
                   </div>
                 </div>
                 <div class="second-line" *ngIf="experiment.status !== 1">
@@ -52,32 +79,43 @@
                     实验进行中，点击暂停实验
                   </button>
                   <div class="right">
+
                     <div *ngIf="experiment.iterations.length > 0">
-                      时间区间 &nbsp;
+                      时间区间： &nbsp;
                       <nz-select name="iterations_{{experiment.id}}"
                           [(ngModel)]="experiment.selectedIteration"
                       >
                         <nz-option *ngFor="let iteration of experiment.iterations?.reverse()" [nzLabel]="iteration.dateTimeInterval" [nzValue]="iteration"></nz-option>
                       </nz-select>
                     </div>
-                    <button class="options" nz-button nzType="default" nz-dropdown [nzDropdownMenu]="options">
-                      <i nz-icon nzType="ellipsis" nzTheme="outline"></i>
-                    </button>
-                    <nz-dropdown-menu #options="nzDropdownMenu">
-                      <ul nz-menu nzSelectable>
-                        <li nz-menu-item nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="onDeleteExptDataClick(experiment)" [nzIcon]="iconTplExpt">
-                          <div class="title">删除数据</div>
-                          <div class="subtitle">将会删除所有实验数据，删除后不可恢复</div>
-                        </li>
-                        <li nz-menu-item nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="onDeleteExptClick(experiment)" [nzIcon]="iconTplExpt">
-                          <div class="title">删除实验</div>
-                          <div class="subtitle">将会删除该实验及其实验数据，删除后不可恢复</div>
-                        </li>
-                      </ul>
-                      <ng-template #iconTplExpt>
-                        <i nz-icon nzType="question-circle-o" style="color: red;"></i>
-                      </ng-template>
-                    </nz-dropdown-menu>
+<!--                    <button nz-button nzType="default" nzDanger style="margin-left: 10px;"-->
+<!--                            nz-popconfirm nzPopconfirmTitle="确定删除吗? 将会删除所有实验数据，删除后不可恢复。"-->
+<!--                            nzPopconfirmPlacement="bottomRight"-->
+<!--                            [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"-->
+<!--                            (nzOnConfirm)="onDeleteExptDataClick(experiment)">删除数据</button>-->
+<!--                    <button nz-button nzType="default" nzDanger style="margin-left: 10px;"-->
+<!--                            nz-popconfirm nzPopconfirmTitle="确定删除吗? 将会删除该实验及其实验数据，删除后不可恢复。"-->
+<!--                            nzPopconfirmPlacement="bottomRight"-->
+<!--                            [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"-->
+<!--                            (nzOnConfirm)="onDeleteExptClick(experiment)">删除实验</button>-->
+<!--                    <button class="options" nz-button nzType="default" nz-dropdown [nzDropdownMenu]="options">-->
+<!--                      <i nz-icon nzType="ellipsis" nzTheme="outline"></i>-->
+<!--                    </button>-->
+<!--                    <nz-dropdown-menu #options="nzDropdownMenu">-->
+<!--                      <ul nz-menu nzSelectable>-->
+<!--                        <li nz-menu-item nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="onDeleteExptDataClick(experiment)" [nzIcon]="iconTplExpt">-->
+<!--                          <div class="title">删除数据</div>-->
+<!--                          <div class="subtitle">将会删除所有实验数据，删除后不可恢复</div>-->
+<!--                        </li>-->
+<!--                        <li nz-menu-item nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="onDeleteExptClick(experiment)" [nzIcon]="iconTplExpt">-->
+<!--                          <div class="title">删除实验</div>-->
+<!--                          <div class="subtitle">将会删除该实验及其实验数据，删除后不可恢复</div>-->
+<!--                        </li>-->
+<!--                      </ul>-->
+<!--                      <ng-template #iconTplExpt>-->
+<!--                        <i nz-icon nzType="question-circle-o" style="color: red;"></i>-->
+<!--                      </ng-template>-->
+<!--                    </nz-dropdown-menu>-->
                   </div>
                 </div>
                 <div class="third-line" *ngIf="experiment.status !== 1">
@@ -96,7 +134,7 @@
               </div>
               <nz-table *ngIf="experiment.status !== 1" #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experiment?.selectedIteration?.results" style="margin-top: 20px;">
                 <thead>
-                  <tr>
+                  <tr class="table-th-style">
                     <th>特性</th>
                     <th>转化数 / 用户数</th>
                     <th>转化率</th>
@@ -210,7 +248,7 @@
                 <li *ngIf="!hasWinnerVariation"><i nz-icon nzType="info-circle" nzTheme="outline"></i> 需要更多的实验数据才能在统计学上确认表格中的结论</li>
               </ul>
             </div>
-            <nz-table #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experimentResult" style="margin-top: 20px;">
+            <nz-table #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experimentResult" style="margin-top: 20px;" nzSize="small">
               <thead>
                 <tr>
                   <th>特性</th>

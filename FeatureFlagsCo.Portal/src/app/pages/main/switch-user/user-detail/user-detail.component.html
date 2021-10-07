@@ -2,12 +2,12 @@
     <div class="title">
     用户属性列表
     </div>
-    <nz-table #basicTable 
-            [nzData]="list" 
-            [nzFrontPagination]="true"  
+    <nz-table #basicTable
+            [nzData]="list" nzSize="small"
+            [nzFrontPagination]="true"
            >
         <thead>
-          <tr>
+          <tr class="table-th-style">
             <th>属性</th>
             <th>值</th>
           </tr>

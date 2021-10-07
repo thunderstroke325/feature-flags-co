@@ -29,6 +29,10 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzTableModule } from 'ng-zorro-antd/table';
+import {NzTabsModule} from "ng-zorro-antd/tabs";
+import {NzSwitchModule} from "ng-zorro-antd/switch";
+import {NzCollapseModule} from "ng-zorro-antd/collapse";
+
 
 @NgModule({
   declarations: [
@@ -62,7 +66,10 @@ import { NzTableModule } from 'ng-zorro-antd/table';
     NzDividerModule,
     NzSpinModule,
     NzToolTipModule,
-    NzTableModule
+    NzTabsModule,
+    NzSwitchModule,
+    NzTableModule,
+    NzCollapseModule
   ],
   exports: [
     NavBtnsComponent,

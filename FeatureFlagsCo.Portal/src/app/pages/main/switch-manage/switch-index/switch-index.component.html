@@ -4,10 +4,10 @@
             <div class="search">
                 <div nz-row>
                     <div class="search-wrap" nz-col nzSpan="8">
-                        <input nz-input placeholder="按名字查找" [(ngModel)]="nameSearchValue"/>
+                        <input nz-input placeholder="按名字查找" [(ngModel)]="nameSearchValue" (ngModelChange)="onSearchByName($event)"/>
                     </div>
                     <div class="search-wrap" nz-col nzSpan="8">
-                        <nz-select style="width: 70%;" [(ngModel)]="showType">
+                        <nz-select style="width: 70%;" [(ngModel)]="showType" (ngModelChange)="onSearchByOnOff($event)">
                             <nz-option nzValue="" nzLabel="展示所有开关"></nz-option>
                             <nz-option nzValue="Enabled" nzLabel="展示 Enabled 的开关"></nz-option>
                             <nz-option nzValue="Disabled" nzLabel="展示 Disabled 的开关"></nz-option>
@@ -15,45 +15,77 @@
                     </div>
                     <div nz-col nzSpan="8" class="wrap-right">
                         <button nz-button nzType="primary" (click)="addSwitch()">
-                            <i nz-icon nzType="plus" nzTheme="outline"></i>
+                          <i nz-icon nzType="plus" nzTheme="outline"></i>
                             添加开关
                         </button>
                     </div>
                 </div>
             </div>
-            <div class="switch-list" #listRef>
-              <ng-container *ngFor="let switch of switchLists">
-                <div class="switch" *ngIf="switch.name.includes(nameSearchValue) && switch.status?.includes(showType)" (click)="onIntoSwitchDetail(switch)">
-                  <section>
-                    <div class="title">
-                        {{switch.name}}
-                    </div>
-                    <div class="description">
-                        {{switch.keyName}}
-                    </div>
-                  </section>
-                  <span>最近修改：{{getLocalDate(switch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</span>
+            <div class="switch-list" #switchTable>
+                <nz-table #basicTable nzSize="small"
+                          [nzScroll]="{ y: '520px' }"
+                          [nzData]="switchListsShowData"
+                          [nzLoading]="isLoading"
+                          [nzFrontPagination]="false"
+                          [nzTotal]="totalCount"
+                          [nzPageSize]="pageSize"
+                          [nzPageIndex]="pageIndex + 1"
+                          (nzPageIndexChange)="onChangePageIndex($event)">
+                  <thead>
+                  <tr class="table-th-style">
+                    <th>名称</th>
+                    <th>状态</th>
+                    <th>最近修改</th>
+                    <th nzAlign="center">操作</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr *ngFor="let switch of basicTable.data" class="table-tr-pointer">
+                    <td>{{switch.name}}</td>
+                    <td>
+                      <nz-switch [ngModel]="switch.status === 'Enabled'" (click)="onChangeSwitchStatus(switch)" nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
+                    </td>
+<!--                    <td>{{switch.keyName}}</td>-->
+                    <td>{{getLocalDate(switch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
+                    <td style="text-align: center"><a nz-button nzType="link" style="color: #9A95CC;" (click)="onIntoSwitchDetail(switch)">详情</a></td>
+                  </tr>
+                  </tbody>
+                </nz-table>
+<!--              <ng-container *ngFor="let switch of switchLists">-->
+<!--                <div class="switch" *ngIf="switch.name.includes(nameSearchValue) && switch.status?.includes(showType)" (click)="onIntoSwitchDetail(switch)">-->
+<!--                  <section>-->
+<!--                    <div class="title">-->
+<!--                        {{switch.name}}-->
+<!--                    </div>-->
+<!--                    <div class="description">-->
+<!--                        {{switch.keyName}}-->
+<!--                    </div>-->
+<!--                  </section>-->
+<!--                  <span>最近修改：{{getLocalDate(switch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</span>-->
 
-                  <nz-button-group>
-                      <button nz-button [nzType]="switch.status === 'Enabled' ? 'primary' : 'default'" (click)="onChangeSwitchStatus(switch, 'Enabled', $event)">开</button>
-                      <button nz-button [nzType]="switch.status === 'Disabled' ? 'primary' : 'default'" (click)="onChangeSwitchStatus(switch, 'Disabled', $event)">关</button>
-                  </nz-button-group>
-                </div>
-              </ng-container>
+<!--                  <nz-button-group>-->
+<!--                      <button nz-button [nzType]="switch.status === 'Enabled' ? 'primary' : 'default'" (click)="onChangeSwitchStatus(switch, 'Enabled', $event)">开</button>-->
+<!--                      <button nz-button [nzType]="switch.status === 'Disabled' ? 'primary' : 'default'" (click)="onChangeSwitchStatus(switch, 'Disabled', $event)">关</button>-->
+<!--                  </nz-button-group>-->
+<!--                </div>-->
+<!--              </ng-container>-->
 
-              <div class="mask" *ngIf="isInitLoading">
-                  <nz-spin></nz-spin>
-              </div>
+<!--              <div class="mask" *ngIf="isInitLoading">-->
+<!--                  <nz-spin></nz-spin>-->
+<!--              </div>-->
             </div>
         </div>
     </div>
 </section>
 
 <nz-modal [(nzVisible)]="createModalVisible"
+          [nzWidth]="700"
+          [nzBodyStyle]="{minHeight: '90px'}"
+          [nzCentered]="true"
           nzTitle="新建开关"
           nzMaskClosable="false"
           (nzOnCancel)="handleCancel()"
           (nzOnOk)="handleOk()"
           [nzOkLoading]="isOkLoading">
-    <input nz-input placeholder="name..." [(ngModel)]="switchName"/>
+    <input *nzModalContent nz-input placeholder="开关名称" [(ngModel)]="switchName"/>
 </nz-modal>

@@ -2,28 +2,23 @@
     <app-layout>
         <app-nav-btns name="header" [routeUrl]="'report'" [id]="switchId"></app-nav-btns>
         <div class="content-body" name="detail" *ngIf="!hideContent">
-            <ng-container>
+          <div style="width: 100%; display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
+            <nz-button-group [nzSize]="'large'" style="width: fit-content;margin-top: 20px;font-size: 13px;">
+              <div style="border-bottom: 1px solid rgba(0, 0, 0, 0.06);width: 100%">
+                <ng-container *ngFor="let btn of navReportConfig;">
+                  <a nz-button style="font-size: 13px;padding: 0 0 2px 0;margin-right: 32px;height: auto;
+                        border-bottom: 1px solid {{timeSpan=== btn.keyValue ? '#4CB287' : 'transparent'}};
+                        color: {{timeSpan=== btn.keyValue ? '#4CB287' : '#000'}}" nzType='link'
+                     (click)="onTimeSpanClcik(btn.keyValue)">{{btn.labelValue}}</a>
+                </ng-container>
+              </div>
+            </nz-button-group>
+          </div>
+          <div style="padding:10px 20px 10px 0;width: 100%;text-align: center;">{{userUsageStr}}</div>
+          <ng-container>
                 <!-- <h2>共有{{totalUsers}}用户被标记，其中{{hitUsers}}人使用此功能</h2> -->
-                <h4 style="
-                margin: 0px;
-                margin-top: 5px;
-                border: 1px solid lightgray;
-                padding: 5px;
-                text-align: center;
-            ">{{userUsageStr}}</h4>
                 <div class="report-echarts" #reportEcharts [style.height]="height">
-
                 </div>
-                <section>
-                    <button nz-button [nzType]="timeSpan === 'P7D' ? 'primary' : 'default'"
-                        (click)="onTimeSpanClcik('P7D')">查看最近7天</button>
-                    <button nz-button [nzType]="timeSpan === 'P1D' ? 'primary' : 'default'"
-                        (click)="onTimeSpanClcik('P1D')">查看最近24小时</button>
-                    <button nz-button [nzType]="timeSpan === 'PT2H' ? 'primary' : 'default'"
-                        (click)="onTimeSpanClcik('PT2H')">查看最近2小时</button>
-                    <button nz-button [nzType]="timeSpan === 'PT30M' ? 'primary' : 'default'"
-                        (click)="onTimeSpanClcik('PT30M')">查看最近30分钟</button>
-                </section>
                 <div class="mask" *ngIf="isLoading">
                     <nz-spin nzSimple></nz-spin>
                 </div>
