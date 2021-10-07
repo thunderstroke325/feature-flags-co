@@ -1,11 +1,5 @@
 version: "3.9"
 services:
-  # web:
-  #   build: .
-  #   ports:
-  #     - "5000:5000"
-  # redis:
-  #   image: "redis:alpine"
   ffc-experiment-dev:
     build:
       context: ../FeatureFlagsCo.Experiments

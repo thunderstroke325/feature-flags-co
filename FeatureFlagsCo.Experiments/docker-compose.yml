@@ -1,13 +1,10 @@
 version: "3.9"
 services:
-  # web:
-  #   build: .
-  #   ports:
-  #     - "5000:5000"
-  # redis:
-  #   image: "redis:alpine"
   ffc-experiments:
     build:
       context: ../FeatureFlagsCo.Experiments
+      args: 
+        exptenv: prod
       dockerfile: Dockerfile
     image: ffc-experiments
+
