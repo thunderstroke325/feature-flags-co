@@ -101,15 +101,18 @@ export class MainComponent implements OnInit, OnDestroy {
         level: 1,
         title: '快速实战文档',
         target: QUICK_COMBAT_DOCUMENT
-      }, {
-        level: 1,
-        title: 'SDK & Integration',
-        target: INTEGRATION_OF_CLOUD_SERVICE_PROVIDERS
-      }, {
-        level: 1,
-        title: '特征管理指南',
-        target: AGILE_SWITCH_BOLIERPLATE
-      }, {
+      }, 
+      // {
+      //   level: 1,
+      //   title: 'SDK & Integration',
+      //   target: INTEGRATION_OF_CLOUD_SERVICE_PROVIDERS
+      // }, 
+      // {
+      //   level: 1,
+      //   title: '特征管理指南',
+      //   target: AGILE_SWITCH_BOLIERPLATE
+      // }, 
+      {
         level: 1,
         line: true
       }, {
