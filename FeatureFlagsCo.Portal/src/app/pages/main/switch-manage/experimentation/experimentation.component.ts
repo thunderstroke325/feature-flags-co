@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FfcAngularSdkService } from 'ffc-angular-sdk';
+import { FfcService } from 'src/app/services/ffc.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from 'src/app/services/experiment.service';
 import { SwitchService } from 'src/app/services/switch.service';
@@ -36,9 +36,9 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     private switchServe: SwitchService,
     private message: NzMessageService,
     private experimentService: ExperimentService,
-    private ffcAngularSdkService: FfcAngularSdkService
+    private ffcService: FfcService
   ) {
-    this.experimentation = environment.name === 'Standalone' ? 'temporary version' : this.ffcAngularSdkService.variation('experimentation');
+    this.experimentation = environment.name === 'Standalone' ? 'temporary version' : this.ffcService.client.variation('experimentation');
 
     this.route.data.pipe(map(res => res.switchInfo)).subscribe((result: CSwitchParams) => {
       const featureDetail = new CSwitchParams(result);

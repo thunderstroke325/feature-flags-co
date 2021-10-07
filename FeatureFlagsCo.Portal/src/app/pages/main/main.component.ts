@@ -13,7 +13,7 @@ import { AccountService } from 'src/app/services/account.service';
 import { getAuth } from 'src/app/utils';
 import { ProjectService } from 'src/app/services/project.service';
 import { SwitchService } from 'src/app/services/switch.service';
-import { FfcAngularSdkService } from 'ffc-angular-sdk';
+import { FfcService } from 'src/app/services/ffc.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -44,7 +44,7 @@ export class MainComponent implements OnInit, OnDestroy {
     private projectService: ProjectService,
     private switchService: SwitchService,
     private userService: UserService,
-    private ffcAngularSdkService: FfcAngularSdkService,
+    private ffcService: FfcService,
   ) {
 
     if (environment.name === 'Production') {
@@ -118,7 +118,7 @@ export class MainComponent implements OnInit, OnDestroy {
       }
     ];
 
-    if (this.ffcAngularSdkService.variation('experimentation') === 'V2') {
+    if (this.ffcService.client.variation('experimentation') === 'V2') {
       const experimentationItem = {
         level: 1,
         title: '数据实验',

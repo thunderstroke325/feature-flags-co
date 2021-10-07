@@ -15,7 +15,6 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { NzMessageModule } from 'ng-zorro-antd/message';
-import { FfcAngularSdkModule } from 'ffc-angular-sdk';
 import { AccountProjectEnvResolver } from './account-preject-env-resolver.service';
 
 registerLocaleData(zh);
@@ -25,7 +24,6 @@ registerLocaleData(zh);
     AppComponent
   ],
   imports: [
-    FfcAngularSdkModule,
     BrowserModule,
     AppRoutingModule,
     FormsModule,

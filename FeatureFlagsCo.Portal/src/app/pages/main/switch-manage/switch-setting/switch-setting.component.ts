@@ -7,7 +7,6 @@ import { map } from 'rxjs/operators';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IFfParams, IVariationOption, IFfSettingParams } from '../types/switch-new';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { FfcAngularSdkService } from 'ffc-angular-sdk';
 
 @Component({
   selector: 'setting',

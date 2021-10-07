@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { FfcAngularSdkService } from 'ffc-angular-sdk';
 import { Observable } from 'rxjs';
+import { FfcService } from 'src/app/services/ffc.service';
 import { getAuth } from 'src/app/utils';
 import { environment } from 'src/environments/environment';
 
@@ -11,7 +11,7 @@ import { environment } from 'src/environments/environment';
 export class MainGuard implements CanActivate {
 
   constructor(
-    private ffcAngularSdkService: FfcAngularSdkService
+    private ffcService: FfcService
   ) {
 
   }
@@ -27,7 +27,7 @@ export class MainGuard implements CanActivate {
    private initAuth() {
     const auth = getAuth();
 
-    this.ffcAngularSdkService.initialize(
+    this.ffcService.client.initialize(
       environment.projectEnvKey,
       {
         key: auth.email,

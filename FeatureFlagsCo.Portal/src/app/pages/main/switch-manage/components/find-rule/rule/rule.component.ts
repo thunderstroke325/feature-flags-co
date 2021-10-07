@@ -3,7 +3,6 @@ import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { IJsonContent } from '../../../types/switch-new';
 import { ruleType, ruleValueConfig, findIndex } from '../ruleConfig';
-import { FfcAngularSdkService } from 'ffc-angular-sdk';
 
 @Component({
   selector: 'app-rule',

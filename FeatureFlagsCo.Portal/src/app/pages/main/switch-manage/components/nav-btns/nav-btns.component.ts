@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { btnsConfig } from './btns';
-import { FfcAngularSdkService } from 'ffc-angular-sdk';
+import { FfcService } from 'src/app/services/ffc.service';
 import { environment } from './../../../../../../environments/environment';
 
 @Component({
@@ -18,9 +18,9 @@ export class NavBtnsComponent {
 
   constructor(
     private router: Router,
-    private ffcAngularSdkService: FfcAngularSdkService
+    private ffcService: FfcService
   ){
-    const experimentation  = environment.name === 'Standalone' ? 'temporary version' : this.ffcAngularSdkService.variation('experimentation');
+    const experimentation  = environment.name === 'Standalone' ? 'temporary version' : this.ffcService.client.variation('experimentation');
     if (experimentation === 'hide') {
       const idx = this.navConfig.findIndex(n => n.id === 'experimentations');
       if (idx > -1) {

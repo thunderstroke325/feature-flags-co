@@ -5,7 +5,7 @@ import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType, IVariationOption, IFftiuParams, IRulePercentageRollout, IPrequisiteFeatureFlag } from '../types/switch-new';
-import { FfcAngularSdkService } from 'ffc-angular-sdk';
+import { FfcService } from 'src/app/services/ffc.service';
 import { PendingChange } from '../types/pending-changes';
 import { TeamService } from 'src/app/services/team.service';
 import { IAccount, IProjectEnv } from 'src/app/config/types';
@@ -39,10 +39,10 @@ export class TargetConditionsComponent implements OnInit {
     private route:ActivatedRoute,
     private switchServe: SwitchService,
     private msg: NzMessageService,
-    private ffcAngularSdkService: FfcAngularSdkService,
+    private ffcService: FfcService,
     private teamService: TeamService
   ) {
-    this.approvalRequestEnabled = environment.name === 'Standalone' ? false : this.ffcAngularSdkService.variation('approval-request') === 'true';
+    this.approvalRequestEnabled = environment.name === 'Standalone' ? false : this.ffcService.client.variation('approval-request') === 'true';
     this.ListenerResolveData();
   }
 
