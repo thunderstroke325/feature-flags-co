@@ -1,8 +1,7 @@
-<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzWidth]="500" (nzOnClose)="onClose()">
+<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzWidth]="500" nzTitle="Metric 信息" [nzFooter]="confirm" (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <div class="drawer-layout">
-      <form nz-form [formGroup]="metricForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
-        <h3>Metric 信息</h3>
+      <form id="myForm" nz-form [formGroup]="metricForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
         <nz-form-item>
             <nz-form-label>名称</nz-form-label>
             <nz-form-control nzErrorTip="名称！">
@@ -75,11 +74,12 @@
           </nz-form-control>
           在代码中埋点时使用该事件名称。
         </nz-form-item>
-
-        <button nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">{{isEditing
-            ? '更新' : '创建'}}</button>
       </form>
     </div>
   </ng-container>
+  <ng-template #confirm>
+    <button form="myForm" style="float: right" nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>
+
+  </ng-template>
 </nz-drawer>
 

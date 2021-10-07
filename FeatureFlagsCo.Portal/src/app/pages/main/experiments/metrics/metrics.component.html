@@ -1,6 +1,6 @@
 <div class="body">
   <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
-    <nz-card style="margin-top: 20px;">
+    <div style="margin-top: 20px;">
       <div class="actions">
         <div class="filters">
           <div class="search-filter">
@@ -21,18 +21,18 @@
           </button>
         </div>
       </div>
-      <nz-table #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="metricList" style="margin-top: 20px;">
+      <nz-table #borderedTable [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="metricList" style="margin-top: 20px;">
         <thead>
-          <tr>
+          <tr class="table-th-style">
             <th>Metric</th>
             <th>事件类型</th>
             <th>维护人</th>
+            <th nzAlign="center">编辑</th>
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngFor="let data of borderedTable.data">
-            <tr>
-              <td (click)="onCreateOrEditClick(data)"><a class="title">{{data.name}}</a></td>
+            <tr  *ngFor="let data of borderedTable.data">
+              <td>{{data.name}}</td>
               <td>
                 <nz-tag nzNoAnimation>
                   <ng-container *ngIf="data.eventType === customEventType">
@@ -41,11 +41,14 @@
                 </nz-tag>
               </td>
               <td>{{ data.maintainerName }}</td>
+              <td (click)="onCreateOrEditClick(data)" style="color: #9A95CC;text-align: center;">
+                <i nz-icon nzType="edit" nzTheme="fill"></i>
+                编辑
+              </td>
             </tr>
-          </ng-container>
         </tbody>
       </nz-table>
-    </nz-card>
+    </div>
   </nz-spin>
 </div>
 
