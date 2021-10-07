@@ -3,7 +3,7 @@
       <nz-spin [nzSpinning]="isUploading" nzTip="上传中...">
         <div class="upload-drawer-layout">
           <section>
-            <h5 nz-typography>请选择要上传的文件（仅支持 json 文件）<a class="template-link" href="/assets/upload_example.json" target="_blank">点击查看模板</a> :</h5>
+            <div>请选择要上传的文件（仅支持 json 文件）<a class="template-link" href="/assets/upload_example.json" target="_blank">点击查看模板</a> :</div>
             <nz-upload
                     [nzAction]="uploadUrl"
                     [nzHeaders]="{ authorization: 'authorization-text' }"
