@@ -7,4 +7,5 @@ services:
         exptenv: prod
       dockerfile: Dockerfile
     image: ffc-experiments
-
+    ports: 
+      - 80:80

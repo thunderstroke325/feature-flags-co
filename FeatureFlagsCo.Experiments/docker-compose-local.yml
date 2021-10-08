@@ -13,6 +13,8 @@ services:
         exptenv: local
       dockerfile: Dockerfile.local
     image: ffc-experiments
+    ports: 
+      - 80:80
     profiles: 
       - local
     networks:
