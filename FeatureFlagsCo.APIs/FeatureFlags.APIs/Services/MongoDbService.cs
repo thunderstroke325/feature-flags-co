@@ -329,40 +329,20 @@ namespace FeatureFlags.APIs.Services
                     Status = param.Status,
                     VariationOptionWhenDisabled = new VariationOption()
                     {
-                        DisplayOrder = 1,
-                        LocalId = 1,
-                        VariationValue = "产品经理话术版1"
+                        DisplayOrder = 3,
+                        LocalId = 3,
+                        VariationValue = "旧版"
                     },
                     DefaultRulePercentageRollouts = new List<VariationOptionPercentageRollout>()
                     {
                         new VariationOptionPercentageRollout
                         {
-                            RolloutPercentage = new double[2] {0, 0.33},
-                            ValueOption = new VariationOption()
-                            {
-                                DisplayOrder = 1,
-                                LocalId = 1,
-                                VariationValue = "产品经理话术版1"
-                            }
-                        },
-                        new VariationOptionPercentageRollout
-                        {
-                            RolloutPercentage = new double[2] {0.33, 0.67},
-                            ValueOption = new VariationOption()
-                            {
-                                DisplayOrder = 2,
-                                LocalId = 2,
-                                VariationValue = "程序员话术版1"
-                            }
-                        },
-                        new VariationOptionPercentageRollout
-                        {
-                            RolloutPercentage = new double[2] {0.67, 1},
+                            RolloutPercentage = new double[2] {0, 1},
                             ValueOption = new VariationOption()
                             {
                                 DisplayOrder = 3,
                                 LocalId = 3,
-                                VariationValue = "产品经理话术版2"
+                                VariationValue = "旧版"
                             }
                         }
                     }
@@ -373,14 +353,20 @@ namespace FeatureFlags.APIs.Services
                 {
                     new FeatureFlagTargetUsersWhoMatchTheseRuleParam 
                     {
-                        RuleName = "CSDN 规则",
+                        RuleName = "Age规则A",
                         RuleJsonContent = new List<FeatureFlagRuleJsonContent> 
                         {
                             new FeatureFlagRuleJsonContent 
                             {
-                                Operation = "EndsWith",
-                                Property = "外放地址",
-                                Value = "?from=csdn"
+                                Operation = "BiggerThan",
+                                Property = "age",
+                                Value = "18"
+                            },
+                            new FeatureFlagRuleJsonContent
+                            {
+                                Operation = "LessEqualThan",
+                                Property = "age",
+                                Value = "20"
                             }
                         },
                         ValueOptionsVariationRuleValues = new List<VariationOptionPercentageRollout> 
@@ -390,55 +376,51 @@ namespace FeatureFlags.APIs.Services
                                 RolloutPercentage = new double[2] {0, 1},
                                 ValueOption = new VariationOption()
                                 {
-                                    DisplayOrder = 2,
-                                    LocalId = 2,
-                                    VariationValue = "程序员话术版1"
+                                    DisplayOrder = 1,
+                                    LocalId = 1,
+                                    VariationValue = "新版本A"
                                 }
                             }
                         }
                     },
                     new FeatureFlagTargetUsersWhoMatchTheseRuleParam
                     {
-                        RuleName = "RRCPJL 规则",
+                        RuleName = "Age规则AB",
                         RuleJsonContent = new List<FeatureFlagRuleJsonContent>
                         {
                             new FeatureFlagRuleJsonContent
                             {
-                                Operation = "EndsWith",
-                                Property = "外放地址",
-                                Value = "?from=rrcpjl"
+                                Operation = "BiggerThan",
+                                Property = "age",
+                                Value = "20"
+                            },
+                            new FeatureFlagRuleJsonContent
+                            {
+                                Operation = "LessEqualThan",
+                                Property = "age",
+                                Value = "30"
                             }
                         },
                         ValueOptionsVariationRuleValues = new List<VariationOptionPercentageRollout>
                         {
                             new VariationOptionPercentageRollout
                             {
-                                RolloutPercentage = new double[2] {0, 0.5},
+                                RolloutPercentage = new double[2] {0, 0.3},
                                 ValueOption = new VariationOption()
                                 {
                                     DisplayOrder = 1,
                                     LocalId = 1,
-                                    VariationValue = "产品经理话术版1"
+                                    VariationValue = "新版本A"
                                 }
                             },
                             new VariationOptionPercentageRollout
                             {
-                                RolloutPercentage = new double[2] {0.5, 0.5},
+                                RolloutPercentage = new double[2] {0.3, 1},
                                 ValueOption = new VariationOption()
                                 {
                                     DisplayOrder = 2,
                                     LocalId = 2,
-                                    VariationValue = "程序员话术版1"
-                                }
-                            },
-                            new VariationOptionPercentageRollout
-                            {
-                                RolloutPercentage = new double[2] {0, 0.5},
-                                ValueOption = new VariationOption()
-                                {
-                                    DisplayOrder = 3,
-                                    LocalId = 3,
-                                    VariationValue = "产品经理话术版2"
+                                    VariationValue = "新版本B"
                                 }
                             }
                         }
@@ -450,19 +432,19 @@ namespace FeatureFlags.APIs.Services
                     {
                         DisplayOrder = 1,
                         LocalId = 1,
-                        VariationValue = "产品经理话术版1"
+                        VariationValue = "新版本A"
                     },
                     new VariationOption()
                     {
                         DisplayOrder = 2,
                         LocalId = 2,
-                        VariationValue = "程序员话术版1"
+                        VariationValue = "新版本B"
                     },
                     new VariationOption()
                     {
                         DisplayOrder = 3,
                         LocalId = 3,
-                        VariationValue = "产品经理话术版2"
+                        VariationValue = "旧版"
                     },
                 },
                 TargetIndividuals = new List<TargetIndividualForVariationOption>()

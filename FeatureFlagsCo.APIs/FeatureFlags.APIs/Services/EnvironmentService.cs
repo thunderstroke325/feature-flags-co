@@ -113,14 +113,14 @@ namespace FeatureFlags.APIs.Services
                 var userProperty = new EnvironmentUserProperty
                 {
                     EnvironmentId = env.Id,
-                    Properties = new List<string> { "外放地址" }
+                    Properties = new List<string> { "age" }
                 };
 
                 await _environmentService.CreateOrUpdateCosmosDBEnvironmentUserPropertiesForCRUDAsync(userProperty);
 
                 var demoFFVM = new CreateFeatureFlagViewModel 
                 { 
-                    Name = "演示专用功能标记",
+                    Name = "示例开关",
                     Status = "Enabled",
                     EnvironmentId = env.Id
                 };
