@@ -132,7 +132,7 @@
                   开始实验
                 </button>
               </div>
-              <nz-table *ngIf="experiment.status !== 1" #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experiment?.selectedIteration?.results" style="margin-top: 20px;">
+              <nz-table *ngIf="experiment.status !== 1" nzSize="small" #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experiment?.selectedIteration?.results" style="margin-top: 10px;">
                 <thead>
                   <tr class="table-th-style">
                     <th>特性</th>

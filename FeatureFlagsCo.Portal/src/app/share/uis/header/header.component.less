@@ -37,9 +37,20 @@
   min-width: 200px;
   font-size: 15px;
   li{
+    &:first-child {
+      cursor: default;
+      border-bottom: 1px solid #b4b5c2;
+      &:hover {
+        background-color: white;
+      }
+    }
     width: 100%;
     display: flex;
     justify-content: center;
+    &:not(:first-child) {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
   }
 }
 

@@ -93,6 +93,7 @@ export class HeaderComponent implements OnInit {
 
   onSelectProject(project: IProject) {
     this.selectedProject = project;
+    this.selectedEnv = project.environments.length > 0 ? project.environments[0] : null;
   }
 
   onSelectEnv(env: IEnvironment) {
