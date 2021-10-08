@@ -132,7 +132,6 @@ class RabbitMQConsumer(ABC, RabbitMQ):
                     self._init__redis_connection(
                         self._redis_host, self._redis_port, self._redis_passwd)
                 self.consumer(queue, *bindings)
-                break
             except KeyboardInterrupt:
                 logger.info('#######Interrupted#########')
                 try:
