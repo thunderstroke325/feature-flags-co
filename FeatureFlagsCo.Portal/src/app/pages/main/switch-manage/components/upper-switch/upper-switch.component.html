@@ -5,13 +5,15 @@
         <p style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin-left: 24px">若下方上游开关不符合条件，则此开关处于关闭状态</p>
     </ng-template>
     <ng-template #collapseAction>
-      <button style="position: relative;top: -50px;" nz-button nzType="primary" (click)="onAddUpperSwitch($event)">
-        <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>
-        添加上游开关
-      </button>
+      <div style="position: relative">
+        <button style="position: absolute;top: -50px;right:0" nz-button nzType="primary" (click)="onAddUpperSwitch($event)">
+          <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>
+          添加上游开关
+        </button>
+      </div>
     </ng-template>
 
-  <nz-collapse-panel [nzHeader]="collapseTitle" [nzExtra]="collapseAction" [nzActive]="upperFeatures.length!==0">
+  <nz-collapse-panel [nzHeader]="collapseTitle" [nzExtra]="collapseAction" [nzActive]="upperFeatures.length!==0" >
   <nz-table #basicTable [nzData]="upperFeatures" [nzFrontPagination]="false" nzSize="small">
     <thead>
     <tr class="table-th-style">
