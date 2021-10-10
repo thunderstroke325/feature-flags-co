@@ -29,5 +29,18 @@ namespace FeatureFlagsCo.Messaging.Services
                 await UpsertItemAsync(experiment);
             }
         }
+
+        public void UpdateExperimentResult(ExperimentResult param)
+        {
+            var experiment = Get(param.ExperimentId);
+            if (experiment != null)
+            {
+                var iteration = experiment.Iterations.Find(it => it.Id == param.IterationId);
+                iteration.UpdatedAt = param.EndTime;
+                iteration.Results = param.Results;
+
+                UpsertItem(experiment);
+            }
+        }
     }
 }

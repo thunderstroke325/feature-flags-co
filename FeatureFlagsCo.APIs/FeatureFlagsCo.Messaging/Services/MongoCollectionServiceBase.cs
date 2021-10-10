@@ -20,6 +20,8 @@ namespace FeatureFlagsCo.Messaging.Services
         public async Task<T> GetAsync(string id) =>
             await _collection.Find<T>(book => book.Id == id).FirstOrDefaultAsync();
 
+        public T Get(string id) =>
+            _collection.Find<T>(book => book.Id == id).FirstOrDefault();
 
         public async Task<T> UpsertItemAsync(T item)
         {
@@ -35,15 +37,40 @@ namespace FeatureFlagsCo.Messaging.Services
             }
         }
 
+        public T UpsertItem(T item)
+        {
+            var existingItem = Get(item.Id);
+            if (existingItem != null)
+            {
+                item.Id = existingItem.Id;
+                return Update(item.Id, item);
+            }
+            else
+            {
+                return Create(item);
+            }
+        }
+
         public async Task<T> CreateAsync(T item)
         {
             await _collection.InsertOneAsync(item);
             return item;
         }
 
+        public T Create(T item)
+        {
+            _collection.InsertOne(item);
+            return item;
+        }
+
         public async Task<T> UpdateAsync(string id, T item)
         {
             return await _collection.FindOneAndReplaceAsync(p => p.Id == id, item);
+        }
+
+        public T Update(string id, T item)
+        {
+            return _collection.FindOneAndReplace(p => p.Id == id, item);
         }
 
         public async Task RemoveAsync(T bookIn) =>

@@ -72,11 +72,14 @@ namespace FeatureFlags.APIs.Services
                         exclusive: false,
                         autoDelete: false,
                         arguments: null).QueueName;
+
+                    _channel.BasicQos(prefetchSize: 0, prefetchCount: 200, global: false);
+
                     _channel.QueueBind(queue: queueName,
                         exchange: "Q3",
                         routingKey: "py.experiments.experiment.results.#");
                     var consumer = new EventingBasicConsumer(_channel);
-                    consumer.Received += async (model, ea) =>
+                    consumer.Received += (model, ea) =>
                     {
                         string message = default;
                         try
@@ -84,7 +87,7 @@ namespace FeatureFlags.APIs.Services
                             var body = ea.Body.ToArray();
                             message = Encoding.UTF8.GetString(body);
                             var messageModel = JsonConvert.DeserializeObject<ExperimentResult>(message);
-                            await _experimentService.UpdateExperimentResultAsync(messageModel);
+                            _experimentService.UpdateExperimentResult(messageModel);
 
                             _channel.BasicAck(ea.DeliveryTag, false);
                         }
