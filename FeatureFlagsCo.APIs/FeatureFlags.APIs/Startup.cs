@@ -233,11 +233,9 @@ namespace FeatureFlags.AdminWebAPIs
             Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
 
             var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
-            services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
-            services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
-            services.AddSingleton<IFeatureFlagMqService, FeatureFlagMqService>();
-            services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
             services.AddSingleton<IAuditLogMqService, AuditLogMqService>();
+
+            services.AddSingleton<MessagingService, MessagingService>();
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
             services.AddSingleton<IExportExperimentsDataToElasticSearchService>(new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));

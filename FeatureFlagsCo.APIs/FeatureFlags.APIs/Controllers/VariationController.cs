@@ -2,13 +2,11 @@
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
-using FeatureFlags.APIs.ViewModels;
 using FeatureFlagsCo.MQ;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -26,24 +24,18 @@ namespace FeatureFlags.APIs.Controllers
         private readonly ILogger<VariationController> _logger;
         private readonly IDistributedCache _redisCache;
         private readonly IVariationService _variationService;
-        private readonly IOptions<MySettings> _mySettings;
-        private readonly IInsighstMqService _insightsService;
-        private readonly IFeatureFlagMqService _featureFlagMqService;
+        private readonly MessagingService _messagingService;
 
         public VariationController(
             ILogger<VariationController> logger, 
             IDistributedCache redisCache,
             IVariationService variationService,
-            IOptions<MySettings> mySettings,
-            IInsighstMqService insightsService,
-            IFeatureFlagMqService featureFlagMqService)
+            MessagingService messagingService)
         {
             _logger = logger;
             _redisCache = redisCache;
             _variationService = variationService;
-            _mySettings = mySettings;
-            _insightsService = insightsService;
-            _featureFlagMqService = featureFlagMqService;
+            _messagingService = messagingService;
         }
 
         [HttpPost]
@@ -214,8 +206,9 @@ namespace FeatureFlags.APIs.Controllers
                     });
                 }
             }
-            _featureFlagMqService.SendMessage(ffEvent);
-            _insightsService.SendMessage(new FeatureFlagsCo.MQ.MessageModel
+
+            _messagingService.SendFeatureFlagDataAsync(ffEvent);
+            _messagingService.SendInsightDataAsync(new FeatureFlagsCo.MQ.MessageModel
             {
                 SendDateTime = DateTime.UtcNow,
                 Labels = labels,

@@ -33,8 +33,8 @@ namespace FeatureFlags.APIs.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly IDistributedCache _redisCache;
-        private readonly IInsighstMqService _rabbitmqInsightsService;
         private readonly INoSqlService _noSqlService;
+        private readonly MessagingService _messagingService;
         private readonly IFeatureFlagsUsageService _ffUsageService;
         private readonly IOptions<MySettings> _mySettings;
 
@@ -42,17 +42,17 @@ namespace FeatureFlags.APIs.Controllers
 
         public WeatherForecastController(ILogger<WeatherForecastController> logger,
             IDistributedCache redisCache,
-            IInsighstMqService rabbitmqInsightsService,
             INoSqlService noSqlService,
+            MessagingService messagingService,
             IOptions<MySettings> mySettings,
             IFeatureFlagsUsageService ffUsageService)
         {
             _logger = logger;
             _redisCache = redisCache;
-            _rabbitmqInsightsService = rabbitmqInsightsService;
             _noSqlService = noSqlService;
             _ffUsageService = ffUsageService;
             _mySettings = mySettings;
+            _messagingService = messagingService;
         }
 
         [HttpGet]
@@ -126,7 +126,7 @@ namespace FeatureFlags.APIs.Controllers
             _redisCache.SetString(date, JsonConvert.SerializeObject(customizedTraceProperties));
             _redisCache.GetString(date);
             Response.StatusCode = 200;
-            await _rabbitmqInsightsService.SendMessageAsync(new FeatureFlagsCo.MQ.MessageModel
+            await _messagingService.SendInsightDataAsync(new FeatureFlagsCo.MQ.MessageModel
             {
                 Labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
                  {
@@ -141,14 +141,14 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("SendDataToElasticSearch")]
-        public void SendDataToElasticSearch()
+        public async Task<dynamic> SendDataToElasticSearch()
         {
             var date = Guid.NewGuid().ToString();
             Response.StatusCode = 200;
             var testFeatureFlagId = FeatureFlagKeyExtension.GetFeatureFlagId(date, "-1");
             for(int i = 1; i > 0; i--)
             {
-                _rabbitmqInsightsService.SendMessage(new FeatureFlagsCo.MQ.MessageModel
+                await _messagingService.SendInsightDataAsync(new FeatureFlagsCo.MQ.MessageModel
                 {
                     Labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
                      {
@@ -166,6 +166,8 @@ namespace FeatureFlags.APIs.Controllers
                     IndexTarget = "ffvariationrequestindex"
                 });
             }
+
+            return Task.FromResult<Object>(null);
         }
 
         [HttpGet]

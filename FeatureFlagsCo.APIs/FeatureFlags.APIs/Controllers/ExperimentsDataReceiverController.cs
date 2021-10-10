@@ -24,14 +24,14 @@ namespace FeatureFlags.APIs.Controllers
     public class ExperimentsDataReceiverController : ControllerBase
     {
         private readonly ILogger<ExperimentsDataReceiverController> _logger;
-        private readonly IExperimentMqService _experimentsService;
+        private readonly MessagingService _messagingService;
 
         public ExperimentsDataReceiverController(
             ILogger<ExperimentsDataReceiverController> logger,
-            IExperimentMqService experimentsService)
+            MessagingService messagingService)
         {
             _logger = logger;
-            _experimentsService = experimentsService;
+            _messagingService = messagingService;
         }
 
 
@@ -59,7 +59,7 @@ namespace FeatureFlags.APIs.Controllers
                         TimeStamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
                     };
 
-                    _experimentsService.SendMessage(message);
+                    _messagingService.SendEventDataAsync(message);
                 }
                 return new JsonResult(null);
             }

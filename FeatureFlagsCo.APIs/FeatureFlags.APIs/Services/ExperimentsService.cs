@@ -38,22 +38,19 @@ namespace FeatureFlags.APIs.Services
     {
         private readonly IOptions<MySettings> _mySettings;
         private readonly INoSqlService _noSqlDbService;
-        private readonly IInsighstMqService _insightsService;
         private readonly MetricService _metricService;
-        private readonly IExperimentStartEndMqService _experimentStartEndMqService;
+        private readonly MessagingService _messagingService;
 
         public ExperimentsService(
             INoSqlService noSqlDbService,
-            IInsighstMqService insightsService,
+            MessagingService messagingService,
             MetricService metricService,
-            IExperimentStartEndMqService experimentStartEndMqService,
             IOptions<MySettings> mySettings)
         {
             _noSqlDbService = noSqlDbService;
-            _insightsService = insightsService;
-            _experimentStartEndMqService = experimentStartEndMqService;
             _mySettings = mySettings;
             _metricService = metricService;
+            _messagingService = messagingService;
         }
 
         public async Task UpdateExperimentResultAsync(ExperimentResult param) 
@@ -145,7 +142,7 @@ namespace FeatureFlags.APIs.Services
                             Variations = experiment.Variations
                         };
 
-                        _experimentStartEndMqService.SendMessage(message);
+                        _messagingService.SendExperimentStartEndDataAsync(message);
                     }
                 });
 
@@ -179,7 +176,7 @@ namespace FeatureFlags.APIs.Services
                             Variations = experiment.Variations
                         };
 
-                        _experimentStartEndMqService.SendMessage(message);
+                        _messagingService.SendExperimentStartEndDataAsync(message);
                     }
                 });
 
@@ -257,7 +254,7 @@ namespace FeatureFlags.APIs.Services
                             Variations = experiment.Variations
                         };
 
-                        _experimentStartEndMqService.SendMessage(message);
+                        _messagingService.SendExperimentStartEndDataAsync(message);
                     }
                 });
 
@@ -277,7 +274,7 @@ namespace FeatureFlags.APIs.Services
                     Variations = experiment.Variations
                 };
 
-                _experimentStartEndMqService.SendMessage(message);
+                _messagingService.SendExperimentStartEndDataAsync(message);
 
                 return iteration;
             }
@@ -337,7 +334,7 @@ namespace FeatureFlags.APIs.Services
                     Variations = experiment.Variations
                 };
 
-                _experimentStartEndMqService.SendMessage(message);
+                _messagingService.SendExperimentStartEndDataAsync(message);
 
                 return iteration;
             }
