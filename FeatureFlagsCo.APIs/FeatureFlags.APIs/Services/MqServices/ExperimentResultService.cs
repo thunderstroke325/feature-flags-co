@@ -2,9 +2,6 @@ using System;
 using System.Text;
 using System.Threading;
 using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.ViewModels;
-using FeatureFlags.APIs.ViewModels.Experiments;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -26,6 +23,7 @@ namespace FeatureFlags.APIs.Services
         public ExperimentResultService(string rabbitConnectStr, IExperimentsService experimentService)
         {
             _factory = new ConnectionFactory();
+            _factory.NetworkRecoveryInterval = TimeSpan.FromSeconds(10);
             _factory.Uri = new Uri(rabbitConnectStr);
             _experimentService = experimentService;
             Init();
@@ -33,19 +31,22 @@ namespace FeatureFlags.APIs.Services
 
         public void Init()
         {
-            if (_channel != null)
+            int retryCount = 1;
+            while (true)
             {
-                _channel.Close();
-                // _channel.QueueDelete("experiment.result.reader");
-            }
-
-            if (_connection != null)
-                _connection.Close();
-            for (int i = 0; i < 3; i++)
-            {
-                Console.WriteLine("Start RabbitMq Receiver Service at " + DateTime.UtcNow.ToString());
                 try
                 {
+                    if (_channel != null)
+                    {
+                        _channel.Close();
+                        // _channel.QueueDelete("experiment.result.reader");
+                    }
+
+                    if (_connection != null)
+                        _connection.Close();
+
+                    Console.WriteLine("Start RabbitMq Receiver Service at " + DateTime.UtcNow.ToString());
+                
                     _connection = _factory.CreateConnection();
                     _channel = _connection.CreateModel();
 
@@ -106,7 +107,8 @@ namespace FeatureFlags.APIs.Services
                 }
                 catch (Exception exp)
                 {
-                    Console.WriteLine($"{i} times. Connection failed:" + exp.Message);
+                    Console.WriteLine($"{retryCount} times. Connection failed:" + exp.Message);
+                    retryCount++;
                     Thread.Sleep(30 * 1000);
                 }
             }

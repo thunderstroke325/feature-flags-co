@@ -20,7 +20,7 @@ namespace FeatureFlags.APIs.Services
         public async Task<List<Metric>> GetMetricsAsync(int envId, string searchText, int pageIndex, int pageSize)
         {
             if (string.IsNullOrWhiteSpace(searchText))
-                return await _collection.Find(p => p.EnvId == envId).SortByDescending(p => p.UpdatedAt).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
+                return await _collection.Find(p => p.EnvId == envId).SortByDescending(p => p.CreatedAt).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
             else
                 return await _collection.Find(p => p.EnvId == envId && p.Name.ToLower().Contains(searchText.ToLower())).SortByDescending(p => p.CreatedAt).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
         }

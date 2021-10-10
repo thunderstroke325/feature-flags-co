@@ -46,7 +46,6 @@ const routes: Routes = [
         }
       }, {
         path: 'experimentations/:id',
-        resolve: { switchInfo: SwicthSettingResolver },
         loadChildren: () => import("./experimentation/experimentation.module").then(m => m.ExperimentationModule),
         data: {
           breadcrumb: '开关详情'
