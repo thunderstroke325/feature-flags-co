@@ -27,7 +27,6 @@
           </nz-empty>
 
           <nz-card class="experiment" *ngFor="let experiment of experimentList" style="margin-top: 20px;">
-            <nz-spin [nzSpinning]="experiment.isLoading" nzTip="数据加载中..." >
               <div class="head">
                 <div class="first-line">
                   <div class="title-area">
@@ -137,80 +136,81 @@
                   开始实验
                 </button>
               </div>
-              <nz-table *ngIf="experiment.status !== 1" nzSize="small" #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experiment?.selectedIteration?.results" style="margin-top: 10px;">
-                <thead>
-                  <tr class="table-th-style">
-                    <th>特性</th>
-                    <th>转化数 / 用户数</th>
-                    <th>转化率</th>
-                    <th style="width: 210px">置信区间</th>
-                    <th>变化</th>
-                    <th>P-值</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <ng-container *ngFor="let data of borderedTable.data">
-                    <tr *ngIf="data.isEmpty" class="empty_variation">
-                      <td>
-                        <span nz-tooltip [nzTooltipTitle]="'暂时没有实验数据'" [nzTooltipColor]="'cyan'">
-                          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
-                        </span>
-                        &nbsp;{{ data.variationValue }}
-                      </td>
-                      <td> --/-- </td>
-                      <td> -- </td>
-                      <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell"> <div>基准特性</div> </td>
-                      <td *ngIf="!data.isBaseline"> -- </td>
-                      <td *ngIf="!data.isBaseline"> -- </td>
-                      <td> -- </td>
+              <nz-spin [nzSpinning]="experiment.isLoading" nzTip="数据加载中..." >
+                <nz-table *ngIf="experiment.status !== 1" nzSize="small" #borderedTable nzBordered [nzFrontPagination]="false" [nzShowPagination]="false" [nzData]="experiment?.selectedIteration?.results" style="margin-top: 10px;">
+                  <thead>
+                    <tr class="table-th-style">
+                      <th>特性</th>
+                      <th>转化数 / 用户数</th>
+                      <th>转化率</th>
+                      <th style="width: 210px">置信区间</th>
+                      <th>变化</th>
+                      <th>P-值</th>
                     </tr>
-                    <tr *ngIf="!data.isEmpty" [class.winner]="data.isWinner" >
-                      <td>
-                        <span *ngIf="data.isWinner" nz-tooltip [nzTooltipTitle]="'该特性胜出'" [nzTooltipColor]="'cyan'">
-                          <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i>
-                        </span>
-                        <span *ngIf="data.isInvalid" nz-tooltip [nzTooltipTitle]="'相对于基准特性并不具有统计学上的优势'" [nzTooltipColor]="'cyan'">
-                          <ng-container *ngIf="!data.isBaseline">
-                            <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i>
-                          </ng-container>
-                          <ng-container *ngIf="data.isBaseline">
-                            <span class="icon_placeholder"></span>
-                          </ng-container>
-                        </span>
-                        <span class="icon_placeholder" *ngIf="!data.isWinner && !data.isInvalid"></span>
-                        &nbsp;{{ data.variationValue }}</td>
-                      <td>{{ data.conversion }}/{{ data.uniqueUsers }}</td>
-                      <td>{{ data.conversionRate | percentage }}</td>
-                      <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell">
-                        <div>基准特性</div>
-                      </td>
-                      <td *ngIf="!data.isBaseline">
-                        <div  style="width: 200px;box-sizing: border-box;">
-                          <div *ngIf="data.confidenceInterval[0] >= 0" class="BoxChart">
-                            <div class="BoxChart-whisker"></div>
-                            <div class="BoxChart-box--container">
-                              <div class="BoxChart-box--line"></div>
-                              <div class="BoxChart-box" [style.left.px]="data.confidenceInterval[0] * 200" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) * 200">
-                                <div class="BoxChart-box--median" [style.left.px]="(data.conversionRate - data.confidenceInterval[0]) * 200"></div>
+                  </thead>
+                  <tbody>
+                    <ng-container *ngFor="let data of borderedTable.data">
+                      <tr *ngIf="data.isEmpty" class="empty_variation">
+                        <td>
+                          <span nz-tooltip [nzTooltipTitle]="'暂时没有实验数据'" [nzTooltipColor]="'cyan'">
+                            <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+                          </span>
+                          &nbsp;{{ data.variationValue }}
+                        </td>
+                        <td> --/-- </td>
+                        <td> -- </td>
+                        <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell"> <div>基准特性</div> </td>
+                        <td *ngIf="!data.isBaseline"> -- </td>
+                        <td *ngIf="!data.isBaseline"> -- </td>
+                        <td> -- </td>
+                      </tr>
+                      <tr *ngIf="!data.isEmpty" [class.winner]="data.isWinner" >
+                        <td>
+                          <span *ngIf="data.isWinner" nz-tooltip [nzTooltipTitle]="'该特性胜出'" [nzTooltipColor]="'cyan'">
+                            <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i>
+                          </span>
+                          <span *ngIf="data.isInvalid" nz-tooltip [nzTooltipTitle]="'相对于基准特性并不具有统计学上的优势'" [nzTooltipColor]="'cyan'">
+                            <ng-container *ngIf="!data.isBaseline">
+                              <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i>
+                            </ng-container>
+                            <ng-container *ngIf="data.isBaseline">
+                              <span class="icon_placeholder"></span>
+                            </ng-container>
+                          </span>
+                          <span class="icon_placeholder" *ngIf="!data.isWinner && !data.isInvalid"></span>
+                          &nbsp;{{ data.variationValue }}</td>
+                        <td>{{ data.conversion }}/{{ data.uniqueUsers }}</td>
+                        <td>{{ data.conversionRate | percentage }}</td>
+                        <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell">
+                          <div>基准特性</div>
+                        </td>
+                        <td *ngIf="!data.isBaseline">
+                          <div  style="width: 200px;box-sizing: border-box;">
+                            <div *ngIf="data.confidenceInterval[0] >= 0" class="BoxChart">
+                              <div class="BoxChart-whisker"></div>
+                              <div class="BoxChart-box--container">
+                                <div class="BoxChart-box--line"></div>
+                                <div class="BoxChart-box" [style.left.px]="data.confidenceInterval[0] * 200" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) * 200">
+                                  <div class="BoxChart-box--median" [style.left.px]="(data.conversionRate - data.confidenceInterval[0]) * 200"></div>
+                                </div>
                               </div>
+                              <div class="BoxChart-whisker"></div>
                             </div>
-                            <div class="BoxChart-whisker"></div>
                           </div>
-                        </div>
-                        <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
-                        <div *ngIf="data.confidenceInterval[0] === -1"class="confidence_interval"> -- </div>
-                      </td>
-                      <td *ngIf="!data.isBaseline">
-                        {{ data.changeToBaseline | percentage }}
-                      </td>
-                      <td>
-                        {{ data.pValue }}
-                      </td>
-                    </tr>
-                  </ng-container>
-                </tbody>
-              </nz-table>
-            </nz-spin>
+                          <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
+                          <div *ngIf="data.confidenceInterval[0] === -1"class="confidence_interval"> -- </div>
+                        </td>
+                        <td *ngIf="!data.isBaseline">
+                          {{ data.changeToBaseline | percentage }}
+                        </td>
+                        <td>
+                          {{ data.pValue }}
+                        </td>
+                      </tr>
+                    </ng-container>
+                  </tbody>
+                </nz-table>
+              </nz-spin>
           </nz-card>
         </div>
         <div *ngIf="experimentation==='final version' || experimentation==='temporary version'">
