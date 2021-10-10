@@ -57,11 +57,12 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
       this.refreshIntervalId = setInterval(() => {
         const activeExperimentIteration = this.onGoingExperiments.map(expt => {
+          expt.isLoading = true;
           return {
             experimentId: expt.id,
             iterationId: expt.iterations.find(it => it.endTime === null)?.id
           }
-        }).filter(expt => !!expt.iterationId);
+        });
 
         if (activeExperimentIteration.length > 0) {
           this.experimentService.getIterationResults(this.switchServe.envId, activeExperimentIteration).subscribe(res => {
@@ -77,6 +78,10 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
                 }
               });
             }
+
+            this.onGoingExperiments.forEach(expt => expt.isLoading = false);
+          }, _ => {
+            this.onGoingExperiments.forEach(expt => expt.isLoading = false);
           });
         }
       }, this.refreshInterval);
