@@ -203,5 +203,13 @@ namespace FeatureFlags.APIs.Controllers
         {
             return Ok();
         }
+
+
+        [HttpGet]
+        [Route("parsekey/{key}")]
+        public FeatureFlagIdByEnvironmentKeyViewModel ParseKey(string key)
+        {
+            return FeatureFlagKeyExtension.GetEnvIdsByEnvKey(key);
+        }
     }
 }

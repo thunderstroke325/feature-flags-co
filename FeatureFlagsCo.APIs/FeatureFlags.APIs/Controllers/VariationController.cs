@@ -90,7 +90,14 @@ namespace FeatureFlags.APIs.Controllers
                     return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Feature Flag doesn't exist, please verify your featureFlagKeyName" });
                 }
 
-                SendToRabbitMQ(param, ffIdVM, returnResult);
+                try
+                {
+                    SendToRabbitMQ(param, ffIdVM, returnResult);
+                }
+                catch(Exception exp)
+                {
+                    _logger.LogError(exp, "Post /Variation/GetMultiOptionVariation:SendToRabbitMQ ; Body: " + JsonConvert.SerializeObject(param));
+                }
 
                 return new JsonResult(returnResult.Item1);
             }
