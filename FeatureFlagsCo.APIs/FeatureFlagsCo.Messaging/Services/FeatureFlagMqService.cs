@@ -1,13 +1,13 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using FeatureFlags.APIs.ViewModels;
+using FeatureFlagsCo.Messaging;
 using FeatureFlagsCo.MQ;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
-namespace FeatureFlags.APIs.Services
+namespace FeatureFlagsCo.Messaging.Services
 {
     public class FeatureFlagMqService : IFeatureFlagMqService
     {
@@ -65,7 +65,10 @@ namespace FeatureFlags.APIs.Services
 
         public Task SendMessageAsync(FeatureFlagMessageModel message)
         {
-            throw new NotImplementedException();
+            Task.Yield();
+            SendMessage(message);
+
+            return Task.FromResult<Object>(null);
         }
     }
 }

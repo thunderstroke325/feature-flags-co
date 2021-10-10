@@ -1,22 +1,27 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using FeatureFlags.APIs.ViewModels;
-using FeatureFlagsCo.MQ;
+using FeatureFlagsCo.Messaging.ViewModels;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
-namespace FeatureFlags.APIs.Services
+namespace FeatureFlagsCo.Messaging.Services
 {
-    public class FeatureFlagMqService : IFeatureFlagMqService
+    public interface IExperimentStartEndMqService
+    {
+        void SendMessage(ExperimentIterationMessageViewModel message);
+        Task SendMessageAsync(ExperimentIterationMessageViewModel message);
+    }
+
+    public class ExperimentStartEndMqService : IExperimentStartEndMqService
     {
         private readonly ConnectionFactory _connectionFactory;
         private readonly IOptions<MySettings> _mySettings;
         private IConnection _connection;
         private IModel _channel;
 
-        public FeatureFlagMqService(IOptions<MySettings> mySettings)
+        public ExperimentStartEndMqService(IOptions<MySettings> mySettings)
         {
             _mySettings = mySettings;
 
@@ -29,7 +34,7 @@ namespace FeatureFlags.APIs.Services
             _channel = _connection.CreateModel();
             _channel.CallbackException += Channel_CallbackException;
         }
-
+        
         private void Channel_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
         {
             _channel = _connection.CreateModel();
@@ -52,20 +57,23 @@ namespace FeatureFlags.APIs.Services
             _connection = _connectionFactory.CreateConnection();
         }
 
-        public void SendMessage(FeatureFlagMessageModel message)
+        public void SendMessage(ExperimentIterationMessageViewModel message)
         {
             var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
-            // Q4 数据发送至py
-            _channel.ExchangeDeclare(exchange: "Q4", type: "topic");
-            _channel.BasicPublish(exchange: "Q4",
-                routingKey: "py.experiments.events.ff",
+            // Q4 数据发送至es
+            _channel.ExchangeDeclare(exchange: "Q1", type: "topic");
+            _channel.BasicPublish(exchange: "Q1",
+                routingKey: "py.experiments.recordinginfo",
                 basicProperties: null,
                 body: body);
         }
 
-        public Task SendMessageAsync(FeatureFlagMessageModel message)
+        public Task SendMessageAsync(ExperimentIterationMessageViewModel message)
         {
-            throw new NotImplementedException();
+            Task.Yield();
+            SendMessage(message);
+
+            return Task.FromResult<Object>(null);
         }
     }
 }

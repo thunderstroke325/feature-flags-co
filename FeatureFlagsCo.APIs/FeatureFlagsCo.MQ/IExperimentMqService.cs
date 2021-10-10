@@ -8,5 +8,6 @@ namespace FeatureFlagsCo.MQ
     public interface IExperimentMqService
     {
         void SendMessage(ExperimentMessageModel message);
+        Task SendMessageAsync(ExperimentMessageModel message);
     }
 }

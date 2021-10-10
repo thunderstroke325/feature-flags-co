@@ -1,24 +1,21 @@
-﻿using FeatureFlags.APIs.ViewModels;
-using FeatureFlagsCo.MQ;
+﻿using FeatureFlagsCo.MQ;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FeatureFlags.APIs.Services
+namespace FeatureFlagsCo.Messaging.Services
 {
 
-    public class ExperimentstRabbitMqService : IExperimentMqService
+    public class InsighstRabbitMqService : IInsighstMqService
     {
         private readonly ConnectionFactory _connectionFactory;
         private readonly IOptions<MySettings> _mySettings;
         private IConnection _connection;
         private IModel _channel;
-        public ExperimentstRabbitMqService(IOptions<MySettings> mySettings)
+        public InsighstRabbitMqService(IOptions<MySettings> mySettings)
         {
             _mySettings = mySettings;
 
@@ -29,18 +26,24 @@ namespace FeatureFlags.APIs.Services
             _connection.ConnectionShutdown += Connection_ConnectionShutdown;
             _connection.ConnectionBlocked += Connection_ConnectionBlocked;
             _channel = _connection.CreateModel();
-            // _channel.QueueDeclare(queue: "experiments",
+            // _channel.QueueDeclare(queue: "hello",
             //                         durable: false,
             //                         exclusive: false,
             //                         autoDelete: false,
             //                         arguments: null);
+            //this.SendMessage(new MessageModel
+            //{
+            //    Labels = new List<MessageLabel> { new MessageLabel { LabelName = "API Init", LabelValue = DateTime.UtcNow.ToLongDateString() } },
+            //    Message = "InsighstRabbitMqService Connected",
+            //    SendDateTime = DateTime.UtcNow
+            //});
             _channel.CallbackException += Channel_CallbackException;
         }
 
         private void Channel_CallbackException(object sender, RabbitMQ.Client.Events.CallbackExceptionEventArgs e)
         {
             _channel = _connection.CreateModel();
-            // _channel.QueueDeclare(queue: "experiments",
+            // _channel.QueueDeclare(queue: "hello",
             //                         durable: false,
             //                         exclusive: false,
             //                         autoDelete: false,
@@ -64,36 +67,34 @@ namespace FeatureFlags.APIs.Services
             _connection = _connectionFactory.CreateConnection();
         }
 
-        public void SendMessage(ExperimentMessageModel message)
+        public void SendMessage(MessageModel message)
         {
 
             var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
-            // Q5 数据发送至es, py
-            _channel.ExchangeDeclare(exchange: "Q5", type: "topic");
-            _channel.BasicPublish(exchange: "Q5",
-                routingKey: "es.experiments.events.user",
+            // Q4 数据发送至es
+            _channel.ExchangeDeclare(exchange: "Q4", type: "topic");
+            _channel.BasicPublish(exchange: "Q4",
+                routingKey: "es.experiments.events.ff",
                 basicProperties: null,
                 body: body);
-            _channel.BasicPublish(exchange: "Q5",
-                routingKey: "py.experiments.events.user",
-                basicProperties: null,
-                body: body);
-
             // _channel.BasicPublish(exchange: "",
-            //                       routingKey: "experiments",
+            //                       routingKey: "hello",
             //                       basicProperties: null,
             //                       body: body);
             //_channel.BasicPublish(exchange: "",
-            //                      routingKey: "experiments",
+            //                      routingKey: "hello",
             //                      basicProperties: null,
             //                      body: body);
 
             //Console.WriteLine(message);
         }
 
-        public Task SendMessageAsync(ExperimentMessageModel message)
+        public Task SendMessageAsync(MessageModel message)
         {
-            throw new NotImplementedException();
+            Task.Yield();
+            SendMessage(message);
+
+            return Task.FromResult<Object>(null);
         }
     }
 }
