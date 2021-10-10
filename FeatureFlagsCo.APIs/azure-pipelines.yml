@@ -106,7 +106,7 @@ stages:
                   azureSubscription: 'azure-china-devops'
                   appType: 'webApp'
                   appName: 'ffc-api-ce2-dev'
-                  package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+                  package: '$(Build.ArtifactStagingDirectory)/**/FeatureFlags.APIs.zip'
                   deploymentMethod: 'auto'
 
     
@@ -293,5 +293,5 @@ stages:
                   azureSubscription: 'azure-china-devops'
                   appType: 'webApp'
                   appName: 'ffc-webapp-api-ce2'
-                  package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+                  package: '$(Build.ArtifactStagingDirectory)/**/FeatureFlags.APIs.zip'
                   deploymentMethod: 'auto'
