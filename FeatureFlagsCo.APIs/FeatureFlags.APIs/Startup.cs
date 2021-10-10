@@ -25,7 +25,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using FeatureFlagsCo.FeatureInsights;
 using FeatureFlagsCo.FeatureInsights.ElasticSearch;
-using FeatureFlagsCo.MQ.Export;
 
 namespace FeatureFlags.AdminWebAPIs
 {
@@ -233,15 +232,11 @@ namespace FeatureFlags.AdminWebAPIs
             Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
 
             var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
-            services.AddSingleton<IAuditLogMqService, AuditLogMqService>();
+            //services.AddSingleton<IAuditLogMqService, AuditLogMqService>();
 
             services.AddSingleton<MessagingService, MessagingService>();
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
-            services.AddSingleton<IExportExperimentsDataToElasticSearchService>(new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
-            services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
-            services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
-            services.AddSingleton<IExportAuditLogDataToElasticSearchService>(new ExportAuditLogDataToElasticSearchService(insightsRabbitMqUrl, esHost));
 
             services.AddScoped<IFeatureFlagsUsageService, ElasticSearchFeatureFlagsUsageService>();
             services.AddScoped<IExperimentationService, ExperimentationService>();

@@ -22,7 +22,6 @@ using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
 {
-
     public class ExperimentationService : IExperimentationService
     {
         private readonly IOptions<MySettings> _mySettings;

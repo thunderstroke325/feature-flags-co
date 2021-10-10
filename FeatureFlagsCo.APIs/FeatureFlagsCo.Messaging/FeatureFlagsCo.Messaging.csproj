@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FeatureFlagsCo.Export\FeatureFlagsCo.MQ.Export.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.MQ\FeatureFlagsCo.MQ.csproj" />
   </ItemGroup>
 

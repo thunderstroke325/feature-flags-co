@@ -23,17 +23,18 @@ namespace FeatureFlags.APIs.Controllers
         private readonly ILogger<FeatureFlagTriggersController> _logger;
         private readonly INoSqlService _noSqlDbService;
         private readonly IDistributedCache _redisCache;
-        private readonly IAuditLogMqService _auditLogService;
+        //private readonly IAuditLogMqService _auditLogService;
 
 
         public FeatureFlagTriggersController(ILogger<FeatureFlagTriggersController> logger,
             INoSqlService noSqlDbService,
-            IDistributedCache redisCache, IAuditLogMqService auditLogService)
+            IDistributedCache redisCache)
+            //IAuditLogMqService auditLogService)
         {
             _logger = logger;
             _noSqlDbService = noSqlDbService;
             _redisCache = redisCache;
-            _auditLogService = auditLogService;
+            //_auditLogService = auditLogService;
         }
 
         [HttpGet]

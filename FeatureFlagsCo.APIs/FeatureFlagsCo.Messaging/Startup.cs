@@ -1,5 +1,7 @@
+using FeatureFlags.APIs.Services;
 using FeatureFlagsCo.Messaging.Services;
 using FeatureFlagsCo.MQ;
+using FeatureFlagsCo.MQ.Export;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -100,6 +102,16 @@ namespace FeatureFlagsCo.Messaging
             services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
             services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
 
+            var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
+
+            var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
+
+            services.AddSingleton<IExportExperimentsDataToElasticSearchService>(new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+            services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+            services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+            services.AddSingleton<IExportAuditLogDataToElasticSearchService>(new ExportAuditLogDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+
+    
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
             if (hostingType == "Azure")
             {
