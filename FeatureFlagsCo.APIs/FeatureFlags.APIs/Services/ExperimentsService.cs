@@ -28,8 +28,6 @@ namespace FeatureFlags.APIs.Services
 
         Task<List<ExperimentResultViewModel>> GetExperimentResult(ExperimentQueryViewModel param);
 
-        Task UpdateExperimentResultAsync(ExperimentResult param);
-
         Task<List<ExperimentViewModel>> GetExperimentsByFeatureFlagIds(IEnumerable<string> featureFlagIds, bool shouldIncludeIterations);
         Task<IEnumerable<ExperimentIteration>> GetIterationResults(int envId, List<ExperimentIterationTuple> experimentIterationTuples);
     }
@@ -51,19 +49,6 @@ namespace FeatureFlags.APIs.Services
             _mySettings = mySettings;
             _metricService = metricService;
             _messagingService = messagingService;
-        }
-
-        public async Task UpdateExperimentResultAsync(ExperimentResult param) 
-        {
-            var experiment = await _noSqlDbService.GetExperimentByIdAsync(param.ExperimentId);
-            if (experiment != null) 
-            {
-                var iteration = experiment.Iterations.Find(it => it.Id == param.IterationId);
-                iteration.UpdatedAt = param.EndTime;
-                iteration.Results = param.Results;
-
-                await _noSqlDbService.UpsertExperimentAsync(experiment);
-            }
         }
 
         public async Task<List<ExperimentViewModel>> GetExperimentsByFeatureFlagIds(IEnumerable<string> featureFlagIds, bool shouldIncludeIterations)

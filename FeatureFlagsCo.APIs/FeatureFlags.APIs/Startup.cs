@@ -236,15 +236,9 @@ namespace FeatureFlags.AdminWebAPIs
 
             services.AddSingleton<MessagingService, MessagingService>();
 
-            var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
-
             services.AddScoped<IFeatureFlagsUsageService, ElasticSearchFeatureFlagsUsageService>();
             services.AddScoped<IExperimentationService, ExperimentationService>();
             services.AddScoped<IAuditLogSearchService, AuditLogSearchService>();
-            
-            var serviceProvider = services.BuildServiceProvider();
-            var exptsService = serviceProvider.GetService<IExperimentsService>();
-            services.AddSingleton<IExperimentResultService>(new ExperimentResultService(insightsRabbitMqUrl, exptsService));
             #endregion
         }
 

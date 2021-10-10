@@ -1,5 +1,6 @@
 using FeatureFlags.APIs.Services;
 using FeatureFlagsCo.Messaging.Services;
+using FeatureFlagsCo.Messaging.ViewModels;
 using FeatureFlagsCo.MQ;
 using FeatureFlagsCo.MQ.Export;
 using Microsoft.ApplicationInsights.DataContracts;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
@@ -96,22 +98,29 @@ namespace FeatureFlagsCo.Messaging
             });
 
             services.Configure<MySettings>(options => Configuration.GetSection("MySettings").Bind(options));
+            services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
+            services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
 
             services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
             services.AddSingleton<IFeatureFlagMqService, FeatureFlagMqService>();
             services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
             services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
+            services.AddSingleton<ExperimentsService, ExperimentsService>();
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
 
             var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
+/**/
 
             services.AddSingleton<IExportExperimentsDataToElasticSearchService>(new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddSingleton<IExportAuditLogDataToElasticSearchService>(new ExportAuditLogDataToElasticSearchService(insightsRabbitMqUrl, esHost));
 
-    
+            var serviceProvider = services.BuildServiceProvider();
+            var exptsService = serviceProvider.GetService<ExperimentsService>();
+            services.AddSingleton<IExperimentResultService>(new ExperimentResultService(insightsRabbitMqUrl, exptsService));
+
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
             if (hostingType == "Azure")
             {

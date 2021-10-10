@@ -1,7 +1,8 @@
 using System;
 using System.Text;
 using System.Threading;
-using FeatureFlags.APIs.Models;
+using FeatureFlagsCo.Messaging.Models;
+using FeatureFlagsCo.Messaging.Services;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -16,11 +17,11 @@ namespace FeatureFlags.APIs.Services
     public class ExperimentResultService : IExperimentResultService
     {
         private readonly ConnectionFactory _factory;
-        private readonly IExperimentsService _experimentService;
+        private readonly ExperimentsService _experimentService;
         private IConnection _connection;
         private IModel _channel;
 
-        public ExperimentResultService(string rabbitConnectStr, IExperimentsService experimentService)
+        public ExperimentResultService(string rabbitConnectStr, ExperimentsService experimentService)
         {
             _factory = new ConnectionFactory();
             _factory.NetworkRecoveryInterval = TimeSpan.FromSeconds(10);
