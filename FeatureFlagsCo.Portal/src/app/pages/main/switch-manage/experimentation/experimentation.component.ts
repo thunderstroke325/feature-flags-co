@@ -22,7 +22,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   featureFlagId: string;
   currentVariationOptions: IVariationOption[] = [];
   selectedBaseline: IVariationOption = null;
-
+  isInitLoading = true;
   experimentation: string;
 
   hasInvalidVariation: boolean = false;
@@ -39,11 +39,11 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     private ffcService: FfcService
   ) {
     this.experimentation = environment.name === 'Standalone' ? 'temporary version' : this.ffcService.client.variation('experimentation');
-
-    this.route.data.pipe(map(res => res.switchInfo)).subscribe((result: CSwitchParams) => {
-      const featureDetail = new CSwitchParams(result);
+    const ffId: string = decodeURIComponent(this.route.snapshot.params['id']);
+    this.switchServe.getSwitchDetail(ffId).subscribe(res => {
+      const featureDetail = new CSwitchParams(res);
       this.currentVariationOptions = featureDetail.getVariationOptions();
-    })
+    });
   }
 
   ngOnDestroy(): void {
@@ -101,9 +101,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   lastSearchText = null;
 
   experimentList: IExperiment[] = [];
-  isLoadingExperiments = false;
   private initData() {
-    this.isLoadingExperiments = true;
     this.experimentService.getExperiments({envId: this.switchServe.envId, featureFlagId: this.featureFlagId}).subscribe(experiments => {
       if (experiments) {
         this.experimentList = experiments.map(experiment => {
@@ -123,10 +121,10 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
         this.onGoingExperiments = [...this.experimentList.filter(expt => expt.status === ExperimentStatus.Recording)];
       }
-      this.isLoadingExperiments = false;
+      this.isInitLoading = false;
     }, _ => {
       this.message.error("数据加载失败，请重试!");
-      this.isLoadingExperiments = false;
+      this.isInitLoading = false;
     });
 
     this.eventInputs.pipe(
@@ -139,7 +137,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
           if (result.aggregations.keys.buckets.length === 0) {
             this.message.warning('目前还没有任何事件，请耐心等待事件被终端用户激发后再试！');
           } else {
-            //this.lastEventItem = result.aggregations.keys.after_key.EventName;
             this.eventList = result.aggregations.keys.buckets.map(b => b.key.EventName);
           }
         }
