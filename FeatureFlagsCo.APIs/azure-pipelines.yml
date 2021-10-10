@@ -129,107 +129,96 @@ stages:
               #     projects: '**/FeatureFlagsCo.APIs/FeatureFlags.APIsTests/FeatureFlags.APIsTests.csproj'
      
 
-- stage: 'DevelopmentIntegrationTest'
-  jobs:
-  - deployment: 'DevIntegrationTest'
-    environment: 'Approval_API_Dev'
-    condition: succeeded()
-    strategy:
-        runOnce:
-          deploy:
-            steps:
-              - script: |
-                  dir
+# - stage: 'DevelopmentIntegrationTest'
+#   jobs:
+#   - deployment: 'DevIntegrationTest'
+#     environment: 'Approval_API_Dev'
+#     condition: succeeded()
+#     strategy:
+#         runOnce:
+#           deploy:
+#             steps:
+#               - script: |
+#                   dir
                   
-              - checkout: self
+#               - checkout: self
 
-              # - task: replacetokens@3
-              #   displayName: Replace tokens in all tfvars files
-              #   inputs:
-              #     rootDirectory: '$(Build.SourcesDirectory)/FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests'
-              #     targetFiles: '**/*.json'
-              #     emptyValue: EMPTY
-              #     tokenPrefix: '#{'
-              #     tokenSuffix: '}#'
-              #   env:
-              #     loginUserName: '$(Postman_Integration_Test_Login_Username)'
-              #     loginPassword: '$(Postman_Integration_Test_Login_Password)'
-
-              - task: PowerShell@2
-                displayName: Replace Postman Setting
-                inputs:
-                  targetType: 'inline'
-                  script: |
-                    cd FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests
+#               - task: PowerShell@2
+#                 displayName: Replace Postman Setting
+#                 inputs:
+#                   targetType: 'inline'
+#                   script: |
+#                     cd FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests
                     
-                    $pathToJson = "ffc-variation-random-test.json"
-                    $a = Get-Content $pathToJson | ConvertFrom-Json
-                    Write-Host $a
-                    $a.variable[0].value = "$(API_URL_Dev)"
-                    ConvertTo-Json $a -depth 100  | set-content $pathToJson
+#                     $pathToJson = "ffc-variation-random-test.json"
+#                     $a = Get-Content $pathToJson | ConvertFrom-Json
+#                     Write-Host $a
+#                     $a.variable[0].value = "$(API_URL_Dev)"
+#                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
                     
-                    $pathToJsonCheck = "ffc-variation-random-test.json"
-                    $aCheck = Get-Content $pathToJson | ConvertFrom-Json
-                    Write-Host $aCheck.variable[0].value
+#                     $pathToJsonCheck = "ffc-variation-random-test.json"
+#                     $aCheck = Get-Content $pathToJson | ConvertFrom-Json
+#                     Write-Host $aCheck.variable[0].value
                     
-                    $pathToJson2 = "ffc-multi-variation-ffp-test.json"
-                    $a2 = Get-Content $pathToJson2 | ConvertFrom-Json
-                    $a2.variable[0].value = "$(API_URL_Dev)"
-                    ConvertTo-Json $a2 -depth 100  | set-content $pathToJson2
+#                     $pathToJson2 = "ffc-multi-variation-ffp-test.json"
+#                     $a2 = Get-Content $pathToJson2 | ConvertFrom-Json
+#                     $a2.variable[0].value = "$(API_URL_Dev)"
+#                     ConvertTo-Json $a2 -depth 100  | set-content $pathToJson2
                     
-                    $pathToJsonCheck2 = "ffc-multi-variation-ffp-test.json"
-                    $aCheck2 = Get-Content $pathToJson2 | ConvertFrom-Json
-                    Write-Host $aCheck2.variable[0].value
+#                     $pathToJsonCheck2 = "ffc-multi-variation-ffp-test.json"
+#                     $aCheck2 = Get-Content $pathToJson2 | ConvertFrom-Json
+#                     Write-Host $aCheck2.variable[0].value
                     
-                    $pathToJson3 = "ffc-multi-variation-cache-test.json"
-                    $a3 = Get-Content $pathToJson3 | ConvertFrom-Json
-                    $a3.variable[0].value = "$(API_URL_Dev)"
-                    ConvertTo-Json $a3 -depth 100  | set-content $pathToJson3
+#                     $pathToJson3 = "ffc-multi-variation-cache-test.json"
+#                     $a3 = Get-Content $pathToJson3 | ConvertFrom-Json
+#                     $a3.variable[0].value = "$(API_URL_Dev)"
+#                     ConvertTo-Json $a3 -depth 100  | set-content $pathToJson3
                     
-                    $pathToJsonCheck3 = "ffc-multi-variation-cache-test.json"
-                    $aCheck3 = Get-Content $pathToJson3 | ConvertFrom-Json
-                    Write-Host $aCheck3.variable[0].value
+#                     $pathToJsonCheck3 = "ffc-multi-variation-cache-test.json"
+#                     $aCheck3 = Get-Content $pathToJson3 | ConvertFrom-Json
+#                     Write-Host $aCheck3.variable[0].value
               
-              - task: Bash@3
-                displayName: 'run newman'
-                inputs:
-                  targetType: 'inline'
-                  script: |
-                    cd FeatureFlagsCo.APIs
-                    cd FeatureFlagsCo.APIs.Tests
-                    cd Postman.IntegrationTests
-                    npm install -g newman
-                    newman run ffc-variation-random-test.json --reporters cli,junit --reporter-junit-export junit-report.xml
+#               - task: Bash@3
+#                 displayName: 'run newman'
+#                 inputs:
+#                   targetType: 'inline'
+#                   script: |
+#                     cd FeatureFlagsCo.APIs
+#                     cd FeatureFlagsCo.APIs.Tests
+#                     cd Postman.IntegrationTests
+#                     npm install -g newman
+#                     newman run ffc-variation-random-test.json --reporters cli,junit --reporter-junit-export junit-report.xml
               
-              - task: Bash@3
-                displayName: 'run newman'
-                inputs:
-                  targetType: 'inline'
-                  script: |
-                    cd FeatureFlagsCo.APIs
-                    cd FeatureFlagsCo.APIs.Tests
-                    cd Postman.IntegrationTests
-                    npm install -g newman
-                    newman run ffc-multi-variation-ffp-test.json --reporters cli,junit --reporter-junit-export junit-report2.xml
+#               - task: Bash@3
+#                 displayName: 'run newman'
+#                 inputs:
+#                   targetType: 'inline'
+#                   script: |
+#                     cd FeatureFlagsCo.APIs
+#                     cd FeatureFlagsCo.APIs.Tests
+#                     cd Postman.IntegrationTests
+#                     npm install -g newman
+#                     newman run ffc-multi-variation-ffp-test.json --reporters cli,junit --reporter-junit-export junit-report2.xml
 
-              - task: Bash@3
-                displayName: 'run newman'
-                inputs:
-                  targetType: 'inline'
-                  script: |
-                    cd FeatureFlagsCo.APIs
-                    cd FeatureFlagsCo.APIs.Tests
-                    cd Postman.IntegrationTests
-                    npm install -g newman
-                    newman run ffc-multi-variation-cache-test.json --reporters cli,junit --reporter-junit-export junit-report3.xml
+#               - task: Bash@3
+#                 displayName: 'run newman'
+#                 inputs:
+#                   targetType: 'inline'
+#                   script: |
+#                     cd FeatureFlagsCo.APIs
+#                     cd FeatureFlagsCo.APIs.Tests
+#                     cd Postman.IntegrationTests
+#                     npm install -g newman
+#                     newman run ffc-multi-variation-cache-test.json --reporters cli,junit --reporter-junit-export junit-report3.xml
 
-              - task: PublishTestResults@2
-                inputs:
-                  testResultsFormat: 'JUnit'
-                  testResultsFiles: '**/*.xml'
-                  mergeTestResults: true
-                  failTaskOnFailedTests: true
-                displayName: 'Publish Test Results'   
+#               - task: PublishTestResults@2
+#                 inputs:
+#                   testResultsFormat: 'JUnit'
+#                   testResultsFiles: '**/*.xml'
+#                   mergeTestResults: true
+#                   failTaskOnFailedTests: true
+#                 displayName: 'Publish Test Results'   
+
 
 - stage: 'Production'
   condition: succeeded()
