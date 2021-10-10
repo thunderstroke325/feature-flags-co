@@ -9,7 +9,7 @@
   <ng-container>
     <div class="detail-body" name="detail" *ngIf="featureFlagId">
       <div *ngIf="experimentation==='V2'">
-        <nz-empty *ngIf="!isLoadingExperiments && experimentList.length === 0"
+        <nz-empty style="margin-top: 50px" *ngIf="!isLoadingExperiments && experimentList.length === 0"
         [nzNotFoundContent]="contentTpl"
         >
           <ng-template #contentTpl>
@@ -193,7 +193,7 @@
                           </div>
                         </div>
                         <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
-                        <div *ngIf="data.confidenceInterval[0] === '-'"class="confidence_interval"> -- </div>
+                        <div *ngIf="data.confidenceInterval[0] === -1"class="confidence_interval"> -- </div>
                       </td>
                       <td *ngIf="!data.isBaseline">
                         {{ data.changeToBaseline | percentage }}
