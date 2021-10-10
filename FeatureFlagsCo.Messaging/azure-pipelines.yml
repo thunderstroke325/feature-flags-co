@@ -1,0 +1,163 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger: none
+
+
+pool:
+  vmImage: windows-latest
+
+variables:
+- group: MJKG_API_SETTINGS
+- name: buildConfiguration
+  value: Release
+
+
+stages:
+
+- stage: 'Development'
+  jobs:
+  - deployment: 'DeployToDevelopment'
+    environment: 'Approval_API_Dev'
+    strategy:
+        runOnce:
+          deploy:
+            steps:
+              - script: |
+                  dir
+                  
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Install .NET Core SDK
+                inputs:
+                  version: 3.1.x
+                  packageType: runtime
+
+              - task: PowerShell@2
+                displayName: Replace Settings
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs/FeatureFlagsCo.Messaging
+                    $pathToJson = "appsettings.json"
+                    $a = Get-Content $pathToJson | ConvertFrom-Json
+            
+                    $a.ConnectionStrings.RedisServerUrl = "$(REDISCACHE_ConnectionString_Dev)"
+
+                    $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey_Dev)"
+                    $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString_Dev)"
+
+                    $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId_Dev)"
+                    $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret_Dev)"
+
+                    $a.MySettings.InsightsRabbitMqUrl = "$(MySettings_InsightsRabbitMqUrl_Dev)"
+                    $a.MySettings.ElasticSearchHost = "$(MySettings_ElasticSearchHost_Dev)"                    
+                    $a.MySettings.ExperimentsServiceHost = "$(MySettings_ExperimentsServiceHost_Dev)"
+                    $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString_Dev)"
+                    $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName_Dev)"
+
+                    ConvertTo-Json $a -depth 100  | set-content $pathToJson
+
+                    $pathToJsonCheck = "appsettings.json"
+                    $aCheck = Get-Content $pathToJson | ConvertFrom-Json
+
+              
+              - task: DotNetCoreCLI@2
+                displayName: dotnet restore api
+                inputs:
+                  command: restore
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.Messaging/FeatureFlagsCo.Messaging.csproj'
+              - task: DotNetCoreCLI@2
+                displayName: dotnet build api
+                inputs:
+                  command: 'build'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.Messaging/FeatureFlagsCo.Messaging.csproj'
+                  
+              - task: DotNetCoreCLI@2
+                inputs:
+                  command: publish
+                  publishWebProjects: True
+                  arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+                  zipAfterPublish: True
+              - task: AzureWebApp@1
+                inputs:
+                  azureSubscription: 'azure-china-devops'
+                  appType: 'webApp'
+                  appName: 'ffc-mqservice-ce2-dev'
+                  package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+                  deploymentMethod: 'auto'
+
+    
+     
+
+- stage: 'Production'
+  condition: succeeded()
+  jobs:
+  - deployment: 'DeployToProduction'
+    environment: 'Approval_API'
+    strategy:
+        runOnce:
+          deploy:
+            steps:
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Install .NET Core SDK
+                inputs:
+                  version: 3.1.x
+                  packageType: runtime
+
+              - task: PowerShell@2
+                displayName: Replace Settings
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd FeatureFlagsCo.APIs/FeatureFlagsCo.Messaging
+                    $pathToJson = "appsettings.json"
+                    $a = Get-Content $pathToJson | ConvertFrom-Json
+            
+                    $a.ConnectionStrings.RedisServerUrl = "$(REDISCACHE_ConnectionString)"
+
+                    $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey)"
+                    $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString)"
+
+                    $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId)"
+                    $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret)"
+
+                    $a.MySettings.InsightsRabbitMqUrl = "$(MySettings_InsightsRabbitMqUrl)"
+                    $a.MySettings.ElasticSearchHost = "$(MySettings_ElasticSearchHost)"                    
+                    $a.MySettings.ExperimentsServiceHost = "$(MySettings_ExperimentsServiceHost)"
+                    $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString)"
+                    $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName)"
+
+                    ConvertTo-Json $a -depth 100  | set-content $pathToJson
+
+                    $pathToJsonCheck = "appsettings.json"
+                    $aCheck = Get-Content $pathToJson | ConvertFrom-Json
+
+                    
+              - task: DotNetCoreCLI@2
+                displayName: dotnet restore api
+                inputs:
+                  command: restore
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.Messaging/FeatureFlagsCo.Messaging.csproj'
+              - task: DotNetCoreCLI@2
+                displayName: dotnet build api
+                inputs:
+                  command: 'build'
+                  projects: '**/FeatureFlagsCo.APIs/FeatureFlagsCo.Messaging/FeatureFlagsCo.Messaging.csproj'
+                  
+              - task: DotNetCoreCLI@2
+                inputs:
+                  command: publish
+                  publishWebProjects: True
+                  arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+                  zipAfterPublish: True
+              - task: AzureWebApp@1
+                inputs:
+                  azureSubscription: 'azure-china-devops'
+                  appType: 'webApp'
+                  appName: 'ffc-mqservice-ce2'
+                  package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+                  deploymentMethod: 'auto'
