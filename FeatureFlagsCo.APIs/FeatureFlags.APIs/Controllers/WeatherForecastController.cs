@@ -213,5 +213,18 @@ namespace FeatureFlags.APIs.Controllers
         {
             return FeatureFlagKeyExtension.GetEnvIdsByEnvKey(key);
         }
+
+        [HttpGet]
+        [Route("SendFeatureFlagDataWithoutResponse")]
+        public void SendFeatureFlagDataWithoutResponse()
+        {
+            _messagingService.SendFeatureFlagDataWithoutResponse(new FeatureFlagMessageModel
+            {
+                FFUserName = "TESTESTTEST"
+            });
+        }
+
+        
     }
+
 }

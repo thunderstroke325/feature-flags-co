@@ -49,6 +49,30 @@ namespace FeatureFlags.APIs.Services
             await PostData("Insights", new StringContent(JsonConvert.SerializeObject(param)));
         }
 
+
+        public void SendInsightDataWithoutResponse(MessageModel param)
+        {
+            var wc = new System.Net.WebClient();
+            wc.Headers["Content-type"] = "application/json";
+            wc.UploadStringAsync(new System.Uri($"{_mySettings.Value.MessagingServiceHost}/api/Insights/"), "POST", JsonConvert.SerializeObject(param));
+            //wc.UploadStringCompleted += (sender, e) =>
+            //{
+
+            //};
+        }
+
+
+        public void SendFeatureFlagDataWithoutResponse(FeatureFlagMessageModel param)
+        {
+            var wc = new System.Net.WebClient();
+            wc.Headers["Content-type"] = "application/json";
+            wc.UploadStringAsync(new System.Uri($"{_mySettings.Value.MessagingServiceHost}/api/Experiments/feature-flags/"), "POST", JsonConvert.SerializeObject(param));
+            //wc.UploadStringCompleted += (sender, e) =>
+            //{
+         
+            //};
+        }
+
         public async Task SendFeatureFlagDataAsync(FeatureFlagMessageModel param)
         {
             await PostData("Experiments/feature-flags", new StringContent(JsonConvert.SerializeObject(param)));

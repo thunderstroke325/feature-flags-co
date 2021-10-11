@@ -84,7 +84,7 @@ namespace FeatureFlags.APIs.Controllers
 
                 try
                 {
-                    await SendToRabbitMQ(param, ffIdVM, returnResult);
+                    SendToRabbitMQ(param, ffIdVM, returnResult);
                 }
                 catch(Exception exp)
                 {
@@ -120,7 +120,7 @@ namespace FeatureFlags.APIs.Controllers
             }
         }
 
-        private async Task SendToRabbitMQ(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, Tuple<VariationOption, bool> returnResult)
+        private void SendToRabbitMQ(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, Tuple<VariationOption, bool> returnResult)
         {
             var ffEvent = new FeatureFlagMessageModel()
             {
@@ -207,8 +207,18 @@ namespace FeatureFlags.APIs.Controllers
                 }
             }
 
-            await _messagingService.SendFeatureFlagDataAsync(ffEvent);
-            await _messagingService.SendInsightDataAsync(new FeatureFlagsCo.MQ.MessageModel
+            //await _messagingService.SendFeatureFlagDataAsync(ffEvent);
+            //await _messagingService.SendInsightDataAsync(new FeatureFlagsCo.MQ.MessageModel
+            //{
+            //    SendDateTime = DateTime.UtcNow,
+            //    Labels = labels,
+            //    Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam()),
+            //    FeatureFlagId = ffIdVM.FeatureFlagId,
+            //    IndexTarget = "ffvariationrequestindex"
+            //});
+
+            _messagingService.SendFeatureFlagDataWithoutResponse(ffEvent);
+            _messagingService.SendInsightDataWithoutResponse(new FeatureFlagsCo.MQ.MessageModel
             {
                 SendDateTime = DateTime.UtcNow,
                 Labels = labels,
