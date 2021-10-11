@@ -110,7 +110,7 @@ namespace FeatureFlags.APIs.Services
                 var metric = await _metricService.GetAsync(experiment.MetricId);
                 // If the experiment has active iteration
                 var operationTime = DateTime.UtcNow;
-                experiment.Iterations.ForEach(i =>
+                experiment.Iterations.ForEach(async i =>
                 {
                     if (!i.EndTime.HasValue)
                     {
@@ -127,7 +127,7 @@ namespace FeatureFlags.APIs.Services
                             Variations = experiment.Variations
                         };
 
-                        _messagingService.SendExperimentStartEndDataAsync(message);
+                        await _messagingService.SendExperimentStartEndDataAsync(message);
                     }
                 });
 
@@ -144,7 +144,7 @@ namespace FeatureFlags.APIs.Services
                 var metric = await _metricService.GetAsync(experiment.MetricId);
                 // If the experiment has active iteration
                 var operationTime = DateTime.UtcNow;
-                experiment.Iterations.ForEach(i =>
+                experiment.Iterations.ForEach(async i =>
                 {
                     if (!i.EndTime.HasValue)
                     {
@@ -161,7 +161,7 @@ namespace FeatureFlags.APIs.Services
                             Variations = experiment.Variations
                         };
 
-                        _messagingService.SendExperimentStartEndDataAsync(message);
+                        await _messagingService.SendExperimentStartEndDataAsync(message);
                     }
                 });
 
@@ -220,7 +220,7 @@ namespace FeatureFlags.APIs.Services
 
                 var metric = await _metricService.GetAsync(experiment.MetricId);
                 // stop active iterations
-                experiment.Iterations.ForEach(i =>
+                experiment.Iterations.ForEach(async i =>
                 {
                     if (!i.EndTime.HasValue)
                     {
@@ -239,7 +239,7 @@ namespace FeatureFlags.APIs.Services
                             Variations = experiment.Variations
                         };
 
-                        _messagingService.SendExperimentStartEndDataAsync(message);
+                        await _messagingService.SendExperimentStartEndDataAsync(message);
                     }
                 });
 
@@ -259,7 +259,7 @@ namespace FeatureFlags.APIs.Services
                     Variations = experiment.Variations
                 };
 
-                _messagingService.SendExperimentStartEndDataAsync(message);
+                await _messagingService.SendExperimentStartEndDataAsync(message);
 
                 return iteration;
             }
@@ -319,7 +319,7 @@ namespace FeatureFlags.APIs.Services
                     Variations = experiment.Variations
                 };
 
-                _messagingService.SendExperimentStartEndDataAsync(message);
+                await _messagingService.SendExperimentStartEndDataAsync(message);
 
                 return iteration;
             }

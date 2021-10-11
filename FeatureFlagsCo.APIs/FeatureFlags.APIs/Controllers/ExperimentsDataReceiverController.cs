@@ -37,7 +37,7 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("PushData")]
-        public JsonResult PushData([FromBody] List<ExperimentMessageViewModel> param)
+        public async Task<dynamic> PushData([FromBody] List<ExperimentMessageViewModel> param)
         {
             if (param != null && param.Count > 0)
             {
@@ -59,7 +59,7 @@ namespace FeatureFlags.APIs.Controllers
                         TimeStamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
                     };
 
-                    _messagingService.SendEventDataAsync(message);
+                    await _messagingService.SendEventDataAsync(message);
                 }
                 return new JsonResult(null);
             }
