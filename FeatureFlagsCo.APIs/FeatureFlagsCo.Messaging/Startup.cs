@@ -101,11 +101,11 @@ namespace FeatureFlagsCo.Messaging
             services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
             services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
 
-            services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
-            services.AddSingleton<IFeatureFlagMqService, FeatureFlagMqService>();
-            services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
-            services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
-            services.AddSingleton<ExperimentsService, ExperimentsService>();
+            services.AddScoped<IInsighstMqService, InsighstRabbitMqService>();
+            services.AddScoped<IFeatureFlagMqService, FeatureFlagMqService>();
+            services.AddScoped<IExperimentStartEndMqService, ExperimentStartEndMqService>();
+            services.AddScoped<IExperimentMqService, ExperimentstRabbitMqService>();
+            services.AddScoped<ExperimentsService, ExperimentsService>();
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
 

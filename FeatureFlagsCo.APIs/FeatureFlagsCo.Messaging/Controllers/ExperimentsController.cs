@@ -4,6 +4,7 @@ using FeatureFlagsCo.MQ;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace FeatureFlagsCo.Messaging.Controllers
@@ -55,9 +56,11 @@ namespace FeatureFlagsCo.Messaging.Controllers
         [Route("events")]
         public async Task<dynamic> SendEventData([FromBody] ExperimentMessageModel param)
         {
-            _logger.LogTrace("Experiments/SendEventData");
-            await _experimentMqService.SendMessageAsync(param);
-            return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
+
+                _logger.LogTrace("Experiments/SendEventData");
+                await _experimentMqService.SendMessageAsync(param);
+                return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
+            
         }
     }
 }
