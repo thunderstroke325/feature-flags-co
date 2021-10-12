@@ -106,11 +106,6 @@ namespace FeatureFlagsCo.Messaging
             services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
             services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
             services.AddSingleton<ExperimentsService, ExperimentsService>();
-            services.AddSingleton<ServiceBusSender>(
-                new ServiceBusSender(
-                    this.Configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value,
-                    "apitomq"));
-
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
 
@@ -143,7 +138,7 @@ namespace FeatureFlagsCo.Messaging
             }
 
 
-            services.AddSingleton<ServiceBusQ4Q5Receiver>();
+            services.AddSingleton<ServiceBusQ4Receiver>();
             //services.AddSingleton<ServiceBusQ4Q5Receiver>(new ServiceBusQ4Q5Receiver(
             //   Configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value,
             //   esHost, featureFlagMqService));

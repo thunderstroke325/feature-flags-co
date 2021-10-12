@@ -15,12 +15,12 @@ namespace FeatureFlagsCo.Messaging.Controllers
     {
         ILogger<InsightsController> _logger;
         //private readonly IInsighstMqService _insightsService;
-        private readonly ServiceBusSender _serviceBusSender;
+        private readonly ServiceBusQ4Sender _serviceBusSender;
 
         public InsightsController(
            ILogger<InsightsController> logger,
-           ServiceBusSender serviceBusSender,
-           ServiceBusQ4Q5Receiver serviceBusQ4Q5Receiver)
+           ServiceBusQ4Sender serviceBusSender,
+           ServiceBusQ4Receiver serviceBusQ4Q5Receiver)
         {
             _logger = logger;
             _serviceBusSender = serviceBusSender;

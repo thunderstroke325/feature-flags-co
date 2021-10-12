@@ -38,13 +38,7 @@ class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
                         body['EnvId'], body['EventName'])
                     self.__setup_relation_between_obj_expt(
                         event_env_id, body['EventName'], key)
-                    RabbitMQSender(self._mq_host,
-                                   self._mq_port,
-                                   self._mq_username,
-                                   self._mq_passwd,
-                                   self._redis_host,
-                                   self._redis_port,
-                                   self._redis_passwd).send('Q2', 'py.experiments.experiment', key)
+                    self.send('Q2', 'py.experiments.experiment', key)
                     logger.info('########p1 send %r to Q2########' % key)
 
 
