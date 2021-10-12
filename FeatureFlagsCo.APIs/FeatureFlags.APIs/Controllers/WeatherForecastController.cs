@@ -224,7 +224,33 @@ namespace FeatureFlags.APIs.Controllers
             });
         }
 
-        
+        [HttpGet]
+        [Route("SendInsightDataWithoutResponse")]
+        public void SendInsightDataWithoutResponse()
+        {
+            //_messagingService.SendInsightDataWithoutResponse(new MessageModel
+            //{
+            //    FeatureFlagId = "FeatureFlagId" + Guid.NewGuid().ToString(),
+            //    IndexTarget = "formasstestonly",
+            //    SendDateTime = DateTime.UtcNow
+            //});
+
+
+            _messagingService.SendAPIServiceToMQServiceWithoutResponse(new APIServiceToMQServiceModel
+            {
+                FFMessage = new FeatureFlagMessageModel
+                {
+                    FeatureFlagId = "FeatureFlagId" + Guid.NewGuid().ToString()
+                },
+                Message = new FeatureFlagsCo.MQ.MessageModel
+                {
+                    FeatureFlagId = "FeatureFlagId" + Guid.NewGuid().ToString(),
+                    IndexTarget = "formasstestonly",
+                    SendDateTime = DateTime.UtcNow
+                }
+            });
+        }
+
     }
 
 }

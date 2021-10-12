@@ -61,6 +61,18 @@ namespace FeatureFlags.APIs.Services
             //};
         }
 
+        public void SendAPIServiceToMQServiceWithoutResponse(APIServiceToMQServiceModel param)
+        {
+            var wc = new System.Net.WebClient();
+            wc.Headers["Content-type"] = "application/json";
+            wc.UploadStringAsync(new System.Uri($"{_mySettings.Value.MessagingServiceHost}/api/Insights"), "POST", JsonConvert.SerializeObject(param));
+            //wc.UploadStringCompleted += (sender, e) =>
+            //{
+
+            //};
+        }
+        
+
 
         public void SendFeatureFlagDataWithoutResponse(FeatureFlagMessageModel param)
         {

@@ -217,15 +217,20 @@ namespace FeatureFlags.APIs.Controllers
             //    IndexTarget = "ffvariationrequestindex"
             //});
 
-            _messagingService.SendFeatureFlagDataWithoutResponse(ffEvent);
-            _messagingService.SendInsightDataWithoutResponse(new FeatureFlagsCo.MQ.MessageModel
+            _messagingService.SendAPIServiceToMQServiceWithoutResponse(new APIServiceToMQServiceModel
             {
-                SendDateTime = DateTime.UtcNow,
-                Labels = labels,
-                Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam()),
-                FeatureFlagId = ffIdVM.FeatureFlagId,
-                IndexTarget = "ffvariationrequestindex"
+                FFMessage = ffEvent,
+                Message = new FeatureFlagsCo.MQ.MessageModel
+                {
+                    SendDateTime = DateTime.UtcNow,
+                    Labels = labels,
+                    Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam()),
+                    FeatureFlagId = ffIdVM.FeatureFlagId,
+                    IndexTarget = "ffvariationrequestindex"
+                }
             });
+            //_messagingService.SendFeatureFlagDataWithoutResponse(ffEvent);
+            //_messagingService.SendInsightDataWithoutResponse();
         }
     }
 }

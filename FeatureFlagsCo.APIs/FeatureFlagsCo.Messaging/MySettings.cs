@@ -27,5 +27,7 @@ namespace FeatureFlagsCo.Messaging
         public string CacheType { get; set; }
         public string ElasticSearchHost { get; set; }
         public string ExperimentsServiceHost { get; set; }
+
+        public string ServiceBusConnectionString { get; set; }
     }
 }
