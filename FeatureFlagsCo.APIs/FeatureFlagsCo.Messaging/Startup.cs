@@ -106,6 +106,10 @@ namespace FeatureFlagsCo.Messaging
             services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
             services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
             services.AddSingleton<ExperimentsService, ExperimentsService>();
+            services.AddSingleton<ServiceBusQ4Sender>(
+                new ServiceBusQ4Sender(
+                    this.Configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value));
+
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
 
