@@ -91,8 +91,7 @@ class RabbitMQSender(RabbitMQ):
                 channel = self.conn.channel()
                 channel.exchange_declare(
                     exchange=topic,
-                    exchange_type='topic',
-                    durable=True)
+                    exchange_type='topic')
                 logger.info("#######send topic: %r, routing_key: %r#######" % (
                     topic, routing_key))
                 body = str.encode(json.dumps(msg))
@@ -143,8 +142,7 @@ class RabbitMQConsumer(ABC, RabbitMQSender):
             for topic, binding_keys in bindings:
                 channel.exchange_declare(
                     exchange=topic,
-                    exchange_type='topic',
-                    durable=True)
+                    exchange_type='topic')
                 for binding_key in set(binding_keys):
                     channel.queue_bind(
                         exchange=topic, queue=queue_name, routing_key=binding_key)
