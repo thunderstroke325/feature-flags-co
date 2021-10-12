@@ -66,6 +66,7 @@ stages:
                     $a.MySettings.CacheType = "$(MySettings_CacheType_Dev)"
                     
                     $a.MySettings.ExperimentsServiceHost = "$(MySettings_ExperimentsServiceHost_Dev)"
+                    $a.MySettings.MessagingServiceHost = "$(MySettings_MessagingServiceHost_Dev)"
 
                     $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString_Dev)"
                     $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName_Dev)"
@@ -250,6 +251,7 @@ stages:
                     $a.MySettings.CacheType = "$(MySettings_CacheType)"
                     
                     $a.MySettings.ExperimentsServiceHost = "$(MySettings_ExperimentsServiceHost)"
+                    $a.MySettings.MessagingServiceHost = "$(MySettings_MessagingServiceHost)"
 
                     $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString)"
                     $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName)"
