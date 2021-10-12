@@ -282,13 +282,9 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         if (interval > timedelta(minutes=para_delay_reception)) \
                 and ((datetime.now() - ExptEndTime) < timedelta(minutes=para_wait_processing)):
             # send back exptId to Q2
-            RabbitMQSender(self._mq_host,
-                           self._mq_port,
-                           self._mq_username,
-                           self._mq_passwd,
-                           self._redis_host,
-                           self._redis_port,
-                           self._redis_passwd).send('Q2', 'py.experiments.experiment', expt_id)
+            self.send('Q2', 'py.experiments.experiment', expt_id)
+            logger.info(
+                'a delay to acept events after deadline of %r' % expt_id)
             logger.info('#########send back to Q2 %r#########' % expt_id)
         # last event received within N minutes, no potential recepton delay, proceed data deletion
         else:
@@ -336,20 +332,21 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         expt_id = body
         value = self.redis_get(expt_id)
         fmt = '%Y-%m-%dT%H:%M:%S.%f'
+        # Create or Get last_exec_time for each expt_id
+        dict_from_redis = self.redis_get('dict_expt_last_exec_time')
+        dict_expt_last_exec_time = dict_from_redis if dict_from_redis else {}
+        last_exec_time = dict_expt_last_exec_time.get(expt_id, None)
         if expt_id == self._last_expt_id:
-            # Create or Get last_exec_time for each expt_id
-            dict_from_redis = self.redis_get('dict_expt_last_exec_time')
-            dict_expt_last_exec_time = dict_from_redis if dict_from_redis else {}
-            last_exec_time = dict_expt_last_exec_time.get(expt_id, None)
-            if not last_exec_time:
-                last_exec_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
+            self.conn.sleep(self._wait_timeout)
+        elif not last_exec_time:
+            pass
+        else:
             interval = datetime.now() - datetime.strptime(last_exec_time, fmt)
             if interval.total_seconds() < self._wait_timeout:
-                sleep(self._wait_timeout - interval.total_seconds())
-            dict_expt_last_exec_time[expt_id] = datetime.now().strftime(
-                "%Y-%m-%dT%H:%M:%S.%f")
-            self.redis_set('dict_expt_last_exec_time',
-                           dict_expt_last_exec_time)
+                self.conn.sleep(self._wait_timeout - interval.total_seconds())
+        dict_expt_last_exec_time[expt_id] = datetime.now().strftime(
+            "%Y-%m-%dT%H:%M:%S.%f")
+        self.redis_set('dict_expt_last_exec_time', dict_expt_last_exec_time)
         self._last_expt_id = expt_id
         # If experiment info exist
         if value:
@@ -363,25 +360,13 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
             output_to_mq = self.__calc_experiment_result(
                 expt, expt_id, list_ff_events, list_user_events)
             # send result to Q3
-            RabbitMQSender(self._mq_host,
-                           self._mq_port,
-                           self._mq_username,
-                           self._mq_passwd,
-                           self._redis_host,
-                           self._redis_port,
-                           self._redis_passwd).send('Q3', 'py.experiments.experiment.results', output_to_mq)
+            self.send('Q3', 'py.experiments.experiment.results', output_to_mq)
             logger.info('########p2 sends %r result to Q3#########' % expt_id)
 
             # experiment not finished
             if not expt['EndExptTime']:
                 # send back exptId to Q2
-                RabbitMQSender(self._mq_host,
-                               self._mq_port,
-                               self._mq_username,
-                               self._mq_passwd,
-                               self._redis_host,
-                               self._redis_port,
-                               self._redis_passwd).send('Q2', 'py.experiments.experiment', expt_id)
+                self.send('Q2', 'py.experiments.experiment', expt_id)
                 logger.info(
                     '#########p2 sends %r back to Q2########' % expt_id)
             # experiment finished

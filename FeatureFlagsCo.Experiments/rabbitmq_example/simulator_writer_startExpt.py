@@ -21,6 +21,13 @@ if __name__ == '__main__':
     redis_host = get_config_value('redis', 'redis_host')
     redis_port = get_config_value('redis', 'redis_port')
     redis_passwd = get_config_value('redis', 'redis_passwd')
+    sender = RabbitMQSender(mq_host,
+                            mq_port,
+                            mq_username,
+                            mq_passwd,
+                            redis_host,
+                            redis_port,
+                            redis_passwd)
 
     # Expt1
     # Q1 start
@@ -35,14 +42,7 @@ if __name__ == '__main__':
         "StartExptTime": "2021-09-20T21:00:00.123456",
         "EndExptTime": ""
     }
-    RabbitMQSender(mq_host,
-                   mq_port,
-                   mq_username,
-                   mq_passwd,
-                   redis_host,
-                   redis_port,
-                   redis_passwd).send('Q1', 'py.experiments.recordinginfo', Q1_START)
-
+    sender.send('Q1', 'py.experiments.recordinginfo', Q1_START)
     for group in range(1, 4):
         for user in range(100):
             # Q4
@@ -60,13 +60,7 @@ if __name__ == '__main__':
                 "TimeStamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f"),
                 "phoneNumber": "135987652543"
             }
-            RabbitMQSender(mq_host,
-                           mq_port,
-                           mq_username,
-                           mq_passwd,
-                           redis_host,
-                           redis_port,
-                           redis_passwd).send('Q4', 'py.experiments.events.ff', Q4)
+            sender.send('Q4', 'py.experiments.events.ff', Q4)
 
     for group in range(1, 4):
         for user in range(100 - 20*group):
@@ -99,14 +93,16 @@ if __name__ == '__main__':
                 "EnvironmentId": "103",
                 "AccountId": "38"
             }
-            RabbitMQSender(mq_host,
-                           mq_port,
-                           mq_username,
-                           mq_passwd,
-                           redis_host,
-                           redis_port,
-                           redis_passwd).send('Q5', 'py.experiments.events.user', Q5)
+            sender.send('Q5', 'py.experiments.events.user', Q5)
+    sender.mq_close()
 
+    sender = RabbitMQSender(mq_host,
+                            mq_port,
+                            mq_username,
+                            mq_passwd,
+                            redis_host,
+                            redis_port,
+                            redis_passwd)
     # Expt2
     # Q1 start
     Q1_START = {
@@ -120,13 +116,7 @@ if __name__ == '__main__':
         "StartExptTime": "2021-09-20T21:00:00.123456",
         "EndExptTime": ""
     }
-    RabbitMQSender(mq_host,
-                   mq_port,
-                   mq_username,
-                   mq_passwd,
-                   redis_host,
-                   redis_port,
-                   redis_passwd).send('Q1', 'py.experiments.recordinginfo', Q1_START)
+    sender.send('Q1', 'py.experiments.recordinginfo', Q1_START)
 
     for group in range(1, 4):
         for user in range(100):
@@ -145,13 +135,7 @@ if __name__ == '__main__':
                 "TimeStamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f"),
                 "phoneNumber": "135987652543"
             }
-            RabbitMQSender(mq_host,
-                           mq_port,
-                           mq_username,
-                           mq_passwd,
-                           redis_host,
-                           redis_port,
-                           redis_passwd).send('Q4', 'py.experiments.events.ff', Q4)
+            sender.send('Q4', 'py.experiments.events.ff', Q4)
 
     for group in range(1, 4):
         for user in range(100 - 25*group):
@@ -184,10 +168,5 @@ if __name__ == '__main__':
                 "EnvironmentId": "103",
                 "AccountId": "38"
             }
-            RabbitMQSender(mq_host,
-                           mq_port,
-                           mq_username,
-                           mq_passwd,
-                           redis_host,
-                           redis_port,
-                           redis_passwd).send('Q5', 'py.experiments.events.user', Q5)
+            sender.send('Q5', 'py.experiments.events.user', Q5)
+        sender.mq_close()
