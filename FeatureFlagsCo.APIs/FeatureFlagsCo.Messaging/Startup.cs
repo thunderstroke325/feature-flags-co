@@ -106,6 +106,10 @@ namespace FeatureFlagsCo.Messaging
             services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
             services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
             services.AddSingleton<ExperimentsService, ExperimentsService>();
+            services.AddSingleton<ServiceBusQ4Sender>(
+                new ServiceBusQ4Sender(
+                    this.Configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value));
+
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
 
@@ -113,8 +117,9 @@ namespace FeatureFlagsCo.Messaging
 /**/
 
             services.AddSingleton<IExportExperimentsDataToElasticSearchService>(new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
-            services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+            //services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             services.AddSingleton<IExportAuditLogDataToElasticSearchService>(new ExportAuditLogDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+
 
             var serviceProvider = services.BuildServiceProvider();
             var exptsService = serviceProvider.GetService<ExperimentsService>();
@@ -135,6 +140,12 @@ namespace FeatureFlagsCo.Messaging
                 aiOptions.EnableRequestTrackingTelemetryModule = false;
                 services.AddApplicationInsightsTelemetry(aiOptions);
             }
+
+
+            services.AddSingleton<ServiceBusQ4Receiver>();
+            //services.AddSingleton<ServiceBusQ4Q5Receiver>(new ServiceBusQ4Q5Receiver(
+            //   Configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value,
+            //   esHost, featureFlagMqService));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

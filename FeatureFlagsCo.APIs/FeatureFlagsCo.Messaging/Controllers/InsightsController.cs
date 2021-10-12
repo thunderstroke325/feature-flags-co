@@ -1,4 +1,6 @@
-﻿using FeatureFlagsCo.MQ;
+﻿
+using FeatureFlagsCo.Messaging.Services;
+using FeatureFlagsCo.MQ;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -12,24 +14,34 @@ namespace FeatureFlagsCo.Messaging.Controllers
     public class InsightsController : ControllerBase
     {
         ILogger<InsightsController> _logger;
-        private readonly IInsighstMqService _insightsService;
+        //private readonly IInsighstMqService _insightsService;
+        private readonly ServiceBusQ4Sender _serviceBusSender;
 
         public InsightsController(
            ILogger<InsightsController> logger,
-           IInsighstMqService insightsService)
+           ServiceBusQ4Sender serviceBusSender,
+           ServiceBusQ4Receiver serviceBusQ4Q5Receiver)
         {
             _logger = logger;
-            
-            _insightsService = insightsService;
+            _serviceBusSender = serviceBusSender;
         }
 
         // Write to Q4 for elasticsearch
+        //[HttpPost]
+        //[Route("")]
+        //public async Task<dynamic> SendInsightData([FromBody] MessageModel param)
+        //{
+        //    _logger.LogTrace("Insights/SendInsightData");
+        //    await _insightsService.SendMessageAsync(param);
+        //    return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
+        //}
+
         [HttpPost]
         [Route("")]
-        public async Task<dynamic> SendInsightData([FromBody] MessageModel param)
+        public async Task<dynamic> SendAPIServiceToMQServiceData([FromBody] APIServiceToMQServiceModel param)
         {
-            _logger.LogTrace("Insights/SendInsightData");
-            await _insightsService.SendMessageAsync(param);
+            _logger.LogTrace("Insights/SendAPIServiceToMQServiceData");
+            await _serviceBusSender.SendAPIServiceToMQServiceData(param);
             return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
         }
     }
