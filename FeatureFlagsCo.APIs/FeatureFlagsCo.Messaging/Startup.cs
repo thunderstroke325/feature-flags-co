@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System;
@@ -106,10 +107,30 @@ namespace FeatureFlagsCo.Messaging
             services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
             services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
             services.AddSingleton<ExperimentsService, ExperimentsService>();
-            services.AddSingleton<ServiceBusQ4Sender>(
-                new ServiceBusQ4Sender(
-                    this.Configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value));
 
+            var serviceProvider = services.BuildServiceProvider();
+
+            // service bus sender
+            var q1SenderLogger = serviceProvider.GetService<ILogger<ServiceBusQ1Sender>>();
+            var q4SenderLogger = serviceProvider.GetService<ILogger<ServiceBusQ4Sender>>();
+            var q5SenderLogger = serviceProvider.GetService<ILogger<ServiceBusQ5Sender>>();
+
+            services.AddSingleton<ServiceBusQ1Sender>(new ServiceBusQ1Sender(Configuration, q1SenderLogger));
+            services.AddSingleton<ServiceBusQ4Sender>(new ServiceBusQ4Sender(Configuration, q4SenderLogger));
+            services.AddSingleton<ServiceBusQ5Sender>(new ServiceBusQ5Sender(Configuration, q5SenderLogger));
+
+            // service bus receiver
+            var experimentStartEndmqService = serviceProvider.GetService<IExperimentStartEndMqService>();
+            var ffMqService = serviceProvider.GetService<IFeatureFlagMqService>();
+            var experimentstRabbitMqService = serviceProvider.GetService<IExperimentMqService>();
+            var q1ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ1Receiver>>();
+            var q4ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ4Receiver>>();
+            var q5ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ5Receiver>>();
+
+            services.AddSingleton<ServiceBusQ1Receiver>(new ServiceBusQ1Receiver(Configuration, experimentStartEndmqService, q1ReceiverLogger));
+            services.AddSingleton<ServiceBusQ4Receiver>(new ServiceBusQ4Receiver(Configuration, ffMqService, q4ReceiverLogger));
+            services.AddSingleton<ServiceBusQ5Receiver>(new ServiceBusQ5Receiver(Configuration, experimentstRabbitMqService, q5ReceiverLogger));
+           
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
 
@@ -121,7 +142,7 @@ namespace FeatureFlagsCo.Messaging
             services.AddSingleton<IExportAuditLogDataToElasticSearchService>(new ExportAuditLogDataToElasticSearchService(insightsRabbitMqUrl, esHost));
 
 
-            var serviceProvider = services.BuildServiceProvider();
+            
             var exptsService = serviceProvider.GetService<ExperimentsService>();
             services.AddSingleton<IExperimentResultService>(new ExperimentResultService(insightsRabbitMqUrl, exptsService));
 
@@ -140,12 +161,6 @@ namespace FeatureFlagsCo.Messaging
                 aiOptions.EnableRequestTrackingTelemetryModule = false;
                 services.AddApplicationInsightsTelemetry(aiOptions);
             }
-
-
-            services.AddSingleton<ServiceBusQ4Receiver>();
-            //services.AddSingleton<ServiceBusQ4Q5Receiver>(new ServiceBusQ4Q5Receiver(
-            //   Configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value,
-            //   esHost, featureFlagMqService));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

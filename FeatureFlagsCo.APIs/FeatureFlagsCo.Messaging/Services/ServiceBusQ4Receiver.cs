@@ -15,59 +15,32 @@ using System.Threading.Tasks;
 
 namespace FeatureFlagsCo.Messaging.Services
 {
-    public class ServiceBusQ4Receiver
+    public class ServiceBusQ4Receiver : ServiceBusReceiverBase
     {
-        private readonly ServiceBusClient _client;
-        private readonly string _topicName;
-        private ServiceBusProcessor _processor;
+        protected override string TopicPath { get { return "q4"; } }
         private ILogger<ServiceBusQ4Receiver> _logger;
         private readonly string _esHost;
         private readonly IFeatureFlagMqService _featureFlagMqService;
 
-        public ServiceBusQ4Receiver(IOptions<MySettings> mySettings,
+        public ServiceBusQ4Receiver(IConfiguration configuration,
                                 IFeatureFlagMqService featureFlagMqService,
-                                 ILogger<ServiceBusQ4Receiver> logger)
+                                 ILogger<ServiceBusQ4Receiver> logger) : base(configuration)
         {
-            _client = new ServiceBusClient(mySettings.Value.ServiceBusConnectionString);
-            _topicName = "q4";
             _logger = logger;
-            _esHost = mySettings.Value.ElasticSearchHost;
+            _esHost = configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
             _featureFlagMqService = featureFlagMqService;
-
-            Task.Run(async () =>
-            {
-                await StartProcessAsync(_client);
-            }).ConfigureAwait(true);
         }
 
-        public async Task StartProcessAsync(ServiceBusClient client)
+        public override Task Processor_ProcessErrorAsync(ProcessErrorEventArgs arg)
         {
-            _processor = client.CreateProcessor(_topicName, "standard", new ServiceBusProcessorOptions());
-            try
-            {
-                // add handler to process messages
-                _processor.ProcessMessageAsync += Processor_ProcessMessageAsync;
-                // add handler to process any errors
-                _processor.ProcessErrorAsync += Processor_ProcessErrorAsync; ;
-
-                await _processor.StartProcessingAsync();
-            }
-            finally
-            {
-            }
-            // start processing 
-        }
-
-        private Task Processor_ProcessErrorAsync(ProcessErrorEventArgs arg)
-        {
-            _logger.LogError(arg.Exception, "ServiceBusQ4Q5Receiver apitomq Error");
+            _logger.LogError(arg.Exception, "ServiceBusQ4Receiver apitomq Error");
             return Task.CompletedTask;
         }
 
-        private async Task Processor_ProcessMessageAsync(ProcessMessageEventArgs args)
+        public override async Task Processor_ProcessMessageAsync(ProcessMessageEventArgs args)
         {
             string body = args.Message.Body.ToString();
-            Console.WriteLine($"Received: {body}");
+            Console.WriteLine($"Q4 Received: {body}");
             var data = JsonConvert.DeserializeObject<APIServiceToMQServiceModel>(body);
             var completed = true;
             if(data != null && data.Message != null)

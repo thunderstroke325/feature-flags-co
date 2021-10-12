@@ -59,7 +59,7 @@ namespace FeatureFlags.APIs.Controllers
                         TimeStamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
                     };
 
-                    await _messagingService.SendEventDataAsync(message);
+                    _messagingService.SendEventDataWithoutResponse(message);
                 }
                 return new JsonResult(null);
             }
