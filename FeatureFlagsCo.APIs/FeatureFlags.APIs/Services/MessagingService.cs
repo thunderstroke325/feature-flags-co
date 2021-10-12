@@ -44,10 +44,10 @@ namespace FeatureFlags.APIs.Services
             }
         }
 
-        public async Task SendInsightDataAsync(MessageModel param) 
-        {
-            await PostData("Insights", new StringContent(JsonConvert.SerializeObject(param)));
-        }
+        //public async Task SendInsightDataAsync(MessageModel param) 
+        //{
+        //    await PostData("Insights", new StringContent(JsonConvert.SerializeObject(param)));
+        //}
 
 
         public void SendInsightDataWithoutResponse(MessageModel param)
@@ -85,19 +85,41 @@ namespace FeatureFlags.APIs.Services
             //};
         }
 
-        public async Task SendFeatureFlagDataAsync(FeatureFlagMessageModel param)
+        public void SendEventDataWithoutResponse(ExperimentMessageModel param)
         {
-            await PostData("Experiments/feature-flags", new StringContent(JsonConvert.SerializeObject(param)));
+            var wc = new System.Net.WebClient();
+            wc.Headers["Content-type"] = "application/json";
+            wc.UploadStringAsync(new System.Uri($"{_mySettings.Value.MessagingServiceHost}/api/Experiments/events/"), "POST", JsonConvert.SerializeObject(param));
+            //wc.UploadStringCompleted += (sender, e) =>
+            //{
+
+            //};
         }
 
-        public async Task SendExperimentStartEndDataAsync(ExperimentIterationMessageViewModel param)
+        public void SendExperimentStartEndDataWithoutResponse(ExperimentIterationMessageViewModel param)
         {
-            await PostData("Experiments/experiment", new StringContent(JsonConvert.SerializeObject(param)));
+            var wc = new System.Net.WebClient();
+            wc.Headers["Content-type"] = "application/json";
+            wc.UploadStringAsync(new System.Uri($"{_mySettings.Value.MessagingServiceHost}/api/Experiments/experiment/"), "POST", JsonConvert.SerializeObject(param));
+            //wc.UploadStringCompleted += (sender, e) =>
+            //{
+
+            //};
         }
 
-        public async Task SendEventDataAsync(ExperimentMessageModel param)
-        {
-            await PostData("Experiments/events", new StringContent(JsonConvert.SerializeObject(param)));
-        }
+        //public async Task SendFeatureFlagDataAsync(FeatureFlagMessageModel param)
+        //{
+        //    await PostData("Experiments/feature-flags", new StringContent(JsonConvert.SerializeObject(param)));
+        //}
+
+        //public async Task SendExperimentStartEndDataAsync(ExperimentIterationMessageViewModel param)
+        //{
+        //    await PostData("Experiments/experiment", new StringContent(JsonConvert.SerializeObject(param)));
+        //}
+
+        //public async Task SendEventDataAsync(ExperimentMessageModel param)
+        //{
+        //    await PostData("Experiments/events", new StringContent(JsonConvert.SerializeObject(param)));
+        //}
     }
 }

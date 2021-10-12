@@ -62,7 +62,7 @@ namespace FeatureFlagsCo.Messaging.Services
             _connection = _connectionFactory.CreateConnection();
         }
 
-        public void SendMessage(ExperimentMessageModel message)
+        public bool SendMessage(ExperimentMessageModel message)
         {
 
             var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
@@ -87,13 +87,15 @@ namespace FeatureFlagsCo.Messaging.Services
             //                      body: body);
 
             //Console.WriteLine(message);
+
+            return true;
         }
 
-        public Task SendMessageAsync(ExperimentMessageModel message)
+        public Task<bool> SendMessageAsync(ExperimentMessageModel message)
         {
             Task.Yield();
-            this.SendMessage(message);
-            return Task.FromResult<Object>(null);
+            var sendResult = this.SendMessage(message);
+            return Task.FromResult<bool>(sendResult);
         }
     }
 }

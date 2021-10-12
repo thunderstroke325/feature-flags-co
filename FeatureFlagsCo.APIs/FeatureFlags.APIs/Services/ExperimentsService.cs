@@ -127,7 +127,7 @@ namespace FeatureFlags.APIs.Services
                             Variations = experiment.Variations
                         };
 
-                        await _messagingService.SendExperimentStartEndDataAsync(message);
+                        _messagingService.SendExperimentStartEndDataWithoutResponse(message);
                     }
                 });
 
@@ -161,7 +161,7 @@ namespace FeatureFlags.APIs.Services
                             Variations = experiment.Variations
                         };
 
-                        await _messagingService.SendExperimentStartEndDataAsync(message);
+                        _messagingService.SendExperimentStartEndDataWithoutResponse(message);
                     }
                 });
 
@@ -239,7 +239,7 @@ namespace FeatureFlags.APIs.Services
                             Variations = experiment.Variations
                         };
 
-                        await _messagingService.SendExperimentStartEndDataAsync(message);
+                        _messagingService.SendExperimentStartEndDataWithoutResponse(message);
                     }
                 });
 
@@ -259,7 +259,7 @@ namespace FeatureFlags.APIs.Services
                     Variations = experiment.Variations
                 };
 
-                await _messagingService.SendExperimentStartEndDataAsync(message);
+                _messagingService.SendExperimentStartEndDataWithoutResponse(message);
 
                 return iteration;
             }
@@ -319,7 +319,7 @@ namespace FeatureFlags.APIs.Services
                     Variations = experiment.Variations
                 };
 
-                await _messagingService.SendExperimentStartEndDataAsync(message);
+                _messagingService.SendExperimentStartEndDataWithoutResponse(message);
 
                 return iteration;
             }

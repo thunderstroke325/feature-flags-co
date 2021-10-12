@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace FeatureFlagsCo.Messaging.Controllers
@@ -19,8 +20,7 @@ namespace FeatureFlagsCo.Messaging.Controllers
 
         public InsightsController(
            ILogger<InsightsController> logger,
-           ServiceBusQ4Sender serviceBusSender,
-           ServiceBusQ4Receiver serviceBusQ4Q5Receiver)
+           ServiceBusQ4Sender serviceBusSender)
         {
             _logger = logger;
             _serviceBusSender = serviceBusSender;
@@ -41,7 +41,9 @@ namespace FeatureFlagsCo.Messaging.Controllers
         public async Task<dynamic> SendAPIServiceToMQServiceData([FromBody] APIServiceToMQServiceModel param)
         {
             _logger.LogTrace("Insights/SendAPIServiceToMQServiceData");
-            await _serviceBusSender.SendAPIServiceToMQServiceData(param);
+
+            string messagePayload = JsonSerializer.Serialize(param);
+            await _serviceBusSender.SendMessageAsync(messagePayload);
             return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
         }
     }

@@ -126,7 +126,7 @@ namespace FeatureFlags.APIs.Controllers
             _redisCache.SetString(date, JsonConvert.SerializeObject(customizedTraceProperties));
             _redisCache.GetString(date);
             Response.StatusCode = 200;
-            await _messagingService.SendInsightDataAsync(new FeatureFlagsCo.MQ.MessageModel
+            _messagingService.SendInsightDataWithoutResponse(new FeatureFlagsCo.MQ.MessageModel
             {
                 Labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
                  {
@@ -148,7 +148,7 @@ namespace FeatureFlags.APIs.Controllers
             var testFeatureFlagId = FeatureFlagKeyExtension.GetFeatureFlagId(date, "-1");
             for(int i = 1; i > 0; i--)
             {
-                await _messagingService.SendInsightDataAsync(new FeatureFlagsCo.MQ.MessageModel
+                _messagingService.SendInsightDataWithoutResponse(new FeatureFlagsCo.MQ.MessageModel
                 {
                     Labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
                      {

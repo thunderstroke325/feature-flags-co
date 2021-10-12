@@ -4,6 +4,7 @@ using FeatureFlagsCo.MQ;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace FeatureFlagsCo.Messaging.Controllers
@@ -13,32 +14,37 @@ namespace FeatureFlagsCo.Messaging.Controllers
     public class ExperimentsController: ControllerBase
     {
         private readonly ILogger<ExperimentsController> _logger;
-        private readonly IFeatureFlagMqService _featureFlagsService;
-        private readonly IExperimentStartEndMqService _experimentStartEndMqService;
-        private readonly IExperimentMqService _experimentMqService;
+        //private readonly IFeatureFlagMqService _featureFlagsService;
+        //private readonly IExperimentStartEndMqService _experimentStartEndMqService;
+        //private readonly IExperimentMqService _experimentMqService;
+        private readonly ServiceBusQ1Sender _serviceBusQ1Sender;
+        private readonly ServiceBusQ5Sender _serviceBusQ5Sender;
 
         public ExperimentsController(
            ILogger<ExperimentsController> logger,
-           IFeatureFlagMqService featureFlagsService,
-           IExperimentStartEndMqService experimentStartEndMqService,
-           IExperimentMqService experimentMqService)
+           ServiceBusQ1Sender serviceBusQ1Sender,
+           ServiceBusQ5Sender serviceBusQ5Sender
+            )
         {
             _logger = logger;
 
-            _featureFlagsService = featureFlagsService;
-            _experimentStartEndMqService = experimentStartEndMqService;
-            _experimentMqService = experimentMqService;
+            _serviceBusQ1Sender = serviceBusQ1Sender;
+            _serviceBusQ5Sender = serviceBusQ5Sender;
+            //_featureFlagsService = featureFlagsService;
+            //_experimentStartEndMqService = experimentStartEndMqService;
+            //_experimentMqService = experimentMqService;
         }
 
         // Write to Q4 for python
-        [HttpPost]
-        [Route("feature-flags")]
-        public async Task<dynamic> SendFeatureFlagData([FromBody] FeatureFlagMessageModel param)
-        {
-            _logger.LogTrace("Experiments/SendFeatureFlagData");
-            await _featureFlagsService.SendMessageAsync(param);
-            return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
-        }
+        // Not used anymore
+        //[HttpPost]
+        //[Route("feature-flags")]
+        //public async Task<dynamic> SendFeatureFlagData([FromBody] FeatureFlagMessageModel param)
+        //{
+        //    _logger.LogTrace("Experiments/SendFeatureFlagData");
+        //    await _featureFlagsService.SendMessageAsync(param);
+        //    return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
+        //}
 
         // Write to Q1
         [HttpPost]
@@ -46,7 +52,9 @@ namespace FeatureFlagsCo.Messaging.Controllers
         public async Task<dynamic> SendExperimentStartEndData([FromBody] ExperimentIterationMessageViewModel param)
         {
             _logger.LogTrace("Experiments/SendExperimentStartEndData");
-            await _experimentStartEndMqService.SendMessageAsync(param);
+
+            string messagePayload = JsonSerializer.Serialize(param);
+            await _serviceBusQ1Sender.SendMessageAsync(messagePayload);
             return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
         }
 
@@ -56,7 +64,9 @@ namespace FeatureFlagsCo.Messaging.Controllers
         public async Task<dynamic> SendEventData([FromBody] ExperimentMessageModel param)
         {
             _logger.LogTrace("Experiments/SendEventData");
-            await _experimentMqService.SendMessageAsync(param);
+
+            string messagePayload = JsonSerializer.Serialize(param);
+            await _serviceBusQ5Sender.SendMessageAsync(messagePayload);
             return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
         }
     }

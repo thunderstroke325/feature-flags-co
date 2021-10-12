@@ -10,8 +10,8 @@ namespace FeatureFlagsCo.Messaging.Services
 {
     public interface IExperimentStartEndMqService
     {
-        void SendMessage(ExperimentIterationMessageViewModel message);
-        Task SendMessageAsync(ExperimentIterationMessageViewModel message);
+        bool SendMessage(ExperimentIterationMessageViewModel message);
+        Task<bool> SendMessageAsync(ExperimentIterationMessageViewModel message);
     }
 
     public class ExperimentStartEndMqService : IExperimentStartEndMqService
@@ -57,7 +57,7 @@ namespace FeatureFlagsCo.Messaging.Services
             _connection = _connectionFactory.CreateConnection();
         }
 
-        public void SendMessage(ExperimentIterationMessageViewModel message)
+        public bool SendMessage(ExperimentIterationMessageViewModel message)
         {
             var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
             // Q4 数据发送至es
@@ -66,14 +66,16 @@ namespace FeatureFlagsCo.Messaging.Services
                 routingKey: "py.experiments.recordinginfo",
                 basicProperties: null,
                 body: body);
+
+            return true;
         }
 
-        public Task SendMessageAsync(ExperimentIterationMessageViewModel message)
+        public Task<bool> SendMessageAsync(ExperimentIterationMessageViewModel message)
         {
             Task.Yield();
-            SendMessage(message);
+            var sendResult = SendMessage(message);
 
-            return Task.FromResult<Object>(null);
+            return Task.FromResult<bool>(sendResult);
         }
     }
 }

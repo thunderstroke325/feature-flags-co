@@ -1,37 +1,30 @@
-﻿using Azure.Messaging.ServiceBus;
-using FeatureFlagsCo.MQ;
+﻿using FeatureFlagsCo.MQ;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace FeatureFlagsCo.Messaging.Services
 {
-    public class ServiceBusQ4Sender
+    public class ServiceBusQ4Sender: ServiceBusTopicSenderBase
     {
-        private readonly ServiceBusClient _client;
-        private readonly Azure.Messaging.ServiceBus.ServiceBusSender _clientSender;
+        protected override string TopicPath { get { return "q4"; } }
 
-        public ServiceBusQ4Sender(string connectionString)
+        public ServiceBusQ4Sender(IConfiguration configuration, ILogger<ServiceBusQ4Sender> logger) : base(configuration, logger)
         {
-            _client = new ServiceBusClient(connectionString);
-            _clientSender = _client.CreateSender("q4");
         }
 
-        public async Task SendMessageAsync(MessageModel model)
-        {
-            string messagePayload = JsonSerializer.Serialize(model);
-            ServiceBusMessage message = new ServiceBusMessage(messagePayload);
-            await _clientSender.SendMessageAsync(message).ConfigureAwait(false);
-        }
+        //public async Task SendMessageAsync(MessageModel model)
+        //{
+        //    string messagePayload = JsonSerializer.Serialize(model);
+        //    ServiceBusMessage message = new ServiceBusMessage(messagePayload);
+        //    await _clientSender.SendMessageAsync(message).ConfigureAwait(false);
+        //}
 
         public async Task SendAPIServiceToMQServiceData(APIServiceToMQServiceModel param)
         {
             string messagePayload = JsonSerializer.Serialize(param);
-            ServiceBusMessage message = new ServiceBusMessage(messagePayload);
-            await _clientSender.SendMessageAsync(message).ConfigureAwait(false);
+            await base.SendMessageAsync(messagePayload);
         }
     }
 }
