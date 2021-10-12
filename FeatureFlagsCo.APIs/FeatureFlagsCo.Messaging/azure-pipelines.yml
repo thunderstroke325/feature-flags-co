@@ -89,7 +89,7 @@ stages:
                 inputs:
                   azureSubscription: 'azure-china-devops'
                   appType: 'webApp'
-                  appName: 'ffc-mqservice-ce2-dev'
+                  appName: 'ffc-messaging-ce2-dev'
                   package: '$(Build.ArtifactStagingDirectory)/**/FeatureFlagsCo.Messaging.zip'
                   deploymentMethod: 'auto'
 
@@ -163,6 +163,6 @@ stages:
                 inputs:
                   azureSubscription: 'azure-china-devops'
                   appType: 'webApp'
-                  appName: 'ffc-mqservice-ce2'
+                  appName: 'ffc-messaging-ce2'
                   package: '$(Build.ArtifactStagingDirectory)/**/FeatureFlagsCo.Messaging.zip'
                   deploymentMethod: 'auto'
