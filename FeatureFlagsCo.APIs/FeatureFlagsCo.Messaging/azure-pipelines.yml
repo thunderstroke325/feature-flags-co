@@ -51,6 +51,7 @@ stages:
 
                     $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId_Dev)"
                     $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret_Dev)"
+                    $a.MySettings.ServiceBusConnectionString = "$(MySettings_ServiceBusConnectionString_Dev)"
 
                     $a.MySettings.InsightsRabbitMqUrl = "$(MySettings_InsightsRabbitMqUrl_Dev)"
                     $a.MySettings.ElasticSearchHost = "$(MySettings_ElasticSearchHost_Dev)"                    
@@ -124,6 +125,7 @@ stages:
 
                     $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey)"
                     $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString)"
+                    $a.MySettings.ServiceBusConnectionString = "$(MySettings_ServiceBusConnectionString)"
 
                     $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId)"
                     $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret)"
