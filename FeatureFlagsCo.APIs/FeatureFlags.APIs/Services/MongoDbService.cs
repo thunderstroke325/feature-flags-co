@@ -21,6 +21,7 @@ namespace FeatureFlags.APIs.Services
         private readonly MongoDbEnvironmentUserPropertyService _mongoEnvironmentUserPropertiesService;
         private readonly MongoDbFeatureTriggerService _mongoDbFeatureTriggerService;
         private readonly MongoDbExperimentService _mongoDbExperimentService;
+        private readonly MongoDbFeatureFlagHtmlDetectionSettingService _ffHtmlDetectionSettingService;
         //private readonly MongoDbFeatureFlagCommitService _mongoDbFeatureFlagCommitService;
 
         private readonly IJwtUtilsService _jwtUtilsService;
@@ -31,6 +32,7 @@ namespace FeatureFlags.APIs.Services
             MongoDbEnvironmentUserPropertyService mongoEnvironmentUserPropertiesService,
             MongoDbFeatureTriggerService mongoDbFeatureTriggerService,
             MongoDbExperimentService mongoDbExperimentService,
+            MongoDbFeatureFlagHtmlDetectionSettingService ffHtmlDetectionSettingService,
             //MongoDbFeatureFlagCommitService mongoDbFeatureFlagCommitService,
             IJwtUtilsService jwtUtilsService)
         {
@@ -39,9 +41,17 @@ namespace FeatureFlags.APIs.Services
             _mongoEnvironmentUserPropertiesService = mongoEnvironmentUserPropertiesService;
             _mongoDbFeatureTriggerService = mongoDbFeatureTriggerService;
             _mongoDbExperimentService = mongoDbExperimentService;
+            _ffHtmlDetectionSettingService = ffHtmlDetectionSettingService;
             //_mongoDbFeatureFlagCommitService = mongoDbFeatureFlagCommitService;
             _jwtUtilsService = jwtUtilsService;
         }
+        #region feature flags html detection settings
+        public async Task<List<FeatureFlagHtmlDetectionSetting>> GetFeatureFlagHtmlDetectionSettingsAsync(string environmentKey)
+        {
+            return await _ffHtmlDetectionSettingService.GetFeatureFlagHtmlDetectionSettingsAsync(environmentKey);
+        }
+        #endregion
+
 
         #region experiments
 

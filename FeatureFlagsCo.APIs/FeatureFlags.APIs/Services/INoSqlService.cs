@@ -13,6 +13,11 @@ namespace FeatureFlags.APIs.Services
 {
     public interface INoSqlService
     {
+        #region feature flags html detection settings
+        Task<List<FeatureFlagHtmlDetectionSetting>> GetFeatureFlagHtmlDetectionSettingsAsync(string environmentKey);
+        #endregion
+
+
         #region experiments
         Task<List<Experiment>> GetExperimentsByIdsAsync(List<string> featureFlagIds);
         Task<Experiment> GetExperimentByIdAsync(string exptId);
