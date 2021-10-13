@@ -14,9 +14,10 @@ namespace FeatureFlags.APIs.Models
         public bool IsArchived { get; set; }
         public bool IsActive { get; set; }
         public string FeatureFlagId { get; set; }
+        public string FeatureFlagKey { get; set; }
         public string EnvironmentKey { get; set; }
         public DateTime? UpdatedDate { get; set; }
-        public FeatureFlagHtmlDetectionSettingInput Input { get; set; }
+        public List<CssSelectorItem> Items { get; set; }
 
         public override string GetCollectionName()
         {
@@ -24,10 +25,9 @@ namespace FeatureFlags.APIs.Models
         }
     }
 
-    public class FeatureFlagHtmlDetectionSettingInput
+    public class CssSelectorItem
     {
-        public string ClassName { get; set; }
-        public string InnerKeyText { get; set; }
-        public string NodeName { get; set; }
+        public string CssSelector { get; set; }
+        public string Name { get; set; }
     }
 }

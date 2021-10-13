@@ -59,7 +59,7 @@ namespace FeatureFlags.APIs.Controllers
                         EnvironmentId = param.EnvironmentId,
                         EnvironmentKey = param.EnvironmentKey,
                         FeatureFlagId = param.FeatureFlagId,
-                        Input = param.Input,
+                        Items = param.Items,
                         IsActive = param.IsActive,
                         UpdatedDate = DateTime.UtcNow
                     };
@@ -73,7 +73,7 @@ namespace FeatureFlags.APIs.Controllers
                         EnvironmentKey = param.EnvironmentKey,
                         FeatureFlagId = param.FeatureFlagId,
                         Id = existedElements[0].Id,
-                        Input = param.Input,
+                        Items = param.Items,
                         IsActive = param.IsActive
                     });
                 }
@@ -95,7 +95,7 @@ namespace FeatureFlags.APIs.Controllers
                     EnvironmentId = param.EnvironmentId,
                     EnvironmentKey = param.EnvironmentKey,
                     FeatureFlagId = param.FeatureFlagId,
-                    Input = param.Input,
+                    Items = param.Items,
                     IsActive = param.IsActive,
                     UpdatedDate = DateTime.UtcNow
                 };
