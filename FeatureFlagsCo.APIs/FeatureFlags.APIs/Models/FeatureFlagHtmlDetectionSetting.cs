@@ -29,5 +29,6 @@ namespace FeatureFlags.APIs.Models
     {
         public string CssSelector { get; set; }
         public string Name { get; set; }
+        public VariationOption Variation { get; set; }
     }
 }
