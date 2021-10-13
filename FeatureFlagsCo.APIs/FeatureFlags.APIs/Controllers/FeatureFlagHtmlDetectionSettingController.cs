@@ -38,9 +38,16 @@ namespace FeatureFlags.APIs.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Route("Settings/{environmentKey}")]
-        public async Task<List<FeatureFlagHtmlDetectionSetting>> GetFeatureFlagHtmlDetectionSettings(string environmentKey)
+        public async Task<List<FeatureFlagHtmlDetectionSettingViewModel>> GetFeatureFlagHtmlDetectionSettings(string environmentKey)
         {
-            return await _mongoDbFFHDSService.GetFeatureFlagHtmlDetectionSettingsAsync(environmentKey);
+            var allSettings = await _mongoDbFFHDSService.GetFeatureFlagHtmlDetectionSettingsAsync(environmentKey);
+            if (allSettings != null && allSettings.Count > 0)
+                return allSettings.Select(p => new FeatureFlagHtmlDetectionSettingViewModel()
+                {
+                    CssSelectors = p.Items,
+                    FeatureFlagKey = p.FeatureFlagKey
+                }).ToList();
+            return new List<FeatureFlagHtmlDetectionSettingViewModel>();
         }
 
 
@@ -59,6 +66,7 @@ namespace FeatureFlags.APIs.Controllers
                         EnvironmentId = param.EnvironmentId,
                         EnvironmentKey = param.EnvironmentKey,
                         FeatureFlagId = param.FeatureFlagId,
+                        FeatureFlagKey = param.FeatureFlagKey,
                         Items = param.Items,
                         IsActive = param.IsActive,
                         UpdatedDate = DateTime.UtcNow
@@ -95,6 +103,7 @@ namespace FeatureFlags.APIs.Controllers
                     EnvironmentId = param.EnvironmentId,
                     EnvironmentKey = param.EnvironmentKey,
                     FeatureFlagId = param.FeatureFlagId,
+                    FeatureFlagKey = param.FeatureFlagKey,
                     Items = param.Items,
                     IsActive = param.IsActive,
                     UpdatedDate = DateTime.UtcNow
