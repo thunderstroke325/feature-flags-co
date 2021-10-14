@@ -43,13 +43,11 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.switchServe.getSwitchDetail(ffId).subscribe(res => {
       const featureDetail = new CSwitchParams(res);
       this.currentVariationOptions = featureDetail.getVariationOptions();
-      console.log('constructor end');
     });
   }
 
   ngOnDestroy(): void {
     clearInterval(this.refreshIntervalId);
-    console.log('destroy refresh');
   }
 
   ngOnInit(): void {
@@ -58,7 +56,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       this.initData();
 
       this.refreshIntervalId = setInterval(() => {
-        console.log('start refreshing');
         const activeExperimentIteration = this.onGoingExperiments.map(expt => {
           expt.isLoading = true;
           return {
@@ -93,15 +90,14 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   experimentList: IExperiment[] = [];
   private initData() {
-    console.log('initData');
     this.experimentService.getExperiments({envId: this.switchServe.envId, featureFlagId: this.featureFlagId}).subscribe(experiments => {
       if (experiments) {
         this.experimentList = experiments.map(experiment => {
           const expt = Object.assign({}, experiment);
 
           if (expt.iterations.length > 0) {
-            expt.iterations = expt.iterations.map(ex => this.processIteration(ex, expt.baselineVariation));
-            expt.selectedIteration = expt.iterations[expt.iterations.length -1];
+            expt.iterations = expt.iterations.map(ex => this.processIteration(ex, expt.baselineVariation)).reverse();
+            expt.selectedIteration = expt.iterations[0];
             if (expt.selectedIteration.updatedAt) {
               expt.selectedIteration.updatedAtStr = moment(expt.selectedIteration.updatedAt).format('YYYY-MM-DD HH:mm');
             }
@@ -113,7 +109,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
         this.onGoingExperiments = [...this.experimentList.filter(expt => expt.status === ExperimentStatus.Recording)];
       }
-      console.log('initData end');
       this.isInitLoading = false;
     }, _ => {
       this.message.error("数据加载失败，请重试!");
@@ -142,12 +137,11 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   onStartIterationClick(expt: IExperiment) {
-    console.log('onStartIterationClick');
     expt.isLoading  = true;
     this.experimentService.startIteration(this.switchServe.envId, expt.id).subscribe(res => {
       if (res) {
-        expt.iterations.push(this.processIteration(res, expt.baselineVariation));
-        expt.selectedIteration = expt.iterations[expt.iterations.length -1];
+        expt.iterations.unshift(this.processIteration(res, expt.baselineVariation));
+        expt.selectedIteration = expt.iterations[0];
         expt.status = ExperimentStatus.Recording;
 
         this.onGoingExperiments = [...this.onGoingExperiments, expt];
@@ -160,7 +154,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   onStopIterationClick(expt: IExperiment) {
-    console.log('onStopIterationClick');
     expt.isLoading  = true;
     this.experimentService.stopIteration(this.switchServe.envId, expt.id, expt.selectedIteration.id).subscribe(res => {
       if (res) {
@@ -182,7 +175,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   onReloadIterationResultsClick(expt: IExperiment) {
-    console.log('onReloadIterationResultsClick');
     expt.isLoading  = true;
     this.experimentService.getIterationResults(this.switchServe.envId, [{ experimentId: expt.id, iterationId: expt.selectedIteration.id}]).subscribe(res => {
       if (res) {
@@ -201,7 +193,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   onDeleteExptClick(expt: IExperiment) {
-    console.log('onDeleteExptClick');
     expt.isLoading  = true;
     this.experimentService.archiveExperiment(this.switchServe.envId, expt.id).subscribe(res => {
       this.experimentList = this.experimentList.filter(ex => ex.id !== expt.id);
@@ -213,7 +204,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   onDeleteExptDataClick(expt: IExperiment) {
-    console.log('onDeleteExptClick');
     expt.isLoading  = true;
     this.experimentService.archiveExperimentData(this.switchServe.envId, expt.id).subscribe(res => {
       expt.selectedIteration = null;
@@ -227,7 +217,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   private processIteration(iteration: any, baselineVariation: string) {
-    console.log('processIteration');
     const iterationResults = this.currentVariationOptions.map((option) => {
         const found = iteration.results.find(r => r.variation == option.localId);
 
@@ -253,7 +242,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   private createEmptyIterationResult(option: IVariationOption, baselineVariation: string) {
-    console.log('createEmptyIterationResult');
     return {
       isEmpty: true,
       variationValue: option.variationValue,
