@@ -1,0 +1,3 @@
+run static file web server
+1 go to the folder
+2 python -m http.server <PORT>
