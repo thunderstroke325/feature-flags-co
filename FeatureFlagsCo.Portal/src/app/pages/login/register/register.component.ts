@@ -18,6 +18,7 @@ export class RegisterComponent implements OnInit {
   isLoading: boolean = false;
   phoneNumber: string = null;
   orgName: string = null;
+  inviteCode: string = null;
 
   get password() {
     if (!this.registerForm || !this.registerForm.value) return '';
@@ -34,11 +35,11 @@ export class RegisterComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private message: NzMessageService
-    ) {
-      this.route.queryParams.subscribe(params => {
-        this.phoneNumber = params['tel'];
-      });
-    }
+  ) {
+    this.route.queryParams.subscribe(params => {
+      this.phoneNumber = params['tel'];
+    });
+  }
 
   ngOnInit(): void {
     this.initForm();
@@ -51,6 +52,7 @@ export class RegisterComponent implements OnInit {
       _password: new FormControl(null, [Validators.required]),
       orgName: new FormControl(this.orgName, [Validators.required]),
       phoneNumber: new FormControl(this.phoneNumber, [Validators.required]),
+      inviteCode: new FormControl(this.inviteCode, [Validators.required])
     }, {
       validators: repeatPasswordValidator
     })
@@ -68,12 +70,16 @@ export class RegisterComponent implements OnInit {
     }
     this.isLoading = true;
     const { _password, ...params } = this.registerForm.value
+    params.phoneNumber = params.phoneNumber.toString()
     this.loginService.register(params)
       .subscribe(
         res => {
           this.isLoading = false;
           this.message.success('注册成功！');
           this.router.navigateByUrl('/login');
+        }, err => {
+          this.isLoading = false;
+          this.message.error(err.error.message);
         }
       );
   }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -33,6 +34,7 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IOptions<MySettings> _mySettings;
         private readonly IUserInvitationService _userInvitationService;
         private readonly IAccountUserService _accountUserService;
+        private readonly ILogger<AuthenticateController> _logger;
 
         public AuthenticateController(
             IGenericRepository repository,
@@ -42,7 +44,8 @@ namespace FeatureFlags.APIs.Controllers
             IConfiguration configuration,
             IOptions<MySettings> mySettings,
             IUserInvitationService userInvitationService,
-            IAccountUserService accountUserService)
+            IAccountUserService accountUserService,
+            ILogger<AuthenticateController> logger)
         {
             _repository = repository;
             this._userManager = userManager;
@@ -52,6 +55,7 @@ namespace FeatureFlags.APIs.Controllers
             _mySettings = mySettings;
             _userInvitationService = userInvitationService;
             _accountUserService = accountUserService;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -102,6 +106,13 @@ namespace FeatureFlags.APIs.Controllers
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "User already exists!" });
 
+            string firstCode = "ACEGIKMOQSUWY", thirdCode = "13579";
+            if (string.IsNullOrWhiteSpace(model.InviteCode) || model.InviteCode.Length != 4 || 
+                !firstCode.Contains(model.InviteCode[0]) || !thirdCode.Contains(model.InviteCode[2]))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "邀请码不正确" });
+            }
+
             var result = await _userManager.CreateAsync(
                 new ApplicationUser()
                 {
@@ -125,6 +136,8 @@ namespace FeatureFlags.APIs.Controllers
             };
 
             await _accountService.CreateAccountAsync(user.Id, account, true);
+
+            _logger.LogTrace($"{model.OrgName}的{model.Email}使用{model.InviteCode}注册了账户");
 
             return Ok(new Response { Code = "Success", Message = "User created successfully!" });
         }
