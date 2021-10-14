@@ -15,6 +15,7 @@ namespace FeatureFlags.APIs.Authentication
         public string Password { get; set; }
         public string PhoneNumber { get; set; }
         public string OrgName { get; set; }
+        public string InviteCode { get; set; }
 
     }
 }
