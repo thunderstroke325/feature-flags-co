@@ -88,23 +88,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     }
   }
 
-   // 搜索 events
-   private eventInputs = new Subject<any>();
-   public isEventsLoading = false;
-   public onSearchEvents(value: string = '') {
-    this.eventInputs.next(value);
-  }
-
-  disabledDate = (current: Date): boolean =>
-    // Can not select days before today and today
-    differenceInCalendarDays(current, new Date()) > 0;
-
-  conversionTableTitle = '';
-  eventList: string[] = [];
-  selectedEvent: string;
-  dateRange:Date[] = [];
-  lastSearchText = null;
-
   experimentList: IExperiment[] = [];
   private initData() {
     this.experimentService.getExperiments({envId: this.switchServe.envId, featureFlagId: this.featureFlagId}).subscribe(experiments => {
@@ -113,8 +96,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
           const expt = Object.assign({}, experiment);
 
           if (expt.iterations.length > 0) {
-            expt.iterations = expt.iterations.map(ex => this.processIteration(ex, expt.baselineVariation));
-            expt.selectedIteration = expt.iterations[expt.iterations.length -1];
+            expt.iterations = expt.iterations.map(ex => this.processIteration(ex, expt.baselineVariation)).reverse();
+            expt.selectedIteration = expt.iterations[0];
             if (expt.selectedIteration.updatedAt) {
               expt.selectedIteration.updatedAtStr = moment(expt.selectedIteration.updatedAt).format('YYYY-MM-DD HH:mm');
             }
@@ -132,33 +115,33 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       this.isInitLoading = false;
     });
 
-    this.eventInputs.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(e => {
-      this.isEventsLoading = true;
-      this.experimentService.getCustomEvents(this.switchServe.envId, null, e).subscribe((result: any) => {
-        if(result) {
-          if (result.aggregations.keys.buckets.length === 0) {
-            this.message.warning('目前还没有任何事件，请耐心等待事件被终端用户激发后再试！');
-          } else {
-            this.eventList = result.aggregations.keys.buckets.map(b => b.key.EventName);
-          }
-        }
-        this.isEventsLoading = false;
-      }, _ => {
-        this.message.error("数据加载失败，请重试!");
-        this.isEventsLoading = false;
-      })
-    });
+    // this.eventInputs.pipe(
+    //   debounceTime(300),
+    //   distinctUntilChanged()
+    // ).subscribe(e => {
+    //   this.isEventsLoading = true;
+    //   this.experimentService.getCustomEvents(this.switchServe.envId, null, e).subscribe((result: any) => {
+    //     if(result) {
+    //       if (result.aggregations.keys.buckets.length === 0) {
+    //         this.message.warning('目前还没有任何事件，请耐心等待事件被终端用户激发后再试！');
+    //       } else {
+    //         this.eventList = result.aggregations.keys.buckets.map(b => b.key.EventName);
+    //       }
+    //     }
+    //     this.isEventsLoading = false;
+    //   }, _ => {
+    //     this.message.error("数据加载失败，请重试!");
+    //     this.isEventsLoading = false;
+    //   })
+    // });
   }
 
   onStartIterationClick(expt: IExperiment) {
     expt.isLoading  = true;
     this.experimentService.startIteration(this.switchServe.envId, expt.id).subscribe(res => {
       if (res) {
-        expt.iterations.push(this.processIteration(res, expt.baselineVariation));
-        expt.selectedIteration = expt.iterations[expt.iterations.length -1];
+        expt.iterations.unshift(this.processIteration(res, expt.baselineVariation));
+        expt.selectedIteration = expt.iterations[0];
         expt.status = ExperimentStatus.Recording;
 
         this.onGoingExperiments = [...this.onGoingExperiments, expt];
@@ -267,78 +250,96 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
      };
   }
 
+
   customEventType: EventType = EventType.Custom;
   customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
   /************************** above are for new experiment ****************************************/
-  onDateRangeChange(result: Date[]): void {
-    this.dateRange = [...result];
-  }
 
-  experimentResult = [];
-  isLoadingResult = false;
-  onSubmit() {
+  // 搜索 events
+  // private eventInputs = new Subject<any>();
+  // public isEventsLoading = false;
+  // public onSearchEvents(value: string = '') {
+  //   this.eventInputs.next(value);
+  // }
 
-    if (this.selectedBaseline === undefined || this.selectedBaseline === null) {
-      this.message.warning('请选择基准特性！');
-      return false;
-    }
+  // disabledDate = (current: Date): boolean =>
+  //   // Can not select days before today and today
+  //   differenceInCalendarDays(current, new Date()) > 0;
 
-    if (this.selectedEvent === undefined || this.selectedEvent === null || this.selectedEvent === '') {
-      this.message.warning('请选择事件！');
-      return false;
-    }
+  // eventList: string[] = [];
+  // selectedEvent: string;
+  // dateRange:Date[] = [];
+  // lastSearchText = null;
 
-    if (this.dateRange.length !== 2) {
-      this.message.warning('请设置起止时间！');
-      return false;
-    }
+  // onDateRangeChange(result: Date[]): void {
+  //   this.dateRange = [...result];
+  // }
 
-    this.dateRange[0].setSeconds(0);
-    this.dateRange[1].setSeconds(0);
+  //experimentResult = [];
+  //isLoadingResult = false;
+  // onSubmit() {
 
-    const param = {
-      eventName: this.selectedEvent,
-      startExptTime: this.dateRange[0].toISOString().slice(0, 19),
-      endExptTime: this.dateRange[1].toISOString().slice(0, 19),
-      flag: {
-        id: this.featureFlagId,
-        baselineVariation: `${this.selectedBaseline.localId}`,
-        variations: this.currentVariationOptions.map(o => `${o.localId}`)
-      }
-    };
+  //   if (this.selectedBaseline === undefined || this.selectedBaseline === null) {
+  //     this.message.warning('请选择基准特性！');
+  //     return false;
+  //   }
 
-    this.isLoadingResult = true;
-    this.experimentResult = [];
-    this.experimentService.getExperimentResult(this.switchServe.envId, param).subscribe((result) => {
-      if(result && result.length > 0) {
-        this.experimentResult = this.currentVariationOptions.map((option) => {
-          const found = result.find(r => r.variation == option.localId);
+  //   if (this.selectedEvent === undefined || this.selectedEvent === null || this.selectedEvent === '') {
+  //     this.message.warning('请选择事件！');
+  //     return false;
+  //   }
 
-          return !found ? this.createEmptyExperimentResult(option) : Object.assign({}, found, {
-            variationValue: option.variationValue,
-            pValue: found.pValue === -1 ? '--' : found.pValue,
-            isEmpty: false
-          })
-        });
+  //   if (this.dateRange.length !== 2) {
+  //     this.message.warning('请设置起止时间！');
+  //     return false;
+  //   }
 
-        this.hasInvalidVariation = this.experimentResult.findIndex(e => e.isInvalid && !e.isBaseline) > -1;
-        this.hasWinnerVariation = this.experimentResult.findIndex(e => e.isWinner) > -1;
-      } else {
-        this.message.warning("暂时还没有实验数据，请修改时间区间或稍后再试!");
-      }
+  //   this.dateRange[0].setSeconds(0);
+  //   this.dateRange[1].setSeconds(0);
 
-      this.isLoadingResult = false;
-    }, _ => {
-      this.message.error("数据加载失败，请重试!");
-      this.isLoadingResult = false;
-    });
-  }
+  //   const param = {
+  //     eventName: this.selectedEvent,
+  //     startExptTime: this.dateRange[0].toISOString().slice(0, 19),
+  //     endExptTime: this.dateRange[1].toISOString().slice(0, 19),
+  //     flag: {
+  //       id: this.featureFlagId,
+  //       baselineVariation: `${this.selectedBaseline.localId}`,
+  //       variations: this.currentVariationOptions.map(o => `${o.localId}`)
+  //     }
+  //   };
 
-  private createEmptyExperimentResult(option: IVariationOption) {
-    return {
-      isEmpty: true,
-      variationValue: option.variationValue,
-      isBaseline: this.selectedBaseline.localId === option.localId
-     };
-  }
+  //   this.isLoadingResult = true;
+  //   this.experimentResult = [];
+  //   this.experimentService.getExperimentResult(this.switchServe.envId, param).subscribe((result) => {
+  //     if(result && result.length > 0) {
+  //       this.experimentResult = this.currentVariationOptions.map((option) => {
+  //         const found = result.find(r => r.variation == option.localId);
+
+  //         return !found ? this.createEmptyExperimentResult(option) : Object.assign({}, found, {
+  //           variationValue: option.variationValue,
+  //           pValue: found.pValue === -1 ? '--' : found.pValue,
+  //           isEmpty: false
+  //         })
+  //       });
+
+  //       this.hasInvalidVariation = this.experimentResult.findIndex(e => e.isInvalid && !e.isBaseline) > -1;
+  //       this.hasWinnerVariation = this.experimentResult.findIndex(e => e.isWinner) > -1;
+  //     } else {
+  //       this.message.warning("暂时还没有实验数据，请修改时间区间或稍后再试!");
+  //     }
+
+  //     this.isLoadingResult = false;
+  //   }, _ => {
+  //     this.message.error("数据加载失败，请重试!");
+  //     this.isLoadingResult = false;
+  //   });
+  // }
+
+  // private createEmptyExperimentResult(option: IVariationOption) {
+  //   return {
+  //     isEmpty: true,
+  //     variationValue: option.variationValue,
+  //     isBaseline: this.selectedBaseline.localId === option.localId
+  //    };
+  // }
 }

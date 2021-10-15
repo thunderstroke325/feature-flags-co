@@ -89,7 +89,7 @@
                       <nz-select name="iterations_{{experiment.id}}"
                           [(ngModel)]="experiment.selectedIteration"
                       >
-                        <nz-option *ngFor="let iteration of experiment.iterations?.reverse()" [nzLabel]="iteration.dateTimeInterval" [nzValue]="iteration"></nz-option>
+                        <nz-option *ngFor="let iteration of experiment.iterations" [nzLabel]="iteration.dateTimeInterval" [nzValue]="iteration"></nz-option>
                       </nz-select>
                     </div>
 <!--                    <button nz-button nzType="default" nzDanger style="margin-left: 10px;"-->
@@ -213,7 +213,7 @@
               </nz-spin>
           </nz-card>
         </div>
-        <div *ngIf="experimentation==='final version' || experimentation==='temporary version'">
+        <!-- <div *ngIf="experimentation==='final version' || experimentation==='temporary version'">
           <nz-spin [nzSpinning]="isLoadingResult" nzTip="数据加载中...">
             <div nz-row>
               <span style="display:inline-block; margin-right: 10px;">事件名称</span>
@@ -327,7 +327,7 @@
               </nz-table>
             </nz-card>
           </nz-spin>
-        </div>
+        </div> -->
         <div *ngIf="experimentation==='pro only'">
           <nz-empty
           nzNotFoundImage="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
