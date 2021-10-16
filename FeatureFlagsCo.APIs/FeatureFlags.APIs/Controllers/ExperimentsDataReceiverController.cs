@@ -50,6 +50,7 @@ namespace FeatureFlags.APIs.Controllers
                         Secret = item.Secret,
                         Type = item.Type,
                         EventName = item.EventName,
+                        NumericValue = item.NumericValue,
                         User = item.User,
                         AppType = item.AppType,
                         CustomizedProperties = item.CustomizedProperties,
