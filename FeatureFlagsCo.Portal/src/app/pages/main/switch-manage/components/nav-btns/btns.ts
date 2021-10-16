@@ -6,6 +6,9 @@ export const btnsConfig = [
         id: 'setting',
         label: '设置'
     },{
+      id: 'zero-code-settings',
+      label: '零代码设置'
+    },{
       id: 'triggers',
       label: '触发器'
     },{

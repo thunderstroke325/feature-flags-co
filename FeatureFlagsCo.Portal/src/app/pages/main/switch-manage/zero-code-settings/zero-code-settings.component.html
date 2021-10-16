@@ -1,0 +1,65 @@
+<section class="body">
+  <app-layout>
+      <app-nav-btns name="header" [routeUrl]="'zero-code-settings'" [id]="featureFlagId"></app-nav-btns>
+      <ng-container *ngTemplateOutlet="zeroCodeTemplate" name="detail"></ng-container>
+  </app-layout>
+</section>
+
+<ng-template #zeroCodeTemplate>
+  <ng-template #loadingTem>
+    <div class="spin">
+        <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+    </div>
+  </ng-template>
+  <ng-container *ngIf="!isLoading; else loadingTem;">
+    <div class="detail-body" name="detail" *ngIf="featureFlagId">
+      <div class="info-item">
+        <div style="display: flex;flex-direction: row;justify-content: space-between;align-items: center;margin-bottom: 25px;">
+          <div class="label" style="margin: 0">零代码网站APP开关设置</div>
+          <div class="wrap-right">
+            <button nz-button nzType="primary" (click)="onAddCssSelectorRow()">
+              <i nz-icon nzType="plus" nzTheme="outline"></i>
+              添加
+            </button>
+          </div>
+        </div>
+
+        <nz-table [nzLoading]="isSaving" #editRowTable [nzFrontPagination]="false" [nzData]="model.items" [nzSize]="'small'" [nzShowPagination]="false">
+          <thead>
+            <tr class="table-th-style">
+              <th>CSS Selector</th>
+              <th>网页 URL</th>
+              <th>描述</th>
+              <th>显示内容时对应的开关状态</th>
+              <th nzAlign="center">操作</th>
+            </tr>
+          </thead>
+          <tbody cdkDropList (cdkDropListDropped)="drop($event)">
+            <tr *ngFor="let data of model.items" cdkDrag class="editable-row">
+              <td>
+                <input type="text" style="width:100%" nz-input [(ngModel)]="data.cssSelector" />
+              </td>
+              <td>
+                <input type="text" style="width:100%" nz-input [(ngModel)]="data.url" />
+              </td>
+              <td>
+                <input type="text" style="width:100%" nz-input [(ngModel)]="data.description" />
+              </td>
+              <td>
+                <nz-select nzPlaceHolder="选择特性" [(ngModel)]="data.variationOptionId" style="width: 100%">
+                  <nz-option *ngFor="let o of currentVariationOptions" [nzValue]="o.localId" [nzLabel]="o.variationValue"></nz-option>
+                </nz-select>
+              </td>
+              <td [nzAlign]="'center'">
+                <a nz-popconfirm nzPopconfirmTitle="确定删除吗? 删除后将不可恢复！" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariationOptionRow(data)"><i nz-icon style="color: #9A95CC" nzType="delete" nzTheme="fill"></i></a>
+              </td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </div>
+      <div class="info-item">
+        <button class="submit" [disabled]="isSaving" nz-button nzType="primary" (click)="doSubmit()">保存</button>
+    </div>
+    </div>
+  </ng-container>
+</ng-template>

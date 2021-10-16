@@ -24,6 +24,12 @@ const routes: Routes = [
           breadcrumb: '开关详情'
         }
       }, {
+        path: 'zero-code-settings/:id',
+        loadChildren: () => import("./zero-code-settings/zero-code-settings.module").then(m => m.ZeroCodeSettingsModule),
+        data: {
+          breadcrumb: '开关详情'
+        }
+      }, {
         path: 'report/:id',
         resolve: { switchInfo: StatisticalReportResolver },
         loadChildren: () => import("./statistical-report/statistical-report.module").then(m => m.StatisticalReportModule),

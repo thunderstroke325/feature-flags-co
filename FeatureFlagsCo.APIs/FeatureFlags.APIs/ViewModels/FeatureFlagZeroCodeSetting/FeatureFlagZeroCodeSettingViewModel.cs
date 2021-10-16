@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FeatureFlags.APIs.ViewModels.FeatureFlagHtmlDetectionSetting
+namespace FeatureFlags.APIs.ViewModels.FeatureFlagZeroCodeSetting
 {
-    public class FeatureFlagHtmlDetectionSettingViewModel
+    public class FeatureFlagZeroCodeSettingViewModel
     {
         public string FeatureFlagKey { get; set; }
-        public List<CssSelectorItem> CssSelectors { get; set; }
+        public List<CssSelectorItem> Items { get; set; }
     }
 }

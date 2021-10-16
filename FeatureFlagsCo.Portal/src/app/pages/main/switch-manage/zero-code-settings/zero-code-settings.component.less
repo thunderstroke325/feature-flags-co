@@ -1,0 +1,80 @@
+.body {
+  width: 100%;
+  height: 100%;
+  padding: 10px 20px;
+
+  .spin {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255,0.5);
+  }
+
+  .detail-body {
+      width: 100%;
+      height: calc(100% - 24px);
+      padding: 0px 10px 30px 2px;
+      margin-top: 24px;
+      overflow: auto;
+      position: relative;
+      font-size: 13px;
+
+      .label{
+        font-weight: bold;
+        margin-bottom: 9px;
+      }
+
+      .table-th-style th{
+        background-color: #DDDCEB;
+      }
+
+      .wrap-right {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .info-item {
+          margin-bottom: 25px;
+
+          .editable-cell {
+            position: relative;
+            padding: 5px 12px;
+            cursor: pointer;
+          }
+
+          .editable-row:hover .editable-cell {
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 4px 11px;
+          }
+
+          p {
+              font-size: 13px;
+              font-weight: 400;
+              line-height: 22px;
+              margin: 10px 0px;
+          }
+
+          input {
+            &.half {
+              width: 50%;
+            }
+          }
+
+          .submit {
+              width: 88px;
+              letter-spacing: 2px;
+          }
+      }
+  }
+}
+
+::ng-deep .cdk-drag-preview {
+display: table;
+}
+
+::ng-deep .cdk-drag-placeholder {
+opacity: 0;
+}

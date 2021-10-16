@@ -4,20 +4,13 @@ using FeatureFlags.APIs.ViewModels.DataSync;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.ViewModels.FeatureFlagTrigger;
-using FeatureFlags.APIs.ViewModels.FeatureFlagCommit;
 
 namespace FeatureFlags.APIs.Services
 {
     public interface INoSqlService
     {
-        #region feature flags html detection settings
-        Task<List<FeatureFlagHtmlDetectionSetting>> GetFeatureFlagHtmlDetectionSettingsAsync(string environmentKey);
-        #endregion
-
-
         #region experiments
         Task<List<Experiment>> GetExperimentsByIdsAsync(List<string> featureFlagIds);
         Task<Experiment> GetExperimentByIdAsync(string exptId);

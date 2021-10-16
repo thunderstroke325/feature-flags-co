@@ -46,9 +46,9 @@ export class SwitchSettingComponent implements OnDestroy {
     moveItemInArray(this.variationOptions, event.previousIndex, event.currentIndex);
   }
 
-  startEditVariationOption(id: number): void {
-    this.variationOptionEditId = id;
-  }
+  // startEditVariationOption(id: number): void {
+  //   this.variationOptionEditId = id;
+  // }
 
   stopEditVariationOption(): void {
     this.variationOptionEditId = null;

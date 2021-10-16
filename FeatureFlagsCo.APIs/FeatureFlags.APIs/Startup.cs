@@ -176,7 +176,7 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddSingleton<INoSqlService, MongoDbService>();
             services.AddSingleton<IExperimentsService, ExperimentsService>();
             services.AddSingleton<MongoDbExperimentService>();
-            services.AddSingleton<MongoDbFeatureFlagHtmlDetectionSettingService>();
+            services.AddSingleton<MongoDbFeatureFlagZeroCodeSettingService>();
             services.AddSingleton<MetricService>();
 
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;

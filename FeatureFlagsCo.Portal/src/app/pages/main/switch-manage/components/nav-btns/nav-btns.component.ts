@@ -35,6 +35,14 @@ export class NavBtnsComponent {
         });
       })
     }
+
+    const zeroCodeEnabled = environment.name === 'Standalone' ? true : this.ffcService.client.variation('零代码') === 'true';
+    if (!zeroCodeEnabled) {
+      const idx = this.navConfig.findIndex(n => n.id === 'zero-code-settings');
+      if (idx > -1) {
+        this.navConfig.splice(idx, 1);
+      }
+    }
   }
 
   onCheck(id: string) {

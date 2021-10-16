@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ExperimentationRoutingModule } from './experimentation-routing.module';
+import { ZeroCodeSettingsRoutingModule } from './zero-code-settings-routing.module';
 import { ComponentsModule } from '../components/components.module';
-import { ExperimentationComponent } from './experimentation.component';
+import { ZeroCodeSettingsComponent } from './zero-code-settings.component';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
@@ -17,11 +17,14 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import { NzInputModule } from 'ng-zorro-antd/input';
 
 @NgModule({
-  declarations: [ExperimentationComponent],
+  declarations: [ZeroCodeSettingsComponent],
   imports: [
     CommonModule,
+    NzInputModule,
     FormsModule,
     NzEmptyModule,
     NzSelectModule,
@@ -35,8 +38,9 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
     NzTagModule,
     NzPopconfirmModule,
     NzDropDownModule,
+    DragDropModule,
     ComponentsModule,
-    ExperimentationRoutingModule
+    ZeroCodeSettingsRoutingModule
   ]
 })
-export class ExperimentationModule { }
+export class ZeroCodeSettingsModule { }

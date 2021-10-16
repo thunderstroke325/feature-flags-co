@@ -37,7 +37,9 @@
                         {{ variationOption.variationValue || 'Click to edit' }}
                       </div>
                       <input [hidden]="variationOptionEditId !== variationOption.localId" type="text" nz-input [(ngModel)]="variationOption.variationValue" (blur)="stopEditVariationOption()" /> -->
-                      <input type="text" style="width: 400px" nz-input [(ngModel)]="variationOption.variationValue" (blur)="stopEditVariationOption()" />
+                      <div nz-typography nzCopyable [nzCopyText]="variationOption.variationValue">
+                        <input type="text" style="width: 95%" nz-input [(ngModel)]="variationOption.variationValue" (blur)="stopEditVariationOption()" />
+                      </div>
                     </td>
                     <td [nzAlign]="'center'">
                       <a nz-popconfirm nzPopconfirmTitle="确定删除吗? 删除后将不可恢复！" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariationOptionRow(variationOption.localId)"><i nz-icon style="color: #9A95CC" nzType="delete" nzTheme="fill"></i></a>

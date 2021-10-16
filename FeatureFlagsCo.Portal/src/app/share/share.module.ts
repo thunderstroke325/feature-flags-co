@@ -37,9 +37,10 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { MetricDrawerComponent } from './uis/metric-drawer/metric-drawer.component';
 import { ExperimentDrawerComponent } from './uis/experiment-drawer/experiment-drawer.component';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { PercentagePipe } from 'src/app/share/pipes/percentage.pipe';
 
 @NgModule({
-  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent],
+  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent, PercentagePipe],
   imports: [
     CommonModule,
     FormsModule,
