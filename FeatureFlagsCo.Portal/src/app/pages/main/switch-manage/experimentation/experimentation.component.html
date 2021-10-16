@@ -141,12 +141,12 @@
                   <thead>
                     <tr class="table-th-style">
                       <th>特性</th>
-                      <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment?.selectedIteration?.customEventTrackOption)">
+                      <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metric.customEventTrackOption)">
                         <th>转化数 / 用户数</th>
                         <th>转化率</th>
                       </ng-container>
-                      <ng-container *ngIf="experiment?.selectedIteration?.customEventTrackOption === customEventTrackNumeric">
-                        <th>总发送事件数</th>
+                      <ng-container *ngIf="experiment.metric.customEventTrackOption === customEventTrackNumeric">
+                        <th>总事件数</th>
                         <th>平均值</th>
                       </ng-container>
                       <th style="width: 210px">置信区间</th>
@@ -185,13 +185,13 @@
                           </span>
                           <span class="icon_placeholder" *ngIf="!data.isWinner && !data.isInvalid"></span>
                           &nbsp;{{ data.variationValue }}</td>
-                        <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment?.selectedIteration?.customEventTrackOption)">
+                        <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metric.customEventTrackOption)">
                           <td>{{ data.conversion }}</td>
                           <td>{{ data.conversionRate | percentage }}</td>
                         </ng-container>
-                        <ng-container *ngIf="experiment?.selectedIteration?.customEventTrackOption === customEventTrackNumeric">
+                        <ng-container *ngIf="experiment.metric.customEventTrackOption === customEventTrackNumeric">
                           <td>{{ data.totalEvents }}</td>
-                          <td>{{ data.average }} {{data.customEventUnit}}</td>
+                          <td>{{ data.average }} {{experiment.metric.customEventUnit}</td>
                         </ng-container>
 
                         <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell">
