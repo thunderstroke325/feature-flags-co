@@ -1,8 +1,4 @@
 ﻿using FeatureFlags.APIs.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.ViewModels.Metrics
 {
@@ -16,5 +12,7 @@ namespace FeatureFlags.APIs.ViewModels.Metrics
         public string EventName { get; set; }
         public EventType EventType { get; set; }
         public CustomEventTrackOption CustomEventTrackOption { get; set; }
+        public string CustomEventUnit { get; set; }
+        public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
     }
 }

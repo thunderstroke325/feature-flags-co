@@ -26,6 +26,7 @@
           <tr class="table-th-style">
             <th>Metric</th>
             <th>事件类型</th>
+            <th>事件名称</th>
             <th>维护人</th>
             <th nzAlign="center">编辑</th>
           </tr>
@@ -40,10 +41,10 @@
                   </ng-container>
                 </nz-tag>
               </td>
+              <td>{{ data.eventName }}</td>
               <td>{{ data.maintainerName }}</td>
               <td (click)="onCreateOrEditClick(data)" style="color: #9A95CC;text-align: center;">
-                <i nz-icon nzType="edit" nzTheme="fill"></i>
-                编辑
+                <a><i nz-icon nzType="edit" nzTheme="fill"></i>编辑</a>
               </td>
             </tr>
         </tbody>

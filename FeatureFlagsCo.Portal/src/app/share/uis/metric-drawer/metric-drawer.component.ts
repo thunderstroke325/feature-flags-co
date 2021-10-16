@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IAccount } from 'src/app/config/types';
-import { CustomEventTrackOption, EventType, IMetric } from 'src/app/pages/main/switch-manage/types/experimentations';
+import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from 'src/app/pages/main/switch-manage/types/experimentations';
 import { MetricService } from 'src/app/services/metric.service';
 import { TeamService } from 'src/app/services/team.service';
 
@@ -30,11 +30,16 @@ export class MetricDrawerComponent implements OnInit {
   customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
   customEventTrackNumeric: CustomEventTrackOption = CustomEventTrackOption.Numeric;
 
+  customEventSuccessCriteriaLower: CustomEventSuccessCriteria = CustomEventSuccessCriteria.Lower;
+  customEventSuccessCriteriaHigher: CustomEventSuccessCriteria = CustomEventSuccessCriteria.Higher;
+
+  cust
   @Input()
   set metric(metric: IMetric) {
     this.isEditing = metric && !!metric.id;
     if (metric) {
-      metric.customEventTrackOption = metric.customEventTrackOption || this.customEventTrackConversion;
+      metric.customEventTrackOption = metric.customEventTrackOption || CustomEventTrackOption.Undefined;
+      metric.customEventSuccessCriteria = metric.customEventSuccessCriteria || CustomEventSuccessCriteria.Undefined;
       metric.eventType = metric.eventType || this.customEventType;
       this.patchForm(metric);
     } else {
@@ -82,8 +87,10 @@ export class MetricDrawerComponent implements OnInit {
       description: [null],
       eventType: [EventType.Custom, [Validators.required]],
       maintainerUserId: [null, [Validators.required]],
-      customEventTrackOption: [CustomEventTrackOption.Conversion, [Validators.required]],
-      eventName: [null, [Validators.required]],
+      customEventTrackOption: [CustomEventTrackOption.Undefined],
+      eventName: [null],
+      customEventUnit: [null],
+      customEventSuccessCriteria: [CustomEventSuccessCriteria.Higher],
     });
   }
 
@@ -94,12 +101,28 @@ export class MetricDrawerComponent implements OnInit {
       eventType: metric.eventType,
       maintainerUserId: metric.maintainerUserId,
       customEventTrackOption: metric.customEventTrackOption,
-      eventName: metric.eventName
+      eventName: metric.eventName,
+      customEventUnit: metric.customEventUnit,
+      customEventSuccessCriteria: metric.customEventSuccessCriteria,
     });
   }
 
   resetForm() {
     this.metricForm && this.metricForm.reset();
+  }
+
+  onEventTypeChange(param) {
+    if (param === this.customEventType) {
+      this.metricForm.patchValue({
+        customEventTrackOption: CustomEventTrackOption.Conversion,
+        customEventSuccessCriteria: CustomEventSuccessCriteria.Higher,
+      });
+    } else {
+      this.metricForm.patchValue({
+        customEventTrackOption: CustomEventTrackOption.Undefined,
+        customEventSuccessCriteria: CustomEventSuccessCriteria.Undefined,
+      });
+    }
   }
 
   maintainerSearchChange$ = new BehaviorSubject('');
@@ -117,20 +140,35 @@ export class MetricDrawerComponent implements OnInit {
   }
 
   doSubmit() {
+    const { name, description, maintainerUserId, eventType, eventName, customEventTrackOption, customEventUnit, customEventSuccessCriteria } = this.metricForm.value;
+
     if (this.metricForm.invalid) {
       for (const i in this.metricForm.controls) {
         this.metricForm.controls[i].markAsDirty();
         this.metricForm.controls[i].updateValueAndValidity();
       }
+
+      if (eventType === this.customEventType &&
+        (!eventName || !customEventTrackOption || !customEventUnit || !customEventSuccessCriteria )
+        ) {
+
+        this.metricForm.controls['eventName'].setErrors({required: true});
+        this.metricForm.controls['customEventTrackOption'].setErrors({required: true});
+        this.metricForm.controls['customEventUnit'].setErrors({required: true});
+        this.metricForm.controls['customEventSuccessCriteria'].setErrors({required: true});
+      }
+
       return;
     }
 
     this.isLoading = true;
 
-    const { name, description, eventType, maintainerUserId, customEventTrackOption, eventName } = this.metricForm.value;
-
     if (this.isEditing) {
-      this.metricService.updateMetric({id: this.metric.id, envId: this.metric.envId, name, description, eventType, maintainerUserId, customEventTrackOption, eventName }).pipe()
+      this.metricService.updateMetric({
+        id: this.metric.id,
+        envId: this.metric.envId,
+        name, description, eventType, maintainerUserId, customEventTrackOption, eventName, customEventUnit, customEventSuccessCriteria
+      }).pipe()
         .subscribe(
           res => {
             this.isLoading = false;
@@ -144,7 +182,10 @@ export class MetricDrawerComponent implements OnInit {
           }
         );
     } else {
-      this.metricService.createMetric({ envId: this.metric.envId, name, description, eventType, maintainerUserId, customEventTrackOption, eventName })
+      this.metricService.createMetric({
+        envId: this.metric.envId,
+        name, description, eventType, maintainerUserId, customEventTrackOption, eventName, customEventUnit, customEventSuccessCriteria
+      })
         .pipe()
         .subscribe(
           res => {

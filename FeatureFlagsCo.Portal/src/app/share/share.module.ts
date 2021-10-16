@@ -36,6 +36,7 @@ import { NzUploadModule } from 'ng-zorro-antd/upload';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { MetricDrawerComponent } from './uis/metric-drawer/metric-drawer.component';
 import { ExperimentDrawerComponent } from './uis/experiment-drawer/experiment-drawer.component';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 @NgModule({
   declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent],
@@ -64,6 +65,7 @@ import { ExperimentDrawerComponent } from './uis/experiment-drawer/experiment-dr
     NzRadioModule,
     NzUploadModule,
     NzTagModule,
+    NzToolTipModule,
     ReactiveFormsModule
   ],
   exports: [

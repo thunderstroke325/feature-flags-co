@@ -45,6 +45,7 @@
           <tr class="table-th-style">
             <th>数据实验</th>
             <th>Metric 名称</th>
+            <th>Metric 事件名称</th>
             <th>当前状态</th>
             <th nzAlign="center">操作</th>
           </tr>
@@ -53,6 +54,7 @@
             <tr *ngFor="let data of borderedTable.data">
               <td>{{data.featureFlagName}}</td>
               <td>{{data.metric.name}}</td>
+              <td>{{data.metric.eventName}}</td>
               <td>
                 <i class="status on-going" *ngIf="data.status === 3" nz-icon nzType="right-circle" nzTheme="outline"></i>
                 <i class="status paused" *ngIf="data.status === 2" nz-icon nzType="pause-circle" nzTheme="outline"></i>

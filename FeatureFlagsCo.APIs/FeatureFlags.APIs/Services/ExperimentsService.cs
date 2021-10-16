@@ -230,6 +230,9 @@ namespace FeatureFlags.APIs.Services
                             ExptId = experiment.Id,
                             EnvId = envId.ToString(),
                             IterationId = i.Id,
+                            EventType = (int)metric.EventType,
+                            CustomEventTrackOption = (int)metric.CustomEventTrackOption,
+                            CustomEventSuccessCriteria = (int)metric.CustomEventSuccessCriteria,
                             StartExptTime = i.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                             EndExptTime = operationTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                             EventName = metric.EventName,
@@ -252,6 +255,9 @@ namespace FeatureFlags.APIs.Services
                     ExptId = experiment.Id,
                     EnvId = envId.ToString(),
                     IterationId = iteration.Id,
+                    EventType = (int)metric.EventType,
+                    CustomEventTrackOption = (int)metric.CustomEventTrackOption,
+                    CustomEventSuccessCriteria = (int)metric.CustomEventSuccessCriteria,
                     StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                     EventName = metric.EventName,
                     FlagId = experiment.FlagId,
@@ -284,8 +290,9 @@ namespace FeatureFlags.APIs.Services
                             StartTime = it.StartTime,
                             EndTime = it.EndTime,
                             UpdatedAt = it.UpdatedAt,
-                            Results = it.Results
-
+                            Results = it.Results,
+                            CustomEventUnit = it.CustomEventUnit,
+                            CustomEventTrackOption = it.CustomEventTrackOption
                         }
                    );
             }
@@ -311,6 +318,9 @@ namespace FeatureFlags.APIs.Services
                     ExptId = experiment.Id,
                     EnvId = envId.ToString(),
                     IterationId = iteration.Id,
+                    EventType = (int)metric.EventType,
+                    CustomEventTrackOption = (int)metric.CustomEventTrackOption,
+                    CustomEventSuccessCriteria = (int)metric.CustomEventSuccessCriteria,
                     StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                     EndExptTime = iteration.EndTime.Value.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                     EventName = metric.EventName,

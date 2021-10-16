@@ -6,7 +6,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IAccount, IAccountUser, IProjectEnv } from 'src/app/config/types';
 import { MetricService } from 'src/app/services/metric.service';
 import { TeamService } from 'src/app/services/team.service';
-import { CustomEventTrackOption, EventType, IMetric } from '../../switch-manage/types/experimentations';
+import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from '../../switch-manage/types/experimentations';
 
 @Component({
   selector: 'experiments-metrics',
@@ -108,7 +108,7 @@ export class MetricsComponent implements OnInit, OnDestroy {
   }
 
   onCreateOrEditClick(metric?: IMetric) {
-    this.currentMetric = metric || { envId: this.currentProjectEnv.envId } as IMetric;
+    this.currentMetric = metric || { envId: this.currentProjectEnv.envId, eventType: EventType.Custom, customEventTrackOption: CustomEventTrackOption.Conversion, customEventSuccessCriteria: CustomEventSuccessCriteria.Higher } as IMetric;
     this.detailViewVisible = true;
   }
 

@@ -47,6 +47,11 @@ namespace FeatureFlags.APIs.Models
         public DateTime? EndTime { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public bool IsArvhived { get; set; }
+        public int EventType { get; set; }
+        public string EventName { get; set; }
+        public CustomEventTrackOption CustomEventTrackOption { get; set; }
+        public string CustomEventUnit { get; set; }
+
         public List<IterationResult> Results { get; set; }
 
         //public string FeatureFlagVersion { get; set; } TODO to be added feature flag version is established

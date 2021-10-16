@@ -48,32 +48,57 @@
           <nz-form-control nzErrorTip="事件类型！">
             <nz-input-group>
               <div class="">
-                <nz-select formControlName="eventType">
+                <nz-select formControlName="eventType" (ngModelChange)="onEventTypeChange($event)">
                   <nz-option [nzValue]="customEventType" nzLabel="Custom - 自定义事件"></nz-option>
-                  <!-- <nz-option [nzValue]="pageViewEventType" nzLabel="Page view - 页面展示"></nz-option>
-                  <nz-option [nzValue]="clickEventType" nzLabel="Click - 点击事件"></nz-option> -->
+                  <nz-option [nzValue]="pageViewEventType" nzLabel="Page view - 页面展示"></nz-option>
+                  <nz-option [nzValue]="clickEventType" nzLabel="Click - 点击事件"></nz-option>
                 </nz-select>
               </div>
             </nz-input-group>
           </nz-form-control>
         </nz-form-item>
-        <nz-form-item>
-          <nz-form-control nzErrorTip="事件选项！">
-            <nz-radio-group formControlName="customEventTrackOption" class="custom-event-option">
-              <label nz-radio [nzValue]="customEventTrackConversion">转化率</label>
-              <!-- <label nz-radio [nzValue]="customEventTrackNumeric">数值</label> -->
-            </nz-radio-group>
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-label>事件名称</nz-form-label>
-          <nz-form-control nzErrorTip="事件名称！">
+        <ng-container *ngIf="metricForm.value.eventType === customEventType">
+          <nz-form-item>
+            <nz-form-control nzErrorTip="事件选项！">
+              <nz-radio-group formControlName="customEventTrackOption" class="custom-event-option">
+                <label nz-radio [nzValue]="customEventTrackConversion">转化率</label>
+                <label nz-radio [nzValue]="customEventTrackNumeric">数值</label>
+              </nz-radio-group>
+            </nz-form-control>
+            <span *ngIf="metricForm.value.customEventTrackOption === customEventTrackNumeric"><i nz-icon nzType="info-circle" nzTheme="fill" style="color: #faad14"></i> 为了获得精确结果，数值型的实验要求在埋点时必须发送一个数值。</span>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>事件名称</nz-form-label>
+            <nz-form-control nzErrorTip="事件名称！">
+                <nz-input-group>
+                    <input type="text" nz-input formControlName="eventName" placeholder="事件名称" />
+                </nz-input-group>
+            </nz-form-control>
+            在代码中埋点时使用该事件名称。
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>计量单位</nz-form-label>
+            <nz-form-control nzErrorTip="计量单位！">
               <nz-input-group>
-                  <input type="text" nz-input formControlName="eventName" placeholder="事件名称" />
+                <input type="text" nz-input formControlName="customEventUnit" placeholder="ms, 毫秒，元，￥ 等" />
+            </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label>实验胜出标准</nz-form-label>
+            <nz-form-control nzErrorTip="实验胜出标准">
+              <nz-input-group>
+                <div class="">
+                  <nz-select formControlName="customEventSuccessCriteria">
+                    <nz-option [nzValue]="customEventSuccessCriteriaHigher" nzLabel="高于 基准特性"></nz-option>
+                    <nz-option [nzValue]="customEventSuccessCriteriaLower" nzLabel="低于 基准特性"></nz-option>
+                  </nz-select>
+                </div>
               </nz-input-group>
-          </nz-form-control>
-          在代码中埋点时使用该事件名称。
-        </nz-form-item>
+            </nz-form-control>
+          </nz-form-item>
+        </ng-container>
+
       </form>
     </div>
   </ng-container>

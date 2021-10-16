@@ -31,6 +31,11 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   onGoingExperiments: IExperiment[] = [];
   refreshIntervalId;
   refreshInterval: number = 1000 * 30; // 1 minute
+
+  customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
+  customEventTrackNumeric: CustomEventTrackOption = CustomEventTrackOption.Numeric;
+  customEventType: EventType = EventType.Custom;
+
   constructor(
     private route: ActivatedRoute,
     private switchServe: SwitchService,
@@ -250,9 +255,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
      };
   }
 
-
-  customEventType: EventType = EventType.Custom;
-  customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
   /************************** above are for new experiment ****************************************/
 
   // 搜索 events

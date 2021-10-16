@@ -141,8 +141,14 @@
                   <thead>
                     <tr class="table-th-style">
                       <th>特性</th>
-                      <th>转化数 / 用户数</th>
-                      <th>转化率</th>
+                      <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment?.selectedIteration?.customEventTrackOption)">
+                        <th>转化数 / 用户数</th>
+                        <th>转化率</th>
+                      </ng-container>
+                      <ng-container *ngIf="experiment?.selectedIteration?.customEventTrackOption === customEventTrackNumeric">
+                        <th>总发送事件数</th>
+                        <th>平均值</th>
+                      </ng-container>
                       <th style="width: 210px">置信区间</th>
                       <th>变化</th>
                       <th>P-值</th>
@@ -179,8 +185,15 @@
                           </span>
                           <span class="icon_placeholder" *ngIf="!data.isWinner && !data.isInvalid"></span>
                           &nbsp;{{ data.variationValue }}</td>
-                        <td>{{ data.conversion }}/{{ data.uniqueUsers }}</td>
-                        <td>{{ data.conversionRate | percentage }}</td>
+                        <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment?.selectedIteration?.customEventTrackOption)">
+                          <td>{{ data.conversion }}</td>
+                          <td>{{ data.conversionRate | percentage }}</td>
+                        </ng-container>
+                        <ng-container *ngIf="experiment?.selectedIteration?.customEventTrackOption === customEventTrackNumeric">
+                          <td>{{ data.totalEvents }}</td>
+                          <td>{{ data.average }} {{data.customEventUnit}}</td>
+                        </ng-container>
+
                         <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell">
                           <div>基准特性</div>
                         </td>

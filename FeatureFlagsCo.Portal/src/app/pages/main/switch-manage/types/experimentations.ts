@@ -5,8 +5,15 @@ export enum EventType {
 }
 
 export enum CustomEventTrackOption {
+  Undefined = 0,
   Conversion = 1,
   Numeric = 2
+}
+
+export enum CustomEventSuccessCriteria {
+  Undefined = 0,
+  Lower = 1, // lower than baseline
+  Higher = 2 // higher than baseline
 }
 
 export enum ExperimentStatus {
@@ -23,7 +30,9 @@ export interface IMetric {
   maintainerUserId: string,
   eventName: string,
   eventType: EventType,
-  customEventTrackOption: CustomEventTrackOption
+  customEventTrackOption?: CustomEventTrackOption,
+  customEventUnit?: string,
+  customEventSuccessCriteria?: CustomEventSuccessCriteria
 }
 
 export interface IExperiment {

@@ -14,7 +14,8 @@ namespace FeatureFlags.APIs.Models
         public string EventName { get; set; }
         public EventType EventType { get; set; }
         public CustomEventTrackOption CustomEventTrackOption { get; set; }
-
+        public string CustomEventUnit { get; set; }
+        public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
@@ -28,8 +29,16 @@ namespace FeatureFlags.APIs.Models
 
     public enum CustomEventTrackOption 
     {
+        Undefined = 0,
         Conversion = 1,
         Numeric = 2
+    }
+
+    public enum CustomEventSuccessCriteria
+    {
+        Undefined = 0,
+        Higher = 1,
+        Lower = 2
     }
 
     public enum EventType

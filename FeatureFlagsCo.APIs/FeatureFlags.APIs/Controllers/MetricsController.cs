@@ -36,6 +36,30 @@ namespace FeatureFlags.APIs.Controllers
             _metricService = metricService;
         }
 
+        private List<string> ValidateMetric(MetricViewModel param) 
+        {
+            var validateErrors = new List<string>();
+            if (string.IsNullOrWhiteSpace(param.EventName))
+            {
+                validateErrors.Add("事件名称");
+            }
+
+            if (param.EventType == EventType.Custom)
+            {
+                if (param.CustomEventTrackOption == CustomEventTrackOption.Undefined)
+                {
+                    validateErrors.Add("转化率或数值");
+                }
+
+                if (param.CustomEventSuccessCriteria == CustomEventSuccessCriteria.Undefined)
+                {
+                    validateErrors.Add("实验胜出标准");
+                }
+            }
+
+            return validateErrors;
+        }
+
         [HttpPost]
         [Route("")]
         public async Task<dynamic> CreateMetric([FromBody] MetricViewModel param)
@@ -45,6 +69,12 @@ namespace FeatureFlags.APIs.Controllers
                 var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
                 if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
                 {
+                    var validateErrors = ValidateMetric(param);
+                    if (validateErrors.Count > 0)
+                    {
+                        return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Messages = validateErrors });
+                    }
+
                     var metric = new Metric 
                     {
                         Name = param.Name,
@@ -53,7 +83,11 @@ namespace FeatureFlags.APIs.Controllers
                         EventName = param.EventName,
                         EventType = param.EventType,
                         CustomEventTrackOption = param.CustomEventTrackOption,
-                        MaintainerUserId = param.MaintainerUserId
+                        MaintainerUserId = param.MaintainerUserId,
+                        CustomEventUnit = param.CustomEventUnit,
+                        CustomEventSuccessCriteria = param.CustomEventSuccessCriteria,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
                     };
 
                     var newMetric = await _metricService.CreateAsync(metric);
@@ -80,6 +114,12 @@ namespace FeatureFlags.APIs.Controllers
                 var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
                 if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
                 {
+                    var validateErrors = ValidateMetric(param);
+                    if (validateErrors.Count > 0)
+                    {
+                        return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Messages = validateErrors });
+                    }
+
                     var metric = new Metric
                     {
                         Id = param.Id,
@@ -89,7 +129,10 @@ namespace FeatureFlags.APIs.Controllers
                         EventName = param.EventName,
                         EventType = param.EventType,
                         CustomEventTrackOption = param.CustomEventTrackOption,
-                        MaintainerUserId = param.MaintainerUserId
+                        MaintainerUserId = param.MaintainerUserId,
+                        CustomEventUnit = param.CustomEventUnit,
+                        CustomEventSuccessCriteria = param.CustomEventSuccessCriteria,
+                        UpdatedAt = DateTime.UtcNow
                     };
 
                     var newMetric = await _metricService.UpsertItemAsync(metric);
