@@ -43,7 +43,7 @@ namespace FeatureFlags.APIs.Controllers
             if (allSettings != null && allSettings.Count > 0)
                 return allSettings.Select(p => new FeatureFlagZeroCodeSettingViewModel()
                 {
-                    Items = p.Items,
+                    Items = p.Items.Select(it => new CssSelectorItemViewModel { CssSelector = it.CssSelector, Url = it.Url, VariationValue = it.VariationOption.VariationValue }).ToList(),
                     FeatureFlagKey = p.FeatureFlagKey
                 }).ToList();
             return new List<FeatureFlagZeroCodeSettingViewModel>();
