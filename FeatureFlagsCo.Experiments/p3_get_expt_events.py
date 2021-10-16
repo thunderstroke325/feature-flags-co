@@ -44,7 +44,8 @@ class P3GetEventsConsumer(RabbitMQConsumer):
                     dict_to_add = {
                         # 'EventName': body['EventName'],
                         'UserKeyId': body['User']['FFUserKeyId'],
-                        'TimeStamp': body['TimeStamp']
+                        'TimeStamp': body['TimeStamp'],
+                        'NumericValue': body['NumericValue']
                     }
                     list_user_events = list_user_events + [dict_to_add]
                     self.redis_set(id, list_user_events)

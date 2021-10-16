@@ -32,8 +32,10 @@ if __name__ == '__main__':
         "BaselineVariation": "1",
         "Variations": ["1", "2", "3"],
         "EventName": "ButtonPayTrack",
+        'EventType': 1,
+        'CustomEventTrackOption': 1,
         "StartExptTime": "2021-09-20T21:00:00.123456",
-        "EndExptTime": "2021-10-03T21:00:00.123456"
+        "EndExptTime": "2021-10-15T19:00:00.123456"
     }
     RabbitMQSender(mq_host,
                    mq_port,
@@ -54,8 +56,35 @@ if __name__ == '__main__':
         "BaselineVariation": "1",
         "Variations": ["1", "2", "3"],
         "EventName": "ButtonPayColor",
+        'EventType': 1,
+        'CustomEventTrackOption': 1,
         "StartExptTime": "2021-09-20T21:00:00.123456",
-        "EndExptTime": "2021-10-03T21:00:00.123456"
+        "EndExptTime": "2021-10-15T19:00:00.123456"
+    }
+    RabbitMQSender(mq_host,
+                   mq_port,
+                   mq_username,
+                   mq_passwd,
+                   redis_host,
+                   redis_port,
+                   redis_passwd).send('Q1', 'py.experiments.recordinginfo', Q1_END)
+    logger.info('send to Q1 expt end')
+
+
+    # Expt3
+    #  Q1 end
+    Q1_END = {
+        "ExptId": 'FF__38__48__103__PayCart_exp3',
+        "IterationId": "2",
+        "EnvId": "103",
+        "FlagId": "FF__38__48__103__PayCart",
+        "BaselineVariation": "1",
+        "Variations": ["1", "2", "3"],
+        "EventName": "ButtonPayCart",
+        'EventType': 1,
+        'CustomEventTrackOption': 2,
+        "StartExptTime": "2021-09-20T21:00:00.123456",
+        "EndExptTime": "2021-10-15T19:00:00.123456"
     }
     RabbitMQSender(mq_host,
                    mq_port,
