@@ -13,6 +13,6 @@ export interface ICssSelectorItem {
   id: string,
   cssSelector: string,
   description: string,
-  variationOptionId: number,
+  variationOption: IVariationOption,
   url: string
 }

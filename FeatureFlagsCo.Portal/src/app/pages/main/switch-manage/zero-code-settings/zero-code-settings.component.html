@@ -46,8 +46,8 @@
                 <input type="text" style="width:100%" nz-input [(ngModel)]="data.description" />
               </td>
               <td>
-                <nz-select nzPlaceHolder="选择特性" [(ngModel)]="data.variationOptionId" style="width: 100%">
-                  <nz-option *ngFor="let o of currentVariationOptions" [nzValue]="o.localId" [nzLabel]="o.variationValue"></nz-option>
+                <nz-select nzPlaceHolder="选择特性" [compareWith]="compareWith" [(ngModel)]="data.variationOption" style="width: 100%">
+                  <nz-option *ngFor="let o of currentVariationOptions" [nzValue]="o" [nzLabel]="o.variationValue"></nz-option>
                 </nz-select>
               </td>
               <td [nzAlign]="'center'">

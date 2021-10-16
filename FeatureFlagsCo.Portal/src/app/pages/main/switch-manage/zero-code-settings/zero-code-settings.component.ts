@@ -4,7 +4,6 @@ import { FfcService } from 'src/app/services/ffc.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IVariationOption } from '../types/switch-new';
-import { environment } from '../../../../../environments/environment';
 import { ZeroCodeService } from 'src/app/services/zero-code.service';
 import { IZeroCode } from '../types/zero-code';
 import { uuidv4 } from 'src/app/utils';
@@ -18,6 +17,14 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 })
 export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
 
+  compareWith: (obj1: any, obj2: any) => boolean = (obj1: any, obj2: any) => {
+    if(obj1 && obj2) {
+      return obj1.localId === obj2.localId;
+    } else {
+      return false;
+    }
+  };
+
   featureFlagId: string;
   currentVariationOptions: IVariationOption[] = [];
   isLoading = true;
@@ -27,8 +34,7 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private switchServe: SwitchService,
     private zeroCodeService: ZeroCodeService,
-    private message: NzMessageService,
-    private ffcService: FfcService
+    private message: NzMessageService
   ) {
     this.featureFlagId = decodeURIComponent(this.route.snapshot.params['id']);
     const currentProjectEnv: IProjectEnv = JSON.parse(localStorage.getItem('current-project'));
@@ -81,7 +87,7 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
         id: uuidv4(),
         cssSelector: null,
         description: null,
-        variationOptionId: null,
+        variationOption: null,
         url: null
       }
     ];

@@ -1,10 +1,5 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Models
 {
@@ -31,7 +26,7 @@ namespace FeatureFlags.APIs.Models
         public string Id { get; set; }
         public string CssSelector { get; set; }
         public string Description { get; set; }
-        public int VariationOptionId { get; set; }
+        public VariationOption VariationOption { get; set; }
         public string Url { get; set; }
     }
 }

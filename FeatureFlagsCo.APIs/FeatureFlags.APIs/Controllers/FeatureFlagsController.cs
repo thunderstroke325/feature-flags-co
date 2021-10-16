@@ -32,13 +32,15 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IEnvironmentService _envService;
         //private readonly IAuditLogMqService _auditLogService;
         private readonly MongoDbFeatureFlagService _mongoDbFeatureFlagService;
+        private readonly MongoDbFeatureFlagZeroCodeSettingService _mongoDbFFZCSService;
 
         public FeatureFlagsController(ILogger<FeatureFlagsController> logger, IGenericRepository repository,
             IFeatureFlagsService featureFlagService,
             INoSqlService noSqlDbService,
             IDistributedCache redisCache,
             IEnvironmentService envService,
-            MongoDbFeatureFlagService mongoDbFeatureFlagService)
+            MongoDbFeatureFlagService mongoDbFeatureFlagService,
+            MongoDbFeatureFlagZeroCodeSettingService mongoDbFFZCSService)
             //IAuditLogMqService auditLogService)
         {
             _logger = logger;
@@ -51,6 +53,7 @@ namespace FeatureFlags.APIs.Controllers
             //_auditLogService = auditLogService;
 
             _mongoDbFeatureFlagService = mongoDbFeatureFlagService;
+            _mongoDbFFZCSService = mongoDbFFZCSService;
         }
 
 
@@ -219,7 +222,15 @@ namespace FeatureFlags.APIs.Controllers
                 var prerequisite = await _noSqlDbService.GetFeatureFlagAsync(f.PrerequisiteFeatureFlagId);
                 f.ValueOptionsVariationValue = prerequisite.VariationOptions.FirstOrDefault(v => v.LocalId == f.ValueOptionsVariationValue.LocalId);
             }
-            
+
+            // update zero code settings
+            var zeroCodeSetting = await _mongoDbFFZCSService.GetByEnvAndFeatureFlagIdAsync(ff.EnvironmentId, ff.Id);
+            if (zeroCodeSetting != null) 
+            {
+                zeroCodeSetting.Items.ForEach(i => i.VariationOption = param.VariationOptions.FirstOrDefault(o => o.LocalId == i.VariationOption.LocalId));
+                await _mongoDbFFZCSService.UpdateAsync(zeroCodeSetting.Id, zeroCodeSetting);
+            }
+
             await _noSqlDbService.UpdateFeatureFlagAsync(ff);
             param.LastUpdatedTime = ff.FF.LastUpdatedTime;
             param.KeyName = ff.FF.KeyName;
