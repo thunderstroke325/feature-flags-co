@@ -136,7 +136,7 @@ export class MetricDrawerComponent implements OnInit {
   }
 
   onClose() {
-    this.close.emit({ isEditing: false, data: this.metric });
+    this.close.emit({ isEditing: this.isEditing, data: this.metric });
   }
 
   doSubmit() {

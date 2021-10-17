@@ -170,6 +170,8 @@ namespace FeatureFlags.APIs.Controllers
                         EventName = m.EventName,
                         EventType = m.EventType,
                         CustomEventTrackOption = m.CustomEventTrackOption,
+                        CustomEventUnit = m.CustomEventUnit,
+                        CustomEventSuccessCriteria = m.CustomEventSuccessCriteria,
                         MaintainerUserId = m.MaintainerUserId
                     });
                 }
