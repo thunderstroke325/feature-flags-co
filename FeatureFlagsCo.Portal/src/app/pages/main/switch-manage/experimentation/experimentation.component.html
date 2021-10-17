@@ -191,7 +191,7 @@
                         </ng-container>
                         <ng-container *ngIf="experiment.metric.customEventTrackOption === customEventTrackNumeric">
                           <td>{{ data.totalEvents }}</td>
-                          <td>{{ data.average }} {{experiment.metric.customEventUnit}}</td>
+                          <td>{{ data.average }} <span *ngIf="data.average !== '--'">{{experiment.metric.customEventUnit}}</span></td>
                         </ng-container>
 
                         <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell">

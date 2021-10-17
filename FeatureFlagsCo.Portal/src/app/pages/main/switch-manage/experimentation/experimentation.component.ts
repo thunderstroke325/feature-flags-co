@@ -246,6 +246,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         return !found ? this.createEmptyIterationResult(option, baselineVariation) : Object.assign({}, found, {
           conversion: found.conversion === -1 ? '--' : found.conversion,
           uniqueUsers: found.uniqueUsers === -1 ? '--' : found.uniqueUsers,
+          totalEvents: found.totalEvents === -1 ? '--' : found.totalEvents,
+          average: found.average === -1 ? '--' : found.average,
           variationValue: option.variationValue,
           pValue: found.pValue === -1 ? '--' : found.pValue,
           isEmpty: false,
