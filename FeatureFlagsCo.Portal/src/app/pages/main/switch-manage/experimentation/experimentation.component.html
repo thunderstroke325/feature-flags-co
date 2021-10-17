@@ -191,28 +191,50 @@
                         </ng-container>
                         <ng-container *ngIf="experiment.metric.customEventTrackOption === customEventTrackNumeric">
                           <td>{{ data.totalEvents }}</td>
-                          <td>{{ data.average }} {{experiment.metric.customEventUnit}</td>
+                          <td>{{ data.average }} {{experiment.metric.customEventUnit}}</td>
                         </ng-container>
 
                         <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell">
                           <div>基准特性</div>
                         </td>
-                        <td *ngIf="!data.isBaseline">
-                          <div  style="width: 200px;box-sizing: border-box;">
-                            <div *ngIf="data.confidenceInterval[0] >= 0" class="BoxChart">
-                              <div class="BoxChart-whisker"></div>
-                              <div class="BoxChart-box--container">
-                                <div class="BoxChart-box--line"></div>
-                                <div class="BoxChart-box" [style.left.px]="data.confidenceInterval[0] * 200" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) * 200">
-                                  <div class="BoxChart-box--median" [style.left.px]="(data.conversionRate - data.confidenceInterval[0]) * 200"></div>
+
+                        <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metric.customEventTrackOption)">
+                          <td *ngIf="!data.isBaseline">
+                            <div  style="width: 200px;box-sizing: border-box;">
+                              <div *ngIf="data.confidenceInterval[0] >= 0" class="BoxChart">
+                                <div class="BoxChart-whisker"></div>
+                                <div class="BoxChart-box--container">
+                                  <div class="BoxChart-box--line"></div>
+                                  <div class="BoxChart-box" [style.left.px]="data.confidenceInterval[0] * 200" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) * 200">
+                                    <div class="BoxChart-box--median" [style.left.px]="(data.conversionRate - data.confidenceInterval[0]) * 200"></div>
+                                  </div>
                                 </div>
+                                <div class="BoxChart-whisker"></div>
                               </div>
-                              <div class="BoxChart-whisker"></div>
                             </div>
-                          </div>
-                          <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
-                          <div *ngIf="data.confidenceInterval[0] === -1"class="confidence_interval"> -- </div>
-                        </td>
+                            <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
+                            <div *ngIf="data.confidenceInterval[0] === -1"class="confidence_interval"> -- </div>
+                          </td>
+                        </ng-container>
+                        <ng-container *ngIf="experiment.metric.customEventTrackOption === customEventTrackNumeric">
+                          <td *ngIf="!data.isBaseline">
+                            <div  style="width: 200px;box-sizing: border-box;">
+                              <div *ngIf="data.confidenceInterval[0] >= 0" class="BoxChart">
+                                <div class="BoxChart-whisker"></div>
+                                <div class="BoxChart-box--container">
+                                  <div class="BoxChart-box--line"></div>
+                                  <div class="BoxChart-box" [style.left.px]="(data.confidenceInterval[0] - experiment.selectedIteration.numericConfidenceIntervalBoundary[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200">
+                                    <div class="BoxChart-box--median" [style.left.px]="(data.average - data.confidenceInterval[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200"></div>
+                                  </div>
+                                </div>
+                                <div class="BoxChart-whisker"></div>
+                              </div>
+                            </div>
+                            <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0]}} {{experiment.metric.customEventUnit}} - {{data.confidenceInterval[1]}} {{experiment.metric.customEventUnit}}</div>
+                            <div *ngIf="data.confidenceInterval[0] === -1"class="confidence_interval"> -- </div>
+                          </td>
+                        </ng-container>
+
                         <td *ngIf="!data.isBaseline">
                           {{ data.changeToBaseline | percentage }}
                         </td>

@@ -67,7 +67,9 @@ namespace FeatureFlags.APIs.Services
                     Name = m.Name,
                     EventName = m.EventName,
                     EventType = m.EventType,
-                    CustomEventTrackOption = m.CustomEventTrackOption
+                    CustomEventTrackOption = m.CustomEventTrackOption,
+                    CustomEventUnit = m.CustomEventUnit,
+                    CustomEventSuccessCriteria = m.CustomEventSuccessCriteria
                 });
 
             return experiments.OrderByDescending(ex => ex.CreatedAt).Select(r => {

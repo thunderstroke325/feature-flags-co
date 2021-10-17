@@ -17,6 +17,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { ShareModule } from 'src/app/share/share.module';
 
 @NgModule({
   declarations: [ExperimentationComponent],
@@ -36,6 +37,7 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
     NzPopconfirmModule,
     NzDropDownModule,
     ComponentsModule,
+    ShareModule,
     ExperimentationRoutingModule
   ]
 })

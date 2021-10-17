@@ -5,9 +5,6 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from 'src/app/services/experiment.service';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IVariationOption } from '../types/switch-new';
-import { differenceInCalendarDays } from 'date-fns';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 import { environment } from './../../../../../environments/environment';
 import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment } from '../types/experimentations';
 import * as moment from 'moment';
@@ -80,6 +77,16 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
                     expt.selectedIteration.updatedAt = iteration.updatedAt;
                     expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
                   }
+
+                  if (expt.metric.customEventTrackOption === this.customEventTrackNumeric) {
+                    // [min, max, max - min]
+                    expt.selectedIteration.numericConfidenceIntervalBoundary = [
+                      Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
+                      Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
+                    ];
+
+                    expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
+                  }
                 }
               });
             }
@@ -103,8 +110,19 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
           if (expt.iterations.length > 0) {
             expt.iterations = expt.iterations.map(ex => this.processIteration(ex, expt.baselineVariation)).reverse();
             expt.selectedIteration = expt.iterations[0];
+
             if (expt.selectedIteration.updatedAt) {
               expt.selectedIteration.updatedAtStr = moment(expt.selectedIteration.updatedAt).format('YYYY-MM-DD HH:mm');
+            }
+
+            if (experiment.metric.customEventTrackOption === this.customEventTrackNumeric) {
+              // [min, max, max - min]
+              expt.selectedIteration.numericConfidenceIntervalBoundary = [
+                Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
+                Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
+              ];
+
+              expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
             }
           }
 

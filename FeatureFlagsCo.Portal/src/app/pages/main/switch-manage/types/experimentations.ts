@@ -57,7 +57,8 @@ export interface IExperimentIteration {
   updatedAt?: Date,
   updatedAtStr?: string,
   results: IExperimentIterationResult[],
-  dateTimeInterval?: string
+  dateTimeInterval?: string,
+  numericConfidenceIntervalBoundary?: number[] // [min, max, max - min]
 }
 
 export interface IExperimentIterationResult {

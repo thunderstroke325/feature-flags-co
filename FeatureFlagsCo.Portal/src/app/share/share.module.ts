@@ -85,7 +85,8 @@ import { PercentagePipe } from 'src/app/share/pipes/percentage.pipe';
     AccountDrawerComponent,
     UploadDrawerComponent,
     MetricDrawerComponent,
-    ExperimentDrawerComponent
+    ExperimentDrawerComponent,
+    PercentagePipe
   ]
 })
 export class ShareModule { }
