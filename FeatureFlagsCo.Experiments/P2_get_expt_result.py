@@ -562,15 +562,20 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
             # call function to calculate experiment result
             # EventType: 1, 2 ,3 ; 分别是 customevent, pageview, click
             # CustomEventTrackOption: 1, 2 ; 分别是 conversion, numeric
-            if expt["EventType"] == 1:
-                if expt['CustomEventTrackOption'] == 1 :
-                    output_to_mq = self.__calc_customevent_conversion(expt,list_ff_events, list_user_events)
-                elif expt['CustomEventTrackOption'] == 2 :
-                    output_to_mq = self.__calc_customevent_numeric(expt,list_ff_events, list_user_events)
+            if "EventType" in expt.keys():
+                if expt["EventType"] == 1:
+                    if expt['CustomEventTrackOption'] == 1 :
+                        output_to_mq = self.__calc_customevent_conversion(expt,list_ff_events, list_user_events)
+                    elif expt['CustomEventTrackOption'] == 2 :
+                        output_to_mq = self.__calc_customevent_numeric(expt,list_ff_events, list_user_events)
+                    else:
+                        sys.exit('Non-Recognised Event Type')
                 else:
                     sys.exit('Non-Recognised Event Type')
             else:
-                sys.exit('Non-Recognised Event Type')
+                # Compatible with preview experiments
+                output_to_mq = self.__calc_customevent_conversion(expt,list_ff_events, list_user_events)
+
             # send result to Q3
             self.send('Q3', 'py.experiments.experiment.results', output_to_mq)
             logger.info('########p2 sends %r result to Q3#########' % expt_id)
