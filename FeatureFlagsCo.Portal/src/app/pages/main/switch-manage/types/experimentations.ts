@@ -12,8 +12,8 @@ export enum CustomEventTrackOption {
 
 export enum CustomEventSuccessCriteria {
   Undefined = 0,
-  Lower = 1, // lower than baseline
-  Higher = 2 // higher than baseline
+  Lower = 2, // lower than baseline
+  Higher = 1 // higher than baseline
 }
 
 export enum ExperimentStatus {
