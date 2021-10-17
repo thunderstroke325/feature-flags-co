@@ -344,7 +344,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                    })
                 else:
                     output.append({'variation': item,
-                                   'totalEvents': len(dict_var_listValues[item]),
+                                   'totalEvents': 0,
                                    'average':   -1,
                                    'changeToBaseline': -1,
                                    'confidenceInterval': [-1, -1],
@@ -383,7 +383,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                    })
                 else:
                     output.append({'variation': item,
-                                   'totalEvents': len(dict_var_listValues[item]),
+                                   'totalEvents': 0,
                                    'average':   -1,
                                    'changeToBaseline': -1,
                                    'confidenceInterval': [-1, -1],
