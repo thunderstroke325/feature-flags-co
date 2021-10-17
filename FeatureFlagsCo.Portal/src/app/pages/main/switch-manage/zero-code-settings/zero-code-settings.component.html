@@ -58,7 +58,7 @@
         </nz-table>
       </div>
       <div class="info-item">
-        <button class="submit" [disabled]="isSaving" nz-button nzType="primary" (click)="doSubmit()">保存</button>
+        <button class="submit" [nzLoading]="isSaving" nz-button nzType="primary" (click)="doSubmit()">保存</button>
     </div>
     </div>
   </ng-container>
