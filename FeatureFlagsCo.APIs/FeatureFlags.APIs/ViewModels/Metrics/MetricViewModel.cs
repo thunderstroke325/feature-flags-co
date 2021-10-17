@@ -1,4 +1,4 @@
-﻿using FeatureFlags.APIs.Models;
+﻿using FeatureFlagsCo.MQ;
 
 namespace FeatureFlags.APIs.ViewModels.Metrics
 {

@@ -36,6 +36,12 @@ namespace FeatureFlagsCo.Messaging.Services
             if (experiment != null)
             {
                 var iteration = experiment.Iterations.Find(it => it.Id == param.IterationId);
+
+                iteration.CustomEventSuccessCriteria = param.CustomEventSuccessCriteria;
+                iteration.CustomEventTrackOption = param.CustomEventTrackOption;
+                iteration.CustomEventUnit = param.CustomEventUnit;
+                iteration.EventType = (int)param.EventType;
+           
                 iteration.UpdatedAt = param.EndTime;
                 iteration.Results = param.Results;
 

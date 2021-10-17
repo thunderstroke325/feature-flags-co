@@ -2,6 +2,7 @@
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Metrics;
+using FeatureFlagsCo.MQ;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

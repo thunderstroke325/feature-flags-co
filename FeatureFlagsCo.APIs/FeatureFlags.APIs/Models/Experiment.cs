@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using FeatureFlagsCo.MQ;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
@@ -51,7 +52,7 @@ namespace FeatureFlags.APIs.Models
         public string EventName { get; set; }
         public CustomEventTrackOption CustomEventTrackOption { get; set; }
         public string CustomEventUnit { get; set; }
-
+        public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
         public List<IterationResult> Results { get; set; }
 
         //public string FeatureFlagVersion { get; set; } TODO to be added feature flag version is established

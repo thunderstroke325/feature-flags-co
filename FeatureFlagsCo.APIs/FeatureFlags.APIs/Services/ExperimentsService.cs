@@ -205,20 +205,27 @@ namespace FeatureFlags.APIs.Services
             if (experiment != null)
             {
                 var operationTime = DateTime.UtcNow;
-                var iteration = new ExperimentIteration
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    StartTime = operationTime,
-                    // EndTime, Don't need set end time as this is a start experiment signal
-                    Results = new List<IterationResult>()
-                };
-
+                
                 if (experiment.Iterations == null)
                 {
                     experiment.Iterations = new List<ExperimentIteration>();
                 }
 
                 var metric = await _metricService.GetAsync(experiment.MetricId);
+
+                var iteration = new ExperimentIteration
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    StartTime = operationTime,
+                    // EndTime, Don't need set end time as this is a start experiment signal
+                    Results = new List<IterationResult>(),
+                    CustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
+                    CustomEventTrackOption = metric.CustomEventTrackOption,
+                    CustomEventUnit = metric.CustomEventUnit,
+                    EventType = (int)metric.EventType,
+                    EventName = metric.EventName,
+                };
+                
                 // stop active iterations
                 experiment.Iterations.ForEach(async i =>
                 {
