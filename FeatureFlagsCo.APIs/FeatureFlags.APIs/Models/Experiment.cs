@@ -62,6 +62,8 @@ namespace FeatureFlags.APIs.Models
     {
         public float ChangeToBaseline { get; set; }
         public long Conversion { get; set; }
+        public long TotalEvents { get; set; }
+        public float Average { get; set; }
         public float ConversionRate { get; set; }
         public bool IsBaseline { get; set; }
         public bool IsInvalid { get; set; }
