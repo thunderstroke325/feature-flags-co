@@ -222,10 +222,10 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         # result to send to rabbitmq
         output_to_mq = {
             'ExperimentId': expt['ExptId'],
-            'EventType': expt['EventType'],
-            'CustomEventTrackOption': expt['CustomEventTrackOption'],
-            'CustomEventUnit' : expt['CustomEventUnit'],
-            'CustomEventSuccessCriteria': expt['CustomEventSuccessCriteria'],
+            'EventType': expt.get('EventType',None),
+            'CustomEventTrackOption': expt.get('CustomEventTrackOption',None),
+            'CustomEventUnit' : expt.get('CustomEventUnit',None),
+            'CustomEventSuccessCriteria': expt.get('CustomEventSuccessCriteria',None),
             'IterationId': expt['IterationId'],
             'StartTime': expt['StartExptTime'],
             'EndTime': datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f"),
