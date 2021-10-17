@@ -47,7 +47,6 @@ export class DoLoginComponent implements OnInit {
     this.loginService.login(this.loginForm.value)
       .subscribe(
         res => {
-          this.isLoading = false;
           localStorage.setItem('token', res.token);
           this.authService.redirectUrl = '';
           this.authService.getSelfInfo();
