@@ -39,7 +39,7 @@
           </thead>
           <tbody>
           <tr *ngFor="let project of projectTable.data" (click)="onSelectProject(project)" [ngClass]="{'active': selectedProject?.id == project.id}">
-            <td [style]="selectedProject?.name == project.name?'color:#4CB287':''">{{ project.name }}</td>
+            <td [style]="selectedProject?.name == project.name?'color:#4CB287;cursor:pointer':'cursor:pointer'">{{ project.name }}</td>
           </tr>
           </tbody>
         </nz-table>
@@ -54,7 +54,7 @@
           </thead>
           <tbody>
           <tr *ngFor="let env of envTable.data" (click)="onSelectEnv(env)" [ngClass]="{'active': selectedEnv?.id == env.id}">
-            <td [style]="selectedEnv?.name == env.name?'color:#4CB287':''">{{ env.name }}</td>
+            <td [style]="selectedEnv?.name == env.name?'color:#4CB287;cursor:pointer':'cursor:pointer'">{{ env.name }}</td>
           </tr>
           </tbody>
         </nz-table>
