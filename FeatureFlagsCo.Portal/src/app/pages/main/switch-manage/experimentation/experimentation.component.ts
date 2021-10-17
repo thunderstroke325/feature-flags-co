@@ -32,6 +32,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
   customEventTrackNumeric: CustomEventTrackOption = CustomEventTrackOption.Numeric;
   customEventType: EventType = EventType.Custom;
+  pageViewEventType: EventType = EventType.PageView;
+  clickEventType: EventType = EventType.Click;
 
   constructor(
     private route: ActivatedRoute,

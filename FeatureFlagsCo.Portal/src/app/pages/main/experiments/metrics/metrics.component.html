@@ -39,6 +39,12 @@
                   <ng-container *ngIf="data.eventType === customEventType">
                     自定义事件: {{ data.customEventTrackOption === customEventTrackConversion ? '转化率' : '数值' }}
                   </ng-container>
+                  <ng-container *ngIf="data.eventType === pageViewEventType">
+                    Page View: 转化率
+                  </ng-container>
+                  <ng-container *ngIf="data.eventType === clickEventType">
+                    自定义事件: 转化率
+                  </ng-container>
                 </nz-tag>
               </td>
               <td>{{ data.eventName }}</td>

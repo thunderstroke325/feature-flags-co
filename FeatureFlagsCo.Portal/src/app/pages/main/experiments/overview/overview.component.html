@@ -46,6 +46,7 @@
             <th>开关名称</th>
             <th>Metric 名称</th>
             <th>Metric 事件名称</th>
+            <th>Metric 事件类型</th>
             <th>当前状态</th>
             <th nzAlign="center">操作</th>
           </tr>
@@ -55,6 +56,19 @@
               <td>{{data.featureFlagName}}</td>
               <td>{{data.metric.name}}</td>
               <td>{{data.metric.eventName}}</td>
+              <td>
+                <nz-tag nzNoAnimation>
+                  <ng-container *ngIf="data.metric.eventType === customEventType">
+                    自定义事件: {{ data.metric.customEventTrackOption === customEventTrackConversion ? '转化率' : '数值' }}
+                  </ng-container>
+                  <ng-container *ngIf="data.metric.eventType === pageViewEventType">
+                    Page View: 转化率
+                  </ng-container>
+                  <ng-container *ngIf="data.metric.eventType === clickEventType">
+                    自定义事件: 转化率
+                  </ng-container>
+                </nz-tag>
+              </td>
               <td>
                 <i class="status on-going" *ngIf="data.status === 3" nz-icon nzType="right-circle" nzTheme="outline"></i>
                 <i class="status paused" *ngIf="data.status === 2" nz-icon nzType="pause-circle" nzTheme="outline"></i>

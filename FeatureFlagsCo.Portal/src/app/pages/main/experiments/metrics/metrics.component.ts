@@ -28,6 +28,8 @@ export class MetricsComponent implements OnInit, OnDestroy {
   currentMetric: IMetric;
 
   customEventType: EventType = EventType.Custom;
+  pageViewEventType: EventType = EventType.PageView;
+  clickEventType: EventType = EventType.Click;
   customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
 
   showType: '' | EventType = '';

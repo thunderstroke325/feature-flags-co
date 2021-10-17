@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IProjectEnv } from 'src/app/config/types';
 import { ExperimentService } from 'src/app/services/experiment.service';
-import { ExperimentStatus, IExperiment } from '../../switch-manage/types/experimentations';
+import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment } from '../../switch-manage/types/experimentations';
 
 @Component({
   selector: 'experiments-overview',
@@ -20,6 +20,11 @@ export class OverviewComponent implements OnInit, OnDestroy {
   experimentList: any[] = [];
 
   currentProjectEnv: IProjectEnv = null;
+
+  customEventType: EventType = EventType.Custom;
+  pageViewEventType: EventType = EventType.PageView;
+  clickEventType: EventType = EventType.Click;
+  customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
 
   constructor(
     private router: Router,
