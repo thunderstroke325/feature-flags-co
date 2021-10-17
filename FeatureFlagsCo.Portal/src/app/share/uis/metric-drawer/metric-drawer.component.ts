@@ -5,9 +5,10 @@ import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IAccount } from 'src/app/config/types';
 import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from 'src/app/pages/main/switch-manage/types/experimentations';
+import { FfcService } from 'src/app/services/ffc.service';
 import { MetricService } from 'src/app/services/metric.service';
 import { TeamService } from 'src/app/services/team.service';
-
+import { environment } from './../../../../environments/environment';
 
 @Component({
   selector: 'app-metric-drawer',
@@ -55,12 +56,15 @@ export class MetricDrawerComponent implements OnInit {
   @Input() visible: boolean = false;
   @Output() close: EventEmitter<any> = new EventEmitter();
 
+  pageviewClickEnabled = false;
   constructor(
     private fb: FormBuilder,
     private teamService: TeamService,
     private metricService: MetricService,
+    private ffcService: FfcService,
     private message: NzMessageService
   ) {
+    this.pageviewClickEnabled  = (environment.name === 'Standalone' ? 'true' : this.ffcService.client.variation('pageview-click', 'false')) === 'true';
     const currentAccount: IAccount = JSON.parse(localStorage.getItem('current-account'));
 
     this.maintainerSearchChange$.pipe(
@@ -140,7 +144,7 @@ export class MetricDrawerComponent implements OnInit {
   }
 
   doSubmit() {
-    const { name, description, maintainerUserId, eventType, eventName, customEventTrackOption, customEventUnit, customEventSuccessCriteria } = this.metricForm.value;
+    let { name, description, maintainerUserId, eventType, eventName, customEventTrackOption, customEventUnit, customEventSuccessCriteria } = this.metricForm.value;
 
     if (this.metricForm.invalid) {
       for (const i in this.metricForm.controls) {
@@ -162,6 +166,16 @@ export class MetricDrawerComponent implements OnInit {
     }
 
     this.isLoading = true;
+
+    if (eventType === EventType.PageView) {
+      eventName = 'pageview';
+      customEventTrackOption = CustomEventTrackOption.Conversion;
+      customEventSuccessCriteria = CustomEventSuccessCriteria.Higher;
+    } else if (eventType === EventType.Click) {
+      eventName = 'click';
+      customEventTrackOption = CustomEventTrackOption.Conversion;
+      customEventSuccessCriteria = CustomEventSuccessCriteria.Higher;
+    }
 
     if (this.isEditing) {
       this.metricService.updateMetric({

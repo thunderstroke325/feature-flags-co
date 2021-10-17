@@ -58,6 +58,19 @@ namespace FeatureFlags.APIs.Controllers
                 }
             }
 
+            if (param.EventType == EventType.PageView || param.EventType == EventType.Click)
+            {
+                if (param.CustomEventTrackOption != CustomEventTrackOption.Conversion)
+                {
+                    validateErrors.Add("转化率");
+                }
+
+                if (param.CustomEventSuccessCriteria != CustomEventSuccessCriteria.Higher)
+                {
+                    validateErrors.Add("实验胜出标准");
+                }
+            }
+
             return validateErrors;
         }
 
