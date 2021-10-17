@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { FFCJsClient, IOption } from 'ffc-js-client-sdk/esm';
+import { FFCJsClient } from 'ffc-js-client-sdk/esm';
 
 @Injectable({
   providedIn: 'root'

@@ -93,6 +93,10 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
     ];
   }
 
+  deleteCssSelectorRow(id: string): void {
+    this.model.items = this.model.items.filter(d => d.id !== id);
+  }
+
   isSaving: boolean = false;
   doSubmit() {
     this.isSaving = true;
