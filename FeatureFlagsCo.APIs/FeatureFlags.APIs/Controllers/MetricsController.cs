@@ -100,6 +100,8 @@ namespace FeatureFlags.APIs.Controllers
                         MaintainerUserId = param.MaintainerUserId,
                         CustomEventUnit = param.CustomEventUnit,
                         CustomEventSuccessCriteria = param.CustomEventSuccessCriteria,
+                        ElementTargets = param.ElementTargets,
+                        TargetUrls = param.TargetUrls,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     };
@@ -146,6 +148,8 @@ namespace FeatureFlags.APIs.Controllers
                         MaintainerUserId = param.MaintainerUserId,
                         CustomEventUnit = param.CustomEventUnit,
                         CustomEventSuccessCriteria = param.CustomEventSuccessCriteria,
+                        ElementTargets = param.ElementTargets,
+                        TargetUrls = param.TargetUrls,
                         UpdatedAt = DateTime.UtcNow
                     };
 
@@ -185,6 +189,8 @@ namespace FeatureFlags.APIs.Controllers
                         CustomEventTrackOption = m.CustomEventTrackOption,
                         CustomEventUnit = m.CustomEventUnit,
                         CustomEventSuccessCriteria = m.CustomEventSuccessCriteria,
+                        ElementTargets = m.ElementTargets,
+                        TargetUrls = m.TargetUrls,
                         MaintainerUserId = m.MaintainerUserId
                     });
                 }
@@ -218,6 +224,10 @@ namespace FeatureFlags.APIs.Controllers
                         EventName = m.EventName,
                         EventType = m.EventType,
                         CustomEventTrackOption = m.CustomEventTrackOption,
+                        CustomEventUnit = m.CustomEventUnit,
+                        CustomEventSuccessCriteria = m.CustomEventSuccessCriteria,
+                        ElementTargets = m.ElementTargets,
+                        TargetUrls = m.TargetUrls,
                         MaintainerUserId = m.MaintainerUserId
                     }).FirstOrDefault();
                 }

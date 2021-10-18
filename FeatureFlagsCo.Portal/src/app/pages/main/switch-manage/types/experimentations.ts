@@ -22,6 +22,15 @@ export enum ExperimentStatus {
   Recording = 3
 }
 
+export enum UrlMatchType {
+  Substring = 1
+}
+
+export interface ITargetUrl {
+  matchType: UrlMatchType,
+  url: string
+}
+
 export interface IMetric {
   id?: string,
   name: string,
@@ -32,7 +41,9 @@ export interface IMetric {
   eventType: EventType,
   customEventTrackOption?: CustomEventTrackOption,
   customEventUnit?: string,
-  customEventSuccessCriteria?: CustomEventSuccessCriteria
+  customEventSuccessCriteria?: CustomEventSuccessCriteria,
+  elementTargets?: string,
+  targetUrls?: ITargetUrl[]
 }
 
 export interface IExperiment {

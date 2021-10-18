@@ -24,4 +24,9 @@ namespace FeatureFlagsCo.MQ
         PageView = 2,
         Click = 3
     }
+
+    public enum UrlMatchType 
+    {
+        Substring = 1
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using FeatureFlagsCo.MQ;
 using System;
+using System.Collections.Generic;
 
 namespace FeatureFlags.APIs.Models
 {
@@ -18,6 +19,8 @@ namespace FeatureFlags.APIs.Models
         public DateTime UpdatedAt { get; set; }
 
         // TODO add properties for page view and click
+        public string ElementTargets { get; set; }
+        public List<TargetUrl> TargetUrls { get; set; }
 
         public override string GetCollectionName()
         {

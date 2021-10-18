@@ -1,4 +1,5 @@
 ﻿using FeatureFlagsCo.MQ;
+using System.Collections.Generic;
 
 namespace FeatureFlags.APIs.ViewModels.Metrics
 {
@@ -14,5 +15,7 @@ namespace FeatureFlags.APIs.ViewModels.Metrics
         public CustomEventTrackOption CustomEventTrackOption { get; set; }
         public string CustomEventUnit { get; set; }
         public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
+        public string ElementTargets { get; set; }
+        public List<TargetUrl> TargetUrls { get; set; }
     }
 }

@@ -1,13 +1,14 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IAccount } from 'src/app/config/types';
-import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from 'src/app/pages/main/switch-manage/types/experimentations';
+import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric, UrlMatchType } from 'src/app/pages/main/switch-manage/types/experimentations';
 import { FfcService } from 'src/app/services/ffc.service';
 import { MetricService } from 'src/app/services/metric.service';
 import { TeamService } from 'src/app/services/team.service';
+import { uuidv4 } from 'src/app/utils';
 import { environment } from './../../../../environments/environment';
 
 @Component({
@@ -28,13 +29,14 @@ export class MetricDrawerComponent implements OnInit {
   pageViewEventType: EventType = EventType.PageView;
   clickEventType: EventType = EventType.Click;
 
+  substringUrlMatchType: UrlMatchType = UrlMatchType.Substring;
+
   customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
   customEventTrackNumeric: CustomEventTrackOption = CustomEventTrackOption.Numeric;
 
   customEventSuccessCriteriaLower: CustomEventSuccessCriteria = CustomEventSuccessCriteria.Lower;
   customEventSuccessCriteriaHigher: CustomEventSuccessCriteria = CustomEventSuccessCriteria.Higher;
 
-  cust
   @Input()
   set metric(metric: IMetric) {
     this.isEditing = metric && !!metric.id;
@@ -95,10 +97,27 @@ export class MetricDrawerComponent implements OnInit {
       eventName: [null],
       customEventUnit: [null],
       customEventSuccessCriteria: [CustomEventSuccessCriteria.Higher],
+      elementTargets: [null],
+      targetUrls: this.fb.array([
+        this.fb.group({
+          matchType: [this.substringUrlMatchType, [Validators.required]],
+          url: [''],
+        }),
+      ])
     });
   }
 
   patchForm(metric: Partial<IMetric>) {
+    if (metric.targetUrls && metric.targetUrls.length > 0) {
+      this.metricForm.controls['targetUrls'] = this.fb.array(
+        metric.targetUrls.map(t => this.fb.group({
+          id: [uuidv4()],
+          matchType: [this.substringUrlMatchType, [Validators.required]],
+          url: [''],
+        }))
+      )
+    }
+
     this.metricForm.patchValue({
       name: metric.name,
       description: metric.description,
@@ -108,7 +127,23 @@ export class MetricDrawerComponent implements OnInit {
       eventName: metric.eventName,
       customEventUnit: metric.customEventUnit,
       customEventSuccessCriteria: metric.customEventSuccessCriteria,
+      elementTargets: metric.elementTargets,
+      targetUrls: metric.targetUrls || [],
     });
+  }
+
+  addTargetUrl() {
+    const control = <FormArray>this.metricForm.controls['targetUrls'];
+    control.push(this.fb.group({
+      id: [uuidv4()],
+      matchType: [this.substringUrlMatchType, [Validators.required]],
+      url: [''],
+    }));
+  }
+
+  removeTargetUrl(idx){
+    const control = <FormArray>this.metricForm.controls['targetUrls'];
+    control.removeAt(idx);
   }
 
   resetForm() {
@@ -144,7 +179,7 @@ export class MetricDrawerComponent implements OnInit {
   }
 
   doSubmit() {
-    let { name, description, maintainerUserId, eventType, eventName, customEventTrackOption, customEventUnit, customEventSuccessCriteria } = this.metricForm.value;
+    let { name, description, maintainerUserId, eventType, eventName, customEventTrackOption, customEventUnit, customEventSuccessCriteria, targetUrls, elementTargets } = this.metricForm.value;
 
     if (this.metricForm.invalid) {
       for (const i in this.metricForm.controls) {
@@ -162,6 +197,17 @@ export class MetricDrawerComponent implements OnInit {
         this.metricForm.controls['customEventSuccessCriteria'].setErrors({required: true});
       }
 
+      if (eventType === this.pageViewEventType || eventType === this.clickEventType) {
+        const targetUrls = <FormArray>this.metricForm.controls['targetUrls'];
+        for (const gp of targetUrls.controls) {
+          const group = <FormGroup>gp;
+          for (const i in group.controls) {
+            group.controls[i].markAsDirty();
+            group.controls[i].updateValueAndValidity();
+          }
+        }
+      }
+
       return;
     }
 
@@ -175,13 +221,16 @@ export class MetricDrawerComponent implements OnInit {
       eventName = 'click';
       customEventTrackOption = CustomEventTrackOption.Conversion;
       customEventSuccessCriteria = CustomEventSuccessCriteria.Higher;
+    } else if (eventType === EventType.Custom) {
+      targetUrls = [];
+      elementTargets = '';
     }
 
     if (this.isEditing) {
       this.metricService.updateMetric({
         id: this.metric.id,
         envId: this.metric.envId,
-        name, description, eventType, maintainerUserId, customEventTrackOption, eventName, customEventUnit, customEventSuccessCriteria
+        name, description, eventType, maintainerUserId, customEventTrackOption, eventName, customEventUnit, customEventSuccessCriteria, targetUrls, elementTargets
       }).pipe()
         .subscribe(
           res => {
@@ -198,7 +247,7 @@ export class MetricDrawerComponent implements OnInit {
     } else {
       this.metricService.createMetric({
         envId: this.metric.envId,
-        name, description, eventType, maintainerUserId, customEventTrackOption, eventName, customEventUnit, customEventSuccessCriteria
+        name, description, eventType, maintainerUserId, customEventTrackOption, eventName, customEventUnit, customEventSuccessCriteria, targetUrls, elementTargets
       })
         .pipe()
         .subscribe(
