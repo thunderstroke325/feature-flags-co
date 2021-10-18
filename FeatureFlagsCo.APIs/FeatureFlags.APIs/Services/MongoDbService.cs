@@ -470,9 +470,9 @@ namespace FeatureFlags.APIs.Services
                     Status = param.Status,
                     VariationOptionWhenDisabled = new VariationOption()
                     {
-                        DisplayOrder = 1,
-                        LocalId = 1,
-                        VariationValue = "true"
+                        DisplayOrder = 2,
+                        LocalId = 2,
+                        VariationValue = "false"
                     },
                     DefaultRulePercentageRollouts = new List<VariationOptionPercentageRollout>()
                     {
@@ -481,9 +481,9 @@ namespace FeatureFlags.APIs.Services
                             RolloutPercentage = new double[2] {0, 1},
                             ValueOption = new VariationOption()
                             {
-                                DisplayOrder = 1,
-                                LocalId = 1,
-                                VariationValue = "true"
+                                DisplayOrder = 2,
+                                LocalId = 2,
+                                VariationValue = "false"
                             }
                         }
                     }
