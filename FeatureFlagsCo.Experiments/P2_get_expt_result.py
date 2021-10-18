@@ -562,6 +562,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
             # call function to calculate experiment result
             # EventType: 1, 2 ,3 ; 分别是 customevent, pageview, click
             # CustomEventTrackOption: 1, 2 ; 分别是 conversion, numeric
+            # CustomEventSuccessCriteria : 1, 2  for highest win and lowest win
             if "EventType" in expt.keys():
                 if expt["EventType"] == 1:
                     if expt['CustomEventTrackOption'] == 1 :
@@ -570,6 +571,8 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                         output_to_mq = self.__calc_customevent_numeric(expt,list_ff_events, list_user_events)
                     else:
                         sys.exit('Non-Recognised Event Type')
+                elif expt["EventType"] == 2 or expt["EventType"] == 3 :
+                        output_to_mq = self.__calc_customevent_conversion(expt,list_ff_events, list_user_events)
                 else:
                     sys.exit('Non-Recognised Event Type')
             else:
