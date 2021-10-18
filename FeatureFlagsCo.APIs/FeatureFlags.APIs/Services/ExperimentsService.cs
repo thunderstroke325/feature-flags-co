@@ -62,7 +62,7 @@ namespace FeatureFlags.APIs.Services
                 .Select(ex => ex.MetricId);
 
             return (await _metricService.GetMetricsByIdsAsync(exptIds))
-               .FindAll(m => m.EventType == EventType.Custom || m.EventType == EventType.PageView)
+               .FindAll(m => m.EventType == EventType.Click || m.EventType == EventType.PageView)
                .Select(m => new ExperimentMetricSetting
                {
                    EventName = m.EventName,

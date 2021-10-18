@@ -51,7 +51,7 @@
                 <nz-select formControlName="eventType" (ngModelChange)="onEventTypeChange($event)">
                   <nz-option [nzValue]="customEventType" nzLabel="Custom - 自定义事件"></nz-option>
                   <nz-option *ngIf="pageviewClickEnabled" [nzValue]="pageViewEventType" nzLabel="Page view - 页面展示"></nz-option>
-                  <!-- <nz-option *ngIf="pageviewClickEnabled" [nzValue]="clickEventType" nzLabel="Click - 点击事件"></nz-option> -->
+                  <nz-option *ngIf="pageviewClickEnabled" [nzValue]="clickEventType" nzLabel="Click - 点击事件"></nz-option>
                 </nz-select>
               </div>
             </nz-input-group>
@@ -62,7 +62,7 @@
             <nz-form-label>Click - 点击事件的 Targets </nz-form-label>
             <nz-form-control nzErrorTip="Click - 点击事件的 Targets! ">
                 <nz-input-group>
-                    <input type="text" nz-input formControlName="elementTargets" placeholder="CSS selector" />
+                    <input type="text" nz-input formControlName="elementTargets" placeholder="一个或多个 CSS selector，中间用逗号(,)隔开，请确保不要使用中文逗号！" />
                 </nz-input-group>
             </nz-form-control>
           </nz-form-item>
