@@ -100,6 +100,7 @@ export class MetricDrawerComponent implements OnInit {
       elementTargets: [null],
       targetUrls: this.fb.array([
         this.fb.group({
+          id: [uuidv4()],
           matchType: [this.substringUrlMatchType, [Validators.required]],
           url: [''],
         }),
@@ -179,7 +180,9 @@ export class MetricDrawerComponent implements OnInit {
   }
 
   doSubmit() {
-    let { name, description, maintainerUserId, eventType, eventName, customEventTrackOption, customEventUnit, customEventSuccessCriteria, targetUrls, elementTargets } = this.metricForm.value;
+    let { name, description, maintainerUserId, eventType, eventName, customEventTrackOption, customEventUnit, customEventSuccessCriteria, elementTargets } = this.metricForm.value;
+
+    let targetUrls = this.metricForm.controls['targetUrls'].value;
 
     if (this.metricForm.invalid) {
       for (const i in this.metricForm.controls) {
