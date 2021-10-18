@@ -12,6 +12,7 @@ namespace FeatureFlags.APIs.Services
 {
     public interface IEnvironmentService
     {
+        public Task<int> GetEnvIdBySecretAsync(string envSecret);
         public Task<IEnumerable<EnvironmentViewModel>> GetEnvs(int accountId, int projectId);
 
         // Remove all envs of a project
@@ -49,6 +50,15 @@ namespace FeatureFlags.APIs.Services
             _userManager = userManager;
             _environmentService = environmentService;
             _noSqlDbService = noSqlDbService;
+        }
+
+        public async Task<int> GetEnvIdBySecretAsync(string envSecret) 
+        {
+            var query = from env in _dbContext.Environments
+                        where env.Secret == envSecret
+                        select env.Id;
+
+            return await query.FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<EnvironmentViewModel>> GetEnvs(int accountId, int projectId)

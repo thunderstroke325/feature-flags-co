@@ -23,18 +23,32 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IEnvironmentService _envService;
         private readonly IExperimentsService _experimentsService;
         private readonly MongoDbFeatureFlagService _mongoDbFeatureFlagService;
+        private readonly IEnvironmentService _environmentService;
 
         public ExperimentsController(
             ILogger<ExperimentsController> logger,
             IEnvironmentService envService,
             MongoDbFeatureFlagService mongoDbFeatureFlagService,
+            IEnvironmentService environmentService,
             IExperimentsService experimentsService)
         {
             _logger = logger;
             _envService = envService;
             _experimentsService = experimentsService;
             _mongoDbFeatureFlagService = mongoDbFeatureFlagService;
+            _environmentService = environmentService;
         }
+
+        // SDK call this endpoint to get the active experiment settings
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("{envSecret}")]
+        public async Task<IEnumerable<ExperimentMetricSetting>> GetActiveExperimentMetricSettings(string envSecret)
+        {
+            var envId = await _environmentService.GetEnvIdBySecretAsync(envSecret);
+            return await _experimentsService.GetActiveExperimentMetricSettingsAsync(envId);
+        }
+
 
         [HttpGet]
         [Route("Events/{envId}")]

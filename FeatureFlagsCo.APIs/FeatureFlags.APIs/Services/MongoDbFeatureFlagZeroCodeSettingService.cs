@@ -11,7 +11,7 @@ namespace FeatureFlags.APIs.Services
     {
         public MongoDbFeatureFlagZeroCodeSettingService(IMongoDbSettings settings) : base(settings) 
         {
-            // Create index on updatedAt
+            // Create index on EnvSecret
             var indexKeysDefinition = Builders<FeatureFlagZeroCodeSetting>.IndexKeys.Descending(m => m.EnvSecret);
             Task.Run(() => _collection.Indexes.CreateOneAsync(new CreateIndexModel<FeatureFlagZeroCodeSetting>(indexKeysDefinition))).Wait();
         }

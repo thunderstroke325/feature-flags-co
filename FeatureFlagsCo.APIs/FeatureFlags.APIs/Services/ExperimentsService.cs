@@ -30,6 +30,8 @@ namespace FeatureFlags.APIs.Services
 
         Task<List<ExperimentViewModel>> GetExperimentsByFeatureFlagIds(IEnumerable<string> featureFlagIds, bool shouldIncludeIterations);
         Task<IEnumerable<ExperimentIteration>> GetIterationResults(int envId, List<ExperimentIterationTuple> experimentIterationTuples);
+
+        Task<IEnumerable<ExperimentMetricSetting>> GetActiveExperimentMetricSettingsAsync(int envId);
     }
 
     public class ExperimentsService : IExperimentsService
@@ -38,17 +40,36 @@ namespace FeatureFlags.APIs.Services
         private readonly INoSqlService _noSqlDbService;
         private readonly MetricService _metricService;
         private readonly MessagingService _messagingService;
+        private readonly MongoDbExperimentService _mongoDbExperimentService;
 
         public ExperimentsService(
             INoSqlService noSqlDbService,
             MessagingService messagingService,
             MetricService metricService,
+            MongoDbExperimentService mongoDbExperimentService,
             IOptions<MySettings> mySettings)
         {
             _noSqlDbService = noSqlDbService;
             _mySettings = mySettings;
             _metricService = metricService;
+            _mongoDbExperimentService = mongoDbExperimentService;
             _messagingService = messagingService;
+        }
+
+        public async Task<IEnumerable<ExperimentMetricSetting>> GetActiveExperimentMetricSettingsAsync(int envId)
+        {
+            var exptIds = (await _mongoDbExperimentService.GetActiveExperimentsByEnvAsync(envId))
+                .Select(ex => ex.MetricId);
+
+            return (await _metricService.GetMetricsByIdsAsync(exptIds))
+               .FindAll(m => m.EventType == EventType.Custom || m.EventType == EventType.PageView)
+               .Select(m => new ExperimentMetricSetting
+               {
+                   EventName = m.EventName,
+                   EventType = m.EventType,
+                   ElementTargets = m.ElementTargets,
+                   TargetUrls = m.TargetUrls.Select(t => new TargetUrl { MatchType = t.MatchType, Url = t.Url}).ToList()
+               });
         }
 
         public async Task<List<ExperimentViewModel>> GetExperimentsByFeatureFlagIds(IEnumerable<string> featureFlagIds, bool shouldIncludeIterations)

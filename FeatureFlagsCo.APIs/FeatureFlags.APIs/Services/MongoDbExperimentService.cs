@@ -33,5 +33,13 @@ namespace FeatureFlags.APIs.Services
             return await _collection
                 .Find(e => e.FlagId == featureFlagId && !e.IsArvhived).SortByDescending(p => p.CreatedAt).ToListAsync();
         }
+
+        public async Task<List<Experiment>> GetActiveExperimentsByEnvAsync(int envId)
+        {
+            var expts = await _collection
+                .Find(e => e.EnvId == envId && !e.IsArvhived && e.Iterations.Count > 0).SortByDescending(p => p.CreatedAt).ToListAsync();
+
+            return expts.FindAll(ex => ex.Iterations.Find(it => !it.EndTime.HasValue) != null);
+        }
     }
 }
