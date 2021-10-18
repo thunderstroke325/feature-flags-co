@@ -2,6 +2,7 @@
 using FeatureFlagsCo.Messaging.Models;
 using FeatureFlagsCo.Messaging.Services;
 using FeatureFlagsCo.Messaging.ViewModels;
+using FeatureFlagsCo.MQ;
 using MongoDB.Driver;
 using System.Threading.Tasks;
 
@@ -37,15 +38,27 @@ namespace FeatureFlagsCo.Messaging.Services
             {
                 var iteration = experiment.Iterations.Find(it => it.Id == param.IterationId);
 
-                iteration.CustomEventSuccessCriteria = param.CustomEventSuccessCriteria;
-                iteration.CustomEventTrackOption = param.CustomEventTrackOption;
-                iteration.CustomEventUnit = param.CustomEventUnit;
-                iteration.EventType = (int)param.EventType;
-           
-                iteration.UpdatedAt = param.EndTime;
-                iteration.Results = param.Results;
+                if (iteration != null) 
+                {
+                    if (param.EventType.HasValue)
+                    {
+                        iteration.CustomEventSuccessCriteria = param.CustomEventSuccessCriteria.Value;
+                        iteration.CustomEventTrackOption = param.CustomEventTrackOption.Value;
+                        iteration.EventType = (int)param.EventType.Value;
+                    }
+                    else // 历史遗留实验中，EventType等为 null
+                    {
+                        iteration.CustomEventSuccessCriteria = CustomEventSuccessCriteria.Higher;
+                        iteration.CustomEventTrackOption = CustomEventTrackOption.Conversion;
+                        iteration.EventType = (int)EventType.Custom;
+                    }
 
-                UpsertItem(experiment);
+                    iteration.CustomEventUnit = param.CustomEventUnit;
+                    iteration.UpdatedAt = param.EndTime;
+                    iteration.Results = param.Results;
+
+                    UpsertItem(experiment);
+                }
             }
         }
     }

@@ -49,10 +49,10 @@ namespace FeatureFlagsCo.Messaging.Models
     public class ExperimentResult
     {
         public string ExperimentId { get; set; }
-        public EventType EventType { get; set; }
-        public CustomEventTrackOption CustomEventTrackOption { get; set; }
+        public EventType? EventType { get; set; }
+        public CustomEventTrackOption? CustomEventTrackOption { get; set; }
         public string CustomEventUnit { get; set; }
-        public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
+        public CustomEventSuccessCriteria? CustomEventSuccessCriteria { get; set; }
         public string IterationId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; } // updated time, not the end time of the iteration
