@@ -20,26 +20,64 @@ class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
         dict_acitveExpts[key] = list_act_Expts
         self.redis_set(dict_expt_id, dict_acitveExpts)
 
+    def __check_format(self, body, key, fmt, *args):
+        value = body.get(key, None)
+        is_valid = False
+        if value :
+            if type(value) is fmt :
+                if args:
+                    if value in args[0] :
+                        is_valid = True
+                else:
+                    is_valid = True
+        return is_valid
+
     def handle_body(self, body, **properties):
+        # Check Q1 format
+        example_Q1_format = {
+                                "ExptId":"exp1",
+                                "IterationId":"1",
+                                "EnvId":"111",
+                                "FlagId":"FF__11__11__111__example",
+                                "BaselineVariation":"1",
+                                "Variations":["1","2","3"],
+                                "EventName":"exampleName",
+                                "EventType": 1,
+                                "CustomEventTrackOption": 2,
+                                "CustomEventSuccessCriteria": 1,
+                                "CustomEventUnit": "Unit",
+                                "StartExptTime":"2021-01-01T01:00:00.123456",
+                                "EndExptTime":""
+                            }
+        check_pass = False
         if type(body) is dict:
+            if example_Q1_format.keys() == body.keys():
+                is_valid_ExptId = self.__check_format(body,'ExptId', str)
+                is_valid_EventType= self.__check_format(body,'EventType', int, [1,2,3] )
+                is_valid_CustomEventTrackOption= self.__check_format(body,'CustomEventTrackOption', int, [1,2] )
+                is_valid_CustomEventSuccessCriteria= self.__check_format(body,'CustomEventSuccessCriteria', int, [1,2] )
+                check_pass = ( is_valid_ExptId and is_valid_EventType and is_valid_CustomEventTrackOption and is_valid_CustomEventSuccessCriteria)
+        if check_pass:
             key, end, value = body.get('ExptId', None), body.get(
                 'EndExptTime', None), body
-            if key:
-                logger.info('p1########p1 gets %r#########' % body)
-                self.redis_set(key, value)
-                if not end:
-                    # set up link between ff and his active expts
-                    ff_env_id = 'dict_ff_act_expts_%s_%s' % (
-                        body['EnvId'], body['FlagId'])
-                    self.__setup_relation_between_obj_expt(
-                        ff_env_id, body['FlagId'], key)
-                    # set up link between event and his active expts
-                    event_env_id = 'dict_event_act_expts_%s_%s' % (
-                        body['EnvId'], body['EventName'])
-                    self.__setup_relation_between_obj_expt(
-                        event_env_id, body['EventName'], key)
-                    self.send('Q2', 'py.experiments.experiment', key)
-                    logger.info('########p1 send %r to Q2########' % key)
+            logger.info('p1########p1 gets %r#########' % body)
+            self.redis_set(key, value)
+            if not end:
+                # set up link between ff and his active expts
+                ff_env_id = 'dict_ff_act_expts_%s_%s' % (
+                    body['EnvId'], body['FlagId'])
+                self.__setup_relation_between_obj_expt(
+                    ff_env_id, body['FlagId'], key)
+                # set up link between event and his active expts
+                event_env_id = 'dict_event_act_expts_%s_%s' % (
+                    body['EnvId'], body['EventName'])
+                self.__setup_relation_between_obj_expt(
+                    event_env_id, body['EventName'], key)
+                self.send('Q2', 'py.experiments.experiment', key)
+                logger.info('########p1 send %r to Q2########' % key)
+        else :
+            logger.info("ERROR: Invalid Q1 Format")
+
 
 
 if __name__ == '__main__':
