@@ -415,7 +415,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                     if output[minRateIndex]['changeToBaseline'] < 0:
                         output[minRateIndex]['isWinner'] = True      
                 else:
-                    sys.exit('Non-Recognised CustomEventSuccessCriteria')
+                    logger.info('ERROR : Non-Recognised CustomEventSuccessCriteria')
         logger.info('ExptResults:')
         logger.info(output)
         # result to send to rabbitmq
@@ -570,18 +570,21 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                     elif expt['CustomEventTrackOption'] == 2 :
                         output_to_mq = self.__calc_customevent_numeric(expt,list_ff_events, list_user_events)
                     else:
-                        sys.exit('Non-Recognised Event Type')
+                        logger.info('ERROR: Non-Recognised CustomEventTrackOption')
                 elif expt["EventType"] == 2 or expt["EventType"] == 3 :
-                        output_to_mq = self.__calc_customevent_conversion(expt,list_ff_events, list_user_events)
+                    output_to_mq = self.__calc_customevent_conversion(expt,list_ff_events, list_user_events)
                 else:
-                    sys.exit('Non-Recognised Event Type')
+                    logger.info('ERROR: Non-Recognised Event Type')
             else:
                 # Compatible with preview experiments
                 output_to_mq = self.__calc_customevent_conversion(expt,list_ff_events, list_user_events)
 
             # send result to Q3
-            self.send('Q3', 'py.experiments.experiment.results', output_to_mq)
-            logger.info('########p2 sends %r result to Q3#########' % expt_id)
+            try:
+                self.send('Q3', 'py.experiments.experiment.results', output_to_mq)
+                logger.info('########p2 sends %r result to Q3#########' % expt_id)
+            except:
+                logger.info('ERROR : no result sent to Q3!')
 
             # experiment not finished
             if not expt['EndExptTime']:
