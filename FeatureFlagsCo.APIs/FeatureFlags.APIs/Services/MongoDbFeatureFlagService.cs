@@ -41,6 +41,11 @@ namespace FeatureFlags.APIs.Services
         public List<FeatureFlag> Get() =>
             _featureFlags.Find(p => true).ToList();
 
+        public async Task<List<FeatureFlag>> GetActiveByIds(IEnumerable<string> ids)
+        {
+            return await _featureFlags.Find(p => !p.IsArchived && ids.Contains(p.Id)).ToListAsync();
+        }
+
         public async Task<List<FeatureFlag>> GetByEnvironmentAsync(int envId)
         {
             return await _featureFlags.Find(p => p.EnvironmentId == envId).ToListAsync();

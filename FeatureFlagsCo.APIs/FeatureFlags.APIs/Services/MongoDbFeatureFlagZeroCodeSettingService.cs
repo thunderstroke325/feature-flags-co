@@ -19,7 +19,7 @@ namespace FeatureFlags.APIs.Services
         public async Task<List<FeatureFlagZeroCodeSetting>> GetByEnvSecretAsync(string envSecret)
         {
             return await _collection
-                .Find(e => e.EnvSecret == envSecret && e.IsActive == true && e.Items.Count > 0).ToListAsync();
+                .Find(e => e.EnvSecret == envSecret && e.IsActive == true && !e.IsArchived && e.Items.Count > 0).ToListAsync();
         }
 
         public async Task<FeatureFlagZeroCodeSetting> GetByEnvAndFeatureFlagIdAsync(int envId, string ffId)
