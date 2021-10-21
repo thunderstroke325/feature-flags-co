@@ -32,7 +32,7 @@
         </div>
     </ng-container>
   <ng-template #create>
-    <button form="myForm" nz-button style="float: right"  class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">
+    <button (click)="doSubmit()" nz-button style="float: right"  class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">
       {{isEditing ? '更新' : '创建'}}</button>
   </ng-template>
 </nz-drawer>

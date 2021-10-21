@@ -127,8 +127,7 @@
     </div>
   </ng-container>
   <ng-template #confirm>
-    <button form="myForm" style="float: right" nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>
-
+    <button (click)="doSubmit()" style="float: right" nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>
   </ng-template>
 </nz-drawer>
 

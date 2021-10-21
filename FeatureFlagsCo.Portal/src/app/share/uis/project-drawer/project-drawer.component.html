@@ -1,24 +1,20 @@
 <nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzTitle]="isEditing?'编辑 Project':'添加 Project'" [nzFooter]="create" [nzWidth]="500" (nzOnClose)="onClose()">
     <ng-container *nzDrawerContent>
-        <div class="project-drawer-layout">
-            <form id="myForm" nz-form [formGroup]="projectForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
-
-                <nz-form-item>
-                    <nz-form-label>Project 名称</nz-form-label>
-                    <nz-form-control nzErrorTip="Project 名称！">
-                        <nz-input-group>
-                            <input type="text" nz-input formControlName="name" placeholder="Project 名称" />
-                        </nz-input-group>
-                    </nz-form-control>
-                </nz-form-item>
-
-<!--                <button nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">{{isEditing-->
-<!--                    ? '更新' : '创建'}}</button>-->
-            </form>
-        </div>
+      <div class="project-drawer-layout">
+        <form id="myForm" nz-form [formGroup]="projectForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
+          <nz-form-item>
+            <nz-form-label>Project 名称</nz-form-label>
+            <nz-form-control nzErrorTip="Project 名称！">
+              <nz-input-group>
+                  <input type="text" nz-input formControlName="name" placeholder="Project 名称" />
+              </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+        </form>
+      </div>
     </ng-container>
   <ng-template #create>
-    <button form="myForm" style="float: right" nz-button [nzType]="'primary'" [nzLoading]="isLoading">{{isEditing ? '更新' : '创建'}}</button>
+    <button (click)="doSubmit()" style="float: right" nz-button [nzType]="'primary'" [nzLoading]="isLoading">{{isEditing ? '更新' : '创建'}}</button>
   </ng-template>
 </nz-drawer>
 

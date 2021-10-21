@@ -1,20 +1,20 @@
-<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzWidth]="500" (nzOnClose)="onClose()">
+<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzWidth]="500" [nzFooter]="confirm" (nzOnClose)="onClose()">
     <ng-container *nzDrawerContent>
-        <div class="project-drawer-layout">
-            <form nz-form [formGroup]="accountForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
-
-                <nz-form-item>
-                    <nz-form-label>机构名称</nz-form-label>
-                    <nz-form-control nzErrorTip="机构名称！">
-                        <nz-input-group>
-                            <input type="text" nz-input formControlName="organizationName" placeholder="机构名称" />
-                        </nz-input-group>
-                    </nz-form-control>
-                </nz-form-item>
-
-                <button nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">{{'创建'}}</button>
-            </form>
-        </div>
+      <div class="project-drawer-layout">
+          <form nz-form [formGroup]="accountForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
+            <nz-form-item>
+                <nz-form-label>机构名称</nz-form-label>
+                <nz-form-control nzErrorTip="机构名称！">
+                    <nz-input-group>
+                        <input type="text" nz-input formControlName="organizationName" placeholder="机构名称" />
+                    </nz-input-group>
+                </nz-form-control>
+            </nz-form-item>
+          </form>
+      </div>
     </ng-container>
+    <ng-template #confirm>
+      <button (click)="doSubmit()" style="float: right" nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">{{'创建'}}</button>
+    </ng-template>
 </nz-drawer>
 
