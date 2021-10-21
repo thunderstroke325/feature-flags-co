@@ -22,6 +22,8 @@ namespace FeatureFlags.APIs.Models
         public string ElementTargets { get; set; }
         public List<TargetUrl> TargetUrls { get; set; }
 
+        public bool IsArvhived { get; set; }
+
         public override string GetCollectionName()
         {
             return "Metrics";

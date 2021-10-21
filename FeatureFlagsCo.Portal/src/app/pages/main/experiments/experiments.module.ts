@@ -17,6 +17,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { ShareModule } from 'src/app/share/share.module';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import { NzSpaceModule } from 'ng-zorro-antd/space';
     NzInputModule,
     NzTagModule,
     NzSpaceModule,
+    NzPopconfirmModule,
     ShareModule,
     ExperimentsRoutingModule
   ],

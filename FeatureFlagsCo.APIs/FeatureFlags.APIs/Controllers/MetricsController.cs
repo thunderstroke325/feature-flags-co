@@ -22,19 +22,22 @@ namespace FeatureFlags.APIs.Controllers
     {
         private readonly ILogger<MetricsController> _logger;
         private readonly IEnvironmentService _envService;
-        private readonly INoSqlService _noSqlDbService;
         private readonly MetricService _metricService;
+        private readonly IExperimentsService _experimentsService;
+        private readonly MongoDbExperimentService _mongoDbExperimentService;
 
         public MetricsController(
             ILogger<MetricsController> logger,
             IEnvironmentService envService,
             MetricService metricService,
-            INoSqlService noSqlDbService)
+            MongoDbExperimentService mongoDbExperimentService,
+            IExperimentsService experimentsService)
         {
             _logger = logger;
             _envService = envService;
-            _noSqlDbService = noSqlDbService;
+            _experimentsService = experimentsService;
             _metricService = metricService;
+            _mongoDbExperimentService = mongoDbExperimentService;
         }
 
         private List<string> ValidateMetric(MetricViewModel param) 
@@ -240,6 +243,25 @@ namespace FeatureFlags.APIs.Controllers
 
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
             }
+        }
+
+        [HttpDelete]
+        [Route("{envId}/{metricId}")]
+        public async Task<dynamic> ArchiveExperiment(int envId, string metricId)
+        {
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
+            {
+                var expts = await _mongoDbExperimentService.GetExperimentsByMetricAsync(metricId);
+                if (expts != null && expts.Count > 0) 
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Messages = expts.Select(expt => expt.FlagId).ToList()});
+                }
+
+                await _metricService.ArchiveAsync(metricId);
+            }
+
+            return Ok();
         }
     }
 }
