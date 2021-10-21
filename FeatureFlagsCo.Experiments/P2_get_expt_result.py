@@ -462,6 +462,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
 
     def __update_redis_with_EndExpt(self, list_ff_events, list_user_events,
                                     fmt, ExptStartTime, ExptEndTime, expt_id, expt):
+        """
         # Time to take decision to wait or not the upcomming event data
         para_delay_reception = 1
         para_wait_processing = 5
@@ -491,6 +492,8 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
             logger.info('#########send back to Q2 %r#########' % expt_id)
         # last event received within N minutes, no potential recepton delay, proceed data deletion
         else:
+        """
+        if True:
             # del expt
             self.redis_del(expt_id)
             # TODO move to somewhere
