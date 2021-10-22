@@ -9,7 +9,7 @@
     <ng-container *ngIf="!isLoading; else loadingTem;">
         <div class="detail-body">
           <div id="demo-link" *ngIf="featureDetail?.ff?.keyName === '示例开关'">
-            <a target="_blank" href="https://www.feature-flags.co/demo.html?envKey={{currentProjectEnv?.envSecret}}">点击查看 Demo</a>
+            <a target="_blank" href="http://antd.feature-flags.co/user/?envKey={{currentProjectEnv?.envSecret}}">点击查看 Demo</a>
           </div>
             <div class="item" style="display: flex;flex-direction: row;justify-content: space-between;">
               <div class="item-short">
