@@ -52,7 +52,7 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void{
-    console.log('switchTableHeight==', this.elementView.nativeElement.offsetHeight);
+    //console.log('switchTableHeight==', this.elementView.nativeElement.offsetHeight);
     this.switchTableHeight = this.elementView.nativeElement.offsetHeight;
   }
 

@@ -87,12 +87,10 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
   public getFeatureFlagUsage() {
     window.setTimeout(() => {
       this.isLoading = false;
-      console.log('setTimeout');
     });
     this.switchServe.getReport(this.switchId, this.timeSpan)
       .pipe(
         map(res => {
-          console.log(res);
           this.totalUsers = res.totalUsers || 0;
           this.hitUsers = res.hitUsers || 0;
           // let userUsageStr = `共有${res.totalUsers || 0}用户被标记，其中${res.hitUsers || 0}人使用此功能`;
@@ -112,7 +110,7 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
           // }
           let userUsageStr = "";
           let userByVariationValue = JSON.parse(res.userByVariationValue);
-          console.log(userByVariationValue);
+
           if (userByVariationValue && userByVariationValue.aggregations &&
             userByVariationValue.aggregations.group_by_status &&
             userByVariationValue.aggregations.group_by_status.buckets &&
@@ -125,7 +123,6 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
           }
           this.userUsageStr = userUsageStr;
 
-          console.log();
           let chartData = JSON.parse(res.chartData);
           return chartData || {};
         })
@@ -189,9 +186,7 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
     let data = [];
     if (option && option.length > 0) {
       for (let i = 0; i < option.length; i++) {
-        console.log(option[i].to_as_string.replace('T', ' '));
         var date = new Date(option[i].to_as_string.replace('T', ' ') + ' UTC');
-        console.log(date);
         data.push(moment(date).format("YYYY-MM-DD HH:mm:ss"));
       }
     }
@@ -226,7 +221,6 @@ export class StatisticalReportComponent implements OnInit, OnDestroy, AfterViewI
     //     data: item.rows.sort((a: string[], b: string[]) => new Date(a[0] || '').getTime() - new Date(b[0] || '').getTime())
     //   }
     // });
-    console.log(data);
     return {
       name: "日期时间",
       type: 'line',

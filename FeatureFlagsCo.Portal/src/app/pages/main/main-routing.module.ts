@@ -26,7 +26,6 @@ const routes: Routes = [
       },
       {
         path: 'switch-archive',
-        canActivate: [ArchiveGuard],
         loadChildren: () => import("./switch-archive/switch-archive.module").then(m => m.SwitchArchiveModule),
         data: {
           breadcrumb: '开关存档'

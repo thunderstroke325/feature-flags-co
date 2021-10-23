@@ -77,7 +77,6 @@ export class MetricDrawerComponent implements OnInit {
         this.maintainerList = result;
         this.isMaintainersLoading = false;
       }, error => {
-        console.log("search error");
         this.isMaintainersLoading = false;
       });
     });

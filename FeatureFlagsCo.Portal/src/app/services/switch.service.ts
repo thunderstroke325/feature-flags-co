@@ -160,9 +160,9 @@ export class SwitchService {
   }
 
   // 获取以存档的开关
-  public getArchiveSwitch(id: number): Observable<any> {
+  public getArchiveSwitch(id: number, params: any): Observable<any> {
     const url = environment.url + `/FeatureFlags/GetEnvironmentArchivedFeatureFlags/${id}`;
-    return this.http.get(url);
+    return this.http.get(url, { params });
   }
 
   public getReport(featureFlagId: string, chartQueryTimeSpan: string): Observable<any> {

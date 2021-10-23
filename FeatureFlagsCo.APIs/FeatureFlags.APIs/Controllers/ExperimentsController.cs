@@ -99,7 +99,7 @@ namespace FeatureFlags.APIs.Controllers
                     } 
                     else 
                     {
-                        featureFlags = await _mongoDbFeatureFlagService.SearchActiveAsync(envId, searchText, page, 50);
+                        featureFlags = await _mongoDbFeatureFlagService.GetFeatureFlagsAsync(envId, false, searchText, page, 50);
                         featureFlagIds = featureFlags.Select(f => f.Id).ToList();
                     }
                     

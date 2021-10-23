@@ -59,10 +59,10 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpGet]
         [Route("GetEnvironmentFeatureFlags/{environmentId}")]
-        public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentFeatureFlags(int environmentId)
+        public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentFeatureFlags(int environmentId, [FromQuery] string searchText, [FromQuery] int page = 0, [FromQuery] int pageSize = 300)
         {
             // TODO pagination
-            return await _noSqlDbService.GetEnvironmentFeatureFlagBasicInfoItemsAsync(environmentId, 0, 300);
+            return await _noSqlDbService.GetEnvironmentFeatureFlagBasicInfoItemsAsync(environmentId, searchText, page, pageSize);
         }
 
         [HttpGet]
@@ -82,9 +82,9 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpGet]
         [Route("GetEnvironmentArchivedFeatureFlags/{environmentId}")]
-        public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentArchivedFeatureFlags(int environmentId)
+        public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentArchivedFeatureFlags(int environmentId, [FromQuery] string searchText, [FromQuery] int page = 0, [FromQuery]  int pageSize = 300)
         {
-            return await _noSqlDbService.GetEnvironmentArchivedFeatureFlagBasicInfoItemsAsync(environmentId, 0, 300);
+            return await _noSqlDbService.GetEnvironmentArchivedFeatureFlagBasicInfoItemsAsync(environmentId, searchText, page, pageSize);
         }
 
         [HttpPost]
@@ -263,7 +263,7 @@ namespace FeatureFlags.APIs.Controllers
                 var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
                 if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
                 {
-                    return await _mongoDbFeatureFlagService.SearchActiveAsync(envId, searchText, page, 50);
+                    return await _mongoDbFeatureFlagService.GetFeatureFlagsAsync(envId, false, searchText, page, 50);
                 }
 
                 return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
