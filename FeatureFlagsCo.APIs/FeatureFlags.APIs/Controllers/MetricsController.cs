@@ -43,7 +43,7 @@ namespace FeatureFlags.APIs.Controllers
         private List<string> ValidateMetric(MetricViewModel param) 
         {
             var validateErrors = new List<string>();
-            if (string.IsNullOrWhiteSpace(param.EventName))
+            if (!string.IsNullOrWhiteSpace(param.Id) && string.IsNullOrWhiteSpace(param.EventName))
             {
                 validateErrors.Add("事件名称");
             }
@@ -97,7 +97,6 @@ namespace FeatureFlags.APIs.Controllers
                         Name = param.Name,
                         EnvId = param.EnvId,
                         Description = param.Description,
-                        EventName = param.EventName,
                         EventType = param.EventType,
                         CustomEventTrackOption = param.CustomEventTrackOption,
                         MaintainerUserId = param.MaintainerUserId,
@@ -109,6 +108,19 @@ namespace FeatureFlags.APIs.Controllers
                         UpdatedAt = DateTime.UtcNow
                     };
 
+                    switch (param.EventType) 
+                    {
+                        case EventType.PageView:
+                            metric.EventName = "pageview_" + Guid.NewGuid().ToString();
+                            break;
+                        case EventType.Click:
+                            metric.EventName = "click_" + Guid.NewGuid().ToString();
+                            break;
+                        case EventType.Custom:
+                            metric.EventName = param.EventName;
+                            break;
+                    }
+                        
                     var newMetric = await _metricService.CreateAsync(metric);
                     param.Id = newMetric.Id;
                     return param;

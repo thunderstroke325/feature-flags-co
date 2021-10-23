@@ -217,11 +217,11 @@ export class MetricDrawerComponent implements OnInit {
     this.isLoading = true;
 
     if (eventType === EventType.PageView) {
-      eventName = 'pageview';
+      eventName = this.metric.eventName;
       customEventTrackOption = CustomEventTrackOption.Conversion;
       customEventSuccessCriteria = CustomEventSuccessCriteria.Higher;
     } else if (eventType === EventType.Click) {
-      eventName = 'click';
+      eventName = this.metric.eventName;
       customEventTrackOption = CustomEventTrackOption.Conversion;
       customEventSuccessCriteria = CustomEventSuccessCriteria.Higher;
     } else if (eventType === EventType.Custom) {
