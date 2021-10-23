@@ -47,7 +47,17 @@
                   </ng-container>
                 </nz-tag>
               </td>
-              <td>{{ data.eventName }}</td>
+              <td>
+                <ng-container *ngIf="data.eventType === customEventType">
+                  {{data.eventName}}
+                </ng-container>
+                <ng-container *ngIf="data.eventType === pageViewEventType">
+                  pageview
+                </ng-container>
+                <ng-container *ngIf="data.eventType === clickEventType">
+                 click
+                </ng-container>
+              </td>
               <td>{{ data.maintainerName }}</td>
               <td  style="color: #9A95CC;display: flex;flex-direction: row;align-items: center;justify-content: space-around;">
                 <a (click)="onCreateOrEditClick(data)"><i nz-icon nzType="edit" nzTheme="fill"></i>编辑</a>

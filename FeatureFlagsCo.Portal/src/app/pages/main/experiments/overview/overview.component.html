@@ -55,7 +55,17 @@
             <tr *ngFor="let data of borderedTable.data">
               <td>{{data.featureFlagName}}</td>
               <td>{{data.metric.name}}</td>
-              <td>{{data.metric.eventName}}</td>
+              <td>
+                <ng-container *ngIf="data.metric.eventType === customEventType">
+                  {{data.metric.eventName}}
+                </ng-container>
+                <ng-container *ngIf="data.metric.eventType === pageViewEventType">
+                  pageview
+                </ng-container>
+                <ng-container *ngIf="data.metric.eventType === clickEventType">
+                 click
+                </ng-container>
+              </td>
               <td>
                 <nz-tag nzNoAnimation>
                   <ng-container *ngIf="data.metric.eventType === customEventType">
