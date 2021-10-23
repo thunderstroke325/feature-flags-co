@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { ArchiveGuard } from './archive.guard';
 import { MainComponent } from './main.component';
 import { MainGuard } from './main.guard';
 
