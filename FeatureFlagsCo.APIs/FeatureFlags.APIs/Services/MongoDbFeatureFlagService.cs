@@ -41,7 +41,7 @@ namespace FeatureFlags.APIs.Services
         public List<FeatureFlag> Get() =>
             _featureFlags.Find(p => true).ToList();
 
-        public async Task<List<FeatureFlag>> GetActiveByIds(IEnumerable<string> ids)
+        public async Task<List<FeatureFlag>> GetActiveByIdsAsync(IEnumerable<string> ids)
         {
             return await _featureFlags.Find(p => !p.IsArchived && ids.Contains(p.Id)).ToListAsync();
         }

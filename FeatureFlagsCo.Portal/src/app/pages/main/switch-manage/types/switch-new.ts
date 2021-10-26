@@ -1,5 +1,10 @@
 import { uuidv4 } from "src/app/utils";
 
+export enum FeatureFlagType {
+  Classic = 1,
+  Pretargeted = 2 // 已经预分流，无需我们的开关做用户分流
+}
+
 export interface IUserType {
     id: string;
     keyId?: string;
@@ -23,6 +28,7 @@ export interface IPrequisiteFeatureFlag {
 export interface IFfParams {
     id: string;
     name: string;
+    type: FeatureFlagType;
     keyName: string;
     environmentId: number;
     creatorUserId: string;

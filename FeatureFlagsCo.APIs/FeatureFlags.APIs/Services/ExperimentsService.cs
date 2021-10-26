@@ -62,7 +62,7 @@ namespace FeatureFlags.APIs.Services
         public async Task<IEnumerable<ExperimentMetricSetting>> GetActiveExperimentMetricSettingsAsync(int envId)
         {
             var expts = await _mongoDbExperimentService.GetActiveExperimentsByEnvAsync(envId);
-            var ActiveFeatureFlagIds = (await _mongoDbFeatureFlagService.GetActiveByIds(expts.Select(s => s.FlagId))).Select(ff => ff.Id);
+            var ActiveFeatureFlagIds = (await _mongoDbFeatureFlagService.GetActiveByIdsAsync(expts.Select(s => s.FlagId))).Select(ff => ff.Id);
 
             var exptIds = expts.Where(expt => ActiveFeatureFlagIds.Contains(expt.FlagId)).Select(expt => expt.MetricId);
 

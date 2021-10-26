@@ -467,6 +467,7 @@ namespace FeatureFlags.APIs.Services
                     EnvironmentId = param.EnvironmentId,
                     CreatorUserId = currentUserId,
                     Name = param.Name,
+                    Type = param.Type,
                     Status = param.Status,
                     VariationOptionWhenDisabled = new VariationOption()
                     {

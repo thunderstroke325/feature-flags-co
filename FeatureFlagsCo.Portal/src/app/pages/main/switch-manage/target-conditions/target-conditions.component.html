@@ -11,6 +11,11 @@
           <div id="demo-link" *ngIf="featureDetail?.ff?.keyName === '示例开关'">
             <a target="_blank" href="http://antd.feature-flags.co/user/?envKey={{currentProjectEnv?.envSecret}}">点击查看 Demo</a>
           </div>
+          <ng-container *ngIf="featureDetail?.ff?.type === pretargetedFeatureType">
+            此开关用于进行无埋点的 A/B/n 测试， 适用于客户端已经对用户进行了预分流而无需使用敏捷开关进行用户分流的使用场景.
+          </ng-container>
+
+          <ng-container *ngIf="featureDetail?.ff?.type !== pretargetedFeatureType">
             <div class="item" style="display: flex;flex-direction: row;justify-content: space-between;">
               <div class="item-short">
                 <div class="label">开启或关闭开关</div>
@@ -30,7 +35,7 @@
               </div>
             </div>
             <div class="item" style="margin: 0">
-                <upper-switch [featureList]="featureList" [upperFeatures]="upperFeatures" (search)="onSearchPrequisiteFeatureFlags($event)" (onUpperSwicthChange)="onUpperSwicthChange($event)"></upper-switch>
+              <upper-switch [featureList]="featureList" [upperFeatures]="upperFeatures" (search)="onSearchPrequisiteFeatureFlags($event)" (onUpperSwicthChange)="onUpperSwicthChange($event)"></upper-switch>
             </div>
             <div class="item">
               <nz-collapse [nzBordered]="false" [nzGhost]="true">
@@ -89,6 +94,7 @@
                 </ul>
               </nz-dropdown-menu>
             </div>
+          </ng-container>
         </div>
     </ng-container>
     <ng-template #loadingTem>
