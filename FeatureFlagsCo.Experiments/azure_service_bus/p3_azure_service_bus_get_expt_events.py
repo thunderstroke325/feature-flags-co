@@ -14,7 +14,7 @@ p3_debug_logger.setLevel(logging.INFO)
 
 
 class P3AzureGetExptFFEventsReceiver(AzureReceiver):
-    def handle_body(self, topic, body):
+    def handle_body(self, current_topic, body):
         if type(body) is dict:
             missing_keys = [k for k in P3_FF_EVENT_NECESSAIRE_KEYS if k not in body.keys()]
             if not missing_keys:
@@ -30,17 +30,17 @@ class P3AzureGetExptFFEventsReceiver(AzureReceiver):
                     }
                     list_ff_events = list_ff_events + [dict_to_add]
                     self.redis_set(id, list_ff_events)
-                    p3_debug_logger.info(f'topic: {topic}, FF EVENT: {dict_to_add}')
+                    p3_debug_logger.info(f'topic: {current_topic}, FF EVENT: {dict_to_add}')
                 else:
-                    p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=topic, env=body['EnvId'], ffid=body['FeatureFlagId'], reason='EVENT NOT FOUND'))
+                    p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=current_topic, env=body['EnvId'], ffid=body['FeatureFlagId'], reason='EVENT NOT FOUND'))
             else:
-                p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=topic, reason='UNVALID FORMAT', missing_keys=missing_keys))
+                p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=current_topic, reason='UNVALID FORMAT', missing_keys=missing_keys))
         else:
-            p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=topic, reason='FORBIDDEN INPUT'))
+            p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=current_topic, reason='FORBIDDEN INPUT'))
 
 
 class P3AzureGetExptUserEventsReceiver(AzureReceiver):
-    def handle_body(self, topic, body):
+    def handle_body(self, current_topic, body):
         if type(body) is dict:
             missing_keys = [k for k in P3_USER_EVENT_NECESSAIRE_KEYS if k not in body.keys()]
             if not missing_keys:
@@ -57,10 +57,10 @@ class P3AzureGetExptUserEventsReceiver(AzureReceiver):
                     }
                     list_user_events = list_user_events + [dict_to_add]
                     self.redis_set(id, list_user_events)
-                    p3_debug_logger.info(f'topic: {topic}, USER EVENT: {dict_to_add}')
+                    p3_debug_logger.info(f'topic: {current_topic}, USER EVENT: {dict_to_add}')
                 else:
-                    p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=topic, env=body['EnvironmentId'], user_event=body['EventName'], reason='EVENT NOT FOUND'))
+                    p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=current_topic, env=body['EnvironmentId'], user_event=body['EventName'], reason='EVENT NOT FOUND'))
             else:
-                p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=topic, reason='UNVALID FORMAT', missing_keys=missing_keys))
+                p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=current_topic, reason='UNVALID FORMAT', missing_keys=missing_keys))
         else:
-            p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=topic, reason='FORBIDDEN INPUT'))
+            p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=current_topic, reason='FORBIDDEN INPUT'))

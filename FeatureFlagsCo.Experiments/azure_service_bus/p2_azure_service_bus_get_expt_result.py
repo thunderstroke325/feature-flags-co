@@ -51,7 +51,7 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             list_user_events = [user_event for user_event in list_user_events if datetime.strptime(user_event['TimeStamp'], fmt) <= ExptEndTime]
         return expt, ExptStartTime, ExptEndTime, flag_id, event_name, env_id, list_ff_events, list_user_events
 
-    def __update_redis_with_EndExpt(self, list_ff_events, list_user_events, fmt, ExptStartTime, ExptEndTime, expt_id, expt, topic='q2'):
+    def __update_redis_with_EndExpt(self, list_ff_events, list_user_events, fmt, ExptStartTime, ExptEndTime, expt_id, expt, current_topic='q2'):
         # Time to take decision to wait or not the upcomming event data
         para_delay_reception = 1
         para_wait_processing = 1
@@ -87,14 +87,16 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             flag_active_expts = []
             if dict_flag_acitveExpts:
                 flag_active_expts = [ele for ele in dict_flag_acitveExpts[expt['FlagId']] if ele != expt_id]
-                ops.append(('set', id, flag_active_expts))
+                dict_flag_acitveExpts[expt['FlagId']] = flag_active_expts
+                ops.append(('set', id, dict_flag_acitveExpts))
             # ACTION : Update dict_customEvent_acitveExpts
             id = 'dict_event_act_expts_%s_%s' % (expt['EnvId'], expt['EventName'])
             dict_customEvent_acitveExpts = self.redis_get(id)
             customEvent_active_expts = []
             if dict_customEvent_acitveExpts:
                 customEvent_active_expts = [ele for ele in dict_customEvent_acitveExpts[expt['EventName']] if ele != expt_id]
-                ops.append(('set', id, customEvent_active_expts))
+                dict_customEvent_acitveExpts[expt['EventName']] = customEvent_active_expts
+                ops.append(('set', id, dict_customEvent_acitveExpts))
             # ACTION: Delete in Redis > list_FFevent related to FlagID
             # ACTION: Delete in Redis > list_Exptevent related to EventName
             if dict_flag_acitveExpts and not flag_active_expts:
@@ -105,7 +107,6 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
                 id = '%s_%s' % (expt['EnvId'], expt['EventName'])
                 ops.append(('del', id, None))
                 # TODO move to somewhere
-            self._last_expt_id = ''
 
             # del expt expired time
             dict_from_redis = self.redis_get('dict_expt_last_exec_time')
@@ -114,10 +115,11 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
                 if expt_last_exec_time:
                     dict_from_redis.pop(expt_id, None)
                     ops.append(('set', 'dict_expt_last_exec_time', dict_from_redis))
-            self.redis_pipeline_set_del(ops)  # noqa
-            p2_logger.info('EXPT FINISH', extra=get_custom_properties(topic=topic, expt=expt_id))
+            self.redis_pipeline_set_del(ops)
+            self._last_expt_id = ''
+            p2_logger.info('EXPT FINISH', extra=get_custom_properties(topic=current_topic, expt=expt_id))
 
-    def handle_body(self, topic, body):
+    def handle_body(self, current_topic, body):
         starttime = datetime.now()
         expt_id = body
         value = self.redis_get(expt_id)
@@ -186,9 +188,8 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             else:
                 # experiment has got its deadline
                 # Decision to delete or not event related data
-                topic = get_config_value('p2', 'topic_Q2')
-                self.__update_redis_with_EndExpt(list_ff_events, list_user_events, fmt, ExptStartTime, ExptEndTime, expt_id, expt, topic)
+                self.__update_redis_with_EndExpt(list_ff_events, list_user_events, fmt, ExptStartTime, ExptEndTime, expt_id, expt, current_topic)
             endtime = datetime.now()
             delta = endtime - starttime
             p2_debug_logger.info(f'#########p2 processing time in seconds: {delta.total_seconds()}#########')
-            p2_logger.info('EXPT HEALTHY', extra=get_custom_properties(topic=topic, expt=expt_id))
+            p2_logger.info('EXPT HEALTHY', extra=get_custom_properties(topic=current_topic, expt=expt_id))
