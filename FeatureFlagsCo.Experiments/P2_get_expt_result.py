@@ -1,16 +1,14 @@
-from time import sleep
-from config.config_handling import get_config_value
-import json
 import logging
-import os
-import sys
+import math
+from datetime import datetime, timedelta
+
 import numpy as np
+import pandas as pd
 import scipy as sp
 from scipy import stats
-from datetime import datetime, timedelta
-import math
-import pandas as pd
-from rabbitmq.rabbitmq import RabbitMQConsumer, RabbitMQSender
+
+from config.config_handling import get_config_value
+from rabbitmq.rabbitmq import RabbitMQConsumer
 
 logger = logging.getLogger("P2_get_expt_result")
 logger.setLevel(logging.INFO)
@@ -38,10 +36,10 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         a = 1.0 * np.array(data)
         n = len(a)
         m, se = np.mean(a), sp.stats.sem(a)
-        h = se * sp.stats.t.ppf((1 + confidence) / 2., n-1)
-        return m, m-h, m+h
+        h = se * sp.stats.t.ppf((1 + confidence) / 2., n - 1)
+        return m, m - h, m + h
 
-     # cal Expt Result from list of FlagsEvents and list of CustomEvents:
+    # cal Expt Result from list of FlagsEvents and list of CustomEvents:
     def __calc_customevent_conversion(self, expt, list_ff_events, list_user_events):
         # User's flags event aggregation, if not empty
         if list_ff_events:
@@ -127,7 +125,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
             for item in dict_var_occurence.keys():
                 if item in dict_expt_occurence.keys():
                     dist_item = [1 for i in range(dict_expt_occurence[item])] + [
-                        0 for i in range(dict_var_occurence[item]-dict_expt_occurence[item])]
+                        0 for i in range(dict_var_occurence[item] - dict_expt_occurence[item])]
                     rate, min, max = self.__mean_confidence_interval(
                         dist_item)
                     if math.isnan(min) or math.isnan(max):
@@ -139,7 +137,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                     output.append({'variation': item,
                                    'conversion': dict_expt_occurence[item],
                                    'uniqueUsers': dict_var_occurence[item],
-                                   'conversionRate':   round(rate, 3),
+                                   'conversionRate': round(rate, 3),
                                    'changeToBaseline': -1,
                                    'confidenceInterval': confidenceInterval,
                                    'pValue': -1,
@@ -151,7 +149,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                     output.append({'variation': item,
                                    'conversion': 0,
                                    'uniqueUsers': dict_var_occurence[item],
-                                   'conversionRate':   0,
+                                   'conversionRate': 0,
                                    'changeToBaseline': -1,
                                    'confidenceInterval': [-1, -1],
                                    'pValue': -1,
@@ -165,12 +163,12 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                 dict_var_occurence[var_baseline]
             # Preprare Baseline data sample distribution for Pvalue Calculation
             dist_baseline = [1 for i in range(dict_expt_occurence[var_baseline])] + [
-                0 for i in range(dict_var_occurence[var_baseline] -
-                                 dict_expt_occurence[var_baseline])]
+                0 for i in range(dict_var_occurence[var_baseline]
+                                 - dict_expt_occurence[var_baseline])]
             for item in dict_var_occurence.keys():
                 if item in dict_expt_occurence.keys():
                     dist_item = [1 for i in range(dict_expt_occurence[item])] + [
-                        0 for i in range(dict_var_occurence[item]-dict_expt_occurence[item])]
+                        0 for i in range(dict_var_occurence[item] - dict_expt_occurence[item])]
                     rate, min, max = self.__mean_confidence_interval(
                         dist_item)
                     if math.isnan(min) or math.isnan(max):
@@ -179,11 +177,11 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                         confidenceInterval = [0 if round(min, 2) < 0 else round(
                             min, 2), 1 if round(max, 2) > 1 else round(max, 2)]
                     pValue = round(
-                        1-stats.ttest_ind(dist_baseline, dist_item).pvalue, 2)
+                        1 - stats.ttest_ind(dist_baseline, dist_item).pvalue, 2)
                     output.append({'variation': item,
                                    'conversion': dict_expt_occurence[item],
                                    'uniqueUsers': dict_var_occurence[item],
-                                   'conversionRate':   round(rate, 3),
+                                   'conversionRate': round(rate, 3),
                                    'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
                                    'confidenceInterval': confidenceInterval,
                                    'pValue': -1 if math.isnan(pValue) else pValue,
@@ -196,7 +194,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                     output.append({'variation': item,
                                    'conversion': 0,
                                    'uniqueUsers': dict_var_occurence[item],
-                                   'conversionRate':   0,
+                                   'conversionRate': 0,
                                    'changeToBaseline': -1,
                                    'confidenceInterval': [-1, -1],
                                    'pValue': -1,
@@ -206,7 +204,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                    })
             # Get winner variation
             listValid = [output.index(
-                item) for item in output if item['isInvalid'] == False]
+                item) for item in output if not item['isInvalid']]
             # If at least one variation is valid:
             if len(listValid) != 0:
                 dictValid = {}
@@ -222,10 +220,10 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         # result to send to rabbitmq
         output_to_mq = {
             'ExperimentId': expt['ExptId'],
-            'EventType': expt.get('EventType',None),
-            'CustomEventTrackOption': expt.get('CustomEventTrackOption',None),
-            'CustomEventUnit' : expt.get('CustomEventUnit',None),
-            'CustomEventSuccessCriteria': expt.get('CustomEventSuccessCriteria',None),
+            'EventType': expt.get('EventType', None),
+            'CustomEventTrackOption': expt.get('CustomEventTrackOption', None),
+            'CustomEventUnit' : expt.get('CustomEventUnit', None),
+            'CustomEventSuccessCriteria': expt.get('CustomEventSuccessCriteria', None),
             'IterationId': expt['IterationId'],
             'StartTime': expt['StartExptTime'],
             'EndTime': datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f"),
@@ -233,7 +231,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
         }
         return output_to_mq
 
-    def __calc_customevent_numeric(self, expt,list_ff_events, list_user_events):
+    def __calc_customevent_numeric(self, expt, list_ff_events, list_user_events):
         # User's flags event aggregation, if not empty
         if list_ff_events:
             df_ff_events = pd.DataFrame(list_ff_events)
@@ -302,15 +300,15 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                         dict_var_listValues[it] = [metricValue]
                     else:
                         dict_var_listValues[it] = dict_var_listValues[it] + [metricValue]
-                        
+
         logger.info('dictionary of expt var:occurence')
-        logger.info(dict_expt_occurence)    
+        logger.info(dict_expt_occurence)
         output = []
         for var in expt['Variations']:
             if var not in dict_var_occurence.keys():
                 output.append({'variation': var,
                                'totalEvents': -1,
-                               'average':   -1,
+                               'average': -1,
                                'changeToBaseline': -1,
                                'confidenceInterval': [-1, -1],
                                'pValue': -1,
@@ -330,11 +328,11 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                         confidenceInterval = [-1, -1]
                     else:
                         confidenceInterval = [0 if round(min, 3) < 0 else round(
-                            min, 3),round(max, 3)]
+                            min, 3), round(max, 3)]
                     pValue = -1
                     output.append({'variation': item,
                                    'totalEvents': len(dict_var_listValues[item]),
-                                   'average':   round(rate, 3),
+                                   'average': round(rate, 3),
                                    'changeToBaseline': -1,
                                    'confidenceInterval': confidenceInterval,
                                    'pValue': -1,
@@ -345,7 +343,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                 else:
                     output.append({'variation': item,
                                    'totalEvents': 0,
-                                   'average':   -1,
+                                   'average': -1,
                                    'changeToBaseline': -1,
                                    'confidenceInterval': [-1, -1],
                                    'pValue': -1,
@@ -355,7 +353,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                    'isInvalid': True
                                    })
         else:
-            BaselineRate = sum(dict_var_listValues[var_baseline])/len(dict_var_listValues[var_baseline])
+            BaselineRate = sum(dict_var_listValues[var_baseline]) / len(dict_var_listValues[var_baseline])
             # Preprare Baseline data sample distribution for Pvalue Calculation
             dist_baseline = dict_var_listValues[var_baseline]
             for item in dict_var_occurence.keys():
@@ -367,12 +365,12 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                         confidenceInterval = [-1, -1]
                     else:
                         confidenceInterval = [0 if round(min, 3) < 0 else round(
-                            min, 3),round(max, 3)]
+                            min, 3), round(max, 3)]
                     pValue = round(
-                        1-stats.ttest_ind(dist_baseline, dist_item).pvalue, 3)
+                        1 - stats.ttest_ind(dist_baseline, dist_item).pvalue, 3)
                     output.append({'variation': item,
                                    'totalEvents': len(dict_var_listValues[item]),
-                                   'average':   round(rate, 3),
+                                   'average': round(rate, 3),
                                    'changeToBaseline': round(rate, 3) - round(BaselineRate, 3),
                                    'confidenceInterval': confidenceInterval,
                                    'pValue': -1 if math.isnan(pValue) else pValue,
@@ -384,7 +382,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                 else:
                     output.append({'variation': item,
                                    'totalEvents': 0,
-                                   'average':   -1,
+                                   'average': -1,
                                    'changeToBaseline': -1,
                                    'confidenceInterval': [-1, -1],
                                    'pValue': -1,
@@ -394,7 +392,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                                    })
             # Get winner variation
             listValid = [output.index(
-                item) for item in output if item['isInvalid'] == False]
+                item) for item in output if not item['isInvalid']]
             # If at least one variation is valid:
             if len(listValid) != 0:
                 dictValid = {}
@@ -413,7 +411,7 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
                         dictValid.items(), key=lambda item: item[1])][0]
                     # when baseline has the highest conversion rate
                     if output[minRateIndex]['changeToBaseline'] < 0:
-                        output[minRateIndex]['isWinner'] = True      
+                        output[minRateIndex]['isWinner'] = True
                 else:
                     logger.info('ERROR : Non-Recognised CustomEventSuccessCriteria')
         logger.info('ExptResults:')
@@ -566,18 +564,18 @@ class P2GetExptResultConsumer(RabbitMQConsumer):
             if "EventType" in expt.keys():
                 if expt["EventType"] == 1:
                     if expt['CustomEventTrackOption'] == 1 :
-                        output_to_mq = self.__calc_customevent_conversion(expt,list_ff_events, list_user_events)
+                        output_to_mq = self.__calc_customevent_conversion(expt, list_ff_events, list_user_events)
                     elif expt['CustomEventTrackOption'] == 2 :
-                        output_to_mq = self.__calc_customevent_numeric(expt,list_ff_events, list_user_events)
+                        output_to_mq = self.__calc_customevent_numeric(expt, list_ff_events, list_user_events)
                     else:
                         logger.info('ERROR: Non-Recognised CustomEventTrackOption')
                 elif expt["EventType"] == 2 or expt["EventType"] == 3 :
-                    output_to_mq = self.__calc_customevent_conversion(expt,list_ff_events, list_user_events)
+                    output_to_mq = self.__calc_customevent_conversion(expt, list_ff_events, list_user_events)
                 else:
                     logger.info('ERROR: Non-Recognised Event Type')
             else:
                 # Compatible with preview experiments
-                output_to_mq = self.__calc_customevent_conversion(expt,list_ff_events, list_user_events)
+                output_to_mq = self.__calc_customevent_conversion(expt, list_ff_events, list_user_events)
 
             # send result to Q3
             try:

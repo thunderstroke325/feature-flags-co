@@ -1,5 +1,6 @@
 numpy
 scipy
 pandas
-pika
 redis
+azure-servicebus
+opencensus-ext-azure

@@ -1,13 +1,13 @@
-from config.config_handling import get_config_value
-import json
-import os
-import sys
 import logging
 
-from rabbitmq.rabbitmq import RabbitMQConsumer, RabbitMQSender
+from config.config_handling import get_config_value
+from rabbitmq.rabbitmq import RabbitMQConsumer
 
 logger = logging.getLogger("p1_get_expt_recording_info")
 logger.setLevel(logging.INFO)
+
+NECESSAIRE_KEYS = ['ExptId', 'IterationId', 'EnvId', 'FlagId', 'BaselineVariation', 'Variations', 'EventName',
+                   'EventType', 'CustomEventTrackOption', 'CustomEventSuccessCriteria', 'CustomEventUnit', 'StartExptTime', 'EndExptTime']
 
 
 class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
@@ -33,37 +33,21 @@ class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
         return is_valid
 
     def handle_body(self, body, **properties):
-        # Check Q1 format
-        example_Q1_format = {
-                                "ExptId":"exp1",
-                                "IterationId":"1",
-                                "EnvId":"111",
-                                "FlagId":"FF__11__11__111__example",
-                                "BaselineVariation":"1",
-                                "Variations":["1","2","3"],
-                                "EventName":"exampleName",
-                                "EventType": 1,
-                                "CustomEventTrackOption": 2,
-                                "CustomEventSuccessCriteria": 1,
-                                "CustomEventUnit": "Unit",
-                                "StartExptTime":"2021-01-01T01:00:00.123456",
-                                "EndExptTime":""
-                            }
         if type(body) is dict:
-            if example_Q1_format.keys() == body.keys():
+            if NECESSAIRE_KEYS == body.keys():
                 # Deal with EndExptTime case
                 key, end, value = body.get('ExptId', None), body.get(
                     'EndExptTime', None), body
                 if end:
                     self.redis_set(key, value)
-                    logger.info('p1########p1 gets %r#########' % body)  
-                else: 
-                    # Continue format check             
-                    is_valid_ExptId = self.__check_format(body,'ExptId', str)
-                    is_valid_EventType= self.__check_format(body,'EventType', int, [1,2,3] )
-                    is_valid_CustomEventTrackOption= self.__check_format(body,'CustomEventTrackOption', int, [1,2] )
-                    is_valid_CustomEventSuccessCriteria= self.__check_format(body,'CustomEventSuccessCriteria', int, [1,2] )
-                    check_pass = ( is_valid_ExptId and is_valid_EventType and is_valid_CustomEventTrackOption and is_valid_CustomEventSuccessCriteria)
+                    logger.info('p1########p1 gets %r#########' % body)
+                else:
+                    # Continue format check
+                    is_valid_ExptId = self.__check_format(body, 'ExptId', str)
+                    is_valid_EventType = self.__check_format(body, 'EventType', int, [1, 2, 3])
+                    is_valid_CustomEventTrackOption = self.__check_format(body, 'CustomEventTrackOption', int, [1, 2])
+                    is_valid_CustomEventSuccessCriteria = self.__check_format(body, 'CustomEventSuccessCriteria', int, [1, 2])
+                    check_pass = (is_valid_ExptId and is_valid_EventType and is_valid_CustomEventTrackOption and is_valid_CustomEventSuccessCriteria)
                     if check_pass:
                         key, end, value = body.get('ExptId', None), body.get(
                             'EndExptTime', None), body
@@ -83,7 +67,6 @@ class P1GetExptRecordingInfoConsumer(RabbitMQConsumer):
                         logger.info('########p1 send %r to Q2########' % key)
                     else :
                         logger.info("ERROR: Invalid Q1 Format")
-
 
 
 if __name__ == '__main__':
