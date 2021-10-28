@@ -40,8 +40,8 @@
                   </tr>
                   </thead>
                   <tbody>
-                  <tr *ngFor="let switch of basicTable.data" class="table-tr-pointer">
-                    <td>{{switch.name}}</td>
+                  <tr *ngFor="let switch of basicTable.data">
+                    <td style="cursor: pointer;" (click)="onIntoSwitchDetail(switch)">{{switch.name}}</td>
                     <td>
                       <nz-switch [ngModel]="switch.status === 'Enabled'" (click)="onChangeSwitchStatus(switch)" nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
                     </td>

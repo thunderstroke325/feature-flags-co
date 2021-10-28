@@ -12,46 +12,18 @@ export class UserDetailComponent implements OnInit {
 
   userId: string;
 
-  user;
-
   defaultKeys = ['keyId', 'name', 'email'];
 
-  get list() {
-    if (!this.user) return [];
-    if (!this.user.customizedProperties) {
-      return this.defaultKeys.map(key => ({
-        name: key,
-        value: this.user[key]
-      }));
-    }
-    return this.user.customizedProperties.concat(
-      this.defaultKeys.map(key => ({
-        name: key,
-        value: this.user[key]
-      }))
-    );
-  }
+  propertyList = [];
 
   constructor(
-    private route: ActivatedRoute,
-    private userService: UserService
-  ) { }
+    private route: ActivatedRoute
+  ) {
+   }
 
   ngOnInit(): void {
     this.listenerResolveData();
-    // this.userId = this.route.snapshot.paramMap.get('id');
-    // this.fetchUserDetail();
   }
-
-  // fetchUserDetail() {
-  //   this.userService.getEnvUserDetail({ id: this.userId })
-  //     .pipe()
-  //     .subscribe(
-  //       res => {
-  //         this.user = res;
-  //       }
-  //     );
-  // }
 
   listenerResolveData() {
     this.route.data
@@ -59,7 +31,22 @@ export class UserDetailComponent implements OnInit {
         map(res => res.userDetail)
       )
       .subscribe(res => {
-        this.user = res;
+        const user = res;
+        if (res) {
+          if (!res.customizedProperties) {
+            this.propertyList = this.defaultKeys.map(key => ({
+              name: key,
+              value: user[key]
+            }));
+          } else {
+            this.propertyList = [...user.customizedProperties,
+              ...this.defaultKeys.map(key => ({
+                name: key,
+                value: user[key]
+              }))
+            ];
+          }
+        }
       });
   }
 }
