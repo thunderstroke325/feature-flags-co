@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IUserType } from '../../types/switch-new';
@@ -8,7 +8,7 @@ import { IUserType } from '../../types/switch-new';
   templateUrl: './target-user.component.html',
   styleUrls: ['./target-user.component.less']
 })
-export class TargetUserComponent {
+export class TargetUserComponent implements OnInit {
 
   private inputs = new Subject<any>();
   public compareWith: (obj1: IUserType, obj2: IUserType) => boolean = (obj1: IUserType, obj2: IUserType) => {
@@ -27,7 +27,7 @@ export class TargetUserComponent {
   @Input("userList")
   set list(data: IUserType[]) {
     this.isLoading = false;
-    this.userList = data;
+    this.userList = [...data];
   }
 
   @Output() search = new EventEmitter<string>();    // 搜索用户
@@ -43,6 +43,12 @@ export class TargetUserComponent {
     ).subscribe(e => {
       this.search.next(e);
     });
+  }
+
+  ngOnInit(): void {
+    if (!this.userList || this.userList.length === 0) {
+      this.userList = [...this.selectedUserDetailList || []]
+    }
   }
 
   // 搜索用户

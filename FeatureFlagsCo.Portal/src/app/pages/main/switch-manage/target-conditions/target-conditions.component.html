@@ -41,14 +41,14 @@
               <nz-collapse [nzBordered]="false" [nzGhost]="true">
                 <ng-template #collapseTitle><span style="font-size: 13px;font-weight: bold;">目标用户</span></ng-template>
                 <nz-collapse-panel [nzHeader]="collapseTitle" [nzActive]="targetIndividualsActive">
-                <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
-                  <target-user [type]="variationOption.variationValue"
-                                [tipIdx]="i"
-                                [userList]="userList"
-                                [selectedUserDetailList]="targetIndividuals[variationOption.localId]"
-                                (search)="onSearchUser($event)"
-                                (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)"></target-user>
-                </div>
+                  <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
+                    <target-user [type]="variationOption.variationValue"
+                                  [tipIdx]="i"
+                                  [userList]="userList"
+                                  [selectedUserDetailList]="targetIndividuals[variationOption.localId]"
+                                  (search)="onSearchUser($event)"
+                                  (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)"></target-user>
+                  </div>
                 </nz-collapse-panel>
               </nz-collapse>
             </div>
