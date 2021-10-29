@@ -6,6 +6,7 @@ import { SwitchService } from 'src/app/services/switch.service';
 import { FeatureFlagType, IFfParams } from '../types/switch-new';
 import { AccountService } from 'src/app/services/account.service';
 import {NzTableQueryParams} from "ng-zorro-antd/table";
+import { encodeURIComponentFfc } from 'src/app/utils';
 
 @Component({
   selector: 'index',
@@ -144,7 +145,7 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
 
   // 路由跳转
   private toRouter(id: string) {
-    this.router.navigateByUrl("/switch-manage/condition/" + encodeURIComponent(id));
+    this.router.navigateByUrl("/switch-manage/condition/" + encodeURIComponentFfc(id));
   }
 
   // 转换本地时间

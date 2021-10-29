@@ -21,3 +21,7 @@ export function getPercentageFromRolloutPercentageArray(arr: number[]): number {
   const diff = arr[1] - arr[0];
   return Number((Number(diff.toFixed(2)) * 100).toFixed(0));
 }
+
+export function encodeURIComponentFfc(url: string): string {
+  return encodeURIComponent(url).replace(/\(/g, "%28").replace(/\)/g, '%29');
+}
