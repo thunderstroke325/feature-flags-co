@@ -80,7 +80,7 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             ops = []
             # del expt
             ops.append(('del', expt_id, None))
-            # TODO move to somewhere
+
             # ACTION : Update dict_flag_acitveExpts
             id = 'dict_ff_act_expts_%s_%s' % (expt['EnvId'], expt['FlagId'])
             dict_flag_acitveExpts = self.redis_get(id)
@@ -88,7 +88,13 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             if dict_flag_acitveExpts:
                 flag_active_expts = [ele for ele in dict_flag_acitveExpts[expt['FlagId']] if ele != expt_id]
                 dict_flag_acitveExpts[expt['FlagId']] = flag_active_expts
-                ops.append(('set', id, dict_flag_acitveExpts))
+                if flag_active_expts:
+                    ops.append(('set', id, dict_flag_acitveExpts))
+                else:
+                    # ACTION: Delete in Redis > list_FFevent related to FlagI
+                    ops.append(('del', id, None))
+                    events_id = '%s_%s' % (expt['EnvId'], expt['FlagId'])
+                    ops.append(('del', events_id, None))
             # ACTION : Update dict_customEvent_acitveExpts
             id = 'dict_event_act_expts_%s_%s' % (expt['EnvId'], expt['EventName'])
             dict_customEvent_acitveExpts = self.redis_get(id)
@@ -96,17 +102,13 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             if dict_customEvent_acitveExpts:
                 customEvent_active_expts = [ele for ele in dict_customEvent_acitveExpts[expt['EventName']] if ele != expt_id]
                 dict_customEvent_acitveExpts[expt['EventName']] = customEvent_active_expts
-                ops.append(('set', id, dict_customEvent_acitveExpts))
-            # ACTION: Delete in Redis > list_FFevent related to FlagID
-            # ACTION: Delete in Redis > list_Exptevent related to EventName
-            if dict_flag_acitveExpts and not flag_active_expts:
-                id = '%s_%s' % (expt['EnvId'], expt['FlagId'])
-                ops.append(('del', id, None))
-                # TODO move to somewhere
-            if dict_customEvent_acitveExpts and not customEvent_active_expts:
-                id = '%s_%s' % (expt['EnvId'], expt['EventName'])
-                ops.append(('del', id, None))
-                # TODO move to somewhere
+                if customEvent_active_expts:
+                    ops.append(('set', id, dict_customEvent_acitveExpts))
+                else:
+                    # ACTION: Delete in Redis > list_Exptevent related to EventName
+                    ops.append(('del', id, None))
+                    events_id = '%s_%s' % (expt['EnvId'], expt['EventName'])
+                    ops.append(('del', events_id, None))
 
             # del expt expired time
             dict_from_redis = self.redis_get('dict_expt_last_exec_time')
