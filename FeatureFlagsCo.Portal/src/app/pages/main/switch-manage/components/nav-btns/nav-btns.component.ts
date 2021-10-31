@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { btnsConfig } from './btns';
 import { FfcService } from 'src/app/services/ffc.service';
 import { environment } from './../../../../../../environments/environment';
+import { encodeURIComponentFfc } from 'src/app/utils';
 
 @Component({
   selector: 'app-nav-btns',
@@ -48,8 +49,9 @@ export class NavBtnsComponent {
   onCheck(id: string) {
     let url = `/switch-manage/${id}`;
     if(this.id) {
-      url = `${url}/${encodeURIComponent(this.id)}`;
+      url = `${url}/${encodeURIComponentFfc(this.id)}`;
     }
     this.router.navigateByUrl(url);
   }
 }
+

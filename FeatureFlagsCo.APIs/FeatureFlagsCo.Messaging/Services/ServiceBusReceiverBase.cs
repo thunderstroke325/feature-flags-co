@@ -12,13 +12,13 @@ namespace FeatureFlagsCo.Messaging.Services
 
         private readonly ServiceBusClient _client;
         private ServiceBusProcessor _processor;
+        protected IConfiguration Configuration { get; set; }
 
-        public ServiceBusReceiverBase(
-            IConfiguration configuration
-            )
+        public ServiceBusReceiverBase(IConfiguration configuration)
         {
-            _client = new ServiceBusClient(configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value);
-
+            Configuration = configuration;
+            _client = new ServiceBusClient(Configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value);
+            
             Task.Run(async () =>
             {
                 await StartProcessAsync(_client);
@@ -27,7 +27,11 @@ namespace FeatureFlagsCo.Messaging.Services
 
         public async Task StartProcessAsync(ServiceBusClient client)
         {
-            _processor = client.CreateProcessor(TopicPath, "standard", new ServiceBusProcessorOptions());
+            _processor = client.CreateProcessor(TopicPath, "standard", new ServiceBusProcessorOptions()
+            {
+                // TODO: this conf will be put in mysettings
+                PrefetchCount = 5
+            });
             try
             {
                 // add handler to process messages

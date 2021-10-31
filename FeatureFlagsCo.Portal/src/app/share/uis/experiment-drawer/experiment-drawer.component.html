@@ -1,4 +1,4 @@
-<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzWidth]="500" (nzOnClose)="onClose()">
+<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzWidth]="500" [nzFooter]="confirm" (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <div class="drawer-layout">
       <form nz-form [formGroup]="experimentForm" (ngSubmit)="doSubmit()" nzLayout="vertical" class="layout-form">
@@ -71,9 +71,12 @@
             </nz-input-group>
           </nz-form-control>
         </nz-form-item>
-        <button nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">{{'创建'}}</button>
+
       </form>
     </div>
   </ng-container>
+  <ng-template #confirm>
+    <button (click)="doSubmit()" style="float: right" nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">{{'创建'}}</button>
+  </ng-template>
 </nz-drawer>
 

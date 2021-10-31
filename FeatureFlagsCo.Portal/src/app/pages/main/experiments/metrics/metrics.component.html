@@ -28,7 +28,7 @@
             <th>事件类型</th>
             <th>事件名称</th>
             <th>维护人</th>
-            <th nzAlign="center">编辑</th>
+            <th nzAlign="center">操作</th>
           </tr>
         </thead>
         <tbody>
@@ -47,10 +47,29 @@
                   </ng-container>
                 </nz-tag>
               </td>
-              <td>{{ data.eventName }}</td>
+              <td>
+                <ng-container *ngIf="data.eventType === customEventType">
+                  {{data.eventName}}
+                </ng-container>
+                <ng-container *ngIf="data.eventType === pageViewEventType">
+                  pageview
+                </ng-container>
+                <ng-container *ngIf="data.eventType === clickEventType">
+                 click
+                </ng-container>
+              </td>
               <td>{{ data.maintainerName }}</td>
-              <td (click)="onCreateOrEditClick(data)" style="color: #9A95CC;text-align: center;">
-                <a><i nz-icon nzType="edit" nzTheme="fill"></i>编辑</a>
+              <td  style="color: #9A95CC;display: flex;flex-direction: row;align-items: center;justify-content: space-around;">
+                <a (click)="onCreateOrEditClick(data)"><i nz-icon nzType="edit" nzTheme="fill"></i>编辑</a>
+                <a nz-popconfirm nzPopconfirmTitle="确定删除吗?"
+                            nzPopconfirmPlacement="bottomRight"
+                            [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                            (nzOnConfirm)="onDeleteClick(data, errorMsgsTpl)" [nzIcon]="iconTplDelete">
+                          <i style="color: #9A95CC;" nz-icon nzType="delete" nzTheme="fill"></i>
+                </a>
+                <ng-template #iconTplDelete>
+                  <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+                </ng-template>
               </td>
             </tr>
         </tbody>
@@ -58,5 +77,10 @@
     </div>
   </nz-spin>
 </div>
-
+<ng-template #errorMsgsTpl>
+  <i nz-icon nzType="close-circle" nzTheme="outline" style="color: #ff4d4f"></i><span>{{errorMsgTitle}}</span>
+  <ul style="list-style-type:none;padding:0;margin:5px 0">
+    <li style="text-align: center;" *ngFor="let msg of errorMsgs">{{msg}}</li>
+  </ul>
+</ng-template>
 <app-metric-drawer [visible]="detailViewVisible" (close)="onDetailViewClosed($event)" [metric]="currentMetric"></app-metric-drawer>

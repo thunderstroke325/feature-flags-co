@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
@@ -112,6 +112,27 @@ export class MetricsComponent implements OnInit, OnDestroy {
   onCreateOrEditClick(metric?: IMetric) {
     this.currentMetric = metric || { envId: this.currentProjectEnv.envId, eventType: EventType.Custom, customEventTrackOption: CustomEventTrackOption.Conversion, customEventSuccessCriteria: CustomEventSuccessCriteria.Higher } as IMetric;
     this.detailViewVisible = true;
+  }
+
+
+  errorMsgTitle: string;
+  errorMsgs: string[] = [];
+  onDeleteClick(metric: IMetric, tpl: TemplateRef<void>) {
+    this.isLoading = true;
+    this.metricService.deleteMetric(this.currentProjectEnv.envId, metric.id).subscribe(res => {
+      this.metricList = this.metricList.filter(m => metric.id !== m.id);
+      this.isLoading = false;
+      this.message.success("成功删除 Metric!");
+    }, err => {
+      this.isLoading = false;
+      if (!!err?.error?.messages) {
+        this.errorMsgTitle = '该 Metric 在以下开关的实验中被使用，请先删除实验';
+        this.errorMsgs = err?.error?.messages || [];
+        this.message.create('', tpl, { nzDuration: 5000 });
+      } else {
+        this.message.error('操作失败，请稍后重试！');
+      }
+  });
   }
 
   onDetailViewClosed(data: any) {

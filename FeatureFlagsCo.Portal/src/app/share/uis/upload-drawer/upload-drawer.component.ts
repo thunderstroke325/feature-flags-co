@@ -60,7 +60,6 @@ export class UploadDrawerComponent implements OnInit {
       this.isUploading = true;
     } else {
       this.isUploading = false;
-      console.log(info.file, info.fileList);
 
       if (info.file.status === 'done') {
         this.message.success(`${info.file.name} 文件上传成功`);

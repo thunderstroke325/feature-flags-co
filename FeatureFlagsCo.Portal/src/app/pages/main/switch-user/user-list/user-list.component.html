@@ -75,7 +75,7 @@
                 </thead>
                 <tbody style="width: calc(100% - 200px);">
                   <tr *ngFor="let user of basicTable.data" class="table-tr-pointer">
-                    <td>{{ user.name }}</td>
+                    <td (click)="onRowClick(user)">{{ user.name }}</td>
                     <td>{{ user.keyId }}</td>
                     <td>{{ user.email }}</td>
                     <td style="text-align: center"><a nz-button nzType="link" style="color: #9A95CC;" (click)="onRowClick(user)">详情</a></td>

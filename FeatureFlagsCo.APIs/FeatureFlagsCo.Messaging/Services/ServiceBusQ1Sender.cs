@@ -7,11 +7,15 @@ using System.Threading.Tasks;
 
 namespace FeatureFlagsCo.Messaging.Services
 {
-    public class ServiceBusQ1Sender: ServiceBusTopicSenderBase
+    public class ServiceBusQ1Sender : ServiceBusTopicSenderBase
     {
-        protected override string TopicPath { get { return "q1"; } }
+        protected override string TopicPath
+        {
+            get { return Configuration.GetSection("MySettings").GetSection("Q1Name").Value; }
+        }
 
-        public ServiceBusQ1Sender(IConfiguration configuration, ILogger<ServiceBusQ1Sender> logger) : base(configuration, logger)
+        public ServiceBusQ1Sender(IConfiguration configuration, ILogger<ServiceBusQ1Sender> logger) : base(
+            configuration, logger)
         {
         }
     }

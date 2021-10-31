@@ -9,6 +9,7 @@ namespace FeatureFlags.APIs.ViewModels.FeatureFlagZeroCodeSetting
     public class FeatureFlagZeroCodeSettingViewModel
     {
         public string FeatureFlagKey { get; set; }
+        public FeatureFlagType FeatureFlagType { get; set; }
         public List<CssSelectorItemViewModel> Items { get; set; }
     }
 
@@ -16,6 +17,7 @@ namespace FeatureFlags.APIs.ViewModels.FeatureFlagZeroCodeSetting
     {
         public string CssSelector { get; set; }
         public string VariationValue { get; set; }
+        public int VariationOptionId { get; set; }
         public string Url { get; set; }
     }
 }

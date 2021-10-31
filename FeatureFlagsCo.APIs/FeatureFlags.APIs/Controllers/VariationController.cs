@@ -25,17 +25,80 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IDistributedCache _redisCache;
         private readonly IVariationService _variationService;
         private readonly MessagingService _messagingService;
+        private readonly MongoDbFeatureFlagService _mongoDbFeatureFlagService;
 
         public VariationController(
             ILogger<VariationController> logger, 
             IDistributedCache redisCache,
             IVariationService variationService,
+            MongoDbFeatureFlagService mongoDbFeatureFlagService,
             MessagingService messagingService)
         {
             _logger = logger;
             _redisCache = redisCache;
             _variationService = variationService;
             _messagingService = messagingService;
+            _mongoDbFeatureFlagService = mongoDbFeatureFlagService;
+        }
+
+        [HttpPost]
+        [Route("SendUserVariation")]
+        public async Task<dynamic> SendUserVariation([FromBody] SendUserVariationViewModel param) 
+        {
+            if (param == null)
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("Parameter incorrect");
+            }
+            else if (string.IsNullOrWhiteSpace(param.EnvironmentSecret))
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("EnvironmentSecret shouldn't be empty");
+            }
+            else if (string.IsNullOrWhiteSpace(param.FeatureFlagKeyName))
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("FeatureFlagKeyName shouldn't be empty");
+            }
+            else if (string.IsNullOrWhiteSpace(param.FFUserKeyId))
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotAcceptable;
+                return new JsonResult("FFUserKeyId shouldn't be empty");
+            }
+            try
+            {
+                var ffIdVM = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
+                var ffs = await _mongoDbFeatureFlagService.GetActiveByIdsAsync(new List<string> { ffIdVM.FeatureFlagId });
+                VariationOption variation = null;
+
+                if (ffs != null && ffs.Count == 1)
+                {
+                    var ff = ffs[0];
+                    variation = ff.VariationOptions.Find(v => v.LocalId.Equals(param.VariationOptionId));
+                }
+
+                if (variation == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Feature Flag doesn't exist, please verify your featureFlagKeyName" });
+                }
+
+                try
+                {
+                    SendToRabbitMQ(param, ffIdVM, new Tuple<VariationOption, bool>(variation, true));
+                }
+                catch (Exception exp)
+                {
+                    _logger.LogError(exp, "Post /Variation/GetMultiOptionVariation:SendToRabbitMQ ; Body: " + JsonConvert.SerializeObject(param));
+                }
+
+                return new JsonResult(variation.VariationValue);
+            }
+            catch (Exception exp)
+            {
+                _logger.LogError(exp, "Post /Variation/SendUserVariation ; Body: " + JsonConvert.SerializeObject(param));
+                Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                return new JsonResult(exp.Message);
+            }
         }
 
         [HttpPost]

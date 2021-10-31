@@ -41,8 +41,8 @@ namespace FeatureFlagsCo.Messaging.Controllers
         public async Task<dynamic> SendAPIServiceToMQServiceData([FromBody] APIServiceToMQServiceModel param)
         {
             _logger.LogTrace("Insights/SendAPIServiceToMQServiceData");
-
-            string messagePayload = JsonSerializer.Serialize(param);
+            // TODO deal with es later
+            string messagePayload = JsonSerializer.Serialize(param.FFMessage);
             await _serviceBusSender.SendMessageAsync(messagePayload);
             return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
         }

@@ -1,9 +1,7 @@
 
-from config.config_handling import get_config_value
-import json
 import logging
-import os
-import sys
+
+from config.config_handling import get_config_value
 from rabbitmq.rabbitmq import RabbitMQConsumer
 
 logger = logging.getLogger("p3_get_expt_events")

@@ -41,5 +41,11 @@ namespace FeatureFlags.APIs.Services
 
             return expts.FindAll(ex => ex.Iterations.Find(it => !it.EndTime.HasValue) != null);
         }
+
+        public async Task<List<Experiment>> GetExperimentsByMetricAsync(string metricId)
+        {
+            return await _collection
+                .Find(e => e.MetricId == metricId && !e.IsArvhived).SortByDescending(p => p.CreatedAt).ToListAsync();
+        }
     }
 }

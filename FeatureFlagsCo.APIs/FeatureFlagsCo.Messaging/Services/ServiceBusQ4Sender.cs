@@ -8,7 +8,10 @@ namespace FeatureFlagsCo.Messaging.Services
 {
     public class ServiceBusQ4Sender: ServiceBusTopicSenderBase
     {
-        protected override string TopicPath { get { return "q4"; } }
+        protected override string TopicPath
+        {
+            get { return Configuration.GetSection("MySettings").GetSection("Q4Name").Value; }
+        }
 
         public ServiceBusQ4Sender(IConfiguration configuration, ILogger<ServiceBusQ4Sender> logger) : base(configuration, logger)
         {

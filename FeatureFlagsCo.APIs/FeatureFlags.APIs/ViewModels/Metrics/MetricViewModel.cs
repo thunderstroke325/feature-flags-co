@@ -17,5 +17,7 @@ namespace FeatureFlags.APIs.ViewModels.Metrics
         public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
         public string ElementTargets { get; set; }
         public List<TargetUrl> TargetUrls { get; set; }
+
+        public bool IsArvhived { get; set; }
     }
 }

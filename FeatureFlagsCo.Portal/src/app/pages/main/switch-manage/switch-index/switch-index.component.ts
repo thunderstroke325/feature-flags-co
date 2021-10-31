@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { SwitchService } from 'src/app/services/switch.service';
-import { IFfParams } from '../types/switch-new';
+import { FeatureFlagType, IFfParams } from '../types/switch-new';
 import { AccountService } from 'src/app/services/account.service';
 import {NzTableQueryParams} from "ng-zorro-antd/table";
+import { encodeURIComponentFfc } from 'src/app/utils';
 
 @Component({
   selector: 'index',
@@ -32,7 +33,13 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
   public createModalVisible: boolean = false;             // 创建开关的弹窗显示
   public isOkLoading: boolean = false;                    // 创建开关加载中动画
   public isInitLoading: boolean = true;                  // 数据加载中对话
+
   public switchName: string = '';
+  switchType: FeatureFlagType = FeatureFlagType.Classic;
+
+  ClassicFeatureFlag: FeatureFlagType = FeatureFlagType.Classic;
+  PretargetedFeatureFlag: FeatureFlagType = FeatureFlagType.Pretargeted;
+
   public isIntoing: boolean = false;                      // 是否点击了一条开关，防止路由切换慢的双击效果
   public totalCount: number = 0;
 
@@ -52,7 +59,7 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void{
-    console.log('switchTableHeight==', this.elementView.nativeElement.offsetHeight);
+    //console.log('switchTableHeight==', this.elementView.nativeElement.offsetHeight);
     this.switchTableHeight = this.elementView.nativeElement.offsetHeight;
   }
 
@@ -117,7 +124,7 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
     }
     this.isOkLoading = true;
 
-    this.switchServe.createNewSwitch(this.switchName)
+    this.switchServe.createNewSwitch(this.switchName, this.switchType)
       .subscribe((result: IFfParams) => {
         this.switchServe.setCurrentSwitch(result);
         this.toRouter(result.id);
@@ -138,7 +145,7 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
 
   // 路由跳转
   private toRouter(id: string) {
-    this.router.navigateByUrl("/switch-manage/condition/" + encodeURIComponent(id));
+    this.router.navigateByUrl("/switch-manage/condition/" + encodeURIComponentFfc(id));
   }
 
   // 转换本地时间

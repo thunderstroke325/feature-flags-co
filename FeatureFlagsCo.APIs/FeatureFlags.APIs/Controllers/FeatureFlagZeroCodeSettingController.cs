@@ -23,15 +23,18 @@ namespace FeatureFlags.APIs.Controllers
         private readonly ILogger<FeatureFlagZeroCodeSettingController> _logger;
         private readonly MongoDbFeatureFlagZeroCodeSettingService _mongoDbFFZCSService;
         private readonly IEnvironmentService _envService;
+        private readonly MongoDbFeatureFlagService _mongoDbFeatureFlagService;
 
         public FeatureFlagZeroCodeSettingController(
             ILogger<FeatureFlagZeroCodeSettingController> logger,
             MongoDbFeatureFlagZeroCodeSettingService mongoDbFFZCSService,
+            MongoDbFeatureFlagService mongoDbFeatureFlagService,
             IEnvironmentService envService)
         {
             _logger = logger;
             _mongoDbFFZCSService = mongoDbFFZCSService;
             _envService = envService;
+            _mongoDbFeatureFlagService = mongoDbFeatureFlagService;
         }
 
         [HttpGet]
@@ -41,11 +44,18 @@ namespace FeatureFlags.APIs.Controllers
         {
             var allSettings = await _mongoDbFFZCSService.GetByEnvSecretAsync(envSecret);
             if (allSettings != null && allSettings.Count > 0)
-                return allSettings.Select(p => new FeatureFlagZeroCodeSettingViewModel()
+            {
+                var featureFlags = await _mongoDbFeatureFlagService.GetActiveByIdsAsync(allSettings.Select(s => s.FeatureFlagId));
+                var ActiveFeatureFlagIds = featureFlags.Select(ff => ff.Id);
+
+                return allSettings.Where(p => ActiveFeatureFlagIds.Contains(p.FeatureFlagId)).Select(p => new FeatureFlagZeroCodeSettingViewModel()
                 {
-                    Items = p.Items.Select(it => new CssSelectorItemViewModel { CssSelector = it.CssSelector, Url = it.Url, VariationValue = it.VariationOption.VariationValue }).ToList(),
-                    FeatureFlagKey = p.FeatureFlagKey
+                    Items = p.Items.Select(it => new CssSelectorItemViewModel { CssSelector = it.CssSelector, Url = it.Url, VariationValue = it.VariationOption.VariationValue, VariationOptionId = it.VariationOption.LocalId }).ToList(),
+                    FeatureFlagKey = p.FeatureFlagKey,
+                    FeatureFlagType = featureFlags.Find(ff => ff.Id == p.FeatureFlagId).FF.Type
                 }).ToList();
+            }
+               
             return new List<FeatureFlagZeroCodeSettingViewModel>();
         }
 

@@ -41,35 +41,45 @@ namespace FeatureFlags.APIs.Services
         private readonly MetricService _metricService;
         private readonly MessagingService _messagingService;
         private readonly MongoDbExperimentService _mongoDbExperimentService;
+        private readonly MongoDbFeatureFlagService _mongoDbFeatureFlagService;
 
         public ExperimentsService(
             INoSqlService noSqlDbService,
             MessagingService messagingService,
             MetricService metricService,
             MongoDbExperimentService mongoDbExperimentService,
+            MongoDbFeatureFlagService mongoDbFeatureFlagService,
             IOptions<MySettings> mySettings)
         {
             _noSqlDbService = noSqlDbService;
             _mySettings = mySettings;
             _metricService = metricService;
             _mongoDbExperimentService = mongoDbExperimentService;
+            _mongoDbFeatureFlagService = mongoDbFeatureFlagService;
             _messagingService = messagingService;
         }
 
         public async Task<IEnumerable<ExperimentMetricSetting>> GetActiveExperimentMetricSettingsAsync(int envId)
         {
-            var exptIds = (await _mongoDbExperimentService.GetActiveExperimentsByEnvAsync(envId))
-                .Select(ex => ex.MetricId);
+            var expts = await _mongoDbExperimentService.GetActiveExperimentsByEnvAsync(envId);
+            var ActiveFeatureFlagIds = (await _mongoDbFeatureFlagService.GetActiveByIdsAsync(expts.Select(s => s.FlagId))).Select(ff => ff.Id);
 
-            return (await _metricService.GetMetricsByIdsAsync(exptIds))
-               .FindAll(m => m.EventType == EventType.Click || m.EventType == EventType.PageView)
-               .Select(m => new ExperimentMetricSetting
-               {
-                   EventName = m.EventName,
-                   EventType = m.EventType,
-                   ElementTargets = m.ElementTargets,
-                   TargetUrls = m.TargetUrls.Select(t => new TargetUrl { MatchType = t.MatchType, Url = t.Url}).ToList()
-               });
+            var exptIds = expts.Where(expt => ActiveFeatureFlagIds.Contains(expt.FlagId)).Select(expt => expt.MetricId);
+
+            if (exptIds.Count() > 0)
+            {
+                return (await _metricService.GetMetricsByIdsAsync(exptIds))
+                   .FindAll(m => m.EventType == EventType.Click || m.EventType == EventType.PageView)
+                   .Select(m => new ExperimentMetricSetting
+                   {
+                       EventName = m.EventName,
+                       EventType = m.EventType,
+                       ElementTargets = m.ElementTargets,
+                       TargetUrls = m.TargetUrls.Select(t => new TargetUrl { MatchType = t.MatchType, Url = t.Url }).ToList()
+                   });
+            }
+
+            return new List<ExperimentMetricSetting>();
         }
 
         public async Task<List<ExperimentViewModel>> GetExperimentsByFeatureFlagIds(IEnumerable<string> featureFlagIds, bool shouldIncludeIterations)

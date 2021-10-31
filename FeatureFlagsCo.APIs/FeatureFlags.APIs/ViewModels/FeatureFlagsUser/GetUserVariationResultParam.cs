@@ -24,5 +24,8 @@ namespace FeatureFlags.APIs.Models
         public bool? VariationResult { get; set; }
     }
 
-
+    public class SendUserVariationViewModel : GetUserVariationResultParam 
+    {
+        public int VariationOptionId { get; set; }
+    }
 }

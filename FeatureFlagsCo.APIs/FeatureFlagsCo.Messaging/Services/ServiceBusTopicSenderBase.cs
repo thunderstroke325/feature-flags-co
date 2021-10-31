@@ -14,12 +14,13 @@ namespace FeatureFlagsCo.Messaging.Services
         private readonly ILogger _logger;
         private readonly ServiceBusClient _client;
         private readonly ServiceBusSender _clientSender;
+        protected IConfiguration Configuration { get; set; }
 
         public ServiceBusTopicSenderBase(IConfiguration configuration, ILogger<ServiceBusTopicSenderBase> logger)
         {
             _logger = logger;
-
-            var connectionString = configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value;
+            Configuration = configuration;
+            var connectionString = Configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value;
             _client = new ServiceBusClient(connectionString);
             _clientSender = _client.CreateSender(TopicPath);
         }
@@ -34,6 +35,8 @@ namespace FeatureFlagsCo.Messaging.Services
         public async Task SendMessageAsync(string param)
         {
             ServiceBusMessage message = new ServiceBusMessage(param);
+            message.Subject = TopicPath;
+            message.ApplicationProperties.Add("origin", "standard");
             try
             {
                 await _clientSender.SendMessageAsync(message).ConfigureAwait(false);

@@ -7,6 +7,8 @@ pandas
 requests
 pika
 redis
+azure-servicebus
+opencensus-ext-azure
 flake8
 autopep8
 pylint

@@ -467,6 +467,7 @@ namespace FeatureFlags.APIs.Services
                     EnvironmentId = param.EnvironmentId,
                     CreatorUserId = currentUserId,
                     Name = param.Name,
+                    Type = param.Type,
                     Status = param.Status,
                     VariationOptionWhenDisabled = new VariationOption()
                     {
@@ -714,10 +715,10 @@ namespace FeatureFlags.APIs.Services
         }
 
         public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentFeatureFlagBasicInfoItemsAsync(int environmentId,
-            int pageIndex = 0, int pageSize = 100)
+            string searchText, int pageIndex = 0, int pageSize = 100)
         {
             var returnResult = new List<FeatureFlagBasicInfo>();
-            var ffs = await _mongoFeatureFlagsService.GetFeatureFlagsAsync(environmentId, false, pageIndex, pageSize);
+            var ffs = await _mongoFeatureFlagsService.GetFeatureFlagsAsync(environmentId, false, searchText, pageIndex, pageSize);
             foreach (var ff in ffs)
             {
                 var ffb = ff.FF;
@@ -734,10 +735,10 @@ namespace FeatureFlags.APIs.Services
         }
 
         public async Task<List<FeatureFlagBasicInfo>> GetEnvironmentArchivedFeatureFlagBasicInfoItemsAsync(
-            int environmentId, int pageIndex = 0, int pageSize = 100)
+            int environmentId, string searchText, int pageIndex = 0, int pageSize = 100)
         {
             var returnResult = new List<FeatureFlagBasicInfo>();
-            var ffs = await _mongoFeatureFlagsService.GetFeatureFlagsAsync(environmentId, true, pageIndex, pageSize);
+            var ffs = await _mongoFeatureFlagsService.GetFeatureFlagsAsync(environmentId, true, searchText, pageIndex, pageSize);
             foreach (var ff in ffs)
             {
                 var ffb = ff.FF;

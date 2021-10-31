@@ -4,3 +4,7 @@
 api
 ExperimentApiPy.py
 uwsgi.ini
+rabbitmq
+p1_get_expt_recording_info.py
+P2_get_expt_result.py
+p3_get_expt_events.py

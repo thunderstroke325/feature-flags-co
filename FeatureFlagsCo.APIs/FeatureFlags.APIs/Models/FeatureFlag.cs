@@ -37,6 +37,7 @@ namespace FeatureFlags.APIs.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public FeatureFlagType Type { get; set; }
         public string KeyName { get; set; }
         public int EnvironmentId { get; set; }
         public string CreatorUserId { get; set; }
@@ -84,11 +85,17 @@ namespace FeatureFlags.APIs.Models
         public string Value { get; set; }
     }
 
+    public enum FeatureFlagType 
+    {
+        Classic = 1,
+        Pretargeted = 2
+    }
 
     public class CreateFeatureFlagViewModel
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public FeatureFlagType Type { get; set; }
         public string KeyName { get; set; }
         public int EnvironmentId { get; set; }
         public string CreatorUserId { get; set; }

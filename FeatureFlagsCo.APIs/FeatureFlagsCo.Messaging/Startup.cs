@@ -40,8 +40,8 @@ namespace FeatureFlagsCo.Messaging
                 options.AddPolicy("AllowMyOrigin", p =>
                 {
                     p.AllowAnyOrigin()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
                 });
             });
 
@@ -84,17 +84,17 @@ namespace FeatureFlagsCo.Messaging
                     {
                         new OpenApiSecurityScheme
                         {
-                        Reference = new OpenApiReference
+                            Reference = new OpenApiReference
                             {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
                             },
                             Scheme = "oauth2",
                             Name = "Bearer",
                             In = ParameterLocation.Header
                         },
                         new List<string>()
-                        }
+                    }
                 });
             });
 
@@ -102,10 +102,10 @@ namespace FeatureFlagsCo.Messaging
             services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
             services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
 
-            services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
-            services.AddSingleton<IFeatureFlagMqService, FeatureFlagMqService>();
-            services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
-            services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
+            // services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
+            // services.AddSingleton<IFeatureFlagMqService, FeatureFlagMqService>();
+            // services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
+            // services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
             services.AddSingleton<ExperimentsService, ExperimentsService>();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -120,39 +120,46 @@ namespace FeatureFlagsCo.Messaging
             services.AddSingleton<ServiceBusQ5Sender>(new ServiceBusQ5Sender(Configuration, q5SenderLogger));
 
             // service bus receiver
-            var experimentStartEndmqService = serviceProvider.GetService<IExperimentStartEndMqService>();
-            var ffMqService = serviceProvider.GetService<IFeatureFlagMqService>();
-            var experimentstRabbitMqService = serviceProvider.GetService<IExperimentMqService>();
-            var q1ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ1Receiver>>();
-            var q4ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ4Receiver>>();
-            var q5ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ5Receiver>>();
+            // var experimentStartEndmqService = serviceProvider.GetService<IExperimentStartEndMqService>();
+            // var ffMqService = serviceProvider.GetService<IFeatureFlagMqService>();
+            // var experimentstRabbitMqService = serviceProvider.GetService<IExperimentMqService>();
+            var experimentsService = serviceProvider.GetService<ExperimentsService>();
+            // var q1ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ1Receiver>>();
+            // var q4ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ4Receiver>>();
+            // var q5ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ5Receiver>>();
+            var q3ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ3Receiver>>();
 
-            services.AddSingleton<ServiceBusQ1Receiver>(new ServiceBusQ1Receiver(Configuration, experimentStartEndmqService, q1ReceiverLogger));
-            services.AddSingleton<ServiceBusQ4Receiver>(new ServiceBusQ4Receiver(Configuration, ffMqService, q4ReceiverLogger));
-            services.AddSingleton<ServiceBusQ5Receiver>(new ServiceBusQ5Receiver(Configuration, experimentstRabbitMqService, q5ReceiverLogger));
-           
+            services.AddSingleton(new ServiceBusQ3Receiver(Configuration, experimentsService, q3ReceiverLogger));
+            // services.AddSingleton<ServiceBusQ1Receiver>(new ServiceBusQ1Receiver(Configuration, experimentStartEndmqService, q1ReceiverLogger));
+            // services.AddSingleton<ServiceBusQ4Receiver>(new ServiceBusQ4Receiver(Configuration, ffMqService, q4ReceiverLogger));
+            // services.AddSingleton<ServiceBusQ5Receiver>(new ServiceBusQ5Receiver(Configuration, experimentstRabbitMqService, q5ReceiverLogger));
 
             var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
 
-            var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
+            var insightsRabbitMqUrl =
+                this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
 /**/
 
-            services.AddSingleton<IExportExperimentsDataToElasticSearchService>(new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+            services.AddSingleton<IExportExperimentsDataToElasticSearchService>(
+                new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
             //services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
-            services.AddSingleton<IExportAuditLogDataToElasticSearchService>(new ExportAuditLogDataToElasticSearchService(insightsRabbitMqUrl, esHost));
+            services.AddSingleton<IExportAuditLogDataToElasticSearchService>(
+                new ExportAuditLogDataToElasticSearchService(insightsRabbitMqUrl, esHost));
 
 
-            
             var exptsService = serviceProvider.GetService<ExperimentsService>();
-            services.AddSingleton<IExperimentResultService>(new ExperimentResultService(insightsRabbitMqUrl, exptsService));
+            services.AddSingleton<IExperimentResultService>(new ExperimentResultService(insightsRabbitMqUrl,
+                exptsService));
 
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
             if (hostingType == "Azure")
             {
                 Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
-                        = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
-                aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights").GetSection("InstrumentationKey").Value;
-                aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights").GetSection("ConnectionString").Value;
+                    = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
+                aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights")
+                    .GetSection("InstrumentationKey").Value;
+                aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights")
+                    .GetSection("ConnectionString").Value;
                 aiOptions.EnableAdaptiveSampling = false;
                 aiOptions.EnableDependencyTrackingTelemetryModule = false;
                 aiOptions.EnableAppServicesHeartbeatTelemetryModule = false;
@@ -190,5 +197,4 @@ namespace FeatureFlagsCo.Messaging
             });
         }
     }
-
 }

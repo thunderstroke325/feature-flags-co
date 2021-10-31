@@ -4,8 +4,8 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { Subject } from 'rxjs';
 import { SwitchService } from 'src/app/services/switch.service';
 import { ISwitchArchive } from './types/switch-archive';
-import { ProjectService } from 'src/app/services/project.service';
 import { AccountService } from 'src/app/services/account.service';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-switch-archive',
@@ -15,49 +15,52 @@ import { AccountService } from 'src/app/services/account.service';
 export class SwitchArchiveComponent implements OnInit, OnDestroy {
 
   destory$: Subject<void> = new Subject();
+  private search$ = new Subject<any>();
   currentEnvId: number;
   currentAccountId: number;
-  searchValue: string = '';
+  searchText: string = '';
   isLoading: boolean = false;
   switchLoading: boolean = false;
   switchLists: ISwitchArchive[] = [];
-
-  get switchs() {
-    return this.switchLists.filter((st: ISwitchArchive) => st.name.indexOf(this.searchValue) >= 0);
-  }
 
   constructor(
     private switchService: SwitchService,
     private accountService: AccountService,
     private modal: NzModalService,
-    private msg: NzMessageService
+    private message: NzMessageService
   ) { }
 
   ngOnInit(): void {
     const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
     this.currentAccountId = currentAccountProjectEnv.account.id;
     this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
-    this.fetchArchiveSwitchs(this.currentEnvId);
+    this.init();
+    this.search$.next('');
+  }
+
+  onSearch() {
+    this.search$.next(this.searchText);
+  }
+
+  private init() {
+    this.search$.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(e => {
+      this.isLoading = true;
+      this.switchService.getArchiveSwitch(this.currentEnvId, {searchText: e}).subscribe(res => {
+        this.isLoading = false;
+        this.switchLists = res;
+      }, _ => {
+        this.message.error("数据加载失败，请重试!");
+        this.isLoading = false;
+      })
+    });
   }
 
   ngOnDestroy(): void {
     this.destory$.next();
     this.destory$.complete();
-  }
-
-  fetchArchiveSwitchs(id: number) {
-    this.isLoading = true;
-    this.switchService.getArchiveSwitch(id)
-      .pipe()
-      .subscribe(
-        res => {
-          this.isLoading = false;
-          this.switchLists = res;
-        },
-        _ => {
-          this.isLoading = false;
-        }
-      );
   }
 
   // 复位开关
@@ -74,11 +77,11 @@ export class SwitchArchiveComponent implements OnInit, OnDestroy {
         this.switchService.unarchiveEnvFeatureFlag(st.id, st.name)
           .subscribe(
             res => {
-              this.msg.success('开关复位成功！');
-              this.fetchArchiveSwitchs(this.currentEnvId);
+              this.message.success('开关复位成功！');
+              this.search$.next(this.searchText);
             },
             err => {
-              this.msg.error('开关复位失败，请稍后重试！');
+              this.message.error('开关复位失败，请稍后重试！');
             }
           );
       }

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { btnsConfig } from '../pages/main/switch-manage/components/nav-btns/btns';
-import { CSwitchParams, IFfParams, IFfSettingParams, IPrequisiteFeatureFlag } from '../pages/main/switch-manage/types/switch-new';
+import { CSwitchParams, FeatureFlagType, IFfParams, IFfSettingParams, IPrequisiteFeatureFlag } from '../pages/main/switch-manage/types/switch-new';
 import { AccountService } from './account.service';
 
 @Injectable({
@@ -65,10 +65,11 @@ export class SwitchService {
   }
 
   // 快速创建新的开关
-  public createNewSwitch(name: string = 'demo1') {
+  public createNewSwitch(name: string = 'demo1', type: FeatureFlagType = FeatureFlagType.Classic) {
     const url = environment.url + '/FeatureFlags/CreateFeatureFlag';
     return this.http.post(url, {
       name: name,
+      type,
       environmentId: this.envId,
       status: 'Enabled'
     })
@@ -160,9 +161,9 @@ export class SwitchService {
   }
 
   // 获取以存档的开关
-  public getArchiveSwitch(id: number): Observable<any> {
+  public getArchiveSwitch(id: number, params: any): Observable<any> {
     const url = environment.url + `/FeatureFlags/GetEnvironmentArchivedFeatureFlags/${id}`;
-    return this.http.get(url);
+    return this.http.get(url, { params });
   }
 
   public getReport(featureFlagId: string, chartQueryTimeSpan: string): Observable<any> {

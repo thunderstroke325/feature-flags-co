@@ -63,7 +63,6 @@ export class ExperimentDrawerComponent implements OnInit {
         this.featureFlagList = result;
         this.isFeatureFlagsLoading = false;
       }, error => {
-        console.log("search error");
         this.isFeatureFlagsLoading = false;
       });
     });
@@ -76,7 +75,6 @@ export class ExperimentDrawerComponent implements OnInit {
         this.metricList = result;
         this.isMetricsLoading = false;
       }, error => {
-        console.log("search error");
         this.isMetricsLoading = false;
       });
     });

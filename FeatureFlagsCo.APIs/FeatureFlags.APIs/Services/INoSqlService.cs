@@ -46,13 +46,13 @@ namespace FeatureFlags.APIs.Services
         Task<EnvironmentUser> AddEnvironmentUserAsync(EnvironmentUser item);
 
         Task<List<FeatureFlagBasicInfo>> GetEnvironmentFeatureFlagBasicInfoItemsAsync(int environmentId,
-            int pageIndex = 0, int pageSize = 100);
+            string searchText, int pageIndex = 0, int pageSize = 100);
 
         Task<List<PrequisiteFeatureFlagViewModel>> SearchPrequisiteFeatureFlagsAsync(int environmentId,
             string searchText = "", int pageIndex = 0, int pageSize = 20);
 
         Task<List<FeatureFlagBasicInfo>> GetEnvironmentArchivedFeatureFlagBasicInfoItemsAsync(int environmentId,
-            int pageIndex = 0, int pageSize = 100);
+            string searchText, int pageIndex = 0, int pageSize = 100);
 
         Task<FeatureFlag> GetFlagAsync(string id);
         Task<EnvironmentUserProperty> GetEnvironmentUserPropertiesForCRUDAsync(int environmentId);

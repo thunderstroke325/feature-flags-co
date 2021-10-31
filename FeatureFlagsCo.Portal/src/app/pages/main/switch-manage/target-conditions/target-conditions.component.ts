@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SwitchService } from 'src/app/services/switch.service';
-import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType, IVariationOption, IFftiuParams, IRulePercentageRollout, IPrequisiteFeatureFlag } from '../types/switch-new';
+import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType, IVariationOption, IFftiuParams, IRulePercentageRollout, IPrequisiteFeatureFlag, FeatureFlagType } from '../types/switch-new';
 import { FfcService } from 'src/app/services/ffc.service';
 import { PendingChange } from '../types/pending-changes';
 import { TeamService } from 'src/app/services/team.service';
@@ -36,6 +36,10 @@ export class TargetConditionsComponent implements OnInit {
   currentProjectEnv: IProjectEnv = null;
 
   approvalRequestEnabled: boolean = false;
+
+  classicFeatureType: FeatureFlagType = FeatureFlagType.Classic;
+  pretargetedFeatureType: FeatureFlagType = FeatureFlagType.Pretargeted;
+
   constructor(
     private route:ActivatedRoute,
     private switchServe: SwitchService,

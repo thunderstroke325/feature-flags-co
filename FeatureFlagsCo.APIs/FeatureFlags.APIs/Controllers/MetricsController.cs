@@ -22,25 +22,28 @@ namespace FeatureFlags.APIs.Controllers
     {
         private readonly ILogger<MetricsController> _logger;
         private readonly IEnvironmentService _envService;
-        private readonly INoSqlService _noSqlDbService;
         private readonly MetricService _metricService;
+        private readonly IExperimentsService _experimentsService;
+        private readonly MongoDbExperimentService _mongoDbExperimentService;
 
         public MetricsController(
             ILogger<MetricsController> logger,
             IEnvironmentService envService,
             MetricService metricService,
-            INoSqlService noSqlDbService)
+            MongoDbExperimentService mongoDbExperimentService,
+            IExperimentsService experimentsService)
         {
             _logger = logger;
             _envService = envService;
-            _noSqlDbService = noSqlDbService;
+            _experimentsService = experimentsService;
             _metricService = metricService;
+            _mongoDbExperimentService = mongoDbExperimentService;
         }
 
         private List<string> ValidateMetric(MetricViewModel param) 
         {
             var validateErrors = new List<string>();
-            if (string.IsNullOrWhiteSpace(param.EventName))
+            if (!string.IsNullOrWhiteSpace(param.Id) && string.IsNullOrWhiteSpace(param.EventName))
             {
                 validateErrors.Add("事件名称");
             }
@@ -94,7 +97,6 @@ namespace FeatureFlags.APIs.Controllers
                         Name = param.Name,
                         EnvId = param.EnvId,
                         Description = param.Description,
-                        EventName = param.EventName,
                         EventType = param.EventType,
                         CustomEventTrackOption = param.CustomEventTrackOption,
                         MaintainerUserId = param.MaintainerUserId,
@@ -106,6 +108,19 @@ namespace FeatureFlags.APIs.Controllers
                         UpdatedAt = DateTime.UtcNow
                     };
 
+                    switch (param.EventType) 
+                    {
+                        case EventType.PageView:
+                            metric.EventName = "pageview_" + Guid.NewGuid().ToString();
+                            break;
+                        case EventType.Click:
+                            metric.EventName = "click_" + Guid.NewGuid().ToString();
+                            break;
+                        case EventType.Custom:
+                            metric.EventName = param.EventName;
+                            break;
+                    }
+                        
                     var newMetric = await _metricService.CreateAsync(metric);
                     param.Id = newMetric.Id;
                     return param;
@@ -240,6 +255,25 @@ namespace FeatureFlags.APIs.Controllers
 
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "Internal Error" });
             }
+        }
+
+        [HttpDelete]
+        [Route("{envId}/{metricId}")]
+        public async Task<dynamic> ArchiveExperiment(int envId, string metricId)
+        {
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
+            {
+                var expts = await _mongoDbExperimentService.GetExperimentsByMetricAsync(metricId);
+                if (expts != null && expts.Count > 0) 
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Messages = expts.Select(expt => expt.FlagId).ToList()});
+                }
+
+                await _metricService.ArchiveAsync(metricId);
+            }
+
+            return Ok();
         }
     }
 }

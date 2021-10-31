@@ -81,7 +81,6 @@ export class PendingChange {
         this.reviewerList = result;
         this.isReviewersLoading = false;
       }, error => {
-        console.log("search error");
         this.isReviewersLoading = false;
       });
     });
