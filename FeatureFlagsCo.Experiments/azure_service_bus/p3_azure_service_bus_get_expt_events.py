@@ -19,6 +19,7 @@ class P3AzureGetExptFFEventsReceiver(AzureReceiver):
             missing_keys = [k for k in P3_FF_EVENT_NECESSAIRE_KEYS if k not in body.keys()]
             if not missing_keys:
                 dict_flag_acitveExpts = self.redis_get('dict_ff_act_expts_%s_%s' % (body['EnvId'], body['FeatureFlagId']))
+                # not record an ff event which DOES not match any expt
                 if dict_flag_acitveExpts and dict_flag_acitveExpts.get(body['FeatureFlagId'], None):
                     id = '%s_%s' % (body['EnvId'], body['FeatureFlagId'])
                     value = self.redis_get(id)
@@ -31,8 +32,6 @@ class P3AzureGetExptFFEventsReceiver(AzureReceiver):
                     list_ff_events = list_ff_events + [dict_to_add]
                     self.redis_set(id, list_ff_events)
                     p3_debug_logger.info(f'topic: {current_topic}, FF EVENT: {dict_to_add}')
-                else:
-                    p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=current_topic, env=body['EnvId'], ffid=body['FeatureFlagId'], reason='EVENT NOT FOUND'))
             else:
                 p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=current_topic, reason='UNVALID FORMAT', missing_keys=missing_keys))
         else:
@@ -44,8 +43,8 @@ class P3AzureGetExptUserEventsReceiver(AzureReceiver):
         if type(body) is dict:
             missing_keys = [k for k in P3_USER_EVENT_NECESSAIRE_KEYS if k not in body.keys()]
             if not missing_keys:
-                dict_customEvent_acitveExpts = self.redis_get(
-                    'dict_event_act_expts_%s_%s' % (body['EnvironmentId'], body['EventName']))
+                dict_customEvent_acitveExpts = self.redis_get('dict_event_act_expts_%s_%s' % (body['EnvironmentId'], body['EventName']))
+                # not record an user event which DOES not match any expt
                 if dict_customEvent_acitveExpts and dict_customEvent_acitveExpts.get(body['EventName'], None):
                     id = '%s_%s' % (body['EnvironmentId'], body['EventName'])
                     value = self.redis_get(id)
@@ -58,8 +57,6 @@ class P3AzureGetExptUserEventsReceiver(AzureReceiver):
                     list_user_events = list_user_events + [dict_to_add]
                     self.redis_set(id, list_user_events)
                     p3_debug_logger.info(f'topic: {current_topic}, USER EVENT: {dict_to_add}')
-                else:
-                    p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=current_topic, env=body['EnvironmentId'], user_event=body['EventName'], reason='EVENT NOT FOUND'))
             else:
                 p3_logger.warning('EVENT IGNOR', extra=get_custom_properties(topic=current_topic, reason='UNVALID FORMAT', missing_keys=missing_keys))
         else:
