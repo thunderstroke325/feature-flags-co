@@ -50,7 +50,7 @@ namespace FeatureFlags.APIs.Controllers
 
                 return allSettings.Where(p => ActiveFeatureFlagIds.Contains(p.FeatureFlagId)).Select(p => new FeatureFlagZeroCodeSettingViewModel()
                 {
-                    Items = p.Items.Select(it => new CssSelectorItemViewModel { CssSelector = it.CssSelector, Url = it.Url, VariationValue = it.VariationOption.VariationValue, VariationOptionId = it.VariationOption.LocalId }).ToList(),
+                    Items = p.Items.Select(it => new CssSelectorItemViewModel { CssSelector = it.CssSelector, Url = it.Url, VariationValue = it.VariationOption.VariationValue, VariationOptionId = it.VariationOption.LocalId, HtmlContent = it.HtmlContent, HtmlProperties = it.HtmlProperties, Action = it.Action, Style = it.Style }).ToList(),
                     FeatureFlagKey = p.FeatureFlagKey,
                     FeatureFlagType = featureFlags.Find(ff => ff.Id == p.FeatureFlagId).FF.Type
                 }).ToList();

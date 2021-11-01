@@ -51,7 +51,7 @@
               <nz-option *ngFor="let o of actionOptions" [nzValue]="o.value" [nzLabel]="o.label"></nz-option>
             </nz-select>
           </div>
-          <ng-container *ngIf="item.action === 'show'">
+          <ng-container *ngIf="item.action === 'modify'">
             <div class="info-item">
               <div class="label">元素属性 <a (click)="addHtmlProperty(item)" style="margin-left:20px;font-weight: 800;font-size: 16px;"><i nz-icon nzType="plus-square" nzTheme="outline"></i></a></div>
               <div style="display: flex;justify-content: space-between;margin-bottom:5px" *ngFor="let pro of item.htmlProperties">
@@ -69,6 +69,9 @@
               <nz-code-editor class="editor" [(ngModel)]="item.style" [nzEditorOption]="{ language: 'css' }"></nz-code-editor>
             </div>
           </ng-container>
+          <div class="info-item" style="text-align: right;margin-bottom: 0;">
+            <button style="background-color: rgba(255, 0, 0, 0.5);color: #fff" nz-button nzType="default" (click)="deleteCssSelectorRow(item.id)">删除</button>
+          </div>
         </nz-card>
 
         <!-- <nz-table [nzLoading]="isSaving" #editRowTable [nzFrontPagination]="false" [nzData]="model.items" [nzSize]="'small'" [nzShowPagination]="false">

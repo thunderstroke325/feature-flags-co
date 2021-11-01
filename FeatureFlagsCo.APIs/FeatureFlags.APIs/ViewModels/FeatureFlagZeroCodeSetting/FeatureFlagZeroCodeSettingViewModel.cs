@@ -19,5 +19,9 @@ namespace FeatureFlags.APIs.ViewModels.FeatureFlagZeroCodeSetting
         public string VariationValue { get; set; }
         public int VariationOptionId { get; set; }
         public string Url { get; set; }
+        public string HtmlContent { get; set; }
+        public string Style { get; set; }
+        public List<HtmlProperty> HtmlProperties { get; set; }
+        public string Action { get; set; }
     }
 }

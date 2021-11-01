@@ -33,7 +33,7 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
   model: IZeroCode;
 
   actionOptions: {[key: string]: string}[] = [
-    { value: 'hide', label: '隐藏页面元素'}, { value: 'show', label: "显示页面元素"}
+    { value: 'show', label: "显示页面元素"}, { value: 'modify', label: '修改页面元素'}
   ];
 
   constructor(
@@ -81,7 +81,7 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
   }
 
   itemActionChanged(item: ICssSelectorItem) {
-    if (item.action === 'hide') {
+    if (item.action === 'show') {
       item.htmlContent = null;
       item.htmlProperties = [];
       item.style = '.ffc-style {\r\n\r\n}';
@@ -143,7 +143,6 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
     data.items = this.model.items.map(itm => {
       styleHasError ||= !!itm.style && !itm.style.startsWith('.ffc-style {');
       return Object.assign({}, itm, {
-        htmlContent: this.sanitizer.sanitize(SecurityContext.HTML, itm.htmlContent || ''),
         style: this.sanitizer.sanitize(SecurityContext.STYLE, itm.style || ''),
         htmlProperties: itm.htmlProperties?.map(p => Object.assign({}, p, {
           name: this.sanitizer.sanitize(SecurityContext.HTML, p.name || ''),
