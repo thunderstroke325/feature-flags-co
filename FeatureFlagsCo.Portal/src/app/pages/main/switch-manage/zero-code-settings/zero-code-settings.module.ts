@@ -17,8 +17,9 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
-import {DragDropModule} from '@angular/cdk/drag-drop';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzSpaceModule } from 'ng-zorro-antd/space';
+import { NzCodeEditorModule } from 'ng-zorro-antd/code-editor';
 
 @NgModule({
   declarations: [ZeroCodeSettingsComponent],
@@ -38,7 +39,8 @@ import { NzInputModule } from 'ng-zorro-antd/input';
     NzTagModule,
     NzPopconfirmModule,
     NzDropDownModule,
-    DragDropModule,
+    NzSpaceModule,
+    NzCodeEditorModule,
     ComponentsModule,
     ZeroCodeSettingsRoutingModule
   ]
