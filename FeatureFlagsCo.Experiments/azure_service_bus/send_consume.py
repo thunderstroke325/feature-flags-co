@@ -3,13 +3,13 @@ import abc
 import base64
 import hashlib
 import hmac
-import json
 import logging
 import os
 import sys
 import time
 from abc import ABC
 from datetime import timedelta
+from random import choice
 
 import redis
 from azure.servicebus import (ServiceBusClient, ServiceBusMessage,
@@ -23,6 +23,7 @@ from azure.servicebus.exceptions import (MessageAlreadySettled,
 
 from azure_service_bus.insight_utils import (get_custom_properties,
                                              get_insight_logger)
+from azure_service_bus.utils import decode, encode
 
 try:
     from urllib.parse import quote as url_parse_quote
@@ -78,7 +79,9 @@ class AzureServiceBus:
             host=host,
             port=port,
             password=password,
-            ssl=ssl)
+            ssl=ssl,
+            charset='utf-8',
+            decode_responses=True)
 
     def _init_azure_service_bus(self, fully_qualified_namespace, sas_name, sas_value, token_ttl=timedelta(days=360)):
         """Performs the signing and encoding needed to generate a sas token from a sas key."""
@@ -98,26 +101,6 @@ class AzureServiceBus:
     def redis(self) -> redis.Redis:
         return self._redis
 
-    def redis_get(self, id):
-        value = self.redis.get(id)
-        return json.loads(value.decode()) if value else None
-
-    def redis_set(self, id, value):
-        return self.redis.set(id, str.encode(json.dumps(value)))
-
-    def redis_pipeline_set_del(self, ops=[]):
-        pipeline = self.redis.pipeline()
-        for op in ops:
-            command, key, value = op
-            if command == 'del':
-                pipeline.delete(key)
-            else:
-                pipeline.set(key, str.encode(json.dumps(value)))
-        return pipeline.execute()
-
-    def redis_del(self, *id):
-        return self.redis.delete(*id)
-
 
 class AzureSender(AzureServiceBus):
 
@@ -127,7 +110,7 @@ class AzureSender(AzureServiceBus):
             batch_message = sender.create_message_batch()
             for msg in msgs:
                 try:
-                    message = ServiceBusMessage(json.dumps(msg), subject=topic, application_properties={'origin': origin})
+                    message = ServiceBusMessage(encode(msg), subject=topic, application_properties={'origin': origin})
                 except TypeError:
                     # Message body is of an inappropriate type, must be string, bytes or None.
                     continue
@@ -175,16 +158,16 @@ class AzureSender(AzureServiceBus):
 class AzureReceiver(ABC, AzureSender):
 
     @abc.abstractmethod
-    def handle_body(self, topic, body):
+    def handle_body(self, instance_id, topic, body):
         pass
 
     def consume(self, topic=(),
                 prefetch_count=10,
-                connection_retries=3,
+                connection_retries=10,
                 settlement_retries=3,
                 is_dlq=False):
 
-        def receive_message(receiver: ServiceBusReceiver, settlement_retries=3, is_dlq=False):
+        def receive_message(receiver: ServiceBusReceiver, settlement_retries=3, is_dlq=False, instance_id=None):
             if is_dlq:
                 debug_logger.info("################dlq receiver################")
             else:
@@ -196,19 +179,17 @@ class AzureReceiver(ABC, AzureSender):
                         last_error = None
                         try:
                             # Do your application-specific data processing here
-                            # self.handle_body(msg.subject, json.loads(str(msg)))
-                            self.handle_body(msg.subject, json.loads(str(msg)))
+                            self.handle_body(instance_id, msg.subject, decode(str(msg)))
                             should_complete = True
                         except ServiceBusError:
-                            logger.exception("Maybe error in send message, retrying to connect...")
+                            logger.exception("Maybe error in send message, retrying to connect...", extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
                             raise
                         except redis.RedisError as e:
-                            logger.exception('redis error')
+                            logger.exception('redis error', extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
                             last_error = e
                             should_complete = False
                         except Exception as e:
-                            logger.exception(
-                                f'Application level error in {msg.subject}')
+                            logger.exception(f'Application level error in {msg.subject}', extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
                             last_error = e
                             should_complete = False
 
@@ -230,10 +211,7 @@ class AzureReceiver(ABC, AzureSender):
                                         # messages will be handled later
                                         # save them in redis
                                         id = f'{msg.subject}_py_deferred_sequenced_numbers'
-                                        if not (deferred_sequenced_numbers := self.redis_get(id)):
-                                            deferred_sequenced_numbers = []
-                                        deferred_sequenced_numbers.append(msg.sequence_number)
-                                        self.redis_set(id, deferred_sequenced_numbers)
+                                        self.redis.sadd(id, str(msg.sequence_number))
                                         receiver.defer_message(msg)
                                     else:
                                         receiver.dead_letter_message(msg, reason=str(last_error), error_description='Application level failure')
@@ -242,11 +220,11 @@ class AzureReceiver(ABC, AzureSender):
                                 # Message was already settled, either somewhere earlier in this processing or by another node.  Continue.
                                 # Message lock was lost before settlement.  Handle as necessary in the app layer for idempotency then continue on.
                                 # Message has an improper sequence number, was dead lettered, or otherwise does not exist.  Handle at app layer, continue on.
-                                logger.exception('message settled or lost or not found')
+                                logger.exception('message settled or lost or not found', extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
                                 break
                             except ServiceBusError:
                                 # Any other undefined service errors during settlement.  Can be transient, and can retry, but should be logged, and alerted on high volume.
-                                logger.exception('undefined service errors during settlement, retrying...')
+                                logger.exception('undefined service errors during settlement, retrying...', extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
                                 continue
                 except ServiceBusError:
                     # some service bus error in connection that can be handled at the higher level, such as connection/auth errors
@@ -260,10 +238,10 @@ class AzureReceiver(ABC, AzureSender):
                     logger.exception('service errors and interruptions occasionally occur during receiving, trying to fetch next message...')
                     continue
 
-        self._bus = self._init_azure_service_bus(
-            self._sb_host, self._sb_sas_policy, self._sb_sas_key)
+        instance_id = choice([i for i in range(1000, 100000)])
         for _ in range(connection_retries):  # Connection retries.
             try:
+                self._bus = self._init_azure_service_bus(self._sb_host, self._sb_sas_policy, self._sb_sas_key)
                 debug_logger.info('################opening...################')
                 with self._bus:
                     if topic:
@@ -281,10 +259,11 @@ class AzureReceiver(ABC, AzureSender):
                         except SystemExit:
                             os._exit(0)
                     with receiver:
-                        logger.info('RECEIVER START', extra=get_custom_properties(topic=topic_name, subscription=subscription))
-                        receive_message(receiver, settlement_retries=settlement_retries, is_dlq=is_dlq)
+                        logger.info('RECEIVER START', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
+                        receive_message(receiver, settlement_retries=settlement_retries, is_dlq=is_dlq, instance_id=instance_id)
             except ServiceBusError:
-                logger.exception('An error occurred in service bus level, retrying to connect...')
+                logger.exception('An error occurred in service bus level, retrying to connect...', extra=get_custom_properties(
+                    topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
                 self.clear()
                 time.sleep(10)
                 continue
@@ -295,11 +274,11 @@ class AzureReceiver(ABC, AzureSender):
                 except SystemExit:
                     os._exit(0)
             except:
-                logger.exception('unexpected error ooccurs, retrying to connect...')
+                logger.exception('unexpected error ooccurs, retrying to connect...', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
                 continue
 
         try:
-            logger.warning('APP QUIT', extra=get_custom_properties(topic=topic_name, subscription=subscription, reason='TOO MANY RETRIES'))
+            logger.warning('APP QUIT', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}', reason='TOO MANY RETRIES'))
             self.clear()
             sys.exit(1)
         except:

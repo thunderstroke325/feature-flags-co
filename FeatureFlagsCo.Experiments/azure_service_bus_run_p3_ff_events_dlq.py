@@ -14,6 +14,9 @@ if __name__ == '__main__':
     redis_passwd = get_config_value('redis', 'redis_passwd')
     topic = get_config_value('p3', 'topic_Q4')
     subscription = get_config_value('p3', 'subscription_Q4')
-
+    try:
+        prefetch_count = int(get_config_value('p3', 'prefetch_count'))
+    except:
+        prefetch_count = 10
     P3AzureGetExptFFEventsReceiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd).consume(
-        (topic, subscription), is_dlq=True)
+        (topic, subscription), prefetch_count=prefetch_count, is_dlq=True)

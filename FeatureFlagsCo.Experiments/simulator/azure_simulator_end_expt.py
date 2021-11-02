@@ -22,7 +22,7 @@ if __name__ == '__main__':
         # Expt1
         #  Q1 end
         expts = []
-        for expt_num in range(1, 11):
+        for expt_num in range(1, 21):
             Q1_END = {
                 "ExptId": f"FF__38__48__103__PayButton_{expt_num}_exp{expt_num}",
                 "IterationId": "2",
