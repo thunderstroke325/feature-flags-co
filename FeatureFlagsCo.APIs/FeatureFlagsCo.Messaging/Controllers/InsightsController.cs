@@ -42,8 +42,7 @@ namespace FeatureFlagsCo.Messaging.Controllers
         {
             _logger.LogTrace("Insights/SendAPIServiceToMQServiceData");
             // TODO deal with es later
-            string messagePayload = JsonSerializer.Serialize(param.FFMessage);
-            await _serviceBusSender.SendMessageAsync(messagePayload);
+            await _serviceBusSender.SendAPIServiceToMQServiceData(param);
             return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
         }
     }
