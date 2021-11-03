@@ -6,11 +6,15 @@ import {MacaronColors} from "../g2-chart";
 @Component({
   selector: 'g2-line-chart',
   template: `
-    <div id="line-chart-container-{{this.chartConfig.containerId ? this.chartConfig.containerId : ''}}">
+    <div id="line-chart-container-{{this.containerId ? this.containerId : ''}}" [style]="containerStyle">
     </div>
   `
 })
 export class G2LineChartComponent implements AfterViewInit {
+  @Input()
+  containerId: string = '';
+  @Input()
+  containerStyle: string = "height: 400px; width: 100%;";
   @Input()
   chartConfig: ChartConfig;
 
@@ -22,10 +26,13 @@ export class G2LineChartComponent implements AfterViewInit {
       return;
     }
 
+    this.renderChart();
+  }
+
+  private renderChart() {
     this.chart = new Chart({
-      container: `line-chart-container-${this.chartConfig.containerId}`,
+      container: `line-chart-container-${this.containerId}`,
       autoFit: true,
-      height: this.chartConfig.height,
       padding: this.chartConfig.padding
     });
 
@@ -41,8 +48,8 @@ export class G2LineChartComponent implements AfterViewInit {
     this.chart.tooltip({
       showCrosshairs: true,
       shared: true,
-      itemTpl: toolTip && toolTip.valueTplFormatter
-        ? toolTip.valueTplFormatter(defaultTooltipItemTplPlaceholder)
+      itemTpl: toolTip && toolTip.tplFormatter
+        ? toolTip.tplFormatter(defaultTooltipItemTplPlaceholder)
         : defaultTooltipItemTplPlaceholder
     });
 
@@ -63,7 +70,7 @@ export class G2LineChartComponent implements AfterViewInit {
     this.chart.render();
   }
 
-  configChartAxis({field, formatter, name, position, scale}: AxisConfig): void {
+  private configChartAxis({field, formatter, name, position, scale}: AxisConfig): void {
     this.chart.axis(field, {
       title: {
         text: name,

@@ -10,17 +10,15 @@ export interface AxisConfig {
 }
 
 export interface TooltipConfig {
-  readonly valueTplFormatter?: (tpl: string) => string;
+  readonly tplFormatter?: (tpl: string) => string;
 }
 
 export interface ChartConfig {
-  readonly containerId: string;
   readonly source: Data[];
   readonly dataGroupBy?: string;
   readonly xAxis: AxisConfig;
   readonly yAxis: AxisConfig;
   readonly padding: ViewPadding;
-  readonly height: number;
   readonly toolTip?: TooltipConfig;
 }
 

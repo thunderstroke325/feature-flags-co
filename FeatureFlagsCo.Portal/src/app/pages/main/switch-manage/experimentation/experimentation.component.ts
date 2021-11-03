@@ -328,7 +328,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     });
 
     experiment.chartConfig = ({
-      containerId: experiment.id,
       xAxis: {
         name: xAxisName,
         position: 'end',
@@ -345,8 +344,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       source: source,
       dataGroupBy: 'variation',
       padding: [50, 50, 50, 70],
-      height: 400,
-      toolTip: { valueTplFormatter: tpl => tpl.replace("{value}", `{value} ${valueUnit}`) }
+      toolTip: { tplFormatter: tpl => tpl.replace("{value}", `{value} ${valueUnit}`) },
     });
   }
 
