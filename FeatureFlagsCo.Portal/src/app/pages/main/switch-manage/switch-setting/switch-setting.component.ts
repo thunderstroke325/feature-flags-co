@@ -110,8 +110,8 @@ export class SwitchSettingComponent implements OnInit, OnDestroy {
 
   // 更新开关名字
   onSaveSwitch() {
-    const { id, name } = this.currentSwitch;
-    const data: IFfSettingParams = {id, name};
+    const { id, name, environmentId } = this.currentSwitch;
+    const data: IFfSettingParams = {id, name, environmentId};
 
     if (this.variationOptions.filter(v => v.variationValue === null || v.variationValue === '').length > 0) { // states with no values exist in the array
       this.msg.warning("请确保所有返回状态都没有空值！");
@@ -136,9 +136,7 @@ export class SwitchSettingComponent implements OnInit, OnDestroy {
         this.currentSwitch = result;
         this.switchServe.setCurrentSwitch(result);
         this.msg.success("开关信息更新成功!");
-      }, _ => {
-        this.msg.error("开关信息修改失败，请查看是否有相同名字的开关!");
-      })
+      }, errResponse => this.msg.error(errResponse.error));
   }
 
   // 存档

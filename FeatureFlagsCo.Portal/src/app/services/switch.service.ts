@@ -67,12 +67,14 @@ export class SwitchService {
   // 快速创建新的开关
   public createNewSwitch(name: string = 'demo1', type: FeatureFlagType = FeatureFlagType.Classic) {
     const url = environment.url + '/FeatureFlags/CreateFeatureFlag';
-    return this.http.post(url, {
+    const body = {
       name: name,
       type,
       environmentId: this.envId,
       status: 'Enabled'
-    })
+    };
+
+    return this.http.post(url, body);
   }
 
   // 切换开关状态

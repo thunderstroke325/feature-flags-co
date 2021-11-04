@@ -42,6 +42,7 @@ export interface IFfParams {
 export interface IFfSettingParams {
   id: string;
   name: string;
+  environmentId: number,
   variationOptions?: IVariationOption[] // not null only when nulti state feature flag
 }
 
