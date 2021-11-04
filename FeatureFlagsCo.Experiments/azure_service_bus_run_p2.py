@@ -19,6 +19,6 @@ if __name__ == '__main__':
         prefetch_count = int(get_config_value('p2', 'prefetch_count'))
     except:
         wait_timeout = 30.0
-        prefetch_count = 2
+        prefetch_count = 1
     P2AzureGetExptResultReceiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd, wait_timeout).consume(
         (topic, subscription), prefetch_count=prefetch_count, is_dlq=False)

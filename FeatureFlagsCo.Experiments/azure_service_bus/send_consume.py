@@ -12,8 +12,9 @@ from datetime import timedelta
 from random import choice
 
 import redis
-from azure.servicebus import (ServiceBusClient, ServiceBusMessage,
-                              ServiceBusReceiver, ServiceBusSender)
+from azure.servicebus import (AutoLockRenewer, ServiceBusClient,
+                              ServiceBusMessage, ServiceBusReceiver,
+                              ServiceBusSender)
 from azure.servicebus._common.constants import ServiceBusSubQueue
 from azure.servicebus.exceptions import (MessageAlreadySettled,
                                          MessageLockLostError,
@@ -39,11 +40,11 @@ debug_logger = logging.getLogger('debug_send_consume')
 debug_logger.setLevel(logging.INFO)
 
 # The logging levels below may need to be changed based on the logging that you want to suppress.
-uamqp_logger = logging.getLogger('uamqp')
+uamqp_logger = get_insight_logger('uamqp')
 uamqp_logger.setLevel(logging.ERROR)
 
 # or even further fine-grained control, suppressing the warnings in uamqp.connection module
-uamqp_connection_logger = logging.getLogger('uamqp.connection')
+uamqp_connection_logger = get_insight_logger('uamqp.connection')
 uamqp_connection_logger.setLevel(logging.ERROR)
 
 
@@ -163,11 +164,11 @@ class AzureReceiver(ABC, AzureSender):
 
     def consume(self, topic=(),
                 prefetch_count=10,
-                connection_retries=10,
+                connection_retries=3,
                 settlement_retries=3,
                 is_dlq=False):
 
-        def receive_message(receiver: ServiceBusReceiver, settlement_retries=3, is_dlq=False, instance_id=None):
+        def receive_message(receiver: ServiceBusReceiver, renewer: AutoLockRenewer = None, settlement_retries=3, is_dlq=False, instance_id=None):
             if is_dlq:
                 debug_logger.info("################dlq receiver################")
             else:
@@ -195,6 +196,8 @@ class AzureReceiver(ABC, AzureSender):
 
                         for _ in range(settlement_retries):  # Settlement retry
                             try:
+                                if renewer:
+                                    renewer.register(receiver, msg, max_lock_renewal_duration=60)
                                 if should_complete:
                                     receiver.complete_message(msg)
                                 else:
@@ -258,9 +261,10 @@ class AzureReceiver(ABC, AzureSender):
                             sys.exit(0)
                         except SystemExit:
                             os._exit(0)
-                    with receiver:
-                        logger.info('RECEIVER START', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
-                        receive_message(receiver, settlement_retries=settlement_retries, is_dlq=is_dlq, instance_id=instance_id)
+                    with AutoLockRenewer(max_workers=4) as renewer:
+                        with receiver:
+                            logger.info('RECEIVER START', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
+                            receive_message(receiver, renewer=renewer, settlement_retries=settlement_retries, is_dlq=is_dlq, instance_id=instance_id)
             except ServiceBusError:
                 logger.exception('An error occurred in service bus level, retrying to connect...', extra=get_custom_properties(
                     topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
