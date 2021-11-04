@@ -129,10 +129,10 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
         this.switchServe.setCurrentSwitch(result);
         this.toRouter(result.id);
         this.isOkLoading = false;
-    }, _ => {
-      this.msg.error("创建开关失败，请查看是否有相同名字的开关!");
-      this.isOkLoading = false;
-    })
+      }, errResponse => {
+        this.msg.error(errResponse.error);
+        this.isOkLoading = false;
+      });
   }
 
   // 点击进入对应开关详情
