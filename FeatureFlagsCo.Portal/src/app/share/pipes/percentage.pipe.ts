@@ -6,7 +6,7 @@ export class PercentagePipe implements PipeTransform {
   constructor(private sanitizer: DomSanitizer) {}
 
   transform(value) {
-    if (value === -1) {
+    if (value === -1 || value === '--') {
       return '--'
     } else {
       return (value * 100).toFixed(1) + '%'

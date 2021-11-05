@@ -17,14 +17,64 @@
         <div style="display: flex;flex-direction: row;justify-content: space-between;align-items: center;margin-bottom: 25px;">
           <div class="label" style="margin: 0">零代码网站APP开关设置</div>
           <div class="wrap-right">
-            <button nz-button nzType="primary" (click)="onAddCssSelectorRow()">
-              <i nz-icon nzType="plus" nzTheme="outline"></i>
-              添加
-            </button>
+            <nz-space>
+              <button *nzSpaceItem nz-button nzType="primary" (click)="onAddCssSelectorRow()">
+                <i nz-icon nzType="plus" nzTheme="outline"></i>
+                添加
+              </button>
+              <button *nzSpaceItem class="submit" [nzLoading]="isSaving" nz-button nzType="primary" (click)="doSubmit()">
+                <i nz-icon nzType="save" nzTheme="outline"></i>
+                保存
+              </button>
+            </nz-space>
           </div>
         </div>
 
-        <nz-table [nzLoading]="isSaving" #editRowTable [nzFrontPagination]="false" [nzData]="model.items" [nzSize]="'small'" [nzShowPagination]="false">
+        <nz-card class="experiment" *ngFor="let item of model.items" style="margin-top: 20px;">
+          <div class="info-item">
+            <div class="label">URL</div>
+            <input class="name" nz-input placeholder="页面 URL" [(ngModel)]="item.url" />
+          </div>
+          <div class="info-item">
+            <div class="label">CSS Selector</div>
+            <input class="name" nz-input placeholder="CSS Selector" [(ngModel)]="item.cssSelector" />
+          </div>
+          <div class="info-item">
+            <div class="label">开关特性</div>
+            <nz-select nzPlaceHolder="选择特性" [compareWith]="compareWith" [(ngModel)]="item.variationOption" style="width: 100%">
+              <nz-option *ngFor="let o of currentVariationOptions" [nzValue]="o" [nzLabel]="o.variationValue"></nz-option>
+            </nz-select>
+          </div>
+          <div class="info-item">
+            <div class="label">操作</div>
+            <nz-select nzPlaceHolder="选择操作类型" [(ngModel)]="item.action" (ngModelChange)="itemActionChanged(item)" style="width: 100%">
+              <nz-option *ngFor="let o of actionOptions" [nzValue]="o.value" [nzLabel]="o.label"></nz-option>
+            </nz-select>
+          </div>
+          <ng-container *ngIf="item.action === 'modify'">
+            <div class="info-item">
+              <div class="label">元素属性 <a (click)="addHtmlProperty(item)" style="margin-left:20px;font-weight: 800;font-size: 16px;"><i nz-icon nzType="plus-square" nzTheme="outline"></i></a></div>
+              <div style="display: flex;justify-content: space-between;margin-bottom:5px" *ngFor="let pro of item.htmlProperties">
+                <input type="text" placeholder="属性名，例如 href" style="width:20%" nz-input [(ngModel)]="pro.name" />
+                <input type="text" placeholder="属性值" style="width:79%" nz-input [(ngModel)]="pro.value" />
+                <a (click)="removeHtmlProperty(item, pro.id)" style="margin-top: 5px;margin-left: 15px"><i nz-icon nzType="delete" nzTheme="fill"></i></a>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="label">元素内容 (出于安全性考虑，仅可设置文本内容，请不要输入html)</div>
+              <textarea class="ffc-input" rows="2" nz-input [(ngModel)]="item.htmlContent"></textarea>
+            </div>
+            <div class="info-item">
+              <div class="label">CSS 样式 (请将 CSS 样式填入编辑器中的大括号中)</div>
+              <nz-code-editor class="editor" [(ngModel)]="item.style" [nzEditorOption]="{ language: 'css' }"></nz-code-editor>
+            </div>
+          </ng-container>
+          <div class="info-item" style="text-align: right;margin-bottom: 0;">
+            <button style="background-color: rgba(255, 0, 0, 0.5);color: #fff" nz-button nzType="default" (click)="deleteCssSelectorRow(item.id)">删除</button>
+          </div>
+        </nz-card>
+
+        <!-- <nz-table [nzLoading]="isSaving" #editRowTable [nzFrontPagination]="false" [nzData]="model.items" [nzSize]="'small'" [nzShowPagination]="false">
           <thead>
             <tr class="table-th-style">
               <th>CSS Selector</th>
@@ -34,7 +84,7 @@
               <th nzAlign="center">操作</th>
             </tr>
           </thead>
-          <tbody cdkDropList (cdkDropListDropped)="drop($event)">
+          <tbody>
             <tr *ngFor="let data of model.items" cdkDrag class="editable-row">
               <td>
                 <input type="text" style="width:100%" nz-input [(ngModel)]="data.cssSelector" />
@@ -55,11 +105,8 @@
               </td>
             </tr>
           </tbody>
-        </nz-table>
+        </nz-table> -->
       </div>
-      <div class="info-item">
-        <button class="submit" [nzLoading]="isSaving" nz-button nzType="primary" (click)="doSubmit()">保存</button>
-    </div>
     </div>
   </ng-container>
 </ng-template>

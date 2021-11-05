@@ -1,28 +1,24 @@
 <section class="body">
-    <app-layout>
-        <app-nav-btns name="header" [routeUrl]="'report'" [id]="switchId"></app-nav-btns>
-        <div class="content-body" name="detail" *ngIf="!hideContent">
-          <div style="width: 100%; display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
-            <nz-button-group [nzSize]="'large'" style="width: fit-content;margin-top: 20px;font-size: 13px;">
-              <div style="border-bottom: 1px solid rgba(0, 0, 0, 0.06);width: 100%">
-                <ng-container *ngFor="let btn of navReportConfig;">
-                  <a nz-button style="font-size: 13px;padding: 0 0 2px 0;margin-right: 32px;height: auto;
-                        border-bottom: 1px solid {{timeSpan=== btn.keyValue ? '#4CB287' : 'transparent'}};
-                        color: {{timeSpan=== btn.keyValue ? '#4CB287' : '#000'}}" nzType='link'
-                     (click)="onTimeSpanClcik(btn.keyValue)">{{btn.labelValue}}</a>
-                </ng-container>
-              </div>
-            </nz-button-group>
-          </div>
-          <div style="padding:10px 20px 10px 0;width: 100%;text-align: center;">{{userUsageStr}}</div>
-          <ng-container>
-                <!-- <h2>共有{{totalUsers}}用户被标记，其中{{hitUsers}}人使用此功能</h2> -->
-                <div class="report-echarts" #reportEcharts [style.height]="height">
-                </div>
-                <div class="mask" *ngIf="isLoading">
-                    <nz-spin nzSimple></nz-spin>
-                </div>
-            </ng-container>
+  <app-layout>
+    <app-nav-btns name="header" [routeUrl]="'report'" [id]="switchId"></app-nav-btns>
+    <div name="detail">
+      <nz-button-group [nzSize]="'large'" style="width: fit-content;margin-top: 20px;font-size: 13px;">
+        <div style="border-bottom: 1px solid rgba(0, 0, 0, 0.06);width: 100%">
+          <ng-container *ngFor="let timeSpan of timeSpans;">
+            <a nz-button style="font-size: 13px;padding: 0 0 2px 0;margin-right: 32px;height: auto;
+                        border-bottom: 1px solid {{selectedTimeSpanKey=== timeSpan.key ? '#4CB287' : 'transparent'}};
+                        color: {{selectedTimeSpanKey=== timeSpan.key ? '#4CB287' : '#000'}}" nzType='link'
+               (click)="onTimeSpanClick(timeSpan.key)">{{timeSpan.value}}</a>
+          </ng-container>
         </div>
-    </app-layout>
+      </nz-button-group>
+      <div style="margin: 20px 0;text-align: center;">{{usage}}</div>
+      <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
+        <ng-container *ngIf="!isLoading">
+          <g2-line-chart containerStyle="height: 600px; width: 95%; margin: 0 auto;" [chartConfig]="chartConfig">
+          </g2-line-chart>
+        </ng-container>
+      </nz-spin>
+    </div>
+  </app-layout>
 </section>

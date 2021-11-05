@@ -1,3 +1,5 @@
+import {ChartConfig} from "src/app/share/uis/g2-chart/g2-line-chart/g2-line-chart";
+
 export enum EventType {
   Custom = 1,
   PageView = 2,
@@ -58,7 +60,9 @@ export interface IExperiment {
   variations: string[],
   iterations?: IExperimentIteration[],
   selectedIteration?: IExperimentIteration,
-  isLoading?: boolean
+  isLoading?: boolean,
+  isChartExpanded?: boolean,
+  chartConfig?: ChartConfig,
 }
 
 export interface IExperimentIteration {
@@ -69,7 +73,9 @@ export interface IExperimentIteration {
   updatedAtStr?: string,
   results: IExperimentIterationResult[],
   dateTimeInterval?: string,
-  numericConfidenceIntervalBoundary?: number[] // [min, max, max - min]
+  numericConfidenceIntervalBoundary?: number[], // [min, max, max - min]
+  customEventTrackOption: CustomEventTrackOption,
+  customEventUnit: string
 }
 
 export interface IExperimentIterationResult {
@@ -82,5 +88,7 @@ export interface IExperimentIterationResult {
   pValue: number, // float
   uniqueUsers: number, // long
   variation: string,
+  variationValue: string,
+  average: number,
   confidenceInterval: number[] // float[]
 }

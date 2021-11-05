@@ -1,9 +1,11 @@
-﻿using FeatureFlags.APIs.Models;
+﻿using System;
+using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 
@@ -110,5 +112,14 @@ namespace FeatureFlags.APIs.Services
 
         public async Task RemoveAsync(string id) =>
             await _featureFlags.DeleteOneAsync(book => book.Id == id);
+
+        public async Task<bool> CheckNameHasBeenUsedAsync(int envId, string name)
+        {
+            var featureFlag = await _featureFlags
+                .Find(flag => flag.EnvironmentId == envId && flag.FF.Name == name)
+                .FirstOrDefaultAsync();
+
+            return featureFlag != null;
+        }
     }
 }

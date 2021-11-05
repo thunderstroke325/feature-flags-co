@@ -1,14 +1,15 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, SecurityContext } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FfcService } from 'src/app/services/ffc.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IVariationOption } from '../types/switch-new';
 import { ZeroCodeService } from 'src/app/services/zero-code.service';
-import { IZeroCode } from '../types/zero-code';
+import { ICssSelectorItem, IZeroCode } from '../types/zero-code';
 import { uuidv4 } from 'src/app/utils';
 import { IProjectEnv } from 'src/app/config/types';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { NzConfigService } from 'ng-zorro-antd/core/config';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'zero-code-settings',
@@ -30,12 +31,28 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
   isLoading = true;
 
   model: IZeroCode;
+
+  actionOptions: {[key: string]: string}[] = [
+    { value: 'show', label: "显示页面元素"}, { value: 'modify', label: '修改页面元素'}
+  ];
+
   constructor(
     private route: ActivatedRoute,
     private switchServe: SwitchService,
     private zeroCodeService: ZeroCodeService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private nzConfigService: NzConfigService,
+    private sanitizer: DomSanitizer
   ) {
+    // set monaco editor mode
+    const defaultEditorOption = this.nzConfigService.getConfigForComponent('codeEditor')?.defaultEditorOption || {};
+    this.nzConfigService.set('codeEditor', {
+      defaultEditorOption: {
+        ...defaultEditorOption,
+        theme:'vs-dark'
+      }
+    });
+
     this.featureFlagId = decodeURIComponent(this.route.snapshot.params['id']);
     const currentProjectEnv: IProjectEnv = JSON.parse(localStorage.getItem('current-project'));
     this.model = {
@@ -63,14 +80,24 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
     }
   }
 
-  drop(event: CdkDragDrop<string[]>): void {
-    moveItemInArray(this.model.items, event.previousIndex, event.currentIndex);
+  itemActionChanged(item: ICssSelectorItem) {
+    if (item.action === 'show') {
+      item.htmlContent = null;
+      item.htmlProperties = [];
+      item.style = '.ffc-style {\r\n\r\n}';
+    }
   }
 
   private initData() {
     this.zeroCodeService.getZeroCodes(this.switchServe.envId, this.featureFlagId).subscribe((res: IZeroCode) => {
       if (res) {
         this.model = res;
+        this.model.items = res.items.map(itm => {
+          return Object.assign({}, itm, {
+            htmlProperties: itm.htmlProperties || [],
+            style: !!itm.style ? itm.style : '.ffc-style {\r\n\r\n}'
+          });
+        })
       }
 
       this.isLoading = false;
@@ -78,6 +105,14 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
       this.message.error('数据加载失败');
       this.isLoading = false;
     })
+  }
+
+  addHtmlProperty(item: ICssSelectorItem) {
+    item.htmlProperties = [...item.htmlProperties, { id: uuidv4(), name: null, value: null}];
+  }
+
+  removeHtmlProperty(item: ICssSelectorItem, id: string) {
+    item.htmlProperties = item.htmlProperties.filter(d => d.id !== id);
   }
 
   onAddCssSelectorRow() {
@@ -88,6 +123,10 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
         cssSelector: null,
         description: null,
         variationOption: null,
+        action: null,
+        htmlProperties: [],
+        htmlContent: null,
+        style: '.ffc-style {\r\n\r\n}',
         url: null
       }
     ];
@@ -99,9 +138,27 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
 
   isSaving: boolean = false;
   doSubmit() {
+    let styleHasError = false;
+    const data = Object.assign({}, this.model);
+    data.items = this.model.items.map(itm => {
+      styleHasError ||= !!itm.style && !itm.style.startsWith('.ffc-style {');
+      return Object.assign({}, itm, {
+        style: this.sanitizer.sanitize(SecurityContext.STYLE, itm.style || ''),
+        htmlProperties: itm.htmlProperties?.map(p => Object.assign({}, p, {
+          name: this.sanitizer.sanitize(SecurityContext.HTML, p.name || ''),
+          value: this.sanitizer.sanitize(SecurityContext.HTML, p.value || '')
+        }))
+      });
+    });
+
+    if (styleHasError) {
+      this.message.error('请保留 包裹 CSS 样式的 .ffc-style 部分');
+      return;
+    }
+
     this.isSaving = true;
 
-    this.zeroCodeService.upsert(this.model)
+    this.zeroCodeService.upsert(data)
       .subscribe(
         res => {
           this.isSaving = false;

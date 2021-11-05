@@ -5,7 +5,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from 'src/app/services/experiment.service';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IVariationOption } from '../types/switch-new';
-import { environment } from './../../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment } from '../types/experimentations';
 import * as moment from 'moment';
 
@@ -89,11 +89,18 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
                     expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
                   }
+
+                  // update experiment original iterations
+                  const selectedIterationIndex = expt.iterations.findIndex(iteration => iteration.id === expt.selectedIteration.id);
+                  expt.iterations[selectedIterationIndex] = expt.selectedIteration;
                 }
               });
             }
 
-            this.onGoingExperiments.forEach(expt => expt.isLoading = false);
+            this.onGoingExperiments.forEach(expt => {
+              expt.isLoading = false;
+              this.initChartConfig(expt);
+            });
           }, _ => {
             this.onGoingExperiments.forEach(expt => expt.isLoading = false);
           });
@@ -133,6 +140,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         });
 
         this.onGoingExperiments = [...this.experimentList.filter(expt => expt.status === ExperimentStatus.Recording)];
+        this.experimentList.forEach(experiment => this.initChartConfig(experiment));
       }
       this.isInitLoading = false;
     }, _ => {
@@ -247,6 +255,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
         return !found ? this.createEmptyIterationResult(option, baselineVariation) : Object.assign({}, found, {
           conversion: found.conversion === -1 ? '--' : found.conversion,
+          conversionRate: found.conversionRate === -1 ? '--' : found.conversionRate,
           uniqueUsers: found.uniqueUsers === -1 ? '--' : found.uniqueUsers,
           totalEvents: found.totalEvents === -1 ? '--' : found.totalEvents,
           average: found.average === -1 ? '--' : found.average,
@@ -275,6 +284,68 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       confidenceInterval: [-1, -1],
       isBaseline: baselineVariation === `${option.localId}`
      };
+  }
+
+  private initChartConfig(experiment: IExperiment) {
+    const iterations = experiment.iterations;
+    if (!iterations || !iterations.length) {
+      return;
+    }
+
+    const xAxisName = '时间';
+    const trackOption = iterations[0].customEventTrackOption;
+    const valueUnit = trackOption === CustomEventTrackOption.Conversion
+      ? '%' : (iterations[0].customEventUnit ? iterations[0].customEventUnit : '');
+    const yAxisName = trackOption === CustomEventTrackOption.Conversion
+      ? `转换率（${valueUnit}）`
+      : iterations[0].customEventUnit ? `平均值（${valueUnit}）` : '平均值';
+
+    let source = [];
+    let yAxisFormatter;
+    iterations.forEach(iteration => {
+      const xAxisValue = iteration.endTime ? iteration.endTime : iteration.updatedAt;
+      iteration.results.forEach(result => {
+        if (!result.variation ||
+          !this.currentVariationOptions.find(option => option.localId.toString() == result.variation)
+        ) {
+          return;
+        }
+
+        // see function **processIteration**
+        // conversionRate average 这两个值为 -1 时 会被修改为 '--' 代表 '没有值' 显示为 0
+        let yAxisValue;
+        if (trackOption === CustomEventTrackOption.Conversion) {
+          const conversionRate = Number(result.conversionRate);
+          yAxisValue = conversionRate ? conversionRate * 100 : 0;
+          yAxisFormatter = val => `${val} %`;
+        } else {
+          const average = Number(result.average);
+          yAxisValue = average ? average : 0;
+        }
+
+        source.push({variation: result.variationValue, time: xAxisValue, value: yAxisValue});
+      });
+    });
+
+    experiment.chartConfig = ({
+      xAxis: {
+        name: xAxisName,
+        position: 'end',
+        field: 'time',
+        scale: {type: "timeCat", nice: true, range: [0.05, 0.95], mask: 'YYYY-MM-DD HH:mm'}
+      },
+      yAxis: {
+        name: yAxisName,
+        position: 'end',
+        field: 'value',
+        formatter: yAxisFormatter,
+        scale: {nice: true}
+      },
+      source: source,
+      dataGroupBy: 'variation',
+      padding: [50, 50, 50, 70],
+      toolTip: { tplFormatter: tpl => tpl.replace("{value}", `{value} ${valueUnit}`) },
+    });
   }
 
   /************************** above are for new experiment ****************************************/

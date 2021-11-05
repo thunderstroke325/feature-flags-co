@@ -174,8 +174,15 @@ namespace FeatureFlags.APIs.Controllers
         // The multi state FF is supported
         [HttpPost]
         [Route("CreateFeatureFlag")]
-        public async Task<CreateFeatureFlagViewModel> CreateFeatureFlag([FromBody] CreateFeatureFlagViewModel param)
+        public async Task<dynamic> CreateFeatureFlag([FromBody] CreateFeatureFlagViewModel param)
         {
+            var nameHasBeenUsed =
+                await _mongoDbFeatureFlagService.CheckNameHasBeenUsedAsync(param.EnvironmentId, param.Name);
+            if (nameHasBeenUsed)
+            {
+                return StatusCode(StatusCodes.Status409Conflict, "创建开关失败，请查看是否有相同名字的开关!");
+            }
+            
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             param.CreatorUserId = currentUserId;
             var ids = await _featureFlagService.GetAccountAndProjectIdByEnvironmentIdAsync(param.EnvironmentId);
@@ -198,42 +205,51 @@ namespace FeatureFlags.APIs.Controllers
         // The multi state FF is supported
         [HttpPut]
         [Route("UpdateFeatureFlagSetting")]
-        public async Task<FeatureFlagSettings> UpdateFeatureFlagSetting([FromBody] FeatureFlagSettings param)
+        public async Task<dynamic> UpdateFeatureFlagSetting([FromBody] FeatureFlagSettings param)
         {
-            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
-            FeatureFlag ff = await _noSqlDbService.GetFeatureFlagAsync(param.Id);
-            ff.FF.LastUpdatedTime = DateTime.UtcNow;
-            ff.FF.Name = param.Name;
+            var featureFlag = await _noSqlDbService.GetFeatureFlagAsync(param.Id);
+            if (featureFlag.FF.Name != param.Name)
+            {
+                var nameHasBeenUsed =
+                    await _mongoDbFeatureFlagService.CheckNameHasBeenUsedAsync(param.EnvironmentId, param.Name);
+                if (nameHasBeenUsed)
+                {
+                    return StatusCode(StatusCodes.Status409Conflict, "开关信息修改失败，请查看是否有相同名字的开关!");
+                }
+            }
+            
+            featureFlag.FF.LastUpdatedTime = DateTime.UtcNow;
+            featureFlag.FF.Name = param.Name;
 
-            ff.VariationOptions = param.VariationOptions;
-            ff.FF.DefaultRulePercentageRollouts.ForEach(d => d.ValueOption = param.VariationOptions.FirstOrDefault(v => v.LocalId == d.ValueOption.LocalId));
-            ff.FF.VariationOptionWhenDisabled = param.VariationOptions.FirstOrDefault(o => o.LocalId == ff.FF.VariationOptionWhenDisabled.LocalId);
-            ff.FFTUWMTR.ForEach(f => {
+            featureFlag.VariationOptions = param.VariationOptions;
+            featureFlag.FF.DefaultRulePercentageRollouts.ForEach(d => d.ValueOption = param.VariationOptions.FirstOrDefault(v => v.LocalId == d.ValueOption.LocalId));
+            featureFlag.FF.VariationOptionWhenDisabled = param.VariationOptions.FirstOrDefault(o => o.LocalId == featureFlag.FF.VariationOptionWhenDisabled.LocalId);
+            featureFlag.FFTUWMTR.ForEach(f => {
                 f.ValueOptionsVariationRuleValues.ForEach(v => v.ValueOption = param.VariationOptions.FirstOrDefault(o => o.LocalId == v.ValueOption.LocalId));
             });
-            ff.TargetIndividuals = ff.TargetIndividuals.Select(t => new TargetIndividualForVariationOption { 
+            featureFlag.TargetIndividuals = featureFlag.TargetIndividuals.Select(t => new TargetIndividualForVariationOption { 
                 ValueOption = param.VariationOptions.FirstOrDefault(v => v.LocalId == t.ValueOption.LocalId),
                 Individuals = t.Individuals
             }).ToList().FindAll(t => t.ValueOption != null);
 
             // update prerequistes
-            foreach (var f in ff.FFP)
+            foreach (var f in featureFlag.FFP)
             {
                 var prerequisite = await _noSqlDbService.GetFeatureFlagAsync(f.PrerequisiteFeatureFlagId);
                 f.ValueOptionsVariationValue = prerequisite.VariationOptions.FirstOrDefault(v => v.LocalId == f.ValueOptionsVariationValue.LocalId);
             }
 
             // update zero code settings
-            var zeroCodeSetting = await _mongoDbFFZCSService.GetByEnvAndFeatureFlagIdAsync(ff.EnvironmentId, ff.Id);
+            var zeroCodeSetting = await _mongoDbFFZCSService.GetByEnvAndFeatureFlagIdAsync(featureFlag.EnvironmentId, featureFlag.Id);
             if (zeroCodeSetting != null) 
             {
                 zeroCodeSetting.Items.ForEach(i => i.VariationOption = param.VariationOptions.FirstOrDefault(o => o.LocalId == i.VariationOption.LocalId));
                 await _mongoDbFFZCSService.UpdateAsync(zeroCodeSetting.Id, zeroCodeSetting);
             }
 
-            await _noSqlDbService.UpdateFeatureFlagAsync(ff);
-            param.LastUpdatedTime = ff.FF.LastUpdatedTime;
-            param.KeyName = ff.FF.KeyName;
+            await _noSqlDbService.UpdateFeatureFlagAsync(featureFlag);
+            param.LastUpdatedTime = featureFlag.FF.LastUpdatedTime;
+            param.KeyName = featureFlag.FF.KeyName;
             return param;
         }
 

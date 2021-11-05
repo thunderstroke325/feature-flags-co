@@ -14,6 +14,9 @@ if __name__ == '__main__':
     redis_passwd = get_config_value('redis', 'redis_passwd')
     topic = get_config_value('p1', 'topic_Q1')
     subscription = get_config_value('p1', 'subscription_Q1')
-
+    try:
+        prefetch_count = int(get_config_value('p1', 'prefetch_count'))
+    except:
+        prefetch_count = 10
     P1AzureGetExptRecordingInfoReceiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd).consume(
-        (topic, subscription), is_dlq=True)
+        (topic, subscription), prefetch_count=prefetch_count, is_dlq=True)

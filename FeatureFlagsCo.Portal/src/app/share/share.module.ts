@@ -38,9 +38,10 @@ import { MetricDrawerComponent } from './uis/metric-drawer/metric-drawer.compone
 import { ExperimentDrawerComponent } from './uis/experiment-drawer/experiment-drawer.component';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { PercentagePipe } from 'src/app/share/pipes/percentage.pipe';
+import { G2LineChartComponent } from './uis/g2-chart/g2-line-chart/g2-line-chart.component';
 
 @NgModule({
-  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent, PercentagePipe],
+  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent, PercentagePipe, G2LineChartComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -67,7 +68,6 @@ import { PercentagePipe } from 'src/app/share/pipes/percentage.pipe';
     NzUploadModule,
     NzTagModule,
     NzToolTipModule,
-    ReactiveFormsModule
   ],
   exports: [
     CommonModule,
@@ -86,7 +86,8 @@ import { PercentagePipe } from 'src/app/share/pipes/percentage.pipe';
     UploadDrawerComponent,
     MetricDrawerComponent,
     ExperimentDrawerComponent,
-    PercentagePipe
+    PercentagePipe,
+    G2LineChartComponent
   ]
 })
 export class ShareModule { }

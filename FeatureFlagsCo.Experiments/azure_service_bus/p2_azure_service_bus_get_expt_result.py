@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from time import sleep
 
 from algo.expt_cal import calc_customevent_conversion, calc_customevent_numeric
+from azure_service_bus.utils import decode
 from config.config_handling import get_config_value
 
 from azure_service_bus.insight_utils import (get_custom_properties,
@@ -39,8 +40,12 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
         env_ff_id = '%s_%s' % (env_id, flag_id)
         env_event_id = '%s_%s' % (env_id, event_name)
         # Get list of events from Redis
-        list_ff_events = value_events_ff if (value_events_ff := self.redis_get(env_ff_id)) else []
-        list_user_events = value_user_events if (value_user_events := self.redis_get(env_event_id)) else []
+        with self.redis.pipeline() as pipeline:
+            pipeline.lrange(env_ff_id, 0, -1)
+            pipeline.lrange(env_event_id, 0, -1)
+            res = pipeline.execute()
+        list_ff_events = [decode(ele) for ele in res[0]]
+        list_user_events = [decode(ele) for ele in res[1]]
         # Filter Event according to Experiment StartTime
         list_ff_events = [ff_event for ff_event in list_ff_events if datetime.strptime(ff_event['TimeStamp'], fmt) >= ExptStartTime]
         list_user_events = [user_event for user_event in list_user_events if datetime.strptime(user_event['TimeStamp'], fmt) >= ExptStartTime]
@@ -51,7 +56,7 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             list_user_events = [user_event for user_event in list_user_events if datetime.strptime(user_event['TimeStamp'], fmt) <= ExptEndTime]
         return expt, ExptStartTime, ExptEndTime, flag_id, event_name, env_id, list_ff_events, list_user_events
 
-    def __update_redis_with_EndExpt(self, list_ff_events, list_user_events, fmt, ExptStartTime, ExptEndTime, expt_id, expt, current_topic='q2'):
+    def __update_redis_with_EndExpt(self, list_ff_events, list_user_events, fmt, ExptStartTime, ExptEndTime, expt_id, expt, current_topic='q2', instance_id=None):
         # Time to take decision to wait or not the upcomming event data
         para_delay_reception = 1
         para_wait_processing = 1
@@ -77,58 +82,47 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
         # last event received within N minutes, no potential recepton delay, proceed data deletion
         else:
             p2_debug_logger.info('Update info and delete stopped Experiment data')
-            ops = []
-            # del expt
-            ops.append(('del', expt_id, None))
-
+            is_del_all_ff_events, is_del_all_user_events = False, False
             # ACTION : Update dict_flag_acitveExpts
-            id = 'dict_ff_act_expts_%s_%s' % (expt['EnvId'], expt['FlagId'])
-            dict_flag_acitveExpts = self.redis_get(id)
-            flag_active_expts = []
-            if dict_flag_acitveExpts:
-                flag_active_expts = [ele for ele in dict_flag_acitveExpts[expt['FlagId']] if ele != expt_id]
-                dict_flag_acitveExpts[expt['FlagId']] = flag_active_expts
-                if flag_active_expts:
-                    ops.append(('set', id, dict_flag_acitveExpts))
-                else:
-                    # ACTION: Delete in Redis > list_FFevent related to FlagI
-                    ops.append(('del', id, None))
-                    events_id = '%s_%s' % (expt['EnvId'], expt['FlagId'])
-                    ops.append(('del', events_id, None))
+            ff_act_expts_id = 'dict_ff_act_expts_%s_%s' % (expt['EnvId'], expt['FlagId'])
+            self.redis.srem(ff_act_expts_id, expt_id)
+            if self.redis.scard(ff_act_expts_id) == 0:
+                is_del_all_ff_events = True
+
             # ACTION : Update dict_customEvent_acitveExpts
-            id = 'dict_event_act_expts_%s_%s' % (expt['EnvId'], expt['EventName'])
-            dict_customEvent_acitveExpts = self.redis_get(id)
-            customEvent_active_expts = []
-            if dict_customEvent_acitveExpts:
-                customEvent_active_expts = [ele for ele in dict_customEvent_acitveExpts[expt['EventName']] if ele != expt_id]
-                dict_customEvent_acitveExpts[expt['EventName']] = customEvent_active_expts
-                if customEvent_active_expts:
-                    ops.append(('set', id, dict_customEvent_acitveExpts))
-                else:
-                    # ACTION: Delete in Redis > list_Exptevent related to EventName
-                    ops.append(('del', id, None))
-                    events_id = '%s_%s' % (expt['EnvId'], expt['EventName'])
-                    ops.append(('del', events_id, None))
+            event_act_expts_id = 'dict_event_act_expts_%s_%s' % (expt['EnvId'], expt['EventName'])
+            self.redis.srem(event_act_expts_id, expt_id)
+            if self.redis.scard(event_act_expts_id) == 0:
+                is_del_all_user_events = True
 
-            # del expt expired time
-            dict_from_redis = self.redis_get('dict_expt_last_exec_time')
-            if dict_from_redis:
-                expt_last_exec_time = dict_from_redis.get(expt_id, None)
-                if expt_last_exec_time:
-                    dict_from_redis.pop(expt_id, None)
-                    ops.append(('set', 'dict_expt_last_exec_time', dict_from_redis))
-            self.redis_pipeline_set_del(ops)
+            with self.redis.pipeline() as pipeline:
+                # del expt
+                ids = [expt_id]
+                if is_del_all_ff_events:
+                    # if ff is not related to any expt, remove ff events
+                    ff_events_id = '%s_%s' % (expt['EnvId'], expt['FlagId'])
+                    ids.append(ff_act_expts_id)
+                    ids.append(ff_events_id)
+                if is_del_all_user_events:
+                    # if user is not related to any expt, remove user events
+                    user_events_id = '%s_%s' % (expt['EnvId'], expt['EventName'])
+                    ids.append(event_act_expts_id)
+                    ids.append(user_events_id)
+                pipeline.delete(*ids)
+                # del expt expired time
+                pipeline.hdel('dict_expt_last_exec_time', expt_id)
+                pipeline.execute()
             self._last_expt_id = ''
-            p2_logger.info('EXPT FINISH', extra=get_custom_properties(topic=current_topic, expt=expt_id))
+            p2_logger.info('EXPT FINISH', extra=get_custom_properties(topic=current_topic, expt=expt_id, instance=f'{current_topic}-{instance_id}'))
 
-    def handle_body(self, current_topic, body):
+    def handle_body(self, instance_id, current_topic, body):
+        p2_logger.info('EXPT IN', extra=get_custom_properties(topic=current_topic, expt=body, instance=f'{current_topic}-{instance_id}'))
         starttime = datetime.now()
         expt_id = body
-        value = self.redis_get(expt_id)
+        value = decode(value) if (value := self.redis.get(expt_id)) else False
         fmt = '%Y-%m-%dT%H:%M:%S.%f'
         # Create or Get last_exec_time for each expt_id
-        dict_expt_last_exec_time = dict_from_redis if (dict_from_redis := self.redis_get('dict_expt_last_exec_time')) else {}
-        last_exec_time = dict_expt_last_exec_time.get(expt_id, None)
+        last_exec_time = last_exec_time if (last_exec_time := self.redis.hget('dict_expt_last_exec_time', expt_id)) else False
         interval_to_wait = 0
         if expt_id == self._last_expt_id:
             interval_to_wait = self._wait_timeout
@@ -138,10 +132,10 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             interval = datetime.now() - datetime.strptime(last_exec_time, fmt)
             if abs(interval.total_seconds()) < self._wait_timeout:
                 interval_to_wait = self._wait_timeout - abs(interval.total_seconds())
-        if interval_to_wait:
+        if interval_to_wait > 0 and interval_to_wait <= self._wait_timeout:
+            p2_logger.info('EXPT SLEEP', extra=get_custom_properties(topic=current_topic, expt=expt_id, instance=f'{current_topic}-{instance_id}', sleep_time=str(interval_to_wait)))
             sleep(interval_to_wait)
-        dict_expt_last_exec_time[expt_id] = datetime.now().strftime(fmt)
-        self.redis_set('dict_expt_last_exec_time', dict_expt_last_exec_time)
+        self.redis.hset('dict_expt_last_exec_time', expt_id, datetime.now().strftime(fmt))
         self._last_expt_id = expt_id
         p2_debug_logger.info(f'########p2 gets {value}#########')
         # If experiment info exist
@@ -190,8 +184,8 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             else:
                 # experiment has got its deadline
                 # Decision to delete or not event related data
-                self.__update_redis_with_EndExpt(list_ff_events, list_user_events, fmt, ExptStartTime, ExptEndTime, expt_id, expt, current_topic)
+                self.__update_redis_with_EndExpt(list_ff_events, list_user_events, fmt, ExptStartTime, ExptEndTime, expt_id, expt, current_topic, instance_id)
             endtime = datetime.now()
             delta = endtime - starttime
             p2_debug_logger.info(f'#########p2 processing time in seconds: {delta.total_seconds()}#########')
-            p2_logger.info('EXPT HEALTHY', extra=get_custom_properties(topic=current_topic, expt=expt_id))
+            p2_logger.info('EXPT OUT', extra=get_custom_properties(topic=current_topic, expt=expt_id, instance=f'{current_topic}-{instance_id}'))

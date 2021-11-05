@@ -251,6 +251,14 @@
                     </ng-container>
                   </tbody>
                 </nz-table>
+                <ng-container *ngIf="experiment.isChartExpanded">
+                  <g2-line-chart [containerId]="experiment.id" [chartConfig]="experiment.chartConfig"></g2-line-chart>
+                </ng-container>
+                <div style="text-align: center; margin-top: 10px">
+                  <button nz-button nzType="default" (click)="experiment.isChartExpanded = !experiment.isChartExpanded">
+                    {{ experiment.isChartExpanded ? '收起图表' : '查看图表' }}
+                  </button>
+                </div>
               </nz-spin>
           </nz-card>
         </div>

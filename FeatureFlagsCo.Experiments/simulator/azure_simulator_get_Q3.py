@@ -7,7 +7,7 @@ logger.setLevel(logging.INFO)
 
 
 class AzureSimulatorQ3Receiver(AzureReceiver):
-    def handle_body(self, topic, body):
+    def handle_body(self, instance_id, topic, body):
         logger.info(" [mq] %r" % body)
 
 

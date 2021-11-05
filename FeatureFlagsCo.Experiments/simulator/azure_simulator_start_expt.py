@@ -28,7 +28,7 @@ if __name__ == '__main__':
         # Expt1
         # Q1 start
         expts = []
-        for expt_num in range(1, 11):
+        for expt_num in range(1, 21):
             Q1_START = {
                 "ExptId": f"FF__38__48__103__PayButton_{expt_num}_exp{expt_num}",
                 "IterationId": "2",
@@ -49,12 +49,12 @@ if __name__ == '__main__':
         sender.send(bus, topic_1, origin_1, *expts)
         sender.clear()
         logger.info('send to Q1 expt start')
-        for expt_num in range(1, 11):
+        for expt_num in range(1, 21):
             sender = AzureSender(None, redis_host, redis_port, redis_passwd)
 
             for group in range(1, 4):
                 events = []
-                for user in range(1000):
+                for user in range(200):
                     # Q4
                     Q4 = {
                         "RequestPath": "index/paypage",
@@ -75,8 +75,8 @@ if __name__ == '__main__':
 
             for group in range(1, 4):
                 events = []
-                weight = choice([i for i in range(100, 310)])
-                for user in range(1000 - weight * group):
+                weight = choice([i for i in range(10, 60)])
+                for user in range(200 - weight * group):
                     Q5 = {
                         "Route": "index",
                         "Secret": "YjA1LTNiZDUtNCUyMDIxMDkwNDIyMTMxNV9fMzhfXzQ4X18xMDNfX2RlZmF1bHRfNzc1Yjg=",
