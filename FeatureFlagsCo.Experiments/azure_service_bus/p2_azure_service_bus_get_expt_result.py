@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-# from time import sleep
+from time import sleep
 
 from algo.expt_cal import calc_customevent_conversion, calc_customevent_numeric
 from azure_service_bus.utils import decode
@@ -133,9 +133,8 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             if abs(interval.total_seconds()) < self._wait_timeout:
                 interval_to_wait = self._wait_timeout - abs(interval.total_seconds())
         if interval_to_wait > 0 and interval_to_wait <= self._wait_timeout:
-            # p2_logger.info('EXPT SLEEP', extra=get_custom_properties(topic=current_topic, expt=expt_id, instance=f'{current_topic}-{instance_id}', sleep_time=str(interval_to_wait)))
-            # sleep(interval_to_wait)
-            pass
+            p2_logger.info('EXPT SLEEP', extra=get_custom_properties(topic=current_topic, expt=expt_id, instance=f'{current_topic}-{instance_id}', sleep_time=str(interval_to_wait)))
+            sleep(interval_to_wait)
         self.redis.hset('dict_expt_last_exec_time', expt_id, datetime.now().strftime(fmt))
         self._last_expt_id = expt_id
         p2_debug_logger.info(f'########p2 gets {value}#########')
