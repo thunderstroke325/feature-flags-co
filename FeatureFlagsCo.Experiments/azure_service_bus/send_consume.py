@@ -4,11 +4,9 @@ import base64
 import hashlib
 import hmac
 import logging
-import os
-import sys
 import time
 from abc import ABC
-from datetime import timedelta
+from datetime import datetime, timedelta
 from random import choice
 
 import redis
@@ -22,9 +20,10 @@ from azure.servicebus.exceptions import (MessageAlreadySettled,
                                          MessageSizeExceededError,
                                          ServiceBusError)
 
+from azure_service_bus.constants import FMT
 from azure_service_bus.insight_utils import (get_custom_properties,
                                              get_insight_logger)
-from azure_service_bus.utils import decode, encode
+from azure_service_bus.utils import decode, encode, quite_app
 
 try:
     from urllib.parse import quote as url_parse_quote
@@ -168,7 +167,7 @@ class AzureReceiver(ABC, AzureSender):
                 settlement_retries=3,
                 is_dlq=False):
 
-        def receive_message(receiver: ServiceBusReceiver, renewer: AutoLockRenewer = None, settlement_retries=3, is_dlq=False, receiver_name=None):
+        def receive_message(receiver: ServiceBusReceiver, topic=None, instance=None, renewer: AutoLockRenewer = None, settlement_retries=3, is_dlq=False):
             if is_dlq:
                 debug_logger.info("################dlq receiver################")
             else:
@@ -176,7 +175,8 @@ class AzureReceiver(ABC, AzureSender):
             should_retry = True
             while should_retry:
                 try:
-                    debug_logger.info(f'################pulling the message into {receiver_name}"################')
+                    debug_logger.info(f'################pulling the message into {topic}-{instance}################')
+                    self.redis.hset('topic_pulling_last_exec_time', topic, datetime.utcnow().strftime(FMT))
                     for msg in receiver.receive_messages(max_message_count=None, max_wait_time=60):
                         last_error = None
                         try:
@@ -207,6 +207,7 @@ class AzureReceiver(ABC, AzureSender):
                                     # maybe put the message into dead_letter_queue
                                     if isinstance(last_error, redis.RedisError):
                                         if not self.redis.ping():
+                                            logger.exception('CANNOT PING redis, trying to reconnect...')
                                             self._init__redis_connection(self._redis_host,
                                                                          self._redis_port,
                                                                          self._redis_passwd)
@@ -258,14 +259,11 @@ class AzureReceiver(ABC, AzureSender):
                                                                            prefetch_count=prefetch_count,
                                                                            sub_queue=ServiceBusSubQueue.DEAD_LETTER)
                     else:
-                        try:
-                            sys.exit(0)
-                        except SystemExit:
-                            os._exit(0)
+                        quite_app(0)
                     with AutoLockRenewer(max_workers=4) as renewer:
                         with receiver:
                             logger.info('RECEIVER START', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
-                            receive_message(receiver, renewer=renewer, settlement_retries=settlement_retries, is_dlq=is_dlq, receiver_name=f'{topic_name}-{instance_id}')
+                            receive_message(receiver, topic=topic_name, instance=instance_id, renewer=renewer, settlement_retries=settlement_retries, is_dlq=is_dlq)
             except ServiceBusError:
                 logger.exception('An error occurred in service bus level, retrying to connect...', extra=get_custom_properties(
                     topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
@@ -274,17 +272,10 @@ class AzureReceiver(ABC, AzureSender):
                 continue
             except KeyboardInterrupt:
                 debug_logger.info('################Interrupted################')
-                try:
-                    sys.exit(0)
-                except SystemExit:
-                    os._exit(0)
+                quite_app(0)
             except:
                 logger.exception('unexpected error ooccurs, retrying to connect...', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
                 continue
 
-        try:
-            logger.warning('APP QUIT', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}', reason='TOO MANY RETRIES'))
-            self.clear()
-            sys.exit(1)
-        except:
-            os._exit(1)
+        logger.warning('APP QUIT', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}', reason='TOO MANY RETRIES'))
+        quite_app(1)

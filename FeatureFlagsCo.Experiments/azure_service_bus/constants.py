@@ -25,3 +25,5 @@ P3_USER_EVENT_NECESSAIRE_KEYS = ['EnvironmentId',
                                  'EventName',
                                  'NumericValue',
                                  'TimeStamp']
+
+FMT = '%Y-%m-%dT%H:%M:%S.%f'

@@ -3,12 +3,13 @@ from datetime import datetime, timedelta
 from time import sleep
 
 from algo.expt_cal import calc_customevent_conversion, calc_customevent_numeric
-from azure_service_bus.utils import decode
 from config.config_handling import get_config_value
 
+from azure_service_bus.constants import FMT
 from azure_service_bus.insight_utils import (get_custom_properties,
                                              get_insight_logger)
 from azure_service_bus.send_consume import AzureReceiver
+from azure_service_bus.utils import decode
 
 p2_logger = get_insight_logger('trace_p2_azure_service_bus_get_expt_result')
 p2_logger.setLevel(logging.INFO)
@@ -116,11 +117,10 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             p2_logger.info('EXPT FINISH', extra=get_custom_properties(topic=current_topic, expt=expt_id, instance=f'{current_topic}-{instance_id}'))
 
     def handle_body(self, instance_id, current_topic, body):
-        p2_logger.info('EXPT IN', extra=get_custom_properties(topic=current_topic, expt=body, instance=f'{current_topic}-{instance_id}'))
         starttime = datetime.now()
         expt_id = body
         value = decode(value) if (value := self.redis.get(expt_id)) else False
-        fmt = '%Y-%m-%dT%H:%M:%S.%f'
+        fmt = FMT
         # Create or Get last_exec_time for each expt_id
         last_exec_time = last_exec_time if (last_exec_time := self.redis.hget('dict_expt_last_exec_time', expt_id)) else False
         interval_to_wait = 0
@@ -133,7 +133,7 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             if abs(interval.total_seconds()) < self._wait_timeout:
                 interval_to_wait = self._wait_timeout - abs(interval.total_seconds())
         if interval_to_wait > 0 and interval_to_wait <= self._wait_timeout:
-            p2_logger.info('EXPT SLEEP', extra=get_custom_properties(topic=current_topic, expt=expt_id, instance=f'{current_topic}-{instance_id}', sleep_time=str(interval_to_wait)))
+            p2_debug_logger.info(f'{current_topic}-{instance_id} sleeps {interval_to_wait}')
             sleep(interval_to_wait)
         self.redis.hset('dict_expt_last_exec_time', expt_id, datetime.now().strftime(fmt))
         self._last_expt_id = expt_id
@@ -188,4 +188,4 @@ class P2AzureGetExptResultReceiver(AzureReceiver):
             endtime = datetime.now()
             delta = endtime - starttime
             p2_debug_logger.info(f'#########p2 processing time in seconds: {delta.total_seconds()}#########')
-            p2_logger.info('EXPT OUT', extra=get_custom_properties(topic=current_topic, expt=expt_id, instance=f'{current_topic}-{instance_id}'))
+            p2_logger.info('EXPT HEALTHY', extra=get_custom_properties(topic=current_topic, expt=expt_id, instance=f'{current_topic}-{instance_id}'))
