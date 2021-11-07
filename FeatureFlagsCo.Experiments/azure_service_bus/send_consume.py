@@ -168,7 +168,7 @@ class AzureReceiver(ABC, AzureSender):
                 settlement_retries=3,
                 is_dlq=False):
 
-        def receive_message(receiver: ServiceBusReceiver, renewer: AutoLockRenewer = None, settlement_retries=3, is_dlq=False, instance_id=None):
+        def receive_message(receiver: ServiceBusReceiver, renewer: AutoLockRenewer = None, settlement_retries=3, is_dlq=False, receiver_name=None):
             if is_dlq:
                 debug_logger.info("################dlq receiver################")
             else:
@@ -176,7 +176,8 @@ class AzureReceiver(ABC, AzureSender):
             should_retry = True
             while should_retry:
                 try:
-                    for msg in receiver:
+                    debug_logger.info(f'################pulling the message into {receiver_name}"################')
+                    for msg in receiver.receive_messages(max_message_count=None, max_wait_time=60):
                         last_error = None
                         try:
                             # Do your application-specific data processing here
@@ -264,7 +265,7 @@ class AzureReceiver(ABC, AzureSender):
                     with AutoLockRenewer(max_workers=4) as renewer:
                         with receiver:
                             logger.info('RECEIVER START', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
-                            receive_message(receiver, renewer=renewer, settlement_retries=settlement_retries, is_dlq=is_dlq, instance_id=instance_id)
+                            receive_message(receiver, renewer=renewer, settlement_retries=settlement_retries, is_dlq=is_dlq, receiver_name=f'{topic_name}-{instance_id}')
             except ServiceBusError:
                 logger.exception('An error occurred in service bus level, retrying to connect...', extra=get_custom_properties(
                     topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
