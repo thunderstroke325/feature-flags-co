@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Threading.Tasks;
+using FeatureFlagsCo.Messaging.Models;
 
 namespace FeatureFlagsCo.Messaging.Controllers
 {
@@ -14,37 +15,21 @@ namespace FeatureFlagsCo.Messaging.Controllers
     public class ExperimentsController: ControllerBase
     {
         private readonly ILogger<ExperimentsController> _logger;
-        //private readonly IFeatureFlagMqService _featureFlagsService;
-        //private readonly IExperimentStartEndMqService _experimentStartEndMqService;
-        //private readonly IExperimentMqService _experimentMqService;
         private readonly ServiceBusQ1Sender _serviceBusQ1Sender;
         private readonly ServiceBusQ5Sender _serviceBusQ5Sender;
+        private readonly ElasticSearchService _elasticSearch;
 
         public ExperimentsController(
            ILogger<ExperimentsController> logger,
            ServiceBusQ1Sender serviceBusQ1Sender,
-           ServiceBusQ5Sender serviceBusQ5Sender
-            )
+           ServiceBusQ5Sender serviceBusQ5Sender, 
+           ElasticSearchService elasticSearch)
         {
             _logger = logger;
-
             _serviceBusQ1Sender = serviceBusQ1Sender;
             _serviceBusQ5Sender = serviceBusQ5Sender;
-            //_featureFlagsService = featureFlagsService;
-            //_experimentStartEndMqService = experimentStartEndMqService;
-            //_experimentMqService = experimentMqService;
+            _elasticSearch = elasticSearch;
         }
-
-        // Write to Q4 for python
-        // Not used anymore
-        //[HttpPost]
-        //[Route("feature-flags")]
-        //public async Task<dynamic> SendFeatureFlagData([FromBody] FeatureFlagMessageModel param)
-        //{
-        //    _logger.LogTrace("Experiments/SendFeatureFlagData");
-        //    await _featureFlagsService.SendMessageAsync(param);
-        //    return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
-        //}
 
         // Write to Q1
         [HttpPost]
@@ -67,6 +52,7 @@ namespace FeatureFlagsCo.Messaging.Controllers
 
             string messagePayload = JsonSerializer.Serialize(param);
             await _serviceBusQ5Sender.SendMessageAsync(messagePayload);
+            await _elasticSearch.CreateDocumentAsync(ElasticSearchIndices.Experiment, messagePayload);
             return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
         }
     }
