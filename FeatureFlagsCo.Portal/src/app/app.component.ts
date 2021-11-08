@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { version } from '../../package.json';
+import packageInfo from '../../package.json';
 
 @Component({
   selector: 'app-root',
@@ -13,6 +13,6 @@ export class AppComponent {
 
   constructor(
   ) {
-    console.log(`Current Version: ${version}`);
+    console.log(`Current Version: ${packageInfo.version}`);
   }
 }
