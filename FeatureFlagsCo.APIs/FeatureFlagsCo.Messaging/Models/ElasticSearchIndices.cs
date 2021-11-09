@@ -6,5 +6,7 @@
     public static class ElasticSearchIndices
     {
         public const string Experiment = "experiments";
+
+        public const string Variation = "ffvariationrequestindex";
     }
 }

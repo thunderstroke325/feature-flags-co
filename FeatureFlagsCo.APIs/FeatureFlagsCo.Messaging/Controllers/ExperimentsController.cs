@@ -40,10 +40,11 @@ namespace FeatureFlagsCo.Messaging.Controllers
 
             string messagePayload = JsonSerializer.Serialize(param);
             await _serviceBusQ1Sender.SendMessageAsync(messagePayload);
+            await _elasticSearch.CreateDocumentAsync(ElasticSearchIndices.Experiment, messagePayload);
             return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
         }
 
-        // Write to Q5 for both elasticsearch and python
+        // Write to Q5
         [HttpPost]
         [Route("events")]
         public async Task<dynamic> SendEventData([FromBody] ExperimentMessageModel param)

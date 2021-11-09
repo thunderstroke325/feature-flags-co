@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace FeatureFlagsCo.MQ
+﻿namespace FeatureFlagsCo.MQ
 {
     public class APIServiceToMQServiceModel
     {

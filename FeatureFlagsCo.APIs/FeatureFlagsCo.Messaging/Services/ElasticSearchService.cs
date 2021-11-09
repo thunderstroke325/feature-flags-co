@@ -20,21 +20,23 @@ namespace FeatureFlagsCo.Messaging.Services
         private readonly HttpClient _client;
 
         public ElasticSearchService(
-            HttpClient client, 
+            HttpClient client,
             ILogger<ElasticSearchService> logger,
             IConfiguration configuration)
         {
-            _logger = logger;
-            var connectionString = configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
-            
-            var (auth, apiPrefix) = ParseConnectionString(connectionString);
-            _apiPrefix = apiPrefix;
-            
-            client.DefaultRequestHeaders.Accept.TryParseAdd("application/json");
+            var connectionString = configuration.GetSection("MySettings:ElasticSearchHost").Value;
+            var (auth, hostAndPort) = ParseSpecificConnectionString(connectionString);
+
+            _apiPrefix = hostAndPort;
+
+            // add default headers
+            client.DefaultRequestHeaders.Accept.TryParseAdd(MediaTypeNames.Application.Json);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 "Basic", Convert.ToBase64String(Encoding.ASCII.GetBytes(auth))
             );
             _client = client;
+
+            _logger = logger;
         }
 
         /// <summary>
@@ -44,15 +46,20 @@ namespace FeatureFlagsCo.Messaging.Services
         /// <param name="jsonContent">the content in json format</param>
         /// <returns></returns>
         /// <a>https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html</a>
-        public async Task CreateDocumentAsync(string index, string jsonContent)
+        public async Task<bool> CreateDocumentAsync(string index, string jsonContent)
         {
             var url = $"{_apiPrefix}/{index}/_doc/";
             var body = new StringContent(jsonContent, Encoding.UTF8, MediaTypeNames.Application.Json);
-            
+
+            var createSuccess = false;
             try
             {
                 var response = await _client.PostAsync(url, body);
-                if (response.StatusCode != HttpStatusCode.Created)
+                if (response.StatusCode == HttpStatusCode.Created)
+                {
+                    createSuccess = true;
+                }
+                else
                 {
                     throw new HttpRequestException($"Failed to create document. Status code: {response.StatusCode}");
                 }
@@ -61,15 +68,27 @@ namespace FeatureFlagsCo.Messaging.Services
             {
                 _logger.LogError(exception, $"POST {url} WITH {jsonContent}.");
             }
+
+            return createSuccess;
         }
 
-        private (string auth, string apiPrefix) ParseConnectionString(string connectionString)
+        /// <summary>
+        /// parse the es **specific** connection string to get the auth and host
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <returns></returns>
+        /// <example>
+        /// GIVEN:  https://username:password@host:port
+        /// RETURN: ("username:password", "https://host:port")
+        /// </example>
+        private (string auth, string hostAndPort) ParseSpecificConnectionString(string connectionString)
         {
             var authStart = connectionString.LastIndexOf("/", StringComparison.Ordinal) + 1;
             var authEnd = connectionString.LastIndexOf("@", StringComparison.Ordinal);
+            
             var auth = connectionString.Substring(authStart, authEnd - authStart);
             var hostAndPort = connectionString.Remove(authStart, authEnd - authStart + 1);
-            
+
             return (auth, hostAndPort);
         }
     }
