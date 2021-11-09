@@ -1,7 +1,7 @@
 <div class="project-layout">
     <div class="operation-tools">
         <section nz-col nzSpan="12">
-            <input style="width: 400px" nz-input placeholder="按项目名字查找" [(ngModel)]="searchValue" />
+            <input style="width: 400px" nz-input placeholder="按项目名字查找" [(ngModel)]="searchValue" (ngModelChange)="doSearch()"/>
         </section>
 
         <button nz-button nzType="primary" (click)="onCreateProjectClick()">
@@ -34,13 +34,13 @@
                           {{env.secret}}
                         </div>
                       </div>
-                      <div>
+                      <!-- <div>
                         <div class="desc-name">Mobile Secret</div>
                         <div class="desc-content"
                              *ngIf="env.mobileSecret?.length > 0" nz-typography nzCopyable nzCopyText="{{ env.mobileSecret }}">
                           {{env.mobileSecret}}
                         </div>
-                      </div>
+                      </div> -->
                     </div>
                     <div class="operation">
                       <a style="color: #9A95CC;" nz-button nzType="link" (click)="onEditEnvClick(project, env)">

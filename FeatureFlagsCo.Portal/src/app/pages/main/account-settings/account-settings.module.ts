@@ -26,7 +26,7 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { ShareModule } from 'src/app/share/share.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-
+import { NzRadioModule } from 'ng-zorro-antd/radio';
 
 @NgModule({
   declarations: [AccountSettingsComponent, AccountComponent, ProfileComponent, TeamComponent, ProjectComponent],
@@ -50,6 +50,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
     NzDescriptionsModule,
     NzSpaceModule,
     NzPopconfirmModule,
+    NzRadioModule,
     ScrollingModule,
     ReactiveFormsModule,
     AccountSettingsRoutingModule

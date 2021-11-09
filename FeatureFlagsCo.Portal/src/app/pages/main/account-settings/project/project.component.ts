@@ -24,13 +24,16 @@ export class ProjectComponent implements OnInit {
 
   currentProjectEnv: IProjectEnv; // the project on the top left corner of the page
 
-  get list () {
-    return this.projectService.projects || [];
-  }
+  projects: IProject[] = [];
 
-  get projects() {
-    if (!this.searchValue) return this.list;
-    return this.list.filter(project => project.name.toLowerCase().indexOf(this.searchValue.toLowerCase()) >= 0);
+  doSearch() {
+    const projects = this.projectService.projects || [];
+
+    if (!this.searchValue) {
+      this.projects = [...projects];
+      return;
+    }
+    this.projects = [...projects.filter(project => project.name.toLowerCase().indexOf(this.searchValue.toLowerCase()) >= 0)];
   }
 
   get listHeight() {
@@ -48,6 +51,7 @@ export class ProjectComponent implements OnInit {
     const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
     this.currentAccountId = currentAccountProjectEnv.account.id;
     this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
+    this.doSearch();
   }
 
   isEnvDeleteBtnVisible(env: IEnvironment): boolean {

@@ -22,10 +22,39 @@ nz-select {
   font-weight: bold;
 }
 
-.btn-change-account-name{
+.integrate-sdk {
+  overflow: auto;
+  width: 100%;
+  height: 600px;
+}
 
+.init-code {
+  margin-top: 15px;
+
+  .code-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    pre {
+      background-color: #EEEEEE;
+      border-radius: 10px;
+      margin-top: 10px;
+      width: 100%;
+    }
+  }
+
+  
 }
 
 i{
   color: #9A95CC;
+}
+
+::ng-deep {
+  .init-code .code-wrapper .ant-typography-copy {
+    position: relative;
+    top: 20px;
+    right: 30px;
+  }
 }
