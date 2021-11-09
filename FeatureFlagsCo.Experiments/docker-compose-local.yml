@@ -15,6 +15,7 @@ services:
     image: ffc-experiments
     ports: 
       - 80:80
+      - 9001:9001
     profiles: 
       - local
     networks:

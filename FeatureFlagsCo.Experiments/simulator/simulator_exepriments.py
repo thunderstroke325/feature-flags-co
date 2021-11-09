@@ -2,68 +2,75 @@ from random import choice
 
 import requests
 
-environmentSecret = 'ZTU0LWYzYTItNCUyMDIxMTAyODA3Mjk1M19fMl9fMl9fM19fZGVmYXVsdF9jZjY0ZQ=='
-url_ffEvent = 'http://localhost:5000/Variation/GetMultiOptionVariation'
-url_customEvent = 'http://localhost:5000/ExperimentsDataReceiver/PushData'
+# environmentSecret = 'YjA1LTNiZDUtNCUyMDIxMDkwNDIyMTMxNV9fMzhfXzQ4X18xMDNfX2RlZmF1bHRfNzc1Yjg='
+# url_ffEvent = 'https://ffc-api-ce2-dev.chinacloudsites.cn/Variation/GetMultiOptionVariation'
+# url_customEvent = 'https://ffc-api-ce2-dev.chinacloudsites.cn/ExperimentsDataReceiver/PushData'
+environmentSecret = 'ZDMzLTY3NDEtNCUyMDIxMTAxNzIxNTYyNV9fMzZfXzQ2X185OF9fZGVmYXVsdF80ODEwNA=='
+url_ffEvent = 'https://api.feature-flags.co/Variation/GetMultiOptionVariation'
+url_customEvent = 'https://api.feature-flags.co/ExperimentsDataReceiver/PushData'
 
-FF_NAME = 'testazuresb'
-EVENT_NAME = 'clickme'
+
+FF_NAME = ('PayButton', True)
+EVENT_NAMES = [('ButtonPayTrack', True)]
 
 # ffEvent
-for group in range(1, 4):
-    for user in range(1, 1000):
-        ffUserName = "u_group" + str(group) + "_" + str(user)
-        data = {
-            "featureFlagKeyName": FF_NAME,
-            "environmentSecret": environmentSecret,
-            "ffUserName": ffUserName,
-            "ffUserEmail": ffUserName + "@testliang.com",
-            "ffUserCountry": "China",
-            "ffUserKeyId": ffUserName + "@testliang.com",
-        }
-        params = {'sessionKey': environmentSecret,
-                  'format': 'xml', 'platformId': 1}
-        print('ffUser: ' + ffUserName)
-        response = requests.post(url_ffEvent, params=params, json=data)
-        print(response.text)
-        print('==================')
+ff_name, is_run = FF_NAME
+if is_run:
+    for group in range(0, 5):
+        for user in range(1, 100):
+            ffUserName = "u_group" + str(group) + "_" + str(user)
+            data = {
+                "featureFlagKeyName": ff_name,
+                "environmentSecret": environmentSecret,
+                "ffUserName": ffUserName,
+                "ffUserEmail": ffUserName + "@testliang.com",
+                "ffUserCountry": "China",
+                "ffUserKeyId": ffUserName + "@testliang.com",
+            }
+            params = {'sessionKey': environmentSecret,
+                      'format': 'xml', 'platformId': 1}
+            print('ffUser: ' + ffUserName)
+            response = requests.post(url_ffEvent, params=params, json=data)
+            print(response.text)
+            print('==================')
 
-# User CustomEvent
-for group in range(1, 4):
-    weight = choice([i for i in range(100, 334)])
-    for user in range(1, 1000 - weight * group):
-        ffUserName = "u_group" + str(group) + "_" + str(user)
-        data = [
-            {
-                "route": "index/paypage",
-                "secret": environmentSecret,
-                # "timeStamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f"),
-                "type": "CustomEvent",
-                "eventName": EVENT_NAME,
-                "user": {
-                        "ffUserName": ffUserName,
-                        "ffUserEmail": ffUserName + "@testliang.com",
-                        "ffUserCountry": "China",
-                        "ffUserKeyId": ffUserName + "@testliang.com",
-                        "ffUserCustomizedProperties": [
+for event_name, is_run in EVENT_NAMES:
+    # User CustomEvent
+    if is_run:
+        for group in range(0, 5):
+            weight = choice([i for i in range(10, 20)])
+            for user in range(1, 100 - weight * (group + 1)):
+                ffUserName = "u_group" + str(group) + "_" + str(user)
+                data = [
+                    {
+                        "route": "index/paypage",
+                        "secret": environmentSecret,
+                        # "timeStamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f"),
+                        "type": "CustomEvent",
+                        "eventName": event_name,
+                        "user": {
+                                "ffUserName": ffUserName,
+                                "ffUserEmail": ffUserName + "@testliang.com",
+                                "ffUserCountry": "China",
+                                "ffUserKeyId": ffUserName + "@testliang.com",
+                                "ffUserCustomizedProperties": [
+                                    {
+                                        "name": "string",
+                                        "value": "string"
+                                    }
+                                ]
+                        },
+                        "appType": "PythonApp",
+                        "customizedProperties": [
                             {
                                 "name": "string",
                                 "value": "string"
                             }
                         ]
-                },
-                "appType": "PythonApp",
-                "customizedProperties": [
-                    {
-                        "name": "string",
-                        "value": "string"
                     }
                 ]
-            }
-        ]
-        params = {'sessionKey': environmentSecret,
-                  'format': 'xml', 'platformId': 1}
-        print('ffUser: ' + ffUserName)
-        response = requests.post(url_customEvent, params=params, json=data)
-        print(response.status_code)
-        print('==================')
+                params = {'sessionKey': environmentSecret, 'format': 'xml', 'platformId': 1}
+                print('ffUser: ' + ffUserName)
+                response = requests.post(url_customEvent, params=params, json=data)
+                print(response.status_code)
+                print('==================')

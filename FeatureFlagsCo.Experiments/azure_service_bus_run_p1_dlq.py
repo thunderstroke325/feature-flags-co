@@ -1,5 +1,8 @@
 import logging
-from azure_service_bus.p1_azure_service_bus_get_expt_recoding_info import P1AzureGetExptRecordingInfoReceiver
+import sys
+
+from azure_service_bus.p1_azure_service_bus_get_expt_recoding_info import \
+    P1AzureGetExptRecordingInfoReceiver
 from config.config_handling import get_config_value
 
 if __name__ == '__main__':
@@ -17,6 +20,9 @@ if __name__ == '__main__':
     try:
         prefetch_count = int(get_config_value('p1', 'prefetch_count'))
     except:
-        prefetch_count = 10
+        prefetch_count = 1
+    process_name = ''
+    if len(sys.argv) > 1:
+        process_name = sys.argv[1]
     P1AzureGetExptRecordingInfoReceiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd).consume(
-        (topic, subscription), prefetch_count=prefetch_count, is_dlq=True)
+        process_name, (topic, subscription), prefetch_count=prefetch_count, is_dlq=False)

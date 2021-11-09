@@ -24,4 +24,4 @@ if __name__ == '__main__':
     topic = get_config_value('p2', 'topic_Q3')
     subscription = get_config_value('p2', 'subscription_Q3')
     AzureSimulatorQ3Receiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd).consume(
-        (topic, subscription), prefetch_count=10, is_dlq=False)
+        None, (topic, subscription), prefetch_count=10, is_dlq=False)
