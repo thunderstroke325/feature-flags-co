@@ -30,7 +30,8 @@ namespace FeatureFlagsCo.Messaging.Services
             _processor = client.CreateProcessor(TopicPath, "standard", new ServiceBusProcessorOptions()
             {
                 // TODO: this conf will be put in mysettings
-                PrefetchCount = 5
+                PrefetchCount = 5,
+                AutoCompleteMessages = false
             });
             try
             {

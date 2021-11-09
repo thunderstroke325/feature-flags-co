@@ -89,6 +89,24 @@ namespace FeatureFlagsCo.Messaging
                     }
                 });
             });
+            
+            var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
+            if (hostingType == "Azure")
+            {
+                Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
+                    = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
+                aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights")
+                    .GetSection("InstrumentationKey").Value;
+                aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights")
+                    .GetSection("ConnectionString").Value;
+                aiOptions.EnableAdaptiveSampling = false;
+                aiOptions.EnableDependencyTrackingTelemetryModule = false;
+                aiOptions.EnableAppServicesHeartbeatTelemetryModule = false;
+                aiOptions.EnablePerformanceCounterCollectionModule = false;
+                aiOptions.EnableEventCounterCollectionModule = false;
+                // aiOptions.EnableRequestTrackingTelemetryModule = false;
+                services.AddApplicationInsightsTelemetry(aiOptions);
+            }
 
             services.Configure<MySettings>(options => Configuration.GetSection("MySettings").Bind(options));
             services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
@@ -145,24 +163,6 @@ namespace FeatureFlagsCo.Messaging
             var exptsService = serviceProvider.GetService<ExperimentsService>();
             services.AddSingleton<IExperimentResultService>(new ExperimentResultService(insightsRabbitMqUrl,
                 exptsService));
-
-            var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
-            if (hostingType == "Azure")
-            {
-                Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
-                    = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
-                aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights")
-                    .GetSection("InstrumentationKey").Value;
-                aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights")
-                    .GetSection("ConnectionString").Value;
-                aiOptions.EnableAdaptiveSampling = false;
-                aiOptions.EnableDependencyTrackingTelemetryModule = false;
-                aiOptions.EnableAppServicesHeartbeatTelemetryModule = false;
-                aiOptions.EnablePerformanceCounterCollectionModule = false;
-                aiOptions.EnableEventCounterCollectionModule = false;
-                aiOptions.EnableRequestTrackingTelemetryModule = false;
-                services.AddApplicationInsightsTelemetry(aiOptions);
-            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
