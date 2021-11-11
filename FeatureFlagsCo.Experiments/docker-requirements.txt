@@ -1,6 +1,7 @@
 numpy
 scipy
 pandas
+statsmodels
 redis
 azure-servicebus
 opencensus-ext-azure
