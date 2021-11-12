@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 
 from azure_service_bus.p3_azure_service_bus_get_expt_events import \
@@ -24,5 +25,7 @@ if __name__ == '__main__':
     process_name = ''
     if len(sys.argv) > 1:
         process_name = sys.argv[1]
+    else:
+        process_name = os.path.basename(__file__)
     P3AzureGetExptFFEventsReceiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd).consume(
         process_name, (topic, subscription), prefetch_count=prefetch_count, is_dlq=False)

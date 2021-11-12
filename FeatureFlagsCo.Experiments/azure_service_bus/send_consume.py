@@ -168,7 +168,7 @@ class AzureReceiver(ABC, AzureSender):
                 settlement_retries=3,
                 is_dlq=False):
 
-        def receive_message(receiver: ServiceBusReceiver, process_name, topic=None, instance=None, renewer: AutoLockRenewer = None, settlement_retries=3, is_dlq=False):
+        def receive_message(receiver: ServiceBusReceiver, process_name, topic=None, instance_id=None, renewer: AutoLockRenewer = None, settlement_retries=3, is_dlq=False):
             if is_dlq:
                 debug_logger.info("################dlq receiver################")
             else:
@@ -177,9 +177,9 @@ class AzureReceiver(ABC, AzureSender):
             should_retry = True
             while should_retry:
                 try:
-                    debug_logger.info(f'################pulling the message into {topic}-{instance}################')
+                    debug_logger.info(f'################pulling the message into {topic}-{instance_id}################')
                     if process_name:
-                        current_pulling_timestamp = {'topic': topic, 'instance': instance, 'datetime': datetime.utcnow().strftime(FMT)}
+                        current_pulling_timestamp = {'topic': topic, 'instance': instance_id, 'datetime': datetime.utcnow().strftime(FMT)}
                         self.redis.hset(f'topic_pulling_last_exec_time_in_{machine_id}', process_name, encode(current_pulling_timestamp))
                     for msg in receiver.receive_messages(max_message_count=None, max_wait_time=60):
                         last_error = None
@@ -267,7 +267,7 @@ class AzureReceiver(ABC, AzureSender):
                     with AutoLockRenewer(max_workers=4) as renewer:
                         with receiver:
                             logger.info('RECEIVER START', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
-                            receive_message(receiver, process_name, topic=topic_name, instance=instance_id, renewer=renewer, settlement_retries=settlement_retries, is_dlq=is_dlq)
+                            receive_message(receiver, process_name, topic=topic_name, instance_id=instance_id, renewer=renewer, settlement_retries=settlement_retries, is_dlq=is_dlq)
             except ServiceBusError:
                 logger.exception('An error occurred in service bus level, retrying to connect...', extra=get_custom_properties(
                     topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))

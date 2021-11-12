@@ -14,5 +14,4 @@ if __name__ == '__main__':
     sb_host = get_config_value('azure', 'fully_qualified_namespace')
     sb_sas_policy = get_config_value('azure', 'sas_policy')
     sb_sas_key = get_config_value('azure', 'servicebus_sas_key')
-    FooReceiver(sb_host, sb_sas_policy, sb_sas_key).consume(
-        (TOPIC_NAME, SUBSCRIPTION_NAME), is_dlq=False)
+    FooReceiver(sb_host, sb_sas_policy, sb_sas_key).consume('', (TOPIC_NAME, SUBSCRIPTION_NAME), is_dlq=False)

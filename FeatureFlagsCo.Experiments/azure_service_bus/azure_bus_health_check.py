@@ -82,15 +82,15 @@ class AzureHealthCheck:
                     props = get_custom_properties(topic=topic, instance=f'{topic}-{instance_id}')
                     if pulling_time:
                         interval = abs((datetime.utcnow() - datetime.strptime(pulling_time, FMT)).total_seconds())
-                        if interval >= 960:
+                        if interval >= 300:
                             if self._restart_process(key):
-                                trace_health_check_logger.warning(f'No reponse in {key} more than 16 mins, {key} is restarted by sys', extra=props)
+                                trace_health_check_logger.warning(f'No reponse in {key} more than 5 mins, {key} is restarted by sys', extra=props)
                             else:
-                                raise OperationTimeoutError(message=f'No reponse in {key} more than 16 mins, {key} is halting now, DO RESTART EXPT!!!!!')
-                        elif interval >= 600:
-                            raise OperationTimeoutError(message=f'No reponse in {key} more than 10 mins, {key} may be halting now, CHECK APP INSIGHTS!!!')
-                        elif interval >= 300:
-                            trace_health_check_logger.warning(f'No reponse in {key} more than 5 mins, CHECK APP INSIGHTS!', extra=props)
+                                raise OperationTimeoutError(message=f'No reponse in {key} more than 5 mins, {key} is halting now, DO RESTART EXPT!!!!!')
+                        # elif interval >= 600:
+                        #     raise OperationTimeoutError(message=f'No reponse in {key} more than 10 mins, {key} may be halting now, CHECK APP INSIGHTS!!!')
+                        # elif interval >= 300:
+                        #     trace_health_check_logger.warning(f'No reponse in {key} more than 5 mins, CHECK APP INSIGHTS!', extra=props)
                         else:
                             trace_health_check_logger.info(f'HEALTH CHECK: {key} healthy', extra=props)
                     else:
