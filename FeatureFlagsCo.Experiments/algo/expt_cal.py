@@ -241,6 +241,10 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
 
 
 def calc_customevent_numeric(expt, list_ff_events, list_user_events, logger=logging.getLogger(__name__)):
+    # Set power and alpha default value for expt.
+    para_power = 0.8
+    para_alpha = 0.05
+    ratio_power = 1.0
     # User's flags event aggregation, if not empty
     if list_ff_events:
         df_ff_events = pd.DataFrame(list_ff_events)
@@ -296,6 +300,19 @@ def calc_customevent_numeric(expt, list_ff_events, list_user_events, logger=logg
 
     logger.info('dictionary of expt var:occurence')
     logger.info(dict_expt_occurence)
+
+    # Get User Power & ExperimentEffect Expections 
+    # If not given, Use Power=0.8 as default value
+    Compare_Power = False
+    if not expt.get('Power', None):
+        # Compare power value with 0.8 to decide isInvalid
+        Power = para_power
+        Compare_Power = True 
+    else:
+        # Compare sample with minimum sample calculated
+        Power = expt['Power']
+        ExpectedExperimentEffect= expt['ExpectedExperimentEffect']
+        
     output = []
     for var in expt['Variations']:
         if var not in dict_var_occurence.keys():
@@ -356,6 +373,48 @@ def calc_customevent_numeric(expt, list_ff_events, list_user_events, logger=logg
                 else:
                     confidenceInterval = [0 if round(min, 3) < 0 else round(min, 3), round(max, 3)]
                 pValue = round(1 - stats.ttest_ind(dist_baseline, dist_item).pvalue, 3)
+                # Calculate Power
+                try:
+                    s1 = int(dict_var_occurence[var_baseline])
+                    s2 = int(dict_var_occurence[item])
+                    sampleNow = s1 if s1<s2 else s2
+                    if Compare_Power:
+                        # calculate power compared to default power value
+                        Effect = (rate - BaselineRate)/BaselineRate
+                        power_now = TTestIndPower().power(Effect,sampleNow,1-para_alpha)
+                        if power_now > para_power:
+                            power_valid = True
+                        else:
+                            power_valid = False
+                        logger.info('calculate power compared to default value:')
+                        logger.info(power_now)
+                    else:
+                        # calculate miminum sample
+                        required_n = ceil( sms.NormalIndPower().solve_power(
+                                                        ExpectedExperimentEffect, 
+                                                        power=Power, 
+                                                        alpha=para_alpha, 
+                                                        ratio=ratio_power)
+                        )
+                        if sampleNow > required_n:
+                            power_valid = True
+                        else:
+                            power_valid = False
+                        logger.info('calculate minimum sample size:')
+                        logger.info(required_n)
+                except:
+                        logger.info('ERROR in power calculation, return power_valid False')
+                        power_valid = False
+
+                if (pValue < (1-para_alpha)) or math.isnan(pValue):
+                        pValue_valid = False
+                else:
+                        pValue_valid = True
+                if pValue_valid and power_valid :
+                    isInvalid = False
+                else:
+                    isInvalid = True
+
                 output.append({'variation': item,
                                'totalEvents': len(dict_var_listValues[item]),
                                'average': round(rate, 3),
@@ -364,8 +423,7 @@ def calc_customevent_numeric(expt, list_ff_events, list_user_events, logger=logg
                                'pValue': -1 if math.isnan(pValue) else pValue,
                                'isBaseline': True if var_baseline == item else False,
                                'isWinner': False,
-                               'isInvalid': True if (pValue < 0.95)
-                               or math.isnan(pValue) else False
+                               'isInvalid': isInvalid
                                })
             else:
                 output.append({'variation': item,
