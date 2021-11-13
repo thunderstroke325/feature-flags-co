@@ -148,33 +148,38 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
                 # Calculate pValue
                 pValue = round(1 - stats.ttest_ind(dist_baseline, dist_item).pvalue, 2)
                 # Calculate Power
-                s1 = int(dict_var_occurence[var_baseline])
-                s2 = int(dict_var_occurence[item])
-                sampleNow = s1 if s1<s2 else s2
-                if Compare_Power:
-                    # calculate power compared to default power value
-                    Effect = (rate - BaselineRate)/BaselineRate
-                    power_now = TTestIndPower().power(Effect,sampleNow,1-para_alpha)
-                    if power_now > para_power:
-                        power_valid = True
+                try:
+                    s1 = int(dict_var_occurence[var_baseline])
+                    s2 = int(dict_var_occurence[item])
+                    sampleNow = s1 if s1<s2 else s2
+                    if Compare_Power:
+                        # calculate power compared to default power value
+                        Effect = (rate - BaselineRate)/BaselineRate
+                        power_now = TTestIndPower().power(Effect,sampleNow,1-para_alpha)
+                        if power_now > para_power:
+                            power_valid = True
+                        else:
+                            power_valid = False
+                        logger.info('calculate power compared to default value:')
+                        logger.info(power_now)
                     else:
+                        # calculate miminum sample
+                        required_n = ceil( sms.NormalIndPower().solve_power(
+                                                        ExpectedExperimentEffect, 
+                                                        power=Power, 
+                                                        alpha=para_alpha, 
+                                                        ratio=ratio_power)
+                        )
+                        if sampleNow > required_n:
+                            power_valid = True
+                        else:
+                            power_valid = False
+                        logger.info('calculate minimum sample size:')
+                        logger.info(required_n)
+                except:
+                        logger.info('ERROR in power calculation, return power_valid False')
                         power_valid = False
-                    logger.info('calculate power compared to default value:')
-                    logger.info(power_now)
-                else:
-                    # calculate miminum sample
-                    required_n = ceil( sms.NormalIndPower().solve_power(
-                                                    ExpectedExperimentEffect, 
-                                                    power=Power, 
-                                                    alpha=para_alpha, 
-                                                    ratio=ratio_power)
-                    )
-                    if sampleNow > required_n:
-                        power_valid = True
-                    else:
-                        power_valid = False
-                    logger.info('calculate minimum sample size:')
-                    logger.info(required_n)
+
                 if (pValue < (1-para_alpha)) or math.isnan(pValue):
                         pValue_valid = False
                 else:
