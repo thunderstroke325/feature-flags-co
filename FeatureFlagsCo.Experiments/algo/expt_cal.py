@@ -9,6 +9,7 @@ import pandas as pd
 import scipy as sp
 from scipy import stats
 import statsmodels.stats.api as sms
+from statsmodels.stats.power import TTestIndPower
 
 
 # cal Confidence interval
@@ -18,24 +19,6 @@ def mean_confidence_interval(data, confidence=0.95):
     m, se = np.mean(a), sp.stats.sem(a)
     h = se * sp.stats.t.ppf((1 + confidence) / 2., n - 1)
     return m, m - h, m + h
-
-# calculate power with given expt data
-def get_power(n, p1, p2, cl):
-    alpha = 1 - cl
-    qu = stats.norm.ppf(1 - alpha/2)
-    diff = abs(p2-p1)
-    bp = (p1+p2) / 2
-    
-    v1 = p1 * (1-p1)
-    v2 = p2 * (1-p2)
-    bv = bp * (1-bp)
-    
-    power_part_one = stats.norm.cdf((n**0.5 * diff - qu * (2 * bv)**0.5) / (v1+v2) ** 0.5)
-    power_part_two = 1 - stats.norm.cdf((n**0.5 * diff + qu * (2 * bv)**0.5) / (v1+v2) ** 0.5)
-    
-    power = power_part_one + power_part_two
-    
-    return (power)
     
 # cal Expt Result from list of FlagsEvents and list of CustomEvents:
 def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=logging.getLogger(__name__)):
@@ -90,7 +73,7 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
     # Get User Power & ExperimentEffect Expections 
     # If not given, Use Power=0.8 as default value
     Compare_Power = False
-    if expt.get('Power', None):
+    if not expt.get('Power', None):
         # Compare power value with 0.8 to decide isInvalid
         Power = para_power
         Compare_Power = True 
@@ -165,13 +148,19 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
                 # Calculate pValue
                 pValue = round(1 - stats.ttest_ind(dist_baseline, dist_item).pvalue, 2)
                 # Calculate Power
-                sampleNow = min(dict_var_occurence[item],dict_var_occurence[var_baseline])
+                s1 = int(dict_var_occurence[var_baseline])
+                s2 = int(dict_var_occurence[item])
+                sampleNow = s1 if s1<s2 else s2
                 if Compare_Power:
-                    power_now = get_power(sampleNow, BaselineRate, rate, 1-para_alpha) 
+                    # calculate power compared to default power value
+                    Effect = (rate - BaselineRate)/BaselineRate
+                    power_now = TTestIndPower().power(Effect,sampleNow,1-para_alpha)
                     if power_now > para_power:
                         power_valid = True
                     else:
                         power_valid = False
+                    logger.info('calculate power compared to default value:')
+                    logger.info(power_now)
                 else:
                     # calculate miminum sample
                     required_n = ceil( sms.NormalIndPower().solve_power(
@@ -184,6 +173,8 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
                         power_valid = True
                     else:
                         power_valid = False
+                    logger.info('calculate minimum sample size:')
+                    logger.info(required_n)
                 if (pValue < (1-para_alpha)) or math.isnan(pValue):
                         pValue_valid = False
                 else:
