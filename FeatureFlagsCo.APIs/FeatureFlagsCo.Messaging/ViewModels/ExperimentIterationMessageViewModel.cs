@@ -23,5 +23,9 @@ namespace FeatureFlagsCo.Messaging.ViewModels
         public string BaselineVariation { get; set; }
 
         public List<string> Variations { get; set; }
+
+        public double Power { get; set; } = 0.0;
+
+        public double ExpectedExperimentEffect { get; set; } = 0.0;
     }
 }

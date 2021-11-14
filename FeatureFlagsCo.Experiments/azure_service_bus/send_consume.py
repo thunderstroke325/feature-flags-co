@@ -1,5 +1,3 @@
-
-import abc
 import base64
 import hashlib
 import hmac
@@ -19,11 +17,12 @@ from azure.servicebus.exceptions import (MessageAlreadySettled,
                                          MessageNotFoundError,
                                          MessageSizeExceededError,
                                          ServiceBusError)
+from experiment.constants import FMT, get_azure_instance_id
+from experiment.generic_sender_receiver import (MessageHandler, Receiver,
+                                                RedisStub, Sender)
+from experiment.utils import decode, encode, get_custom_properties, quite_app
 
-from azure_service_bus.constants import FMT, get_azure_instance_id
-from azure_service_bus.insight_utils import (get_custom_properties,
-                                             get_insight_logger)
-from azure_service_bus.utils import decode, encode, quite_app
+from azure_service_bus.insight_utils import get_insight_logger
 
 try:
     from urllib.parse import quote as url_parse_quote
@@ -47,7 +46,7 @@ uamqp_connection_logger = get_insight_logger('uamqp.connection')
 uamqp_connection_logger.setLevel(logging.ERROR)
 
 
-class AzureServiceBus:
+class AzureServiceBus(RedisStub):
     def __init__(self,
                  sb_host,
                  sb_sas_policy,
@@ -61,27 +60,17 @@ class AzureServiceBus:
         self._redis_host = redis_host
         self._redis_port = redis_port
         self._redis_passwd = redis_passwd
-        self._init__redis_connection(
-            redis_host, redis_port, redis_passwd)
+        try:
+            self._ssl = True if int(redis_port) == 6380 else False
+        except:
+            self._ssl = False
+        super()._init__redis_connection(redis_host, redis_port, redis_passwd, self._ssl)
         self._sender_pool = {}
 
     def clear(self):
         for _, sender in self._sender_pool.items():
             sender.close()
         self._sender_pool.clear()
-
-    def _init__redis_connection(self, host, port, password):
-        try:
-            ssl = True if int(port) == 6380 else False
-        except:
-            ssl = False
-        self._redis = redis.Redis(
-            host=host,
-            port=port,
-            password=password,
-            ssl=ssl,
-            charset='utf-8',
-            decode_responses=True)
 
     def _init_azure_service_bus(self, fully_qualified_namespace, sas_name, sas_value, token_ttl=timedelta(days=360)):
         """Performs the signing and encoding needed to generate a sas token from a sas key."""
@@ -97,14 +86,11 @@ class AzureServiceBus:
         credential = AzureSasCredential(sas_token)
         return ServiceBusClient(fully_qualified_namespace, credential, logging_enable=True)
 
-    @property
-    def redis(self) -> redis.Redis:
-        return self._redis
 
+class AzureSender(AzureServiceBus, Sender):
 
-class AzureSender(AzureServiceBus):
-
-    def send(self, bus: ServiceBusClient, topic: str, origin: str, *messages):
+    # def send(self, bus: ServiceBusClient, topic: str, origin: str, *messages):
+    def send(self, *messages, **kwargs):
 
         def send_batch_messages(sender: ServiceBusSender, topic, origin, *msgs):
             batch_message = sender.create_message_batch()
@@ -139,6 +125,9 @@ class AzureSender(AzureServiceBus):
                     continue
             if last_error:
                 raise last_error
+        bus = kwargs.pop('bus', None)
+        topic = kwargs.pop('topic', '')
+        subscription = kwargs.pop('subscription', '')
         if not bus:
             bus = self._init_azure_service_bus(
                 self._sb_host, self._sb_sas_policy, self._sb_sas_key)
@@ -146,27 +135,18 @@ class AzureSender(AzureServiceBus):
                 if not (sender := self._sender_pool.get(topic, None)):
                     sender = bus.get_topic_sender(topic_name=topic)
                     self._sender_pool[topic] = sender
-                send_batch_messages(sender, topic, origin, *messages)
+                send_batch_messages(sender, topic, subscription, *messages)
         else:
             if not (sender := self._sender_pool.get(topic, None)):
                 sender = bus.get_topic_sender(topic_name=topic)
                 self._sender_pool[topic] = sender
-            send_batch_messages(sender, topic, origin, *messages)
-        debug_logger.info(f'send to topic: {topic}, origin: {origin}, num of message: {len(messages)}')
+            send_batch_messages(sender, topic, subscription, *messages)
+        debug_logger.info(f'send to topic: {topic}, origin: {subscription}, num of message: {len(messages)}')
 
 
-class AzureReceiver(ABC, AzureSender):
+class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
 
-    @abc.abstractmethod
-    def handle_body(self, instance_id, topic, body):
-        pass
-
-    def consume(self, process_name,
-                topic=(),
-                prefetch_count=10,
-                connection_retries=3,
-                settlement_retries=3,
-                is_dlq=False):
+    def consume(self, **kwargs):
 
         def receive_message(receiver: ServiceBusReceiver, process_name, topic=None, instance_id=None, renewer: AutoLockRenewer = None, settlement_retries=3, is_dlq=False):
             if is_dlq:
@@ -185,7 +165,12 @@ class AzureReceiver(ABC, AzureSender):
                         last_error = None
                         try:
                             # Do your application-specific data processing here
-                            self.handle_body(instance_id, msg.subject, decode(str(msg)))
+                            self.handle_body(decode(str(msg)),
+                                             bus=self._bus,
+                                             instance_name=topic,
+                                             instance_id=instance_id,
+                                             trace_logger=logger,
+                                             debug_logger=debug_logger)
                             should_complete = True
                         except ServiceBusError:
                             logger.exception("Maybe error in send message, retrying to connect...", extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
@@ -214,7 +199,8 @@ class AzureReceiver(ABC, AzureSender):
                                             logger.exception('CANNOT PING redis, trying to reconnect...')
                                             self._init__redis_connection(self._redis_host,
                                                                          self._redis_port,
-                                                                         self._redis_passwd)
+                                                                         self._redis_passwd,
+                                                                         self._ssl)
                                         receiver.abandon_message(msg)
                                     elif is_dlq:
                                         # messages will be handled later
@@ -246,6 +232,13 @@ class AzureReceiver(ABC, AzureSender):
                         raise
                     logger.exception('service errors and interruptions occasionally occur during receiving, trying to fetch next message...')
                     continue
+
+        process_name = kwargs.pop('process_name', '')
+        topic = kwargs.pop('topic', '')
+        connection_retries = kwargs.pop('connection_retries', 3)
+        prefetch_count = kwargs.pop('prefetch_count', 10)
+        settlement_retries = kwargs.pop('settlement_retries', 3)
+        is_dlq = kwargs.pop('is_dlq', False)
 
         instance_id = choice([i for i in range(1000, 100000)])
         for _ in range(connection_retries):  # Connection retries.

@@ -1,15 +1,13 @@
 import logging
 import math
-from math import ceil
-
 from datetime import datetime
+from math import ceil
 
 import numpy as np
 import pandas as pd
 import scipy as sp
 from scipy import stats
-import statsmodels.stats.api as sms
-from statsmodels.stats.power import TTestIndPower
+from statsmodels.stats.power import TTestIndPower, tt_ind_solve_power
 
 
 # cal Confidence interval
@@ -19,8 +17,9 @@ def mean_confidence_interval(data, confidence=0.95):
     m, se = np.mean(a), sp.stats.sem(a)
     h = se * sp.stats.t.ppf((1 + confidence) / 2., n - 1)
     return m, m - h, m + h
-    
-# cal Expt Result from list of FlagsEvents and list of CustomEvents:
+
+
+# cal Expt Result from list of FlagsEvents and list of CustomEvents
 def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=logging.getLogger(__name__)):
     # Set power and alpha default value for expt.
     para_power = 0.8
@@ -70,18 +69,18 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
     logger.info('dictionary of expt var:occurence')
     logger.info(dict_expt_occurence)
 
-    # Get User Power & ExperimentEffect Expections 
+    # Get User Power & ExperimentEffect Expections
     # If not given, Use Power=0.8 as default value
     Compare_Power = False
     if not expt.get('Power', None):
         # Compare power value with 0.8 to decide isInvalid
         Power = para_power
-        Compare_Power = True 
+        Compare_Power = True
     else:
         # Compare sample with minimum sample calculated
         Power = expt['Power']
-        ExpectedExperimentEffect= expt['ExpectedExperimentEffect']
-            
+        ExpectedExperimentEffect = expt['ExpectedExperimentEffect']
+
     # list of results by flag-variation
     output = []
     for var in expt['Variations']:
@@ -103,7 +102,7 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
         for item in dict_var_occurence.keys():
             if item in dict_expt_occurence.keys():
                 dist_item = [1 for i in range(dict_expt_occurence[item])] + [0 for i in range(dict_var_occurence[item] - dict_expt_occurence[item])]
-                rate, min, max = mean_confidence_interval(dist_item,1-para_alpha)
+                rate, min, max = mean_confidence_interval(dist_item, 1 - para_alpha)
                 if math.isnan(min) or math.isnan(max):
                     confidenceInterval = [-1, -1]
                 else:
@@ -140,7 +139,7 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
         for item in dict_var_occurence.keys():
             if item in dict_expt_occurence.keys():
                 dist_item = [1 for i in range(dict_expt_occurence[item])] + [0 for i in range(dict_var_occurence[item] - dict_expt_occurence[item])]
-                rate, min, max = mean_confidence_interval(dist_item,1-para_alpha)
+                rate, min, max = mean_confidence_interval(dist_item, 1 - para_alpha)
                 if math.isnan(min) or math.isnan(max):
                     confidenceInterval = [-1, -1]
                 else:
@@ -151,44 +150,42 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
                 try:
                     s1 = int(dict_var_occurence[var_baseline])
                     s2 = int(dict_var_occurence[item])
-                    sampleNow = s1 if s1<s2 else s2
+                    sampleNow = s1 if s1 < s2 else s2
                     if Compare_Power:
                         # calculate power compared to default power value
-                        Effect = (rate - BaselineRate)/BaselineRate
-                        power_now = TTestIndPower().power(Effect,sampleNow,1-para_alpha)
+                        Effect = (rate - BaselineRate) / BaselineRate
+                        power_now = TTestIndPower().power(Effect, sampleNow, 1 - para_alpha)
                         if power_now > para_power:
                             power_valid = True
                         else:
                             power_valid = False
-                        logger.info('calculate power compared to default value:')
-                        logger.info(power_now)
+                        logger.info(f'calculate power compared to default value: {power_now}')
                     else:
                         # calculate miminum sample
-                        required_n = ceil( sms.NormalIndPower().solve_power(
-                                                        ExpectedExperimentEffect, 
-                                                        power=Power, 
-                                                        alpha=para_alpha, 
-                                                        ratio=ratio_power)
+                        required_n = ceil(tt_ind_solve_power(
+                            ExpectedExperimentEffect,
+                            power=Power,
+                            alpha=para_alpha,
+                            ratio=ratio_power)
                         )
                         if sampleNow > required_n:
                             power_valid = True
                         else:
                             power_valid = False
-                        logger.info('calculate minimum sample size:')
-                        logger.info(required_n)
+                        logger.info(f'calculate minimum sample size: {required_n}')
                 except:
-                        logger.info('ERROR in power calculation, return power_valid False')
-                        power_valid = False
+                    logger.info('ERROR in power calculation, return power_valid False')
+                    power_valid = False
 
-                if (pValue < (1-para_alpha)) or math.isnan(pValue):
-                        pValue_valid = False
+                if (pValue < (1 - para_alpha)) or math.isnan(pValue):
+                    pValue_valid = False
                 else:
-                        pValue_valid = True
+                    pValue_valid = True
                 if pValue_valid and power_valid :
                     isInvalid = False
                 else:
                     isInvalid = True
-                               
+
                 output.append({'variation': item,
                                'conversion': dict_expt_occurence[item],
                                'uniqueUsers': dict_var_occurence[item],
@@ -301,18 +298,18 @@ def calc_customevent_numeric(expt, list_ff_events, list_user_events, logger=logg
     logger.info('dictionary of expt var:occurence')
     logger.info(dict_expt_occurence)
 
-    # Get User Power & ExperimentEffect Expections 
+    # Get User Power & ExperimentEffect Expections
     # If not given, Use Power=0.8 as default value
     Compare_Power = False
     if not expt.get('Power', None):
         # Compare power value with 0.8 to decide isInvalid
         Power = para_power
-        Compare_Power = True 
+        Compare_Power = True
     else:
         # Compare sample with minimum sample calculated
         Power = expt['Power']
-        ExpectedExperimentEffect= expt['ExpectedExperimentEffect']
-        
+        ExpectedExperimentEffect = expt['ExpectedExperimentEffect']
+
     output = []
     for var in expt['Variations']:
         if var not in dict_var_occurence.keys():
@@ -377,39 +374,37 @@ def calc_customevent_numeric(expt, list_ff_events, list_user_events, logger=logg
                 try:
                     s1 = int(dict_var_occurence[var_baseline])
                     s2 = int(dict_var_occurence[item])
-                    sampleNow = s1 if s1<s2 else s2
+                    sampleNow = s1 if s1 < s2 else s2
                     if Compare_Power:
                         # calculate power compared to default power value
-                        Effect = (rate - BaselineRate)/BaselineRate
-                        power_now = TTestIndPower().power(Effect,sampleNow,1-para_alpha)
+                        Effect = (rate - BaselineRate) / BaselineRate
+                        power_now = TTestIndPower().power(Effect, sampleNow, 1 - para_alpha)
                         if power_now > para_power:
                             power_valid = True
                         else:
                             power_valid = False
-                        logger.info('calculate power compared to default value:')
-                        logger.info(power_now)
+                        logger.info(f'calculate power compared to default value: {power_now}')
                     else:
                         # calculate miminum sample
-                        required_n = ceil( sms.NormalIndPower().solve_power(
-                                                        ExpectedExperimentEffect, 
-                                                        power=Power, 
-                                                        alpha=para_alpha, 
-                                                        ratio=ratio_power)
+                        required_n = ceil(tt_ind_solve_power(
+                            ExpectedExperimentEffect,
+                            power=Power,
+                            alpha=para_alpha,
+                            ratio=ratio_power)
                         )
                         if sampleNow > required_n:
                             power_valid = True
                         else:
                             power_valid = False
-                        logger.info('calculate minimum sample size:')
-                        logger.info(required_n)
+                        logger.info('calculate minimum sample size: {required_n}')
                 except:
-                        logger.info('ERROR in power calculation, return power_valid False')
-                        power_valid = False
+                    logger.info('ERROR in power calculation, return power_valid False')
+                    power_valid = False
 
-                if (pValue < (1-para_alpha)) or math.isnan(pValue):
-                        pValue_valid = False
+                if (pValue < (1 - para_alpha)) or math.isnan(pValue):
+                    pValue_valid = False
                 else:
-                        pValue_valid = True
+                    pValue_valid = True
                 if pValue_valid and power_valid :
                     isInvalid = False
                 else:

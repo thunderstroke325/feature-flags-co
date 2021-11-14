@@ -22,7 +22,7 @@ if __name__ == '__main__':
         # Expt1
         #  Q1 end
         expts = []
-        for expt_num in range(1, 21):
+        for expt_num in range(1, 51):
             Q1_END = {
                 "ExptId": f"FF__38__48__103__PayButton_{expt_num}_exp{expt_num}",
                 "IterationId": "2",
@@ -41,6 +41,6 @@ if __name__ == '__main__':
             expts.append(Q1_END)
 
         sender = AzureSender(None, redis_host, redis_port, redis_passwd)
-        sender.send(bus, topic_1, origin_1, *expts)
+        sender.send(*expts, bus=bus, topic=topic_1, subscription=origin_1)
         sender.clear()
         logger.info('send to Q1 expt end')

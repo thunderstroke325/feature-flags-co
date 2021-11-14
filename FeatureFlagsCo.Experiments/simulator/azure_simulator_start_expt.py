@@ -28,7 +28,7 @@ if __name__ == '__main__':
         # Expt1
         # Q1 start
         expts = []
-        for expt_num in range(1, 21):
+        for expt_num in range(1, 51):
             Q1_START = {
                 "ExptId": f"FF__38__48__103__PayButton_{expt_num}_exp{expt_num}",
                 "IterationId": "2",
@@ -46,10 +46,10 @@ if __name__ == '__main__':
             }
             expts.append(Q1_START)
         sender = AzureSender(None, redis_host, redis_port, redis_passwd)
-        sender.send(bus, topic_1, origin_1, *expts)
+        sender.send(*expts, bus=bus, topic=topic_1, subscription=origin_1)
         sender.clear()
         logger.info('send to Q1 expt start')
-        for expt_num in range(1, 21):
+        for expt_num in range(1, 51):
             sender = AzureSender(None, redis_host, redis_port, redis_passwd)
 
             for group in range(1, 4):
@@ -71,7 +71,7 @@ if __name__ == '__main__':
                         "phoneNumber": "135987652543"
                     }
                     events.append(Q4)
-                sender.send(bus, topic_4, origin_4, *events)
+                sender.send(*events, bus=bus, topic=topic_4, subscription=origin_4)
 
             for group in range(1, 4):
                 events = []
@@ -108,6 +108,6 @@ if __name__ == '__main__':
                         "AccountId": "38"
                     }
                     events.append(Q5)
-                sender.send(bus, topic_5, origin_5, *events)
+                sender.send(*events, bus=bus, topic=topic_5, subscription=origin_5)
 
             sender.clear()

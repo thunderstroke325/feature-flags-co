@@ -36,3 +36,10 @@ def quite_app(status):
         sys.exit(status)
     except SystemExit:
         os._exit(status)
+
+
+def get_custom_properties(**args):
+    properties = {'custom_dimensions': {}}
+    for key, value in args.items():
+        properties['custom_dimensions'][key] = value
+    return properties

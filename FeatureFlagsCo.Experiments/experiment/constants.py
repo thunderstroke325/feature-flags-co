@@ -33,3 +33,7 @@ FMT = '%Y-%m-%dT%H:%M:%S.%f'
 
 def get_azure_instance_id():
     return str(uuid.getnode())
+
+
+# unit = s
+HEALTH_CHECK_TIMEOUT = 210

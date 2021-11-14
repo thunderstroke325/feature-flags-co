@@ -27,5 +27,8 @@ if __name__ == '__main__':
         process_name = sys.argv[1]
     else:
         process_name = os.path.basename(__file__)
-    P1AzureGetExptRecordingInfoReceiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd).consume(
-        process_name, (topic, subscription), prefetch_count=prefetch_count, is_dlq=False)
+    P1AzureGetExptRecordingInfoReceiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd) \
+        .consume(process_name=process_name,
+                 topic=(topic, subscription),
+                 prefetch_count=prefetch_count,
+                 is_dlq=False)

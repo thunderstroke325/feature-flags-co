@@ -11,7 +11,9 @@ url_customEvent = 'https://api.feature-flags.co/ExperimentsDataReceiver/PushData
 
 
 FF_NAME = ('PayButton', True)
-EVENT_NAMES = [('ButtonPayTrack', True)]
+EVENT_NAMES = [('click_c9a9fc3e-5b78-4116-809d-52a71bfadb01', False),
+               ('pageview_63f2d5d1-038c-448e-94f6-84d55ac17d7b', False),
+               ('ButtonPayTrack', True)]
 
 # ffEvent
 ff_name, is_run = FF_NAME
