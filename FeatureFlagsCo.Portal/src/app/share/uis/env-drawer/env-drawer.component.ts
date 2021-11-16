@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IEnvironment, IEnvKey, EnvKeyNameEnum } from 'src/app/config/types';
 import { EnvService } from 'src/app/services/env.service';
+import { ProjectService } from "../../../services/project.service";
 
 @Component({
   selector: 'app-env-drawer',
@@ -44,7 +45,8 @@ export class EnvDrawerComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private envService: EnvService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private projectSrv: ProjectService
   ) { }
 
   ngOnInit(): void {
@@ -126,11 +128,13 @@ export class EnvDrawerComponent implements OnInit {
     }).pipe()
       .subscribe(
         (envKey: IEnvKey) => {
+          // update local storage project env
+          this.projectSrv.updateProjectEnv({ envSecret: envKey.keyValue });
+
           this.close.emit({isEditing: false});
           this.message.success(`重新生成 ${keyName} 成功！`);
         },
         err => {
-
         }
       );
   }

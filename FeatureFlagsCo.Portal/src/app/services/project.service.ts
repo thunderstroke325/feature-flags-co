@@ -3,13 +3,13 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '../config/types';
-import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
 
+  readonly projectEnvKey: string = 'current-project';
   baseUrl: string = environment.url + '/api/accounts/#accountId/projects';
   currentProjectEnvChanged$: Subject<void> = new Subject();
 
@@ -61,10 +61,18 @@ export class ProjectService {
   // }
 
   changeCurrentProjectAndEnv(project: IProjectEnv) {
-    localStorage.setItem('current-project', JSON.stringify(project));
+    localStorage.setItem(this.projectEnvKey, JSON.stringify(project));
     this.currentProjectEnvChanged$.next();
   }
 
+  // update current project env by partial object
+  updateProjectEnv(partialUpdated: Partial<IProjectEnv>) {
+    const projectEnvJson = localStorage.getItem(this.projectEnvKey);
+    const projectEnv = JSON.parse(projectEnvJson);
+    const updatedProject = Object.assign(projectEnv, partialUpdated);
+
+    this.changeCurrentProjectAndEnv(updatedProject);
+  }
 
   // projectEnvStr and projects must exist
   private getProjectEnv(projectEnvStr: string, projects: IProject[]): IProjectEnv {
@@ -83,7 +91,7 @@ export class ProjectService {
    // Observable version
    getCurrentProjectAndEnv(accountId: number): Observable<IProjectEnv> {
     return Observable.create(observer => {
-      const projectEnvStr = localStorage.getItem('current-project');
+      const projectEnvStr = localStorage.getItem(this.projectEnvKey);
       if (this.projects.length === 0 || !projectEnvStr) {
         this.getProjects(accountId).subscribe(res => {
           this.projects = res as IProject[];
