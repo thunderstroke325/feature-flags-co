@@ -1,11 +1,9 @@
-﻿using System;
-using FeatureFlags.APIs.Models;
+﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 
@@ -14,14 +12,11 @@ namespace FeatureFlags.APIs.Services
     public class MongoDbFeatureFlagService
     {
         private readonly IMongoCollection<FeatureFlag> _featureFlags;
-        private readonly IOptions<MySettings> _mySettings;
 
         public MongoDbFeatureFlagService(IMongoDbSettings settings,
             IOptions<MySettings> mySettings)
         {
-            _mySettings = mySettings;
-
-            MongoClient client = null;
+            MongoClient client;
             if (mySettings.Value.HostingType == HostingTypeEnum.Azure.ToString())
             {
                 MongoClientSettings s = MongoClientSettings.FromUrl(
@@ -61,14 +56,6 @@ namespace FeatureFlags.APIs.Services
                 return await _featureFlags.Find(p => p.EnvironmentId == environmentId && p.FF.Name.ToLower().Contains(searchText.ToLower())).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
         }
 
-        //public async Task<List<FeatureFlag>> SearchActiveAsync(int envId, string searchText, int pageIndex, int pageSize)
-        //{
-        //    if (string.IsNullOrWhiteSpace(searchText))
-        //        return await _featureFlags.Find(p => !p.IsArchived && p.EnvironmentId == envId).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
-        //    else
-        //        return await _featureFlags.Find(p => !p.IsArchived && p.EnvironmentId == envId && p.FF.Name.ToLower().Contains(searchText.ToLower())).SortByDescending(p => p.FF.LastUpdatedTime).Skip(pageIndex * pageSize).Limit(pageSize).ToListAsync();
-        //}
-
         public async Task<List<FeatureFlag>> GetFeatureFlagsAsync(int envId, bool isArchived, string searchText, int pageIndex, int pageSize)
         {
             if (string.IsNullOrWhiteSpace(searchText))
@@ -104,7 +91,6 @@ namespace FeatureFlags.APIs.Services
         public async Task UpdateAsync(string id, FeatureFlag featureFlag)
         {
             await _featureFlags.FindOneAndReplaceAsync(p => p.Id == id, featureFlag);
-            //await _featureFlags.ReplaceOneAsync(p => p.Id == id, bookIn);
         }
 
         public async Task RemoveAsync(FeatureFlag bookIn) =>
@@ -120,6 +106,16 @@ namespace FeatureFlags.APIs.Services
                 .FirstOrDefaultAsync();
 
             return featureFlag != null;
+        }
+
+        public async Task<List<FeatureFlag>> GetArchivedFeatureFlags(int envId)
+        {
+            var featureFlags = await _featureFlags
+                .Find(featureFlag => featureFlag.EnvironmentId == envId && featureFlag.IsArchived)
+                .SortByDescending(p => p.FF.LastUpdatedTime)
+                .ToListAsync();
+
+            return featureFlags;
         }
     }
 }
