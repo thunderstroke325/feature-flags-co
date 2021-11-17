@@ -107,6 +107,22 @@ export class MainComponent implements OnInit, OnDestroy {
       }
       this.menus.splice(3, 0, experimentationItem);
     }
+
+    if (this.ffcService.client.variation('数据看板') === 'true') {
+      const dataBoardItems = [{
+        level: 1,
+        line: true
+      },{
+        level: 1,
+        title: '数据看板',
+        path: '/analytics'
+      }];
+
+      const idx = this.menus.findIndex(m => m.path === '/data-sync');
+      if (idx > -1) {
+        this.menus.splice(idx + 1, 0, ...dataBoardItems);
+      }
+    }
   }
 
   // 跳转路由
