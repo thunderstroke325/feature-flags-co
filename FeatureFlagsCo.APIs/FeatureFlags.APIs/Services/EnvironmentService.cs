@@ -111,7 +111,7 @@ namespace FeatureFlags.APIs.Services
             {
                 ProjectId = param.ProjectId,
                 Description = param.Description,
-                MobileSecret = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(System.Guid.NewGuid().ToString())),
+                MobileSecret = FeatureFlagKeyExtension.GenerateEnvironmentKey(param.Id, accountId, param.ProjectId, "mobile"),
                 Name = param.Name,
                 Secret = FeatureFlagKeyExtension.GenerateEnvironmentKey(param.Id, accountId, param.ProjectId)
             });
@@ -141,7 +141,7 @@ namespace FeatureFlags.APIs.Services
             if(param.Id <= 0)
             {
                 env.Secret = FeatureFlagKeyExtension.GenerateEnvironmentKey(env.Id, accountId, param.ProjectId);
-                env.MobileSecret = FeatureFlagKeyExtension.GenerateEnvironmentKey(env.Id, accountId, param.ProjectId);
+                env.MobileSecret = FeatureFlagKeyExtension.GenerateEnvironmentKey(env.Id, accountId, param.ProjectId, "mobile");
                 await _repository.UpdateAsync<Environment>(env);
             }
 

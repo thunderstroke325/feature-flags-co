@@ -18,6 +18,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   featureFlagId: string;
   currentVariationOptions: IVariationOption[] = [];
+  currentFeatureFlag: CSwitchParams = null;
   selectedBaseline: IVariationOption = null;
   isInitLoading = true;
   experimentation: string;
@@ -35,6 +36,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   pageViewEventType: EventType = EventType.PageView;
   clickEventType: EventType = EventType.Click;
 
+  exptRulesVisible = false;
+
   constructor(
     private route: ActivatedRoute,
     private switchServe: SwitchService,
@@ -45,13 +48,21 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.experimentation = environment.name === 'Standalone' ? 'temporary version' : this.ffcService.client.variation('experimentation');
     const ffId: string = decodeURIComponent(this.route.snapshot.params['id']);
     this.switchServe.getSwitchDetail(ffId).subscribe(res => {
-      const featureDetail = new CSwitchParams(res);
-      this.currentVariationOptions = featureDetail.getVariationOptions();
+      this.currentFeatureFlag = new CSwitchParams(res);
+      this.currentVariationOptions = this.currentFeatureFlag.getVariationOptions();
     });
   }
 
   ngOnDestroy(): void {
     clearInterval(this.refreshIntervalId);
+  }
+
+  onSetExptRulesClick() {
+    this.exptRulesVisible = true;
+  }
+
+  onSetExptRulesClosed(data: CSwitchParams) {
+    this.exptRulesVisible = false;
   }
 
   ngOnInit(): void {
@@ -147,26 +158,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       this.message.error("数据加载失败，请重试!");
       this.isInitLoading = false;
     });
-
-    // this.eventInputs.pipe(
-    //   debounceTime(300),
-    //   distinctUntilChanged()
-    // ).subscribe(e => {
-    //   this.isEventsLoading = true;
-    //   this.experimentService.getCustomEvents(this.switchServe.envId, null, e).subscribe((result: any) => {
-    //     if(result) {
-    //       if (result.aggregations.keys.buckets.length === 0) {
-    //         this.message.warning('目前还没有任何事件，请耐心等待事件被终端用户激发后再试！');
-    //       } else {
-    //         this.eventList = result.aggregations.keys.buckets.map(b => b.key.EventName);
-    //       }
-    //     }
-    //     this.isEventsLoading = false;
-    //   }, _ => {
-    //     this.message.error("数据加载失败，请重试!");
-    //     this.isEventsLoading = false;
-    //   })
-    // });
   }
 
   onStartIterationClick(expt: IExperiment) {
@@ -347,94 +338,4 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       toolTip: { tplFormatter: tpl => tpl.replace("{value}", `{value} ${valueUnit}`) },
     });
   }
-
-  /************************** above are for new experiment ****************************************/
-
-  // 搜索 events
-  // private eventInputs = new Subject<any>();
-  // public isEventsLoading = false;
-  // public onSearchEvents(value: string = '') {
-  //   this.eventInputs.next(value);
-  // }
-
-  // disabledDate = (current: Date): boolean =>
-  //   // Can not select days before today and today
-  //   differenceInCalendarDays(current, new Date()) > 0;
-
-  // eventList: string[] = [];
-  // selectedEvent: string;
-  // dateRange:Date[] = [];
-  // lastSearchText = null;
-
-  // onDateRangeChange(result: Date[]): void {
-  //   this.dateRange = [...result];
-  // }
-
-  //experimentResult = [];
-  //isLoadingResult = false;
-  // onSubmit() {
-
-  //   if (this.selectedBaseline === undefined || this.selectedBaseline === null) {
-  //     this.message.warning('请选择基准特性！');
-  //     return false;
-  //   }
-
-  //   if (this.selectedEvent === undefined || this.selectedEvent === null || this.selectedEvent === '') {
-  //     this.message.warning('请选择事件！');
-  //     return false;
-  //   }
-
-  //   if (this.dateRange.length !== 2) {
-  //     this.message.warning('请设置起止时间！');
-  //     return false;
-  //   }
-
-  //   this.dateRange[0].setSeconds(0);
-  //   this.dateRange[1].setSeconds(0);
-
-  //   const param = {
-  //     eventName: this.selectedEvent,
-  //     startExptTime: this.dateRange[0].toISOString().slice(0, 19),
-  //     endExptTime: this.dateRange[1].toISOString().slice(0, 19),
-  //     flag: {
-  //       id: this.featureFlagId,
-  //       baselineVariation: `${this.selectedBaseline.localId}`,
-  //       variations: this.currentVariationOptions.map(o => `${o.localId}`)
-  //     }
-  //   };
-
-  //   this.isLoadingResult = true;
-  //   this.experimentResult = [];
-  //   this.experimentService.getExperimentResult(this.switchServe.envId, param).subscribe((result) => {
-  //     if(result && result.length > 0) {
-  //       this.experimentResult = this.currentVariationOptions.map((option) => {
-  //         const found = result.find(r => r.variation == option.localId);
-
-  //         return !found ? this.createEmptyExperimentResult(option) : Object.assign({}, found, {
-  //           variationValue: option.variationValue,
-  //           pValue: found.pValue === -1 ? '--' : found.pValue,
-  //           isEmpty: false
-  //         })
-  //       });
-
-  //       this.hasInvalidVariation = this.experimentResult.findIndex(e => e.isInvalid && !e.isBaseline) > -1;
-  //       this.hasWinnerVariation = this.experimentResult.findIndex(e => e.isWinner) > -1;
-  //     } else {
-  //       this.message.warning("暂时还没有实验数据，请修改时间区间或稍后再试!");
-  //     }
-
-  //     this.isLoadingResult = false;
-  //   }, _ => {
-  //     this.message.error("数据加载失败，请重试!");
-  //     this.isLoadingResult = false;
-  //   });
-  // }
-
-  // private createEmptyExperimentResult(option: IVariationOption) {
-  //   return {
-  //     isEmpty: true,
-  //     variationValue: option.variationValue,
-  //     isBaseline: this.selectedBaseline.localId === option.localId
-  //    };
-  // }
 }

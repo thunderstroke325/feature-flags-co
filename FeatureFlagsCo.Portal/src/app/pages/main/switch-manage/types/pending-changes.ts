@@ -2,7 +2,7 @@ import { BehaviorSubject } from "rxjs";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { IProjectEnv } from "src/app/config/types";
 import { TeamService } from "src/app/services/team.service";
-import { isNotPercentageRollout } from "src/app/utils";
+import { isNotPercentageRollout, isSingleOperator } from "src/app/utils";
 import { ruleType, ruleValueConfig } from "../components/find-rule/ruleConfig";
 import { IFfParams, IFfpParams, IFftuwmtrParams, IJsonContent, IPrequisiteFeatureFlag, IRulePercentageRollout, IUserType, IVariationOption } from "./switch-new";
 
@@ -128,10 +128,6 @@ export class PendingChange {
     }
   }
 
-  private isSingleOperator(operationType: string) {
-    return !['string', 'number', 'regex', 'multi'].includes(operationType);
-  }
-
   private getVariationValue(variationOptionId: number) {
     return this.variationOptions[variationOptionId].variationValue;
   }
@@ -139,7 +135,7 @@ export class PendingChange {
   private generateRuleChanges(ins: IInstruction): string {
     const serveStr = `serve ${!!ins.variationOptionId ? this.getVariationValue(ins.variationOptionId) : ins.rolloutVariationPercentage.reduce((acc, cur, idx) => { acc += cur.valueOption.variationValue + ` (${ins.rolloutWeights[cur.valueOption.localId] * 100}%)</span>`; acc += idx === ins.rolloutVariationPercentage.length - 1? '</span>' : '<span>'; return acc;}, '<span>')}`;
     const clauseStr = '<ul class="no-style"><li class="clause">'
-    + ins.clauses.map(c => `if ${c.property} ${c.operation} ${!this.isSingleOperator(c.type)? '<span class="ant-tag">' + (c.type === "multi" ? c.multipleValue.join('</span><span class="ant-tag">') : c.value) + '</span>' : ''}`)
+    + ins.clauses.map(c => `if ${c.property} ${c.operation} ${!isSingleOperator(c.type)? '<span class="ant-tag">' + (c.type === "multi" ? c.multipleValue.join('</span><span class="ant-tag">') : c.value) + '</span>' : ''}`)
                  .join(`</li> <li class="and">AND</li> <li class="clause">`) + `</li><li>${serveStr}</li></ul>`;
     return clauseStr;
   }
@@ -309,7 +305,7 @@ export class PendingChange {
     return fftuwmtr.map(f => {
       const result = {
         ruleJsonContent: f.ruleJsonContent.map(item => {
-          let result: ruleType = ruleValueConfig.filter((rule: ruleType) => rule.value === item.operation)[0];
+          let result: ruleType = ruleValueConfig.find((rule: ruleType) => rule.value === item.operation);
 
           let multipleValue: string[] = [];
 
@@ -317,7 +313,7 @@ export class PendingChange {
             multipleValue = JSON.parse(item.value);
           }
 
-          return Object.assign({ multipleValue: multipleValue }, item);
+          return Object.assign({ multipleValue: multipleValue, type: result.type }, item);
         })
       };
 

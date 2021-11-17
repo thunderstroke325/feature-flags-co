@@ -13,6 +13,6 @@ namespace FeatureFlags.APIs.ViewModels.Project
         public string EnvironmentName { get; set; }
         public string EnvironmentDescription { get; set; }
         public string EnvironmentSecret { get; set; }
-        public string EnvironmentModelSecret { get; set; }
+        public string EnvironmentMobileSecret { get; set; }
     }
 }

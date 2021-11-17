@@ -40,6 +40,26 @@ export class TargetConditionsComponent implements OnInit {
   classicFeatureType: FeatureFlagType = FeatureFlagType.Classic;
   pretargetedFeatureType: FeatureFlagType = FeatureFlagType.Pretargeted;
 
+  exptRulesVisible = false;
+
+  onSetExptRulesClick() {
+    this.exptRulesVisible = true;
+  }
+
+  onSetExptRulesClosed(data: any) {
+    if (data.isSaved) {
+      this.isLoading = true;
+      this.switchServe.getSwitchDetail(this.featureDetail.getSwicthDetail().id).subscribe((result: CSwitchParams) => {
+        this.loadFeatureFlag(result);
+        this.isLoading = false;
+      }, () => {
+        this.isLoading = false;
+      });
+    }
+
+    this.exptRulesVisible = false;
+  }
+
   constructor(
     private route:ActivatedRoute,
     private switchServe: SwitchService,
@@ -83,59 +103,59 @@ export class TargetConditionsComponent implements OnInit {
     })
   }
 
+  private loadFeatureFlag(ff: CSwitchParams) {
+    this.featureDetail = new CSwitchParams(ff);
+
+    this.variationOptions = this.featureDetail.getVariationOptions();
+    this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
+      acc[cur.localId] = this.featureDetail.getTargetIndividuals().filter(t => t.valueOption !== null).find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
+      return acc;
+    }, {});
+    for(const i in this.targetIndividuals){
+      if (this.targetIndividuals[i].length !== 0 ){
+        this.targetIndividualsActive = true;
+        break;
+      }
+    }
+    if (this.featureDetail.getFFDefaultRulePercentageRollouts().length === 0) {
+      this.featureDetail.setFFDefaultRulePercentageRollouts([
+        {
+          rolloutPercentage: [0, 1],
+          valueOption: this.variationOptions[0]
+        }
+      ]);
+    }
+
+    const detail: IFfParams = this.featureDetail.getSwicthDetail();
+    this.switchServe.setCurrentSwitch(detail);
+    this.switchId = detail.id;
+
+    this.currentProjectEnv = JSON.parse(localStorage.getItem('current-project'));
+    this.currentAccount = JSON.parse(localStorage.getItem('current-account'));
+    const currentUrl = this.route.snapshot['_routerState'].url;
+    this.pendingChanges = new PendingChange(
+      this.teamService,
+      this.currentAccount.id,
+      this.currentProjectEnv,
+      detail,
+      this.variationOptions,
+      currentUrl.substr(0, currentUrl.lastIndexOf('/') + 1)
+      );
+
+    this.pendingChanges.initialize(
+      this.targetIndividuals,
+      this.featureDetail.getFFVariationOptionWhenDisabled(),
+      this.featureDetail.getFFDefaultRulePercentageRollouts(),
+      this.featureDetail.getFftuwmtr(),
+      this.featureDetail.getUpperFeatures(),
+      this.featureDetail.getFeatureStatus()
+      );
+  }
+
   private ListenerResolveData() {
     this.route.data.pipe(map(res => res.switchInfo))
     .subscribe((result: CSwitchParams) => {
-      this.featureDetail = new CSwitchParams(result);
-
-      this.variationOptions = this.featureDetail.getVariationOptions();
-      this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
-        acc[cur.localId] = this.featureDetail.getTargetIndividuals().filter(t => t.valueOption !== null).find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
-        return acc;
-      }, {});
-      for(const i in this.targetIndividuals){
-        if (this.targetIndividuals[i].length !== 0 ){
-          this.targetIndividualsActive = true;
-          break;
-        }
-      }
-      if (this.featureDetail.getFFDefaultRulePercentageRollouts().length === 0) {
-        this.featureDetail.setFFDefaultRulePercentageRollouts([
-          {
-            rolloutPercentage: [0, 1],
-            valueOption: this.variationOptions[0]
-          }
-        ]);
-      }
-
-      // if (!this.featureDetail.getFFVariationOptionWhenDisabled()) {
-      //   this.featureDetail.setFFVariationOptionWhenDisabled(this.variationOptions[0]);
-      // }
-
-      const detail: IFfParams = this.featureDetail.getSwicthDetail();
-      this.switchServe.setCurrentSwitch(detail);
-      this.switchId = detail.id;
-
-      this.currentProjectEnv = JSON.parse(localStorage.getItem('current-project'));
-      this.currentAccount = JSON.parse(localStorage.getItem('current-account'));
-      const currentUrl = this.route.snapshot['_routerState'].url;
-      this.pendingChanges = new PendingChange(
-        this.teamService,
-        this.currentAccount.id,
-        this.currentProjectEnv,
-        detail,
-        this.variationOptions,
-        currentUrl.substr(0, currentUrl.lastIndexOf('/') + 1)
-        );
-
-      this.pendingChanges.initialize(
-        this.targetIndividuals,
-        this.featureDetail.getFFVariationOptionWhenDisabled(),
-        this.featureDetail.getFFDefaultRulePercentageRollouts(),
-        this.featureDetail.getFftuwmtr(),
-        this.featureDetail.getUpperFeatures(),
-        this.featureDetail.getFeatureStatus()
-        );
+      this.loadFeatureFlag(result);
     });
   }
 

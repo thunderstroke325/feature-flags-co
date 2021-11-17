@@ -25,3 +25,8 @@ export function getPercentageFromRolloutPercentageArray(arr: number[]): number {
 export function encodeURIComponentFfc(url: string): string {
   return encodeURIComponent(url).replace(/\(/g, "%28").replace(/\)/g, '%29');
 }
+
+// determine if a rule operation is single operater
+export function isSingleOperator(operationType: string): boolean {
+  return !['string', 'number', 'regex', 'multi'].includes(operationType);
+}

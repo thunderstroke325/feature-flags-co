@@ -39,9 +39,12 @@ import { ExperimentDrawerComponent } from './uis/experiment-drawer/experiment-dr
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { PercentagePipe } from 'src/app/share/pipes/percentage.pipe';
 import { G2LineChartComponent } from './uis/g2-chart/g2-line-chart/g2-line-chart.component';
+import { ExptRulesDrawerComponent } from './uis/expt-rules-drawer/expt-rules-drawer.component';
+import { NzListModule } from 'ng-zorro-antd/list';
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 
 @NgModule({
-  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent, PercentagePipe, G2LineChartComponent],
+  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent, PercentagePipe, G2LineChartComponent, ExptRulesDrawerComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -68,6 +71,8 @@ import { G2LineChartComponent } from './uis/g2-chart/g2-line-chart/g2-line-chart
     NzUploadModule,
     NzTagModule,
     NzToolTipModule,
+    NzListModule,
+    NzCheckboxModule
   ],
   exports: [
     CommonModule,
@@ -87,7 +92,8 @@ import { G2LineChartComponent } from './uis/g2-chart/g2-line-chart/g2-line-chart
     MetricDrawerComponent,
     ExperimentDrawerComponent,
     PercentagePipe,
-    G2LineChartComponent
+    G2LineChartComponent,
+    ExptRulesDrawerComponent
   ]
 })
 export class ShareModule { }

@@ -57,7 +57,7 @@ namespace FeatureFlags.APIs.Services
                             EnvironmentName = env.Name,
                             EnvironmentDescription = env.Description,
                             EnvironmentSecret = env.Secret,
-                            EnvironmentModelSecret = env.MobileSecret
+                            EnvironmentMobileSecret = env.MobileSecret
                         };
 
             var projectEnvs = await query.ToListAsync();
@@ -74,7 +74,7 @@ namespace FeatureFlags.APIs.Services
                         ProjectId = x.ProjectId,
                         Name = x.EnvironmentName,
                         Description = x.EnvironmentDescription,
-                        MobileSecret = x.EnvironmentModelSecret,
+                        MobileSecret = x.EnvironmentMobileSecret,
                         Secret = x.EnvironmentSecret
                     }).OfType<EnvironmentViewModel>() // exclude null environment
                 }

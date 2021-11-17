@@ -39,7 +39,12 @@
             </div>
             <div class="item">
               <nz-collapse [nzBordered]="false" [nzGhost]="true">
-                <ng-template #collapseTitle><span style="font-size: 13px;font-weight: bold;">目标用户</span></ng-template>
+                <ng-template #collapseTitle>
+                    <span style="font-size: 13px;font-weight: bold;">目标用户</span>
+                    <div *ngIf="featureDetail?.exptIncludeAllRules" style="text-align: right;">
+                      <i nz-icon nzType="aim" nzTheme="outline"></i>分流进入数据实验 <a (click)="onSetExptRulesClick(data)"><i nz-icon nzType="edit" nzTheme="fill"></i>编辑</a>
+                    </div>
+                </ng-template>
                 <nz-collapse-panel [nzHeader]="collapseTitle" [nzActive]="targetIndividualsActive">
                   <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
                     <target-user [type]="variationOption.variationValue"
@@ -60,6 +65,9 @@
               </div>
                 <ng-container *ngFor="let condition of featureDetail?.getFftuwmtr(); let key=index;">
                     <div class="content">
+                      <div *ngIf="featureDetail?.exptIncludeAllRules || condition.isIncludedInExpt" style="text-align: right;margin-top:20px">
+                        <i nz-icon nzType="aim" nzTheme="outline"></i>分流进入数据实验 <a (click)="onSetExptRulesClick(data)"><i nz-icon nzType="edit" nzTheme="fill"></i>编辑</a>
+                      </div>
                         <find-rule [data]="condition"
                                    [properties]="propertiesList"
                                    [index]="key"
@@ -72,12 +80,17 @@
                     </div>
                 </ng-container>
             </div>
-            <div class="item item-short" style="margin-top:32px">
-              <div class="label" style="align-self: flex-start">默认返回值</div>
-              <app-serve-multistates [isSingle]="true"
-                          [variationOptions]="variationOptions"
-                          [rulePercentageRollouts]="featureDetail?.getFFDefaultRulePercentageRollouts()"
-                          (onPercentageChange)="onDefaultRulePercentageRolloutsChange($event)"></app-serve-multistates>
+            <div class="item item-short" style="margin-top:32px;display: flex;justify-content: space-between;align-items: flex-start;">
+              <div>
+                <div class="label" style="align-self: flex-start">默认返回值</div>
+                <app-serve-multistates [isSingle]="true"
+                            [variationOptions]="variationOptions"
+                            [rulePercentageRollouts]="featureDetail?.getFFDefaultRulePercentageRollouts()"
+                            (onPercentageChange)="onDefaultRulePercentageRolloutsChange($event)"></app-serve-multistates>
+              </div>
+              <div *ngIf="featureDetail?.exptIncludeAllRules || featureDetail?.ff.isDefaultRulePercentageRolloutsIncludedInExpt">
+                <i nz-icon nzType="aim" nzTheme="outline"></i>分流进入数据实验 <a (click)="onSetExptRulesClick(data)"><i nz-icon nzType="edit" nzTheme="fill"></i>编辑</a>
+              </div>
 
             </div>
             <div class="item">
@@ -179,3 +192,5 @@
     <button [disabled]="!pendingChanges.canSubmit()" *ngIf="isApprovalRequestModal" nz-button nzType="primary" (click)="handleOk()" >提交审阅</button>
   </div>
 </nz-modal>
+
+<app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)" [featureFlag]="featureDetail"></app-expt-rules-drawer>

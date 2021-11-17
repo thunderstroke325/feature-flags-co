@@ -26,6 +26,12 @@
             </ng-template>
           </nz-empty>
 
+          <ng-container *ngIf="!isInitLoading && experimentList.length > 0">
+            <nz-card class="experiment" style="margin-top: 20px;">
+              进入实验的用户满足以下<a (click)="onSetExptRulesClick()">规则</a> 
+            </nz-card>
+          </ng-container>
+
           <nz-card class="experiment" *ngFor="let experiment of experimentList" style="margin-top: 20px;">
               <div class="head">
                 <div class="first-line">
@@ -392,3 +398,5 @@
     </div>
   </ng-container>
 </ng-template>
+
+<app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)" [featureFlag]="currentFeatureFlag"></app-expt-rules-drawer>
