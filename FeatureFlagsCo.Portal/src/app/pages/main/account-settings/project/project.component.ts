@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
 import { IProject, IEnvironment, IProjectEnv } from 'src/app/config/types';
 import { ProjectService } from 'src/app/services/project.service';
 import { AccountService } from 'src/app/services/account.service';
@@ -11,35 +11,20 @@ import { EnvService } from 'src/app/services/env.service';
 })
 export class ProjectComponent implements OnInit {
 
-  @ViewChild('listRef', { static: false }) listRef: ElementRef;c
-
   creatEditProjectFormVisible: boolean = false;
   creatEditEnvFormVisible: boolean = false;
-  currentAccountId: number;
 
-  project: IProject; // the project being deleting or editing
+  // the project being deleting or editing
+  project: IProject;
   env: IEnvironment;
 
   searchValue: string;
 
-  currentProjectEnv: IProjectEnv; // the project on the top left corner of the page
+  // current project env
+  currentAccountId: number;
+  currentProjectEnv: IProjectEnv;
 
   projects: IProject[] = [];
-
-  doSearch() {
-    const projects = this.projectService.projects || [];
-
-    if (!this.searchValue) {
-      this.projects = [...projects];
-      return;
-    }
-    this.projects = [...projects.filter(project => project.name.toLowerCase().indexOf(this.searchValue.toLowerCase()) >= 0)];
-  }
-
-  get listHeight() {
-    return document.body.clientHeight - 129 - 74 - 20;
-    // return (this.listRef && this.listRef.nativeElement.clientHeight) ?? 0;
-  }
 
   constructor(
     private projectService: ProjectService,
@@ -51,15 +36,13 @@ export class ProjectComponent implements OnInit {
     const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
     this.currentAccountId = currentAccountProjectEnv.account.id;
     this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
-    this.doSearch();
+    this.projectService
+      .getProjects(this.currentAccountId)
+      .subscribe(projects => this.projects = projects);
   }
 
   isEnvDeleteBtnVisible(env: IEnvironment): boolean {
     return this.currentProjectEnv?.envId !== env.id;
-  }
-
-  fetchList(accountId: number) {
-    this.projectService.getProjectList(accountId);
   }
 
   onCreateProjectClick() {
@@ -89,32 +72,69 @@ export class ProjectComponent implements OnInit {
       this.envService.getEnvs(this.currentAccountId, env.projectId).subscribe((envs: IEnvironment[]) => {
         project.environments = envs;
       });
+
+      // emit project list change event
+      this.projectService.projectListChanged$.next();
     })
   }
 
   onDeleteProjectClick(project: IProject) {
     this.projectService.removeProject(this.currentAccountId, project.id).subscribe(() => {
-      this.fetchList(this.currentAccountId);
+      // remove the deleted project from list
+      this.projects = this.projects.filter(item => item.id !== project.id);
+
+      // emit project list change event
+      this.projectService.projectListChanged$.next();
     });
   }
 
   projectClosed(data: any) {
     this.creatEditProjectFormVisible = false;
-    this.fetchList(this.currentAccountId);
-    if (data.isEditing && this.currentProjectEnv.projectId == this.project.id) { // is editing current project
-      this.currentProjectEnv.projectName = data.project.name;
-      this.projectService.changeCurrentProjectAndEnv(this.currentProjectEnv);
+
+    // close after edit project name
+    if (data.isEditing) {
+      const newName = data.project.name;
+
+      const oldProject = this.projects.find(item => item.id == data.project.id);
+      oldProject.name = newName;
+
+      // if is editing current project
+      if (this.currentProjectEnv.projectId == this.project.id) {
+        this.currentProjectEnv.projectName = newName;
+        this.projectService.upsertCurrentProjectEnvLocally(this.currentProjectEnv);
+      }
     }
+
+    // close after create project
+    else if (data.project) {
+      // put the newly created project at the first place
+      this.projects.unshift(data.project);
+    }
+
+    // close after do nothing
+    else {
+
+    }
+
+    // emit project list change event
+    this.projectService.projectListChanged$.next();
   }
 
   envClosed(data: any) {
     this.creatEditEnvFormVisible = false;
-    this.envService.getEnvs(this.currentAccountId, this.env.projectId).subscribe((envs: IEnvironment[]) => {
-      this.project.environments = envs;
-    });
-    if (data.isEditing && this.currentProjectEnv.envId == this.env.id) { // is editing current env
+    this.envService
+      .getEnvs(this.currentAccountId, this.env.projectId)
+      .subscribe((envs: IEnvironment[]) => {
+        this.project.environments = envs;
+      });
+
+    // if is editing current env
+    if (data.isEditing && this.currentProjectEnv.envId == this.env.id) {
       this.currentProjectEnv.envName = data.env.name;
-      this.projectService.changeCurrentProjectAndEnv(this.currentProjectEnv);
+      this.projectService.upsertCurrentProjectEnvLocally(this.currentProjectEnv);
     }
+
+    // emit project list change event
+    this.projectService.projectListChanged$.next();
   }
 }

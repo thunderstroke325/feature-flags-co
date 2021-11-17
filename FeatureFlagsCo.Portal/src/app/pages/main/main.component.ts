@@ -3,14 +3,11 @@ import { AngularPlugin } from '@microsoft/applicationinsights-angularplugin-js';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { IAuthProps, IAccount, IProject, IProjectEnv } from 'src/app/config/types';
+import { IAuthProps } from 'src/app/config/types';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserService } from 'src/app/services/user.service';
 import { IMenuItem } from 'src/app/share/uis/menu/menu';
-// import { IHeaderItem } from 'src/app/share/uis/header/header';
-import { QUICK_COMBAT_DOCUMENT, INTEGRATION_OF_CLOUD_SERVICE_PROVIDERS, AGILE_SWITCH_BOLIERPLATE } from 'src/app/config';
-import { AccountService } from 'src/app/services/account.service';
+import { QUICK_COMBAT_DOCUMENT} from 'src/app/config';
 import { getAuth } from 'src/app/utils';
 import { ProjectService } from 'src/app/services/project.service';
 import { SwitchService } from 'src/app/services/switch.service';
@@ -25,23 +22,13 @@ import { environment } from '../../../environments/environment';
 export class MainComponent implements OnInit, OnDestroy {
 
   public menus: IMenuItem[] = [];
-  public auth: IAuthProps
-  public currentAccount: IAccount;
+  public auth: IAuthProps;
 
   private destory$: Subject<void> = new Subject();
-
-  get accounts() {
-    return this.accountService.accounts || [];
-  }
-
-  get projects() {
-    return this.projectService.projects || [];
-  }
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private accountService: AccountService,
     private projectService: ProjectService,
     private switchService: SwitchService,
     private userService: UserService,
@@ -50,7 +37,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
     if (environment.name === 'Production') {
       // setup the microsoft insights
-      var angularPlugin = new AngularPlugin();
+      const angularPlugin = new AngularPlugin();
       const appInsights = new ApplicationInsights({ config: {
       instrumentationKey: 'c706330b-e4e1-cf9b-9aef-ff26397502d7',
       endpointUrl: 'https://dc.applicationinsights.azure.cn/v2/track', // this points to azure china, ref https://docs.microsoft.com/en-us/azure/azure-monitor/app/custom-endpoints?tabs=nodejs
@@ -101,17 +88,7 @@ export class MainComponent implements OnInit, OnDestroy {
         level: 1,
         title: '快速实战文档',
         target: QUICK_COMBAT_DOCUMENT
-      }, 
-      // {
-      //   level: 1,
-      //   title: 'SDK & Integration',
-      //   target: INTEGRATION_OF_CLOUD_SERVICE_PROVIDERS
-      // }, 
-      // {
-      //   level: 1,
-      //   title: '特征管理指南',
-      //   target: AGILE_SWITCH_BOLIERPLATE
-      // }, 
+      },
       {
         level: 1,
         line: true

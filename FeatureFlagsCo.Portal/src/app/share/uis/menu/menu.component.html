@@ -1,122 +1,58 @@
 <section class="menu-body">
-<!--    <div class="top-title" >-->
-<!--      <div>-->
-<!--        <div class="title">{{currentProjectEnv?.projectName}}</div>-->
-<!--        <div class="title">{{currentProjectEnv?.envName}}</div>-->
-<!--      </div>-->
-<!--      <i nz-icon nzType="swap" nzTheme="outline" (click)="envModalVisible=true"></i>-->
-<!--    </div>-->
-    <div class="menu-list">
-        <ul nz-menu nzMode="inline" style="height: 100%;">
-          <div style="height: 20px"></div>
-            <ng-container *ngTemplateOutlet="menuTpl; context: { $implicit: menus }"></ng-container>
-            <ng-template #menuTpl let-menus>
-              <ng-container *ngFor="let menu of menus">
+  <div class="menu-list">
+    <ul nz-menu nzMode="inline" style="height: 100%;">
+      <div style="height: 20px"></div>
+      <ng-container *ngTemplateOutlet="menuTpl; context: { $implicit: menus }"></ng-container>
+      <ng-template #menuTpl let-menus>
+        <ng-container *ngFor="let menu of menus">
 
-                <ng-container *ngIf="menu.line;else menuItem">
-                    <div class="menu-item-line">
-                        <div class="line"></div>
-                    </div>
+          <ng-container *ngIf="menu.line;else menuItem">
+            <div class="menu-item-line">
+              <div class="line"></div>
+            </div>
+          </ng-container>
+
+          <ng-template #menuItem>
+            <li
+              *ngIf="!menu.children && !menu.hide"
+              nz-menu-item
+              nzMatchRouter
+              [nzPaddingLeft]="menu.level * 24"
+              [nzDisabled]="menu.disabled"
+              [nzSelected]="menu.selected"
+              (click)="onMenuItemSelected(menu)">
+              <a [routerLink]="menu.path" *ngIf="menu.path; else targetMenuItem">
+                <i nz-icon [nzType]="menu.icon" *ngIf="menu.icon"></i>
+                <span>{{ menu.title }}</span>
+              </a>
+              <ng-template #targetMenuItem>
+                <a>
+                  <i nz-icon [nzType]="menu.icon" *ngIf="menu.icon"></i>
+                  <span>{{ menu.title }}</span>
+                </a>
+              </ng-template>
+            </li>
+            <li
+              *ngIf="menu.children && !menu.hide"
+              nz-submenu
+              [nzPaddingLeft]="menu.level * 24"
+              [nzOpen]="menu.open"
+              [nzTitle]="menu.title"
+              [nzIcon]="menu.icon"
+              [nzDisabled]="menu.disabled">
+              <ul>
+                <ng-container
+                  *ngTemplateOutlet="menuTpl;
+                  context: { $implicit: menu.children }">
                 </ng-container>
+              </ul>
+            </li>
+          </ng-template>
 
-                <ng-template #menuItem>
-                    <li
-                        *ngIf="!menu.children && !menu.hide"
-                        nz-menu-item
-                        nzMatchRouter
-                        [nzPaddingLeft]="menu.level * 24"
-                        [nzDisabled]="menu.disabled"
-                        [nzSelected]="menu.selected"
-                        (click)="onMenuItemSelected(menu)"
-                    >
-                      <a [routerLink]="menu.path" *ngIf="menu.path; else targetMenuItem">
-                          <i nz-icon [nzType]="menu.icon" *ngIf="menu.icon"></i>
-                          <span>{{ menu.title }}</span>
-                      </a>
-
-                      <ng-template #targetMenuItem>
-                          <a>
-                              <i nz-icon [nzType]="menu.icon" *ngIf="menu.icon"></i>
-                              <span>{{ menu.title }}</span>
-                          </a>
-                      </ng-template>
-
-                  </li>
-                  <li
-                        *ngIf="menu.children && !menu.hide"
-                        nz-submenu
-                        [nzPaddingLeft]="menu.level * 24"
-                        [nzOpen]="menu.open"
-                        [nzTitle]="menu.title"
-                        [nzIcon]="menu.icon"
-                        [nzDisabled]="menu.disabled"
-                    >
-                    <ul>
-                      <ng-container *ngTemplateOutlet="menuTpl; context: { $implicit: menu.children }"></ng-container>
-                    </ul>
-                  </li>
-
-                </ng-template>
-
-              </ng-container>
-            </ng-template>
-          </ul>
-
-    </div>
-<!--    <div class="user-info">-->
-<!--      <div>-->
-<!--        <div class="title">{{currentAccount?.organizationName}}</div>-->
-<!--        <div class="title"><span>{{auth?.email}}</span>-->
-<!--        <i class="icon-logout" nz-icon nzType="logout" nzTheme="outline" (click)="logout.emit()"></i>-->
-<!--          &lt;!&ndash; <i nz-icon nzType="caret-up" nzTheme="outline" nz-dropdown [nzDropdownMenu]="menu" nzPlacement="topCenter"></i> &ndash;&gt;-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </div>-->
-</section>
-
-<!-- <nz-dropdown-menu #menu="nzDropdownMenu">
-    <ul nz-menu>
-      <li nz-menu-item (click)="logout.emit()">退出登录</li>
+        </ng-container>
+      </ng-template>
     </ul>
-</nz-dropdown-menu> -->
 
-<!--<nz-modal [nzWidth]="1000" [(nzVisible)]="envModalVisible" nzTitle="切换项目环境" (nzOnCancel)="envModelCancel()" (nzOnOk)="envModalConfirm()">-->
-<!--  <ng-container *nzModalContent>-->
-<!--    <div nz-row [nzGutter]="0" class="switch-env">-->
-<!--      <div nz-col class="gutter-row" [nzSpan]="12">-->
-<!--        <nz-table #projectTable [nzData]="availableProjects" [nzFrontPagination]="false" [nzScroll]="{ y: '400px' }">-->
-<!--          <thead>-->
-<!--            <tr>-->
-<!--              <th>项目</th>-->
-<!--              <th></th>-->
-<!--            </tr>-->
-<!--          </thead>-->
-<!--          <tbody>-->
-<!--            <tr *ngFor="let project of projectTable.data" (click)="onSelectProject(project)" [ngClass]="{'active': selectedProject?.id == project.id}">-->
-<!--              <td>{{ project.name }}</td>-->
-<!--              <td class="action-col">-->
-<!--                <a><i nz-icon nzType="right" nzTheme="outline"></i></a>-->
-<!--              </td>-->
-<!--            </tr>-->
-<!--          </tbody>-->
-<!--        </nz-table>-->
-<!--      </div>-->
-<!--      <div nz-col class="gutter-row" [nzSpan]="12">-->
-<!--        <nz-table #envTable [nzData]="availableEnvs" [nzFrontPagination]="false" [nzScroll]="{ y: '400px' }" nzSize="small">-->
-<!--          <thead>-->
-<!--            <tr>-->
-<!--              <th>环境</th>-->
-<!--            </tr>-->
-<!--          </thead>-->
-<!--          <tbody>-->
-<!--            <tr *ngFor="let env of envTable.data" (click)="onSelectEnv(env)" [ngClass]="{'active': selectedEnv?.id == env.id}">-->
-<!--              <td>{{ env.name }}</td>-->
-<!--            </tr>-->
-<!--          </tbody>-->
-<!--        </nz-table>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </ng-container>-->
-<!--</nz-modal>-->
-
+  </div>
+</section>
 

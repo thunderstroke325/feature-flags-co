@@ -20,7 +20,7 @@ export class AccountProjectEnvResolver implements Resolve<any> {
     return this.accountService.getCurrentAccount().pipe(
         take(1),
         mergeMap((account: IAccount) => {
-            return this.projectService.getCurrentProjectAndEnv(account.id).pipe(
+            return this.projectService.getCurrentProjectEnv(account.id).pipe(
               take(1),
               mergeMap((projectEnv: IProjectEnv) => {
                 return of({});

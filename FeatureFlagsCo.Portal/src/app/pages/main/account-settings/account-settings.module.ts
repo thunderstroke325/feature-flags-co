@@ -27,9 +27,10 @@ import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { ShareModule } from 'src/app/share/share.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { ProjectFilterPipe } from "./project/project-filter.pipe";
 
 @NgModule({
-  declarations: [AccountSettingsComponent, AccountComponent, ProfileComponent, TeamComponent, ProjectComponent],
+  declarations: [AccountSettingsComponent, AccountComponent, ProfileComponent, TeamComponent, ProjectComponent, ProjectFilterPipe],
   imports: [
     CommonModule,
     FormsModule,

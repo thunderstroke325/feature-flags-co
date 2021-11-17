@@ -1,7 +1,7 @@
 <div class="project-layout">
     <div class="operation-tools">
         <section nz-col nzSpan="12">
-            <input style="width: 400px" nz-input placeholder="按项目名字查找" [(ngModel)]="searchValue" (ngModelChange)="doSearch()"/>
+            <input style="width: 400px" nz-input placeholder="按项目名字查找" [(ngModel)]="searchValue"/>
         </section>
 
         <button nz-button nzType="primary" (click)="onCreateProjectClick()">
@@ -9,8 +9,8 @@
             添加 Project
         </button>
     </div>
-    <div class="project-list" #listRef>
-        <div *ngFor="let project of projects" class="project">
+    <div class="project-list">
+        <div *ngFor="let project of projects | projectFilter: searchValue" class="project">
             <section>
               <nz-card style="margin-bottom: 10px;">
                 <nz-descriptions style="margin-bottom: 20px" nzTitle="{{project.name}}" [nzExtra]="extraTemplate"></nz-descriptions>

@@ -1,14 +1,11 @@
 <div class="header-body">
-  <app-header (logout)="logout()"></app-header>
+  <app-header [auth]="auth" (logout)="logout()"></app-header>
 </div>
 <section class="main-body">
-    <div class="menu-body">
-        <app-menu [menus]="menus"></app-menu>
-    </div>
-    <div class="router-body">
-<!--        <div class="header">-->
-<!--            <xu-breadcrumb [nzAutoGenerate]="true" [nzRouteLabelFn]="onRouteLabel"></xu-breadcrumb>-->
-<!--        </div>-->
-        <router-outlet></router-outlet>
-    </div>
+  <div class="menu-body">
+    <app-menu [menus]="menus"></app-menu>
+  </div>
+  <div class="router-body">
+    <router-outlet></router-outlet>
+  </div>
 </section>

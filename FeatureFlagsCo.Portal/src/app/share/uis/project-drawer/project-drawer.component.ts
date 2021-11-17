@@ -65,7 +65,7 @@ export class ProjectDrawerComponent implements OnInit {
   }
 
   onClose() {
-    this.close.emit({ isEditing: false });
+    this.close.emit({ isEditing: false, project: undefined });
   }
 
   doSubmit() {
@@ -82,14 +82,12 @@ export class ProjectDrawerComponent implements OnInit {
     const { name } = this.projectForm.value;
 
     if (this.isEditing) {
-      this.projectService.putUpdateProject(this.currentAccountId, {
-        name,
-        id: this.project.id
-      }).pipe()
+      this.projectService
+        .putUpdateProject(this.currentAccountId, {name, id: this.project.id})
         .subscribe(
-          res => {
+          updatedProject => {
             this.isLoading = false;
-            this.close.emit({isEditing: true, project: { name }});
+            this.close.emit({isEditing: true, project: updatedProject});
             this.message.success('更新成功！');
           },
           err => {
@@ -97,12 +95,12 @@ export class ProjectDrawerComponent implements OnInit {
           }
         );
     } else {
-      this.projectService.postCreateProject(this.currentAccountId, { name })
-        .pipe()
+      this.projectService
+        .postCreateProject(this.currentAccountId, {name})
         .subscribe(
-          res => {
+          createdProject => {
             this.isLoading = false;
-            this.close.emit({isEditing: false, project: { name }});
+            this.close.emit({isEditing: false, project: createdProject});
             this.message.success('创建成功！');
           },
           err => {
