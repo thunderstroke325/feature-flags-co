@@ -290,20 +290,7 @@ export class TargetConditionsComponent implements OnInit {
     this.switchServe.updateSwitch(this.featureDetail)
       .subscribe((result) => {
         this.msg.success("修改成功!");
-
-        const featureDetail = new CSwitchParams(result.data);
-        const targetIndividuals = this.variationOptions.reduce((acc, cur) => {
-          acc[cur.localId] = this.featureDetail.getTargetIndividuals().find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
-          return acc;
-        }, {});
-        this.pendingChanges.initialize(
-          targetIndividuals,
-          featureDetail.getFFVariationOptionWhenDisabled(),
-          featureDetail.getFFDefaultRulePercentageRollouts(),
-          featureDetail.getFftuwmtr(),
-          featureDetail.getUpperFeatures(),
-          featureDetail.getFeatureStatus()
-          );
+        this.loadFeatureFlag(result.data);
         this.requestApprovalModalVisible = false;
     }, error => {
       this.msg.error("修改失败!");
