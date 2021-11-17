@@ -14,6 +14,8 @@ import { ShareModule } from 'src/app/share/share.module';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 
 @NgModule({
   declarations: [AnalyticsComponent],
@@ -30,6 +32,8 @@ import { NzStatisticModule } from 'ng-zorro-antd/statistic';
     NzGridModule,
     NzCardModule,
     NzStatisticModule,
+    NzPopconfirmModule,
+    NzDatePickerModule,
     ShareModule,
     AnalyticsRoutingModule
   ]

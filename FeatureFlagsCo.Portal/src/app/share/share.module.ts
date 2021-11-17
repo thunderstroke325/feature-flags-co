@@ -38,13 +38,14 @@ import { MetricDrawerComponent } from './uis/metric-drawer/metric-drawer.compone
 import { ExperimentDrawerComponent } from './uis/experiment-drawer/experiment-drawer.component';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { PercentagePipe } from 'src/app/share/pipes/percentage.pipe';
+import { FfcDatePipe } from 'src/app/share/pipes/ffcdate.pipe';
 import { G2LineChartComponent } from './uis/g2-chart/g2-line-chart/g2-line-chart.component';
 import { ExptRulesDrawerComponent } from './uis/expt-rules-drawer/expt-rules-drawer.component';
 import { NzListModule } from 'ng-zorro-antd/list';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 
 @NgModule({
-  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent, PercentagePipe, G2LineChartComponent, ExptRulesDrawerComponent],
+  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent, PercentagePipe, FfcDatePipe, G2LineChartComponent, ExptRulesDrawerComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -92,6 +93,7 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
     MetricDrawerComponent,
     ExperimentDrawerComponent,
     PercentagePipe,
+    FfcDatePipe,
     G2LineChartComponent,
     ExptRulesDrawerComponent
   ]
