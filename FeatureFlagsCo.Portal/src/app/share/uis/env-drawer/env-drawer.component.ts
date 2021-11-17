@@ -124,13 +124,13 @@ export class EnvDrawerComponent implements OnInit {
 
   onRegenerate(keyName: EnvKeyNameEnum) {
     this.envService.putUpdateEnvKey(this.currentAccountId, this.env.projectId, this.env.id,
-      {keyName: keyName}
+      {keyName: keyName, keyValue: this.env.secret}
     ).subscribe(
       (envKey: IEnvKey) => {
         const curProjectEnv = this.projectSrv.getLocalCurrentProjectEnv();
         if (curProjectEnv &&
-          this._env.id == curProjectEnv.envId &&
-          this._env.projectId == curProjectEnv.projectId) {
+          this.env.id == curProjectEnv.envId &&
+          this.env.projectId == curProjectEnv.projectId) {
           // update current project env
           this.projectSrv.updateCurrentProjectEnvLocally({envSecret: envKey.keyValue});
         };

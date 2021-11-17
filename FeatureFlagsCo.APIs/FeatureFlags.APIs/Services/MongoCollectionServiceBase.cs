@@ -1,9 +1,6 @@
 ﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
@@ -47,6 +44,13 @@ namespace FeatureFlags.APIs.Services
         public async Task<T> UpdateAsync(string id, T item)
         {
             return await _collection.FindOneAndReplaceAsync(p => p.Id == id, item);
+        }
+        
+        public async Task UpdateManyAsync(
+            FilterDefinition<T> filterDefinition, 
+            UpdateDefinition<T> updateDefinition)
+        {
+            await _collection.UpdateManyAsync(filterDefinition, updateDefinition);
         }
 
         public async Task RemoveAsync(T bookIn) =>
