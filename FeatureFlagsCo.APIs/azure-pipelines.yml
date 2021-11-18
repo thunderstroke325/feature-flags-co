@@ -134,13 +134,13 @@ stages:
                   script: |
                     cd FeatureFlagsCo.APIs/FeatureFlagsCo.APIs.Tests/Postman.IntegrationTests
                     
-                    $pathToJson = "ffc-variation-random-test.json"
+                    $pathToJson = "ffc-multi-variation-test.json"
                     $a = Get-Content $pathToJson | ConvertFrom-Json
                     Write-Host $a
                     $a.variable[0].value = "$(API_URL_Dev)"
                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
                     
-                    $pathToJsonCheck = "ffc-variation-random-test.json"
+                    $pathToJsonCheck = "ffc-multi-variation-test.json"
                     $aCheck = Get-Content $pathToJson | ConvertFrom-Json
                     Write-Host $aCheck.variable[0].value
                     
@@ -171,7 +171,7 @@ stages:
                     cd FeatureFlagsCo.APIs.Tests
                     cd Postman.IntegrationTests
                     npm install -g newman
-                    newman run ffc-variation-random-test.json --reporters cli,junit --reporter-junit-export junit-report.xml
+                    newman run ffc-multi-variation-test.json --reporters cli,junit --reporter-junit-export junit-report.xml
               
               - task: Bash@3
                 displayName: 'run newman'
