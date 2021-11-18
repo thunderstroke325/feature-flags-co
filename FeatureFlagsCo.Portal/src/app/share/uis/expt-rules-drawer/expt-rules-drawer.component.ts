@@ -80,7 +80,11 @@ export class ExptRulesDrawerComponent {
         exptPercentage = exptPercentage * 100;
       }
 
-      return Object.assign({ exptRollout: exptPercentage / 100 }, r, { exptPercentage });
+      r.exptPercentage = exptPercentage;
+      if (r.exptRollout === null || r.exptRollout === undefined) {
+        r.exptRollout = exptPercentage / 100;
+      }
+      return Object.assign({}, r);
     });
   }
 
