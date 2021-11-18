@@ -89,6 +89,7 @@ export class AnalyticsComponent implements OnInit {
   ranges = { 今天: [new Date(), new Date()], '本月': [new Date(), endOfMonth(new Date())] };
   listData: DataCard[] = [];
   isLoading = false;
+  dataSourceModalVisible = false;
   constructor(
     private message: NzMessageService
   ) {
@@ -100,7 +101,7 @@ export class AnalyticsComponent implements OnInit {
         isLoading: true,
         items: new Array(6).fill({}).map((_i, index) => ({
           id: `${_i}`,
-          name: `Date item  ${index}`,
+          name: `Data item  ${index}`,
           value: parseFloat((Math.random() * 100).toFixed(2)),
           unit: 'EUR',
           color: 'red',
@@ -121,7 +122,9 @@ export class AnalyticsComponent implements OnInit {
   }
 
   onCreateCard() {
-    this.listData = [new DataCard(), ...this.listData];
+    const card = new DataCard();
+    this.onAddItem(card);
+    this.listData = [card, ...this.listData];
   }
 
   onAddItem(data: DataCard) {
@@ -140,14 +143,30 @@ export class AnalyticsComponent implements OnInit {
     if (idx > -1) {
       this.listData.splice(idx, 1);
     }
-    console.log('removed');
   }
 
-  removeDataItem(card: IDataCard, item: IDataItem) {
+  removeDataItem(card: DataCard, item: IDataItem) {
     const idx = card.items.findIndex(i => i.id === item.id);
     if (idx > -1) {
       card.items.splice(idx, 1)
     }
+  }
+
+  currentDataItem: IDataItem = null;
+  currentDataCard: DataCard = null;
+  onSetDataSource(card: DataCard, item: IDataItem) {
+    this.currentDataItem = Object.assign({}, item);
+    this.currentDataCard = card;
+    this.dataSourceModalVisible = true;
+  }
+
+  onApplyDataSource () {
+    let item = this.currentDataCard.items.find(i => i.id === this.currentDataItem.id);
+    if (item) {
+      item = Object.assign({}, this.currentDataItem);
+    }
+
+    this.dataSourceModalVisible = false;
   }
 }
 

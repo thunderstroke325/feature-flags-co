@@ -10,8 +10,8 @@ export class FfcDatePipe implements PipeTransform {
   transform(value) {
     if (value) {
       return moment(value).format('LL');
-    } else {
-      return moment(new Date()).format('LL');
     }
+
+    return '--';
   }
 }

@@ -16,6 +16,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 
 @NgModule({
   declarations: [AnalyticsComponent],
@@ -34,6 +35,7 @@ import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
     NzStatisticModule,
     NzPopconfirmModule,
     NzDatePickerModule,
+    NzModalModule,
     ShareModule,
     AnalyticsRoutingModule
   ]
