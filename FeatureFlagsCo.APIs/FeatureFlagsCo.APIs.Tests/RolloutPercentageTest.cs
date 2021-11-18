@@ -19,9 +19,13 @@ namespace FeatureFlagsCo.APIs.Tests
         [Fact]
         public void The_Hashed_Value_Should_Be_Fixed()
         {
-            var result = VariationSplittingAlgorithm.IfKeyBelongsPercentage("hu-beau@outlook.com", new double[] { 0.683, 0.685 });
-
-            Assert.True(result);
+            var initValue = VariationSplittingAlgorithm.PercentageOfKey("hu-beau@outlook.com");
+            
+            foreach (var _ in Enumerable.Range(0, 100000))
+            {
+                var newValue = VariationSplittingAlgorithm.PercentageOfKey("hu-beau@outlook.com");
+                Assert.True(initValue == newValue);
+            }
         }
 
         [Fact]

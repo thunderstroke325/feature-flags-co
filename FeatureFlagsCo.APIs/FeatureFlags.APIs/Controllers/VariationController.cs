@@ -141,10 +141,7 @@ namespace FeatureFlags.APIs.Controllers
 
                 try
                 {
-                    if (userVariation.SendToExperiment)
-                    {
-                        SendToRabbitMQ(param, ffIdVm, userVariation);
-                    }
+                    SendToRabbitMQ(param, ffIdVm, userVariation);
                 }
                 catch(Exception exp)
                 {

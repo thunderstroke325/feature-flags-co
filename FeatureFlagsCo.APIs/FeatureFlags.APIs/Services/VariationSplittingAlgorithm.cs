@@ -14,11 +14,23 @@ namespace FeatureFlags.APIs.Services
         /// <returns></returns>
         public static bool IfKeyBelongsPercentage(string key, double[] percentageRange)
         {
+            var percentage = PercentageOfKey(key);
+            
+            return percentage >= percentageRange[0] && percentage <= percentageRange[1];
+        }
+
+        /// <summary>
+        /// 获取给定键值的概率 [0,1] 之间
+        /// </summary>
+        /// <param name="key">键值</param>
+        /// <returns></returns>
+        public static double PercentageOfKey(string key)
+        {
             var hashedKey = new MD5CryptoServiceProvider().ComputeHash(Encoding.ASCII.GetBytes(key));
             var magicNumber = BitConverter.ToInt32(hashedKey, 0);
             var percentage = Math.Abs((double) magicNumber / int.MinValue);
-            
-            return percentage >= percentageRange[0] && percentage <= percentageRange[1];
+
+            return percentage;
         }
     }
 }

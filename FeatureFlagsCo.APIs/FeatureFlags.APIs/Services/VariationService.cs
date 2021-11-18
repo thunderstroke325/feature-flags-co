@@ -500,7 +500,8 @@ namespace FeatureFlags.APIs.Repositories
                         var userKey = ffUser.KeyId;
                         if (IfBelongRolloutPercentage(userKey, item.RolloutPercentage))
                         {
-                            return new ConditionedUserVariation(item, userKey, ffTUWMRItem.isIncludedInExpt);
+                            var newUserKey = userKey.EncodeBase64();
+                            return new ConditionedUserVariation(item, newUserKey, ffTUWMRItem.isIncludedInExpt);
                         }
                     }
                 }
@@ -525,8 +526,9 @@ namespace FeatureFlags.APIs.Repositories
                 rollout => IfBelongRolloutPercentage(userKey, rollout.RolloutPercentage)
             );
             
+            var newUserKey = userKey.EncodeBase64();
             return matchedRollout != null
-                ? new DefaultUserVariation(matchedRollout, userKey, featureFlag.FF.IsDefaultRulePercentageRolloutsIncludedInExpt) 
+                ? new DefaultUserVariation(matchedRollout, newUserKey, featureFlag.FF.IsDefaultRulePercentageRolloutsIncludedInExpt) 
                 : null;
         }
 
