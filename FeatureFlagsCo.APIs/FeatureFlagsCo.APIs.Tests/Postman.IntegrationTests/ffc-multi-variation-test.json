@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6fca63cb-b189-4c33-925d-8f21c750341c",
+		"_postman_id": "8807ff95-efaf-4f57-b1d8-140942e82048",
 		"name": "ffc-multi-variation-test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -145,6 +145,7 @@
 							"        existedVariaIndexes.push(variaIndex);\r",
 							"\r",
 							"        defaultRulePercentageRollouts.push({\r",
+							"            \"exptRollout\": null,\r",
 							"            \"rolloutPercentage\": percentageRanges[r],\r",
 							"            \"valueOption\": variationOptions[variaIndex]\r",
 							"        });\r",
