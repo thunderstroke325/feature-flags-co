@@ -1,5 +1,7 @@
-using FeatureFlags.APIs.Repositories;
 using System;
+using System.Linq;
+using System.Text;
+using FeatureFlags.APIs.Services;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -13,80 +15,53 @@ namespace FeatureFlagsCo.APIs.Tests
         {
             _testOutputHelper = testOutputHelper;
         }
-        [Fact]
-        public void Test1()
-        {
-
-        }
 
         [Fact]
-        public void IfHashedValueIsFixed()
+        public void The_Hashed_Value_Should_Be_Fixed()
         {
-            var _variationService = new VariationService(null, null);
-
-            var result = _variationService.IfBelongRolloutPercentage("hu-beau@outlook.com", new double[] { 0.683, 0.685 });
+            var result = VariationSplittingAlgorithm.IfKeyBelongsPercentage("hu-beau@outlook.com", new double[] { 0.683, 0.685 });
 
             Assert.True(result);
         }
 
         [Fact]
-        public void IfBelongRolloutPercentage()
+        public void Should_Belongs_To_Percentage_Evenly()
         {
-            var _variationService = new VariationService(null, null);
-            
-            for (int k = 0; k < 10; k++)
+            foreach (var round in Enumerable.Range(0, 10))
             {
-                string returnValue = "";
-                returnValue += $"   ##Rround {k}## ";
-                int trueCount = 0;
-                for (int i = 0; i < 100; i++)
-                {
-                    if (_variationService.IfBelongRolloutPercentage(Guid.NewGuid().ToString(), new double[] { 0.0, 0.333 }))
-                        trueCount++;
-                }
-                returnValue += $" 100 sample (GUID): {trueCount};";
-                trueCount = 0;
-                for (int i = 0; i < 100; i++)
-                {
-                    if (_variationService.IfBelongRolloutPercentage($"hu-beau{1000 * k + i}@outlook.com", new double[] { 0.0, 0.333 }))
-                        trueCount++;
-                }
-                returnValue += $" 100 sample (小变化邮箱): {trueCount};";
+                var result = new StringBuilder($"   ##Round {round}## ");
 
-
-                trueCount = 0;
-                for (int i = 0; i < 1000; i++)
-                {
-                    if (_variationService.IfBelongRolloutPercentage(Guid.NewGuid().ToString(), new double[] { 0.0, 0.333 }))
-                        trueCount++;
-                }
-                returnValue += $" 1000 sample (GUID): {trueCount};";
-                trueCount = 0;
-                for (int i = 0; i < 1000; i++)
-                {
-                    if (_variationService.IfBelongRolloutPercentage($"hu-beau{10000 * k + i}@outlook.com", new double[] { 0.0, 0.333 }))
-                        trueCount++;
-                }
-                returnValue += $" 1000 sample (小变化邮箱): {trueCount};";
-
-                trueCount = 0;
-                for (int i = 0; i < 10000; i++)
-                {
-                    if (_variationService.IfBelongRolloutPercentage(Guid.NewGuid().ToString(), new double[] { 0.0, 0.333 }))
-                        trueCount++;
-                }
-                returnValue += $" 10000 sample: {trueCount};";
-                trueCount = 0;
-                for (int i = 0; i < 10000; i++)
-                {
-                    if (_variationService.IfBelongRolloutPercentage($"hu-beau{100000 * k + i}@outlook.com", new double[] { 0.0, 0.333 }))
-                        trueCount++;
-                }
-                returnValue += $" 10000 sample (小变化邮箱): {trueCount};";
-
-
-                _testOutputHelper.WriteLine(returnValue);
+                const string guidKeyType = "GUID";
+                const string emailKeyType = "EMAIL";
+                
+                result.Append(RunSample(round, 100, guidKeyType));
+                result.Append(RunSample(round, 100, emailKeyType));
+                
+                result.Append(RunSample(round, 1000, guidKeyType));
+                result.Append(RunSample(round, 1000, emailKeyType));
+                
+                result.Append(RunSample(round, 10000, guidKeyType));
+                result.Append(RunSample(round, 10000, emailKeyType));
+                
+                _testOutputHelper.WriteLine(result.ToString());
             }
+        }
+
+        private static string RunSample(int round, int count, string keyType)
+        {
+            var belongsToRangeCount = 0;
+            var percentageRange = new []{ 0.0, 0.333 };
+            
+            for (var i = 0; i < count; i++)
+            {
+                var key = keyType == "GUID" ? Guid.NewGuid().ToString() : $"hu-beau{1000 * round + i}@outlook.com";
+                if (VariationSplittingAlgorithm.IfKeyBelongsPercentage(key, percentageRange))
+                {
+                    belongsToRangeCount++;
+                }
+            }
+
+            return $" {count} sample ({(keyType == "GUID" ? "GUID" : "小变化邮箱")}): {belongsToRangeCount};";
         }
     }
 }

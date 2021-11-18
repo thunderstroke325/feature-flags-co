@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Models
 {
@@ -25,11 +24,6 @@ namespace FeatureFlags.APIs.Models
         public string Version { get; set; }
         public DateTime? EffeciveDate { get; set; }
         public bool? ExptIncludeAllRules { get; set; }
-
-        //public override string GetCollectionName()
-        //{
-        //    return "FeatureFlags";
-        //}
     }
 
 
@@ -43,7 +37,7 @@ namespace FeatureFlags.APIs.Models
         public int EnvironmentId { get; set; }
         public string CreatorUserId { get; set; }
         public string Status { get; set; }
-        public bool IsDefaultRulePercentageRolloutsIncludedInExpt { get; set; }
+        public bool? IsDefaultRulePercentageRolloutsIncludedInExpt { get; set; }
         public DateTime? LastUpdatedTime { get; set; }
 
         public List<VariationOptionPercentageRollout> DefaultRulePercentageRollouts { get; set; }
@@ -71,7 +65,7 @@ namespace FeatureFlags.APIs.Models
     {
         public string RuleId { get; set; }
         public string RuleName { get; set; }
-        public bool isIncludedInExpt { get; set; }
+        public bool? isIncludedInExpt { get; set; }
         public List<FeatureFlagRuleJsonContent> RuleJsonContent { get; set; }
         public List<VariationOptionPercentageRollout> ValueOptionsVariationRuleValues { get; set; }
     }
@@ -115,6 +109,9 @@ namespace FeatureFlags.APIs.Models
     {
         public List<FeatureFlagTargetIndividualUser> Individuals { get; set; }
         public VariationOption ValueOption { get; set; }
+
+        public bool IsTargeted(EnvironmentUser envUser)
+            => Individuals.Any(individual => individual.KeyId == envUser.KeyId);
     }
 
     public class VariationOptionPercentageRollout

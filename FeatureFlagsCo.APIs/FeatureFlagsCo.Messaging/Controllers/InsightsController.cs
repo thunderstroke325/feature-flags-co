@@ -57,7 +57,7 @@ namespace FeatureFlagsCo.Messaging.Controllers
             }
             
             // send to service bus
-            if (param.FFMessage != null)
+            if (param.SendToExperiment && param.FFMessage != null)
             {
                 var payload = JsonSerializer.Serialize(param.FFMessage);
                 await _serviceBusSender.SendMessageAsync(payload);

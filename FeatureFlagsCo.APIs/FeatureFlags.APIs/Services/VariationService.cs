@@ -1,11 +1,7 @@
-﻿using FeatureFlags.APIs.Authentication;
-using FeatureFlags.APIs.Models;
+﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
-using FeatureFlags.APIs.ViewModels.Environment;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
 using System;
@@ -13,17 +9,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using System.Text;
-using System.Security.Cryptography;
 
 namespace FeatureFlags.APIs.Repositories
 {
     public interface IVariationService
     {
-        Task<Tuple<VariationOption, bool>> CheckMultiOptionVariationAsync(string environmentSecret, string featureFlagKeyName, EnvironmentUser ffUser,
-            FeatureFlagIdByEnvironmentKeyViewModel ffIdVM);
-
-        bool IfBelongRolloutPercentage(string userFFKeyId, double[] rolloutPercentageRange);
+        Task<UserVariation> GetUserVariationAsync(
+            string envSecret,
+            EnvironmentUser user,
+            FeatureFlagIdByEnvironmentKeyViewModel ffIdVm
+        );
     }
 
     public class VariationService : IVariationService
@@ -39,17 +34,16 @@ namespace FeatureFlags.APIs.Repositories
             _nosqlDbService = nosqlDbService;
         }
 
-        #region Multi Options
-        public async Task<Tuple<VariationOption, bool>> CheckMultiOptionVariationAsync(
-            string environmentSecret, string featureFlagKeyName, EnvironmentUser environmentUser, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
+        public async Task<UserVariation> GetUserVariationAsync(
+            string envSecret, 
+            EnvironmentUser user, 
+            FeatureFlagIdByEnvironmentKeyViewModel ffIdVm)
         {
-            string featureFlagId = ffIdVM.FeatureFlagId;
+            string featureFlagId = ffIdVm.FeatureFlagId;
 
-            int environmentId = Convert.ToInt32(ffIdVM.EnvId);
-            environmentUser.EnvironmentId = environmentId;
-            environmentUser.Id = FeatureFlagKeyExtension.GetEnvironmentUserId(environmentId, environmentUser.KeyId);
-
-            bool readOnlyOperation = true;
+            int environmentId = Convert.ToInt32(ffIdVm.EnvId);
+            user.EnvironmentId = environmentId;
+            user.Id = FeatureFlagKeyExtension.GetEnvironmentUserId(environmentId, user.KeyId);
 
             // get feature flag info
             var featureFlagString = await _redisCache.GetStringAsync(featureFlagId);
@@ -65,11 +59,10 @@ namespace FeatureFlags.APIs.Repositories
                 }
 
                 await _redisCache.SetStringAsync(featureFlagId, JsonConvert.SerializeObject(featureFlag));
-                readOnlyOperation = false;
             }
 
             // get environment feature flag user info
-            var featureFlagUserMappingId = FeatureFlagKeyExtension.GetFeatureFlagUserId(featureFlagId, environmentUser.KeyId);
+            var featureFlagUserMappingId = FeatureFlagKeyExtension.GetFeatureFlagUserId(featureFlagId, user.KeyId);
             var featureFlagsUserMappingString = await _redisCache.GetStringAsync(featureFlagUserMappingId);
             EnvironmentFeatureFlagUser cosmosDBFeatureFlagsUser = null;
 
@@ -83,35 +76,36 @@ namespace FeatureFlags.APIs.Repositories
                     if (cosmosDBFeatureFlagsUser.UserInfo != null)
                     {
                         var userInfo = cosmosDBFeatureFlagsUser.UserInfo;
-                        if ((environmentUser.CustomizedProperties == userInfo.CustomizedProperties ||
-                            JsonConvert.SerializeObject(environmentUser.CustomizedProperties).Trim() == JsonConvert.SerializeObject(userInfo.CustomizedProperties).Trim()) &&
-                            environmentUser.Name == userInfo.Name)
+                        if ((user.CustomizedProperties == userInfo.CustomizedProperties ||
+                            JsonConvert.SerializeObject(user.CustomizedProperties).Trim() == JsonConvert.SerializeObject(userInfo.CustomizedProperties).Trim()) &&
+                            user.Name == userInfo.Name)
                         {
-                            return new Tuple<VariationOption, bool>(cosmosDBFeatureFlagsUser.VariationOptionResultValue, readOnlyOperation);
+                            return cosmosDBFeatureFlagsUser.CachedUserVariation();
                         }
                     }
                 }
             }
 
-            cosmosDBFeatureFlagsUser = await MultiOptionRedoMatchingAndUpdateToRedisCacheAsync(
+            cosmosDBFeatureFlagsUser = await ReMatch(
                 featureFlagId, featureFlagUserMappingId, featureFlag,
-                environmentUser, environmentSecret, ffIdVM);
+                user, envSecret, ffIdVm);
 
-            cosmosDBFeatureFlagsUser.UserInfo = environmentUser;
+            cosmosDBFeatureFlagsUser.UserInfo = user;
             await _redisCache.SetStringAsync(featureFlagUserMappingId, JsonConvert.SerializeObject(cosmosDBFeatureFlagsUser));
 
-            await UpsertEnvironmentUserAsync(environmentUser, environmentId);
+            await UpsertEnvironmentUserAsync(user);
 
-            return new Tuple<VariationOption, bool>(cosmosDBFeatureFlagsUser.VariationOptionResultValue, false);
+            return cosmosDBFeatureFlagsUser.CachedUserVariation();
         }
 
-        private async Task<EnvironmentFeatureFlagUser> MultiOptionRedoMatchingAndUpdateToRedisCacheAsync(
+        #region Need Refactor
+        private async Task<EnvironmentFeatureFlagUser> ReMatch(
            string featureFlagId,
            string environmentFeatureFlagUserId,
            FeatureFlag featureFlag,
            EnvironmentUser environmentUser,
            string environmentSecret,
-           FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
+           FeatureFlagIdByEnvironmentKeyViewModel ffIdVm)
         {
             EnvironmentFeatureFlagUser environmentFeatureFlagUser = new EnvironmentFeatureFlagUser
                 {
@@ -120,81 +114,124 @@ namespace FeatureFlags.APIs.Repositories
                     id = environmentFeatureFlagUserId
                 };
             environmentFeatureFlagUser.LastUpdatedTime = DateTime.UtcNow;
-            environmentFeatureFlagUser.VariationOptionResultValue = 
-                await MultiOptionGetUserVariationResultAsync(
-                        featureFlag, environmentUser, environmentFeatureFlagUser, environmentSecret, ffIdVM);
+            
+            var userVariation = await MatchUserVariationAsync(
+                featureFlag, environmentUser, environmentSecret, ffIdVm);
+            environmentFeatureFlagUser.VariationOptionResultValue = userVariation.Variation;
+            environmentFeatureFlagUser.SendToExperiment = userVariation.SendToExperiment;
+                
             return environmentFeatureFlagUser;
         }
-
-        public async Task<VariationOption> MultiOptionGetUserVariationResultAsync(
-            FeatureFlag cosmosDBFeatureFlag, 
-            EnvironmentUser environmentUser,
-            EnvironmentFeatureFlagUser environmentFeatureFlagUser,
-            string environmentSecret,
-            FeatureFlagIdByEnvironmentKeyViewModel ffIdVM)
+        
+        private async Task<UserVariation> MatchUserVariationAsync(
+            FeatureFlag featureFlag, 
+            EnvironmentUser user,
+            string envSecret,
+            FeatureFlagIdByEnvironmentKeyViewModel ffIdVm)
         {
-            var wsId = cosmosDBFeatureFlag.EnvironmentId;
-
-            if (cosmosDBFeatureFlag.FF.Status == FeatureFlagStatutEnum.Disabled.ToString())
-                return cosmosDBFeatureFlag.FF.VariationOptionWhenDisabled;
-
-            // 判断Prequisite
-            foreach (var ffPItem in cosmosDBFeatureFlag.FFP)
+            // 匹配该用户不满足上游开关设定值 或者 该开关已关闭状态下的 Variation
+            var featureFlagDisabledUserVariation =
+                await MatchFeatureFlagDisabledUserVariationAsync(featureFlag, user, envSecret, ffIdVm);
+            if (featureFlagDisabledUserVariation != null)
             {
-                if (ffPItem.PrerequisiteFeatureFlagId != cosmosDBFeatureFlag.FF.Id)
+                return featureFlagDisabledUserVariation;
+            }
+
+            // 匹配目标用户的 Variation
+            var targetedUserVariation = MatchTargetedUserVariation(featureFlag, user);
+            if (targetedUserVariation != null)
+            {
+                return targetedUserVariation;
+            }
+
+            // 匹配符合规则的用户的 Variation
+            var conditionedUserVariation = MatchConditionedUserVariation(featureFlag, user);
+            if (conditionedUserVariation != null)
+            {
+                return conditionedUserVariation;
+            }
+            
+            // 匹配默认规则下的 Variation
+            var defaultUserVariation = MatchDefaultUserVariation(featureFlag, user);
+            if (defaultUserVariation != null)
+            {
+                return defaultUserVariation;
+            }
+
+            // 返回开关处于关闭状态时的结果
+            return new FeatureFlagDisabledUserVariation(featureFlag.FF.VariationOptionWhenDisabled);
+        }
+        
+        /// <summary>
+        /// match feature flag disabled user variation
+        /// </summary>
+        /// <returns>if the feature flag is disabled or this user does not pass prerequisite check,
+        /// returns FeatureFlagDisabledUserVariation instance, otherwise returns null</returns>
+        private async Task<FeatureFlagDisabledUserVariation> MatchFeatureFlagDisabledUserVariationAsync(
+            FeatureFlag featureFlag, 
+            EnvironmentUser environmentUser,
+            string environmentSecret,
+            FeatureFlagIdByEnvironmentKeyViewModel ffIdVm)
+        {
+            // 判断开关是否处于关闭状态
+            if (featureFlag.FF.Status == FeatureFlagStatutEnum.Disabled.ToString())
+            {
+                return new FeatureFlagDisabledUserVariation(featureFlag.FF.VariationOptionWhenDisabled);
+            }
+
+            // 判断是否满足上游开关的规则
+            foreach (var ffPItem in featureFlag.FFP)
+            {
+                if (ffPItem.PrerequisiteFeatureFlagId != featureFlag.FF.Id)
                 {
-                    var r = await CheckMultiOptionVariationAsync(
-                                    environmentSecret,
-                                    FeatureFlagKeyExtension.GetFeautreFlagKeyById(ffPItem.PrerequisiteFeatureFlagId),
-                                    environmentUser,
-                                    new FeatureFlagIdByEnvironmentKeyViewModel()
-                                    {
-                                        AccountId = ffIdVM.AccountId,
-                                        EnvId = ffIdVM.EnvId,
-                                        FeatureFlagId = ffPItem.PrerequisiteFeatureFlagId,
-                                        ProjectId = ffIdVM.ProjectId
-                                    });
-                    if (r.Item1.LocalId != ffPItem.ValueOptionsVariationValue.LocalId)
-                        return cosmosDBFeatureFlag.FF.VariationOptionWhenDisabled;
+                    var r = await GetUserVariationAsync(
+                        environmentSecret,
+                        environmentUser,
+                        new FeatureFlagIdByEnvironmentKeyViewModel()
+                        {
+                            AccountId = ffIdVm.AccountId,
+                            EnvId = ffIdVm.EnvId,
+                            FeatureFlagId = ffPItem.PrerequisiteFeatureFlagId,
+                            ProjectId = ffIdVm.ProjectId
+                        });
+                    
+                    // 若上游开关不符合条件 则认为此开关处于关闭状态
+                    if (r.Variation.LocalId != ffPItem.ValueOptionsVariationValue.LocalId)
+                    {
+                        return new FeatureFlagDisabledUserVariation(featureFlag.FF.VariationOptionWhenDisabled);
+                    }
                 }
             }
 
-            if(cosmosDBFeatureFlag.TargetIndividuals != null && cosmosDBFeatureFlag.TargetIndividuals.Count > 0)
-            {
-                foreach(var individualItem in cosmosDBFeatureFlag.TargetIndividuals)
-                {
-                    if (individualItem.Individuals.Any(p => p.KeyId == environmentUser.KeyId))
-                        return individualItem.ValueOption;
-                }
-            }
-
-            // 判断Match Rules
-            var ffUserCustomizedProperties = environmentUser.CustomizedProperties ?? new List<FeatureFlagUserCustomizedProperty>();
-            var ffTargetUsersWhoMatchRules = cosmosDBFeatureFlag.FFTUWMTR ?? new List<FeatureFlagTargetUsersWhoMatchTheseRuleParam>();
-            var ruleMatchResult = MultiOptionGetUserVariationRuleMatchResult(
-                cosmosDBFeatureFlag,
-                environmentUser,
-                environmentFeatureFlagUser);
-            if (ruleMatchResult != null)
-                return ruleMatchResult;
-
-            // 判断Default Rule
-            if (cosmosDBFeatureFlag.FF.DefaultRulePercentageRollouts != null)
-            {
-                foreach (var item in cosmosDBFeatureFlag.FF.DefaultRulePercentageRollouts)
-                {
-                    if (IfBelongRolloutPercentage(environmentUser.KeyId, item.RolloutPercentage))
-                        return item.ValueOption;
-                }
-            }
-
-            return cosmosDBFeatureFlag.FF.VariationOptionWhenDisabled;
+            return null;
         }
 
-        private VariationOption MultiOptionGetUserVariationRuleMatchResult(
+        /// <summary>
+        /// match targeted user variation
+        /// </summary>
+        /// <returns>if user is feature flag targeted, return TargetedUserVariation instance, otherwise return null</returns>
+        private TargetedUserVariation MatchTargetedUserVariation(FeatureFlag featureFlag, EnvironmentUser user)
+        {
+            // 判断是否是指定的目标用户
+            var targetedRules = featureFlag.TargetIndividuals;
+            if (targetedRules == null || targetedRules.Count <= 0)
+            {
+                return null;
+            }
+
+            var targetedRule = targetedRules.FirstOrDefault(option => option.IsTargeted(user));
+            return targetedRule != null
+                ? new TargetedUserVariation(targetedRule.ValueOption, featureFlag.ExptIncludeAllRules)
+                : null;
+        }
+        
+        /// <summary>
+        /// match conditioned user variation
+        /// </summary>
+        /// <returns>if user matched one of the feature flag rule, return ConditionedUserVariation, otherwise return null</returns>
+        private ConditionedUserVariation MatchConditionedUserVariation(
           FeatureFlag cosmosDBFeatureFlag,
-          EnvironmentUser ffUser,
-          EnvironmentFeatureFlagUser environmentFeatureFlagUser)
+          EnvironmentUser ffUser)
         {
             foreach (var ffTUWMRItem in cosmosDBFeatureFlag.FFTUWMTR)
             {
@@ -460,42 +497,54 @@ namespace FeatureFlags.APIs.Repositories
                 {
                     foreach(var item in ffTUWMRItem.ValueOptionsVariationRuleValues)
                     {
-                        if (IfBelongRolloutPercentage(ffUser.KeyId, item.RolloutPercentage))
-                            return item.ValueOption;
+                        var userKey = ffUser.KeyId;
+                        if (IfBelongRolloutPercentage(userKey, item.RolloutPercentage))
+                        {
+                            return new ConditionedUserVariation(item, userKey, ffTUWMRItem.isIncludedInExpt);
+                        }
                     }
                 }
             }
             return null;
         }
-
-
-
-        public bool IfBelongRolloutPercentage(string userFFKeyId, double[] rolloutPercentageRange)
+        
+        /// <summary>
+        /// match default user variation
+        /// </summary>
+        /// <returns>if user match default rule, return DefaultUserVariation, otherwise return null</returns>
+        private DefaultUserVariation MatchDefaultUserVariation(FeatureFlag featureFlag, EnvironmentUser user)
         {
-            byte[] hashedKey = new MD5CryptoServiceProvider().ComputeHash(ASCIIEncoding.ASCII.GetBytes(userFFKeyId));
-            int a0 = BitConverter.ToInt32(hashedKey, 0);
-            double y = Math.Abs((double)a0 / (double)int.MinValue);
-            if (y >= rolloutPercentageRange[0] && y <= rolloutPercentageRange[1])
+            var defaultRollouts = featureFlag.FF.DefaultRulePercentageRollouts;
+            if (defaultRollouts == null)
             {
-                return true;
+                return null;
             }
-
-            return false;
+            
+            var userKey = user.KeyId;
+            var matchedRollout = defaultRollouts.FirstOrDefault(
+                rollout => IfBelongRolloutPercentage(userKey, rollout.RolloutPercentage)
+            );
+            
+            return matchedRollout != null
+                ? new DefaultUserVariation(matchedRollout, userKey, featureFlag.FF.IsDefaultRulePercentageRolloutsIncludedInExpt) 
+                : null;
         }
 
-        #endregion
-
-
-        private async Task<EnvironmentUser> UpsertEnvironmentUserAsync(EnvironmentUser wsUser, int environmentId)
+        private async Task UpsertEnvironmentUserAsync(EnvironmentUser wsUser)
         {
             var oldWsUser = await _nosqlDbService.GetEnvironmentUserAsync(wsUser.Id);
             if (oldWsUser != null && !string.IsNullOrWhiteSpace(oldWsUser._Id))
             {
                 wsUser._Id = oldWsUser._Id;
             }
+            
             await _nosqlDbService.UpsertEnvironmentUserAsync(wsUser);
-            return wsUser;
         }
+
+        private bool IfBelongRolloutPercentage(string key, double[] percentageRange)
+            => VariationSplittingAlgorithm.IfKeyBelongsPercentage(key, percentageRange);
+        
+        #endregion
     }
 
 }
