@@ -17,9 +17,16 @@ export class ExptRulesDrawerComponent {
   @Output() close: EventEmitter<any> = new EventEmitter();
 
   private _ff: any = null; // CSwitchParams
-  
+
+  // 实验分流类型
+  experimentRolloutType: 'default' | 'recommended' = 'default';
+
   includeAllRules = true;
   customRules = false;
+
+  get featureFlag() {
+    return this._ff;
+  }
 
   @Input()
   set featureFlag(ff: any) {
@@ -29,13 +36,13 @@ export class ExptRulesDrawerComponent {
           const result = {
             ruleJsonContent: f.ruleJsonContent.map(item => {
               let result: ruleType = ruleValueConfig.filter((rule: ruleType) => rule.value === item.operation)[0];
-    
+
               let multipleValue: string[] = [];
-    
+
               if(result.type === 'multi' && item.multipleValue === undefined) {
                 multipleValue = JSON.parse(item.value);
               }
-    
+
               return Object.assign({ multipleValue: multipleValue, type: result.type, isSingleOperator: isSingleOperator(result.type)}, item);
             }),
             isIncludedInExpt: !!f.isIncludedInExpt,
@@ -44,8 +51,8 @@ export class ExptRulesDrawerComponent {
               percentage: (parseFloat((item.rolloutPercentage[1] - item.rolloutPercentage[0]).toFixed(2))) * 100
             }))
           };
-    
-          result.valueOptionsVariationRuleValues = this.setExptPercentage(result.valueOptionsVariationRuleValues, result.isNotPercentageRollout);
+
+          this.initExperimentRollout(result.valueOptionsVariationRuleValues);
           return Object.assign({}, f, result);
         }),
         ff: Object.assign({}, ff.ff, {
@@ -57,34 +64,96 @@ export class ExptRulesDrawerComponent {
         })
       });
 
-      data.ff.defaultRulePercentageRollouts = this.setExptPercentage(data.ff.defaultRulePercentageRollouts, data.ff.defaultRuleIsNotPercentageRollout);
+      this.initExperimentRollout(data.ff.defaultRulePercentageRollouts);
       this._ff = new CSwitchParams(data);
     }
   }
 
-  private setExptPercentage(ruleValues: IRulePercentageRollout[], isNotPercentageRollout: boolean): IRulePercentageRollout[] {
-    const minPercentage = Math.min(...ruleValues.map(r => r.percentage)) || 0;
-    const has100PercentageOption = ruleValues.find(r => r.percentage == 100);
-
-    return ruleValues.map(r => {
-      let exptPercentage = r.exptRollout;
-      if (r.exptRollout === null || r.exptRollout === undefined) {
-        if (isNotPercentageRollout) {
-          exptPercentage = r.percentage;
-        } else if (has100PercentageOption) {
-          exptPercentage = r.percentage === 100 ? 100 : 0;
-        } else {
-          exptPercentage = minPercentage;
-        }
-      } else {
-        exptPercentage = exptPercentage * 100;
+  // 初始化实验分类比例
+  private initExperimentRollout(rules: IRulePercentageRollout[]) {
+    const self = this;
+    rules.forEach(rule => {
+      // 该开关未设置过实验分流比例 则默认其实验分流比例与请求分流比例相同
+      if (!rule.exptRollout) {
+        self.setDefaultExperimentRollout(rule);
       }
-
-      r.exptPercentage = exptPercentage;
-      if (r.exptRollout === null || r.exptRollout === undefined) {
-        r.exptRollout = exptPercentage / 100;
+      // 该开关已经设置过实验分流比例
+      else {
+        rule.exptPercentage = rule.exptRollout * 100;
       }
-      return Object.assign({}, r);
+    });
+  }
+
+  // 使用默认的实验分流比例
+  useDefaultExperimentRollout() {
+    // 条件规则
+    const conditions = this.featureFlag.fftuwmtr;
+    conditions.forEach(condition =>
+      condition.valueOptionsVariationRuleValues.forEach(rule => {
+        this.setDefaultExperimentRollout(rule);
+      })
+    );
+
+    // 默认值
+    const ffBasic = this.featureFlag.ff;
+    ffBasic.defaultRulePercentageRollouts.forEach(rule => {
+      this.setDefaultExperimentRollout(rule);
+    });
+
+    this.experimentRolloutType = 'default';
+  }
+
+  // 选择要使用的实验分流比例类型
+  toggleExperimentRolloutType() {
+    this.experimentRolloutType === 'default' ?
+      this.useRecommendedExperimentRollout() :
+      this.useDefaultExperimentRollout();
+  }
+
+  // 使用推荐的实验分流比例
+  useRecommendedExperimentRollout() {
+    // 条件规则
+    const conditions = this.featureFlag.fftuwmtr;
+    conditions.forEach(condition =>
+      this.setRecommendedExperimentRollout(condition.valueOptionsVariationRuleValues, condition.isNotPercentageRollout)
+    );
+
+    // 默认值
+    const ffBasic = this.featureFlag.ff;
+    this.setRecommendedExperimentRollout(ffBasic.defaultRulePercentageRollouts, ffBasic.defaultRuleIsNotPercentageRollout);
+
+    this.experimentRolloutType = 'recommended';
+  }
+
+  // 使用默认的实验分流比例 (保持和请求分流比例一致)
+  private setDefaultExperimentRollout(rule: IRulePercentageRollout) {
+    rule.exptPercentage = rule.percentage;
+    rule.exptRollout = rule.percentage / 100;
+  }
+
+  // 根据请求分流比例计算最合适的实验分流比例
+  private setRecommendedExperimentRollout(rules: IRulePercentageRollout[], isNotPercentageRollout: boolean) {
+    if (isNotPercentageRollout) {
+      rules.forEach(rule => {
+        rule.exptPercentage = rule.percentage;
+        rule.exptRollout = rule.percentage / 100;
+      });
+      return;
+    }
+
+    const has100Percentage = rules.find(rule => rule.percentage == 100);
+    if (has100Percentage) {
+      rules.forEach(rule => {
+        rule.exptPercentage = 0;
+        rule.exptRollout = 0;
+      });
+      return;
+    }
+
+    const minPercentage = Math.min(...rules.map(r => r.percentage)) || 0;
+    rules.forEach(rule => {
+      rule.exptPercentage = minPercentage;
+      rule.exptRollout = minPercentage / 100;
     });
   }
 
@@ -92,10 +161,6 @@ export class ExptRulesDrawerComponent {
     if (ruleValue) {
       ruleValue.exptRollout = ruleValue.exptPercentage / 100;
     }
-  }
-
-  get featureFlag() {
-    return this._ff;
   }
 
   constructor(
