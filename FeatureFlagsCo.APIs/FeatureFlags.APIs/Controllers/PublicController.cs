@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services;
+using FeatureFlags.APIs.ViewModels.Public;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace FeatureFlags.APIs.Controllers
 {
     [AllowAnonymous]
     [ApiController]
-    [Route("public/api/")]
+    [Route("api/public/")]
     public class PublicController : ControllerBase
     {
         private readonly IEnvironmentService _environmentSrv;
@@ -29,13 +30,13 @@ namespace FeatureFlags.APIs.Controllers
         /// <param name="envSecret">环境 Secret</param>
         /// <returns></returns>
         [HttpGet]
-        [Route("feature-flag/archived")]
-        public async Task<List<FeatureFlag>> GetArchivedFeatureFlags(string envSecret)
+        [Route("feature-flag")]
+        public async Task<IEnumerable<FeatureFlagViewModel>> GetActiveFeatureFlags(string envSecret)
         {
             var envId = await _environmentSrv.GetEnvIdBySecretAsync(envSecret);
 
-            var archivedFeatureFlags = await _mongoDbFeatureFlagService.GetArchivedFeatureFlags(envId);
-            return archivedFeatureFlags;
+            var activeFeatureFlags = await _mongoDbFeatureFlagService.GetActiveFeatureFlags(envId);
+            return activeFeatureFlags.Select(f => new FeatureFlagViewModel { Id = f.Id, KeyName = f.FF.KeyName });
         }
     }
 }
