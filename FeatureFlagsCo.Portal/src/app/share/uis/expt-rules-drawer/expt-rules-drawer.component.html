@@ -8,11 +8,17 @@
             </div>
           </div>
 
-          <div class="">
+          <div class="select-option-row">
             <nz-radio-group [(ngModel)]="featureFlag.exptIncludeAllRules">
               <label nz-radio [nzValue]="includeAllRules">所有规则</label>
               <label nz-radio [nzValue]="customRules">自定义规则（不包含目标用户规则）</label>
             </nz-radio-group>
+
+            <label nz-checkbox
+                   [nzChecked]="experimentRolloutType === 'recommended'"
+                   (nzCheckedChange)="toggleExperimentRolloutType()">
+              使用推荐值
+            </label>
           </div>
 
           <nz-table style="margin-top:15px" nzSize="small" #basicTable [nzData]="['']"
@@ -51,7 +57,7 @@
                         </ng-container>
                       </ng-container>
                     </div>
-                    serve 
+                    serve
                     <nz-table nzSize="small" [nzFrontPagination]="false" #basicTable [nzData]="['']">
                       <thead>
                         <tr>
@@ -142,7 +148,7 @@
                         </ng-container>
                       </ng-container>
                     </div>
-                    serve 
+                    serve
                     <nz-table nzSize="small" [nzFrontPagination]="false" #basicTable [nzData]="['']">
                       <thead>
                         <tr>
