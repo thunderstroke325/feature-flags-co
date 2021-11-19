@@ -108,11 +108,10 @@ namespace FeatureFlags.APIs.Services
             return featureFlag != null;
         }
 
-        public async Task<List<FeatureFlag>> GetArchivedFeatureFlags(int envId)
+        public async Task<List<FeatureFlag>> GetActiveFeatureFlags(int envId)
         {
             var featureFlags = await _featureFlags
-                .Find(featureFlag => featureFlag.EnvironmentId == envId && featureFlag.IsArchived)
-                .SortByDescending(p => p.FF.LastUpdatedTime)
+                .Find(featureFlag => featureFlag.EnvironmentId == envId && !featureFlag.IsArchived)
                 .ToListAsync();
 
             return featureFlags;
