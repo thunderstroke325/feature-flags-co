@@ -11,7 +11,7 @@
       <div nz-row [nzGutter]="24">
         <div nz-col [nzSpan]="12" *ngFor="let data of listData">
           <nz-list-item>
-            <nz-card [nzLoading]="data.isLoading" [nzActions]="[actionEdit, actionDelete]">
+            <nz-card [class]="{'editing': data.isEditing}" [nzLoading]="data.isLoading" [nzActions]="[actionEdit, actionDelete]">
               <div class="data-title">
                 <ng-container *ngIf="!data.isEditing">
                   {{data.name}}
@@ -20,13 +20,16 @@
                   <input style="font-size: 15px;min-width:250px" nz-input placeholder="看板名称" [(ngModel)]="data.name" />
                 </ng-container>
               </div>
-              <div class="data-range">
+              <div class="date-range">
                 <ng-container *ngIf="!data.isEditing">
                   {{data.startTime | ffcDate}} 至 {{data.endTime | ffcDate}}
                 </ng-container>
                 <ng-container *ngIf="data.isEditing">
                   <div style="margin-top:5px">
                     <nz-date-picker
+                      [nzRenderExtraFooter]="footerStartDate"
+                      [nzShowToday]="false"
+                      [nzAllowClear]="false"
                       [nzDisabledDate]="data.disabledStartDate"
                       nzFormat="yyyy-MM-dd"
                       [(ngModel)]="data.startTime"
@@ -34,12 +37,21 @@
                     ></nz-date-picker>
                     至  
                     <nz-date-picker
+                      [nzRenderExtraFooter]="footerEndDate"
+                      [nzShowToday]="false"
+                      [nzAllowClear]="false"
                       [nzDisabledDate]="data.disabledEndDate"
                       nzFormat="yyyy-MM-dd"
                       [(ngModel)]="data.endTime"
                       nzPlaceHolder="结束日期"
                     ></nz-date-picker>
                   </div>
+                  <ng-template #footerStartDate>
+                    <div style="text-align:center"><a (click)="data.clearStartDate()">清空（设为永远）</a></div>
+                  </ng-template>
+                  <ng-template #footerEndDate>
+                    <div style="text-align:center"><a (click)="data.clearEndDate()">清空（设为永远）</a></div>
+                  </ng-template>
                 </ng-container>
               </div>
               <nz-list nzGrid class="item-grid">
@@ -47,7 +59,11 @@
                   <div nz-col [nzSpan]="8" *ngFor="let item of data.items">
                     <nz-list-item>
                       <nz-card>
-                        <div style="text-align:right;margin-top:-8px;margin-right:-7px" *ngIf="data.isEditing"><a (click)="removeDataItem(data, item)"><i nz-icon nzType="close" nzTheme="outline"></i></a></div>
+                        <div style="text-align:right;margin-top:-8px;margin-right:-7px" *ngIf="data.isEditing">
+                          <a nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom"
+                          [nzPopconfirmOverlayStyle]="{minWidth: '230px'}"
+                          (nzOnConfirm)="removeDataItem(data, item)" [nzIcon]="iconTpl"><i nz-icon nzType="close" nzTheme="outline"></i></a>
+                        </div>
                         <nz-statistic
                           [nzValueTemplate]="valueTpl"
                           [nzTitle]="titleTpl"

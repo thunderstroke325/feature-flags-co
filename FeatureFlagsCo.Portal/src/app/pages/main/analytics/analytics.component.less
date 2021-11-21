@@ -22,7 +22,7 @@ section.body {
         text-align: center;
       }
 
-      .data-range {
+      .date-range {
         text-align: center;
         color: #bdbdbd;
       }
@@ -37,6 +37,9 @@ section.body {
     }
 
     ::ng-deep {
+      .editing .ant-statistic-title {
+        color: rgba(0, 0, 0, 0.85);
+      }
       .ant-card-body {
         padding: 10px;
       }
@@ -48,4 +51,8 @@ section.body {
       }
     }
   }
+}
+
+input:focus::placeholder {
+  color: transparent;
 }

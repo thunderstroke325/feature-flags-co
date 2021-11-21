@@ -12,6 +12,6 @@ export class FfcDatePipe implements PipeTransform {
       return moment(value).format('LL');
     }
 
-    return '--';
+    return '永远';
   }
 }

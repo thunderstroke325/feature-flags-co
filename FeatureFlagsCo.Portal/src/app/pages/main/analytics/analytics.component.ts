@@ -68,12 +68,21 @@ class DataCard {
     }
     return endTime.getTime() <= this.startTime.getTime();
   }
+
+  clearStartDate = (): void => {
+    this.startTime = null;
+  }
+ 
+  clearEndDate = (): void => {
+    this.endTime = null;
+  }
 }
 
 interface IDataItem {
   id: string,
   name: string,
   value: number,
+  dataSource: string,
   unit: string,
   color: string,
   calculationType: CalculationType
@@ -86,7 +95,7 @@ interface IDataItem {
 })
 export class AnalyticsComponent implements OnInit {
 
-  ranges = { 今天: [new Date(), new Date()], '本月': [new Date(), endOfMonth(new Date())] };
+  //ranges = { 今天: [new Date(), new Date()], '本月': [new Date(), endOfMonth(new Date())] };
   listData: DataCard[] = [];
   isLoading = false;
   dataSourceModalVisible = false;
@@ -100,9 +109,10 @@ export class AnalyticsComponent implements OnInit {
         endTime: new Date(),
         isLoading: true,
         items: new Array(6).fill({}).map((_i, index) => ({
-          id: `${_i}`,
+          id: `${index}`,
           name: `Data item  ${index}`,
           value: parseFloat((Math.random() * 100).toFixed(2)),
+          dataSource: 'sdf',
           unit: 'EUR',
           color: 'red',
           calculationType: CalculationType.Count
@@ -117,8 +127,13 @@ export class AnalyticsComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  onDateChange(data: any){
+    console.log('data changed');
+  }
+
   toggleEditingCard(card: IDataCard) {
     card.isEditing = !card.isEditing;
+    card.items = card.items.filter(i => i.name !== null && i.name !== '' && i.dataSource !== null && i.dataSource !== '');
   }
 
   onCreateCard() {
@@ -132,6 +147,7 @@ export class AnalyticsComponent implements OnInit {
         id: uuidv4(),
         name: null,
         value: null,
+        dataSource: null,
         unit: null,
         color: null,
         calculationType: CalculationType.Count
