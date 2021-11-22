@@ -178,6 +178,7 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddSingleton<MongoDbExperimentService>();
             services.AddSingleton<MongoDbFeatureFlagZeroCodeSettingService>();
             services.AddSingleton<MetricService>();
+            services.AddSingleton<MongoDbAnalyticBoardService>();
 
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
             var cacheType = this.Configuration.GetSection("MySettings").GetSection("CacheType").Value;

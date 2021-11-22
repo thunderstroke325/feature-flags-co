@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { endOfMonth } from 'date-fns';
 import { uuidv4 } from 'src/app/utils';
 
 enum CalculationType {
@@ -27,10 +26,8 @@ class DataCard {
   items: IDataItem[];
   isLoading?: boolean; // only for UI
   isEditing?: boolean;
-  self: DataCard;
 
   constructor(data?: IDataCard) {
-    this.self = this;
     if (data) {
       this.id = data.id;
       this.name = data.name;

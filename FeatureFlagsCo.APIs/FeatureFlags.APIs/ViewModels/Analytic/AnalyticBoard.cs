@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace FeatureFlags.APIs.Models
+{
+    public class AnalyticBoardViewModel
+    {
+        public string Id { get; set; }
+        public int EnvId { get; set; }
+        public List<DataSourceDef> DataSourceDefs { get; set; }
+        public List<DataGroupViewModel> DataGroups { get; set; }
+    }
+
+    public class DataSourceDefViewModel 
+    {
+        public string AnalyticBoardId { get; set; }
+        public int EnvId { get; set; }
+        public List<DataSourceDef> DataSourceDefs { get; set; }
+    }
+
+    public class DataGroupViewModel
+    {
+        public string AnalyticBoardId {get;set;}
+        public int EnvId { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public List<DataItem> Items { get; set; }
+    }
+}
