@@ -68,62 +68,87 @@ namespace FeatureFlags.APIs.Controllers
             return StatusCode(StatusCodes.Status401Unauthorized, new Response { Code = "Error", Message = "Unauthorized" });
         }
 
-        //[HttpPost]
-        //[Route("data-source")]
-        //public async Task<dynamic> UpdateDataSourceDef([FromBody] DataSourceDefViewModel param)
-        //{
-        //    var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
-        //    if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
-        //    {
-        //        var board = await _mongoDbAnalyticBoardService.GetAsync(param.AnalyticBoardId);
-        //        if (board == null)
-        //        {
-        //            return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad Request" });
-        //        }
-        //        else
-        //        {
-        //            board.DataSourceDefs = param.DataSourceDefs;
+        [HttpPost]
+        [Route("results")]
+        public async Task<dynamic> CalculateResults([FromBody] CalculationParam param)
+        {
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
+            {
+                IEnumerable<CalculationItemResultViewModel> itemResults = null;
+                if (param.Items.Count == 0)
+                {
+                    itemResults = new List<CalculationItemResultViewModel>();
+                }
+                else 
+                {
+                    // TODO calculate values
+                    Random rd = new Random();
+                    itemResults = param.Items.Select(i => new CalculationItemResultViewModel { Id = i.Id, Value = (double)rd.Next(1, 1000) });
+                }
 
-        //            return await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
-        //        }
-        //    }
+                return new CalculationResultsViewModel { Items = itemResults };
+            }
 
-        //    return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
-        //}
+            return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+        }
 
-        //[HttpPost]
-        //[Route("data-group")]
-        //public async Task<dynamic> UpsertDataGroup([FromBody] DataGroupViewModel param)
-        //{
-        //    var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
-        //    if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
-        //    {
-        //        var board = await _mongoDbAnalyticBoardService.GetAsync(param.AnalyticBoardId);
-        //        if (board == null)
-        //        {
-        //            return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad Request" });
-        //        }
-        //        else
-        //        {
-        //            var dataGroup = board.DataGroups.FirstOrDefault(x => x.Id == param.Id);
-        //            if (dataGroup == null) 
-        //            {
-        //                dataGroup = new DataGroup
-        //                {
-        //                    Id = param.Id
-        //                };
-        //            }
+        [HttpPost]
+        [Route("data-source")]
+        public async Task<dynamic> UpdateDataSourceDef([FromBody] DataSourceDefViewModel param)
+        {
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
+            {
+                var board = await _mongoDbAnalyticBoardService.GetAsync(param.AnalyticBoardId);
+                if (board == null)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad Request" });
+                }
+                else
+                {
+                    board.DataSourceDefs = param.DataSourceDefs;
 
-        //            dataGroup.Name = param.Name;
-        //            dataGroup.StartTime = param.StartTime;
-        //            dataGroup.EndTime = param.EndTime;
-        //            dataGroup.Items = param.Items;
+                    return await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
+                }
+            }
 
-        //            return await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
-        //        }
-        //    }
+            return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+        }
 
-        //    return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
-        //}
+        [HttpPost]
+        [Route("data-group")]
+        public async Task<dynamic> UpsertDataGroup([FromBody] DataGroupViewModel param)
+        {
+            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
+            {
+                var board = await _mongoDbAnalyticBoardService.GetAsync(param.AnalyticBoardId);
+                if (board == null)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad Request" });
+                }
+                else
+                {
+                    var dataGroup = board.DataGroups.FirstOrDefault(x => x.Id == param.Id);
+                    if (dataGroup == null)
+                    {
+                        dataGroup = new DataGroup
+                        {
+                            Id = param.Id
+                        };
+                    }
+
+                    dataGroup.Name = param.Name;
+                    dataGroup.StartTime = param.StartTime;
+                    dataGroup.EndTime = param.EndTime;
+                    dataGroup.Items = param.Items;
+
+                    return await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
+                }
+            }
+
+            return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+        }
     }
 }

@@ -28,4 +28,24 @@ namespace FeatureFlags.APIs.Models
         public DateTime EndTime { get; set; }
         public List<DataItem> Items { get; set; }
     }
+
+    public class CalculationParam
+    {
+        public int EnvId { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public CalculationType CalculationType { get; set; }
+        public List<DataSourceDef> Items { get; set; }
+    }
+
+    public class CalculationItemResultViewModel 
+    {
+        public string Id { get; set; }
+        public double Value { get; set; }
+    }
+
+    public class CalculationResultsViewModel
+    {
+        public IEnumerable<CalculationItemResultViewModel> Items { get; set; }
+    }
 }
