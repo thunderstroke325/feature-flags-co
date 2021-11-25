@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IAccount, IProjectEnv, IAccountProjectEnv } from '../config/types';
 import { ProjectService } from './project.service';
@@ -77,6 +77,7 @@ export class AccountService {
       localStorage.setItem('current-account', '');
     }
 
+    this.projectService.clearCurrentProjectEnv();
     window.location.reload();
   }
 
@@ -88,32 +89,10 @@ export class AccountService {
     } else {
       localStorage.setItem('current-account', '');
     }
-
-    this.projectService.currentProjectEnvChanged$.next();
   }
 
-  // Promise version
-  // getCurrentAccount1(): Promise<IAccount> {
-  //   return new Promise((resolve, reject) => {
-  //     const accountId = localStorage.getItem('account');
-  //     if (this.accounts.length === 0) {
-  //       this.getAccounts().subscribe(res => {
-  //         this.accounts = res as IAccount[];
-  //         if (accountId === undefined) {
-  //           resolve(this.accounts[0]);
-  //         } else {
-  //           resolve(this.accounts.find(ws => ws.id == JSON.parse(accountId)));
-  //         }
-  //       });
-  //     } else {
-  //       resolve(this.accounts.find(ws => ws.id == JSON.parse(accountId)));
-  //     }
-  //   });
-  // }
-
-  // Observable version
   getCurrentAccount(): Observable<IAccount> {
-    return Observable.create(observer => {
+    return new Observable(observer => {
       const accountStr = localStorage.getItem('current-account');
       if (this.accounts.length === 0 || !accountStr) {
         this.getAccounts().subscribe(res => {

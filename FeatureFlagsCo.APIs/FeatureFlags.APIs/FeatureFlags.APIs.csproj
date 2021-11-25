@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile></DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -44,11 +43,6 @@
     <ProjectReference Include="..\FeatureFlagsCo.FeatureInsights.ElasticSearch\FeatureFlagsCo.FeatureInsights.ElasticSearch.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.FeatureInsights\FeatureFlagsCo.FeatureInsights.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.MQ\FeatureFlagsCo.MQ.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Middleware\" />
-    <Folder Include="Services\MqServices\" />
   </ItemGroup>
 
 

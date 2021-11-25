@@ -37,6 +37,7 @@ export interface IFfParams {
     // multi states
     variationOptionWhenDisabled: IVariationOption;
     defaultRulePercentageRollouts: IRulePercentageRollout[];
+    isDefaultRulePercentageRolloutsIncludedInExpt: boolean;
 }
 
 export interface IFfSettingParams {
@@ -73,6 +74,7 @@ export interface IFftuwmtrParams {
     ruleName: string;
     ruleJsonContent: IJsonContent[];
     valueOptionsVariationRuleValues: IRulePercentageRollout[];
+    isIncludedInExpt?: boolean; // TODO this is not optional
 }
 
 export interface IVariationOption {
@@ -89,6 +91,9 @@ export interface ITargetIndividualForVariationOption {
 export interface IRulePercentageRollout {
   rolloutPercentage: number[]; // only two elements, start and end
   valueOption: IVariationOption;
+  percentage?: number; // the percentage representation of rolloutPercentage // only for display usage
+  exptRollout?: number; // 0.45 means 45% TODO this is not optional
+  exptPercentage?: number;  // the percentage representation of exptRollout // only for display usage
 }
 
 export class CSwitchParams {
@@ -103,6 +108,7 @@ export class CSwitchParams {
     private fftuwmtr: IFftuwmtrParams[];
     private targetIndividuals: ITargetIndividualForVariationOption[];
     private variationOptions: IVariationOption[];
+    private exptIncludeAllRules: boolean;
 
     constructor(data: CSwitchParams) {
 
@@ -118,6 +124,8 @@ export class CSwitchParams {
 
         this.variationOptions = data.variationOptions?.sort((a, b) => a.displayOrder - b.displayOrder);
         this.targetIndividuals = data.targetIndividuals;
+
+        this.exptIncludeAllRules = data.exptIncludeAllRules === undefined || data.exptIncludeAllRules === null ? true : data.exptIncludeAllRules;
     }
 
     // 判断是否需要将 null 改为 字符串 ‘null’

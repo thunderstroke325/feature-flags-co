@@ -52,6 +52,7 @@
             </nz-select>
           </div>
           <ng-container *ngIf="item.action === 'modify'">
+            <nz-divider style="margin: 26px 0"></nz-divider>
             <div class="info-item">
               <div class="label">元素属性 <a (click)="addHtmlProperty(item)" style="margin-left:20px;font-weight: 800;font-size: 16px;"><i nz-icon nzType="plus-square" nzTheme="outline"></i></a></div>
               <div style="display: flex;justify-content: space-between;margin-bottom:5px" *ngFor="let pro of item.htmlProperties">
@@ -61,7 +62,7 @@
               </div>
             </div>
             <div class="info-item">
-              <div class="label">元素内容 (出于安全性考虑，仅可设置文本内容，请不要输入html)</div>
+              <div class="label">元素内容</div>
               <textarea class="ffc-input" rows="2" nz-input [(ngModel)]="item.htmlContent"></textarea>
             </div>
             <div class="info-item">

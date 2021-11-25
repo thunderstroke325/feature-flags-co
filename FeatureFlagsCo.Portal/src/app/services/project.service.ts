@@ -3,17 +3,16 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '../config/types';
-import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
 
+  readonly projectEnvKey: string = 'current-project';
   baseUrl: string = environment.url + '/api/accounts/#accountId/projects';
-  currentProjectEnvChanged$: Subject<void> = new Subject();
-
-  projects: IProject[] = [];
+  currentProjectEnvChanged$: Subject<void> = new Subject<void>();
+  projectListChanged$: Subject<void> = new Subject<void>();
 
   constructor(
     private http: HttpClient
@@ -43,57 +42,60 @@ export class ProjectService {
     return this.http.delete(url);
   }
 
-  public getProjectList(accountId: number) {
-    this.getProjects(accountId)
-      .pipe()
-      .subscribe(
-        res => {
-          this.projects = res as IProject[];
-        }
-      );
-  }
-
-  // resetCurrentProjectAndEnv(accountId: number): Observable<any> {
-  //   localStorage.setItem('current-project', '');
-  //   return this.getCurrentProjectAndEnv(accountId).pipe(
-  //     map(() => this.currentProjectEnvChanged$.next())
-  //   );
-  // }
-
-  changeCurrentProjectAndEnv(project: IProjectEnv) {
-    localStorage.setItem('current-project', JSON.stringify(project));
+  // update or set current project env
+  upsertCurrentProjectEnvLocally(project: IProjectEnv) {
+    localStorage.setItem(this.projectEnvKey, JSON.stringify(project));
     this.currentProjectEnvChanged$.next();
   }
 
-
-  // projectEnvStr and projects must exist
-  private getProjectEnv(projectEnvStr: string, projects: IProject[]): IProjectEnv {
-    const projectEnv: IProjectEnv = JSON.parse(projectEnvStr);
-    if (!!projectEnv && !!projects.find(x => projectEnv.projectId === x.id)) {
-      return projectEnv;
+  // update current project env by partial object
+  updateCurrentProjectEnvLocally(partialUpdated: Partial<IProjectEnv>) {
+    const projectEnvJson = localStorage.getItem(this.projectEnvKey);
+    if (!projectEnvJson) {
+      return;
     }
 
-    const currentProject = this.projects[0];
-    const currentEnv = currentProject.environments.slice(0, 1)[0];
-    const result = { projectId: currentProject.id, projectName: currentProject.name, envId: currentEnv.id, envName: currentEnv.name, envSecret: currentEnv.secret };
-    this.changeCurrentProjectAndEnv(result);
-    return result;
+    const projectEnv = JSON.parse(projectEnvJson);
+    const updatedProject = Object.assign(projectEnv, partialUpdated);
+
+    this.upsertCurrentProjectEnvLocally(updatedProject);
   }
 
-   // Observable version
-   getCurrentProjectAndEnv(accountId: number): Observable<IProjectEnv> {
-    return Observable.create(observer => {
-      const projectEnvStr = localStorage.getItem('current-project');
-      if (this.projects.length === 0 || !projectEnvStr) {
-        this.getProjects(accountId).subscribe(res => {
-          this.projects = res as IProject[];
-          const projectEnv = this.getProjectEnv(!!projectEnvStr ? projectEnvStr : '{}', this.projects);
+  // get local project env
+  getLocalCurrentProjectEnv(): IProjectEnv {
+    const projectEnvJson = localStorage.getItem(this.projectEnvKey);
+    return projectEnvJson ? JSON.parse(projectEnvJson) : undefined;
+  }
+
+  // get current project env for account
+  getCurrentProjectEnv(accountId: number): Observable<IProjectEnv> {
+    return new Observable(observer => {
+      const localCurrentProjectEnv = this.getLocalCurrentProjectEnv();
+      if (localCurrentProjectEnv) {
+        observer.next(localCurrentProjectEnv);
+      } else {
+        this.getProjects(accountId).subscribe(projects => {
+          // chose first project first env as default value
+          const firstProject = projects[0];
+          const firstProjectEnv = firstProject.environments[0];
+
+          const projectEnv: IProjectEnv = {
+            projectId: firstProject.id,
+            projectName: firstProject.name,
+            envId: firstProjectEnv.id,
+            envName: firstProjectEnv.name,
+            envSecret: firstProjectEnv.secret
+          };
+
+          this.upsertCurrentProjectEnvLocally(projectEnv);
           observer.next(projectEnv);
         });
-      } else {
-        const projectEnv = this.getProjectEnv(projectEnvStr, this.projects);
-        observer.next(projectEnv);
       }
-    });
+    })
+  };
+
+  // reset current project env
+  clearCurrentProjectEnv() {
+    localStorage.removeItem(this.projectEnvKey);
   }
 }

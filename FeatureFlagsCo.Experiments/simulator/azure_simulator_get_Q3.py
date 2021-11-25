@@ -7,7 +7,7 @@ logger.setLevel(logging.INFO)
 
 
 class AzureSimulatorQ3Receiver(AzureReceiver):
-    def handle_body(self, instance_id, topic, body):
+    def handle_body(self, body, **kwargs):
         logger.info(" [mq] %r" % body)
 
 
@@ -23,5 +23,8 @@ if __name__ == '__main__':
     redis_passwd = get_config_value('redis', 'redis_passwd')
     topic = get_config_value('p2', 'topic_Q3')
     subscription = get_config_value('p2', 'subscription_Q3')
-    AzureSimulatorQ3Receiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd).consume(
-        (topic, subscription), is_dlq=False)
+    AzureSimulatorQ3Receiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd) \
+        .consume(process_name='',
+                 topic=(topic, subscription),
+                 prefetch_count=50,
+                 is_dlq=False)

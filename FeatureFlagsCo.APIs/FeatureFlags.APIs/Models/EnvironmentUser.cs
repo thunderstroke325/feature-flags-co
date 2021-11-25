@@ -3,8 +3,6 @@ using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Models
 {
@@ -39,14 +37,17 @@ namespace FeatureFlags.APIs.Models
     {
         [JsonProperty("id")]
         public string id { get; set; }
-        public string ObjectType { get { return "EnvironmentFFUser"; } set { value = "EnvironmentFFUser"; } }
         public int EnvironmentId { get; set; }
         public string FeatureFlagId { get; set; }
         public DateTime? LastUpdatedTime { get; set; }
-        public bool? ResultValue { get; set; }
-        public string PercentageRolloutBasedRuleId { get; set; }
-
         public VariationOption VariationOptionResultValue { get; set; }
         public EnvironmentUser UserInfo { get; set; }
+        public bool? SendToExperiment { get; set; }
+        
+        public CachedUserVariation CachedUserVariation()
+        {
+            var cachedUserVariation = new CachedUserVariation(VariationOptionResultValue, SendToExperiment);
+            return cachedUserVariation;
+        }
     }
 }

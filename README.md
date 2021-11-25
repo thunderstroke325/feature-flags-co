@@ -1,13 +1,11 @@
 # feature-flags-co
 
-A High-speed Product Iteration Management Artifact based on Feature Flags Management
+可持续交付的对照实验神器 - 重新定义产品迭代
+
 
 
 Official Website: [https://www.feature-flags.co](https://www.feature-flags.co)
 
-## Architecture
-
-![architecture (2)](https://user-images.githubusercontent.com/68597908/130894201-b3be152a-9ae2-4b4d-9ad6-18961e4773a0.png)
 
 ## Docs
 

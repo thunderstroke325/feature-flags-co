@@ -1,5 +1,7 @@
 
 import json
+import os
+import sys
 
 
 def check_format(input={}, key=None, fmt=None, values_range=[]):
@@ -27,3 +29,17 @@ def decode(value):
     else:
         data = value
     return data
+
+
+def quite_app(status):
+    try:
+        sys.exit(status)
+    except SystemExit:
+        os._exit(status)
+
+
+def get_custom_properties(**args):
+    properties = {'custom_dimensions': {}}
+    for key, value in args.items():
+        properties['custom_dimensions'][key] = value
+    return properties

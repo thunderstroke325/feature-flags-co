@@ -20,6 +20,7 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzCodeEditorModule } from 'ng-zorro-antd/code-editor';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
 
 @NgModule({
   declarations: [ZeroCodeSettingsComponent],
@@ -41,6 +42,7 @@ import { NzCodeEditorModule } from 'ng-zorro-antd/code-editor';
     NzDropDownModule,
     NzSpaceModule,
     NzCodeEditorModule,
+    NzDividerModule,
     ComponentsModule,
     ZeroCodeSettingsRoutingModule
   ]

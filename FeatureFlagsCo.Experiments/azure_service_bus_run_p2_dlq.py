@@ -1,5 +1,9 @@
 import logging
-from azure_service_bus.p2_azure_service_bus_get_expt_result import P2AzureGetExptResultReceiver
+import os
+import sys
+
+from azure_service_bus.p2_azure_service_bus_get_expt_result import \
+    P2AzureGetExptResultReceiver
 from config.config_handling import get_config_value
 
 if __name__ == '__main__':
@@ -20,5 +24,13 @@ if __name__ == '__main__':
     except:
         wait_timeout = 30.0
         prefetch_count = 2
-    P2AzureGetExptResultReceiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd, wait_timeout).consume(
-        (topic, subscription), prefetch_count=prefetch_count, is_dlq=True)
+    process_name = ''
+    if len(sys.argv) > 1:
+        process_name = sys.argv[1]
+    else:
+        process_name = os.path.basename(__file__)
+    P2AzureGetExptResultReceiver(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd, wait_timeout) \
+        .consume(process_name=process_name,
+                 topic=(topic, subscription),
+                 prefetch_count=prefetch_count,
+                 is_dlq=False)

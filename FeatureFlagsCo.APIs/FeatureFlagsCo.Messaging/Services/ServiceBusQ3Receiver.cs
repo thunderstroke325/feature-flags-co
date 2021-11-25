@@ -26,20 +26,12 @@ namespace FeatureFlagsCo.Messaging.Services
         {
             _logger = logger;
             _experimentsService = experimentsService;
-            using (_logger.BeginScope(new Dictionary<string, string>()
-                {
-                    ["topic"] = TopicPath,
-                    ["subscription"] = "standard"
-                }
-            ))
-            {
-                _logger.LogTrace("RECEIVER START");
-            }
+            _logger.LogInformation("RECEIVER START: {topic} {subscription}", TopicPath, "standard");
         }
 
         public override Task Processor_ProcessErrorAsync(ProcessErrorEventArgs arg)
         {
-            _logger.LogError(arg.Exception, "ServiceBusQ4Receiver apitomq Error");
+            _logger.LogError(arg.Exception, "Q3 ERROR");
             return Task.CompletedTask;
         }
 
@@ -52,20 +44,12 @@ namespace FeatureFlagsCo.Messaging.Services
             if (res)
             {
                 await args.CompleteMessageAsync(args.Message);
+                _logger.LogInformation("RESULT OK: {topic} {expt}", TopicPath, messageModel.ExperimentId);
             }
             else
             {
-                await args.DeadLetterMessageAsync(args.Message, "Message is not valid");
-                using (_logger.BeginScope(new Dictionary<string, string>()
-                    {
-                        ["topic"] = TopicPath,
-                        ["expt"] = messageModel.ExperimentId,
-                        ["reason"] = "result invalid"
-                    }
-                ))
-                {
-                    _logger.LogTrace("EXPT RESUL");
-                }
+                await args.DeadLetterMessageAsync(args.Message, "RESULT NOT UPDATE");
+                _logger.LogError("RESULT NOT UPDATE: {topic} {expt}", TopicPath, messageModel.ExperimentId);
             }
         }
     }

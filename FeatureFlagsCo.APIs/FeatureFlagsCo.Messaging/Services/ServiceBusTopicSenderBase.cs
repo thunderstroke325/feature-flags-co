@@ -2,8 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FeatureFlagsCo.Messaging.Services
@@ -11,39 +9,37 @@ namespace FeatureFlagsCo.Messaging.Services
     public abstract class ServiceBusTopicSenderBase
     {
         protected abstract string TopicPath { get; }
-        private readonly ILogger _logger;
-        private readonly ServiceBusClient _client;
+        protected ILogger Logger { get; }
+        protected IConfiguration Configuration { get; }
+
         private readonly ServiceBusSender _clientSender;
-        protected IConfiguration Configuration { get; set; }
 
-        public ServiceBusTopicSenderBase(IConfiguration configuration, ILogger<ServiceBusTopicSenderBase> logger)
+        public ServiceBusTopicSenderBase(
+            IConfiguration configuration,
+            ILogger logger)
         {
-            _logger = logger;
             Configuration = configuration;
-            var connectionString = Configuration.GetSection("MySettings").GetSection("ServiceBusConnectionString").Value;
-            _client = new ServiceBusClient(connectionString);
-            _clientSender = _client.CreateSender(TopicPath);
-        }
+            Logger = logger;
 
-        //public async Task SendMessageAsync(MessageModel model)
-        //{
-        //    string messagePayload = JsonSerializer.Serialize(model);
-        //    ServiceBusMessage message = new ServiceBusMessage(messagePayload);
-        //    await _clientSender.SendMessageAsync(message).ConfigureAwait(false);
-        //}
+            var connectionString = configuration.GetSection("MySettings:ServiceBusConnectionString").Value;
+            _clientSender = new ServiceBusClient(connectionString).CreateSender(TopicPath);
+        }
 
         public async Task SendMessageAsync(string param)
         {
-            ServiceBusMessage message = new ServiceBusMessage(param);
-            message.Subject = TopicPath;
+            var message = new ServiceBusMessage(param)
+            {
+                Subject = TopicPath
+            };
             message.ApplicationProperties.Add("origin", "standard");
+
             try
             {
                 await _clientSender.SendMessageAsync(message).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
+                Logger.LogError(e.Message);
             }
         }
     }

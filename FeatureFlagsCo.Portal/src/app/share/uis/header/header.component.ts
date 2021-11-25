@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { IAuthProps, IAccount, IProject, IEnvironment, IProjectEnv } from 'src/app/config/types';
-import { getAuth } from 'src/app/utils';
 import { AccountService } from 'src/app/services/account.service';
 import { ProjectService } from 'src/app/services/project.service';
 import { Router } from '@angular/router';
@@ -12,20 +11,15 @@ import { Router } from '@angular/router';
 })
 export class HeaderComponent implements OnInit {
 
-
-  // @Input() menus: IMenuItem[];
+  @Input() auth: IAuthProps;
   @Output() logout = new EventEmitter();
 
-
-  get projects() {
-    return this.projectService.projects || [];
-  }
-
-  selectedProject: IProject;
-  selectedEnv: IEnvironment;
-  auth: IAuthProps;
   currentProjectEnv: IProjectEnv;
   currentAccount: IAccount;
+
+  allProjects: IProject[];
+  selectedProject: IProject;
+  selectedEnv: IEnvironment;
   envModalVisible: boolean = false;
 
   constructor(
@@ -36,35 +30,25 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.auth = getAuth();
+    this.selectCurrentProjectEnv();
+    this.setAllProjects();
+
+    this.projectService.projectListChanged$
+      .subscribe(_ => {
+        this.setAllProjects();
+        this.selectCurrentProjectEnv();
+      });
+
     this.projectService.currentProjectEnvChanged$
-      .pipe()
-      .subscribe(
-        res => {
-          const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
-          this.currentAccount = currentAccountProjectEnv.account;
-          this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
-          this.setSelectedProjectAndEnv();
-        }
-      );
-
-    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
-    this.currentAccount = currentAccountProjectEnv.account;
-    this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
-    this.setSelectedProjectAndEnv();
-  }
-
-  private setSelectedProjectAndEnv() {
-    this.selectedProject = { id: this.currentProjectEnv.projectId, name: this.currentProjectEnv.projectName } as IProject;
-    this.selectedEnv = { id: this.currentProjectEnv.envId, name: this.currentProjectEnv.envName } as IEnvironment;
+      .subscribe(_ => this.selectCurrentProjectEnv());
   }
 
   get availableProjects() {
-    return this.projects;
+    return this.allProjects;
   }
 
   get availableEnvs() {
-    return this.projects.find(x => x.id === this.selectedProject.id)?.environments;
+    return this.allProjects.find(x => x.id === this.selectedProject.id)?.environments;
   }
 
   envModelCancel() {
@@ -80,7 +64,7 @@ export class HeaderComponent implements OnInit {
       envSecret: this.selectedEnv.secret
     };
 
-    this.projectService.changeCurrentProjectAndEnv(projectEnv);
+    this.projectService.upsertCurrentProjectEnvLocally(projectEnv);
     this.currentProjectEnv = projectEnv;
     this.envModalVisible = false;
 
@@ -100,4 +84,24 @@ export class HeaderComponent implements OnInit {
     this.selectedEnv = env;
   }
 
+  private selectCurrentProjectEnv() {
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+
+    this.currentAccount = currentAccountProjectEnv.account;
+    this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
+
+    this.selectedProject = {
+      id: this.currentProjectEnv.projectId,
+      name: this.currentProjectEnv.projectName
+    } as IProject;
+    this.selectedEnv = {
+      id: this.currentProjectEnv.envId,
+      name: this.currentProjectEnv.envName
+    } as IEnvironment;
+  }
+
+  private setAllProjects() {
+    this.projectService.getProjects(this.currentAccount.id)
+      .subscribe(projects => this.allProjects = projects);
+  }
 }

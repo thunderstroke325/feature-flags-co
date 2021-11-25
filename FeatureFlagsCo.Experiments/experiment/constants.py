@@ -1,3 +1,5 @@
+import uuid
+
 P1_NECESSAIRE_KEYS = ['ExptId',
                       'IterationId',
                       'EnvId',
@@ -25,3 +27,13 @@ P3_USER_EVENT_NECESSAIRE_KEYS = ['EnvironmentId',
                                  'EventName',
                                  'NumericValue',
                                  'TimeStamp']
+
+FMT = '%Y-%m-%dT%H:%M:%S.%f'
+
+
+def get_azure_instance_id():
+    return str(uuid.getnode())
+
+
+# unit = s
+HEALTH_CHECK_TIMEOUT = 210

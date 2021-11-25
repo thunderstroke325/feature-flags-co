@@ -1,0 +1,150 @@
+<section class="body">
+  <div class="content">
+    <div nz-row class="header">
+      <button nz-button nzType="primary" (click)="onCreateCard()">
+        <i nz-icon nzType="plus" nzTheme="outline"></i>
+        新建看板
+      </button>
+    </div>
+    
+    <nz-list nzGrid class="data-grid">
+      <div nz-row [nzGutter]="24">
+        <div nz-col [nzSpan]="12" *ngFor="let data of listData">
+          <nz-list-item>
+            <nz-card [class]="{'editing': data.isEditing}" [nzLoading]="data.isLoading" [nzActions]="[actionEdit, actionDelete]">
+              <div class="data-title">
+                <ng-container *ngIf="!data.isEditing">
+                  {{data.name}}
+                </ng-container>
+                <ng-container *ngIf="data.isEditing">
+                  <input style="font-size: 15px;min-width:250px" nz-input placeholder="看板名称" [(ngModel)]="data.name" />
+                </ng-container>
+              </div>
+              <div class="date-range">
+                <ng-container *ngIf="!data.isEditing">
+                  {{data.startTime | ffcDate}} 至 {{data.endTime | ffcDate}}
+                </ng-container>
+                <ng-container *ngIf="data.isEditing">
+                  <div style="margin-top:5px">
+                    <nz-date-picker
+                      [nzRenderExtraFooter]="footerStartDate"
+                      [nzShowToday]="false"
+                      [nzAllowClear]="false"
+                      [nzDisabledDate]="data.disabledStartDate"
+                      nzFormat="yyyy-MM-dd"
+                      [(ngModel)]="data.startTime"
+                      nzPlaceHolder="开始日期"
+                    ></nz-date-picker>
+                    至  
+                    <nz-date-picker
+                      [nzRenderExtraFooter]="footerEndDate"
+                      [nzShowToday]="false"
+                      [nzAllowClear]="false"
+                      [nzDisabledDate]="data.disabledEndDate"
+                      nzFormat="yyyy-MM-dd"
+                      [(ngModel)]="data.endTime"
+                      nzPlaceHolder="结束日期"
+                    ></nz-date-picker>
+                  </div>
+                  <ng-template #footerStartDate>
+                    <div style="text-align:center"><a (click)="data.clearStartDate()">清空（设为永远）</a></div>
+                  </ng-template>
+                  <ng-template #footerEndDate>
+                    <div style="text-align:center"><a (click)="data.clearEndDate()">清空（设为永远）</a></div>
+                  </ng-template>
+                </ng-container>
+              </div>
+              <nz-list nzGrid class="item-grid">
+                <div nz-row [nzGutter]="16">
+                  <div nz-col [nzSpan]="8" *ngFor="let item of data.items">
+                    <nz-list-item>
+                      <nz-card>
+                        <div style="text-align:right;margin-top:-8px;margin-right:-7px" *ngIf="data.isEditing">
+                          <a nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom"
+                          [nzPopconfirmOverlayStyle]="{minWidth: '230px'}"
+                          (nzOnConfirm)="removeDataItem(data, item)" [nzIcon]="iconTpl"><i nz-icon nzType="close" nzTheme="outline"></i></a>
+                        </div>
+                        <nz-statistic
+                          [nzValueTemplate]="valueTpl"
+                          [nzTitle]="titleTpl"
+                          [nzSuffix]="suffixTpl"
+                          [nzValueStyle]="{ color: item.color }"
+                        ></nz-statistic>
+                      </nz-card>
+                      <ng-template #suffixTpl>
+                        <ng-container *ngIf="!data.isEditing">
+                          {{item.unit}}
+                        </ng-container>
+                      </ng-template>
+                      <ng-template #titleTpl>
+                        <ng-container *ngIf="!data.isEditing">
+                          {{item.name}}
+                        </ng-container>
+                        <ng-container *ngIf="data.isEditing">
+                          <input style="font-size: 11px" nz-input placeholder="数据名称" [(ngModel)]="item.name" />
+                        </ng-container>
+                      </ng-template>
+                      <ng-template #valueTpl>
+                        <ng-container *ngIf="!data.isEditing">
+                          {{item.value}}
+                        </ng-container>
+                        <div *ngIf="data.isEditing" (click)="onSetDataSource(data, item)" style="border: 1px solid #4CB287;border-radius: 5px;padding: 12px 15px;font-size:18px;cursor:pointer;color: #4CB287;margin-top:5px">
+                          点击设置数据源
+                        </div>
+                      </ng-template>
+                    </nz-list-item>
+                  </div>
+                  <div nz-col [nzSpan]="8" *ngIf="data.isEditing">
+                    <nz-list-item>
+                      <nz-card>
+                        <nz-statistic
+                          [nzValueTemplate]="addItemTpl"
+                        ></nz-statistic>
+                      </nz-card>
+                      <ng-template #addItemTpl>
+                        <div (click)="onAddItem(data)" style="border: 1px solid #4CB287;border-radius: 5px;padding: 12px 15px;font-size:18px;cursor:pointer;color: #4CB287;margin-top:5px">
+                          <a><i nz-icon nzType="plus" nzTheme="outline"></i>点击添加</a>
+                        </div>
+                      </ng-template>
+                    </nz-list-item>
+                  </div>
+
+                </div>
+              </nz-list>
+            </nz-card>
+            
+            <ng-template #actionDelete>
+              <a nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom"
+                [nzPopconfirmOverlayStyle]="{minWidth: '230px'}"
+                (nzOnConfirm)="removeCard(data)" [nzIcon]="iconTpl">
+                <i style="color: #9A95CC;" nz-icon nzType="delete" nzTheme="fill"></i>
+              </a>
+            </ng-template>
+            <ng-template #actionEdit>
+              <a style="color: #9A95CC;" (click)="toggleEditingCard(data)">
+                <i *ngIf="!data.isEditing" nz-icon nzType="edit" nzTheme="outline"></i>
+                <i *ngIf="data.isEditing" nz-icon nzType="save" nzTheme="outline"></i>
+              </a>
+            </ng-template>
+          </nz-list-item>
+        </div>
+      </div>
+    </nz-list>
+  </div>
+</section>
+<ng-template #iconTpl>
+  <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+</ng-template>
+
+
+<nz-modal nzClassName="data-source" [(nzVisible)]="dataSourceModalVisible" (nzOnCancel)="dataSourceModalVisible=false">
+  <ng-container *nzModalContent>
+    <div nz-row [nzGutter]="0" class="">
+      {{currentDataItem.name}}
+    </div>
+  </ng-container>
+  <div *nzModalFooter>
+    <button nz-button nzType="default" (click)="dataSourceModalVisible=false">取消</button>
+    <button nz-button nzType="primary" (click)="onApplyDataSource()" >完成</button>
+  </div>
+</nz-modal>

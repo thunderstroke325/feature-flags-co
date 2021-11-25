@@ -1,30 +1,73 @@
-<section>
-  <div class="title">
-    <div>机构名称</div>
-  </div>
-  <form nz-form [formGroup]="validateOrgForm" [nzLayout]="'inline'" (ngSubmit)="submitOrgForm()" style="width: 100%">
-    <nz-form-item>
-        <nz-form-control style="width: 400px" nzErrorTip="请输入机构名称！" class="form-item-content">
-          <nz-input-group nzPrefixIcon="bank" style="color: #9A95CC;">
-              <input type="text" nz-input formControlName="organizationName" placeholder="机构名称" />
-          </nz-input-group>
-        </nz-form-control>
-    </nz-form-item>
-    <nz-form-item>
-      <button nz-button class="btn-change-account-name" [nzType]="'primary'" [nzLoading]="isLoading">更新机构名称</button>
-    </nz-form-item>
-  </form>
-</section>
+<div>
+  <section>
+    <div class="title">
+      <div>机构名称</div>
+    </div>
+    <form nz-form [formGroup]="validateOrgForm" [nzLayout]="'inline'" (ngSubmit)="submitOrgForm()" style="width: 100%">
+      <nz-form-item>
+          <nz-form-control style="width: 400px" nzErrorTip="请输入机构名称！" class="form-item-content">
+            <nz-input-group nzPrefixIcon="bank" style="color: #9A95CC;">
+                <input type="text" nz-input formControlName="organizationName" placeholder="机构名称" />
+            </nz-input-group>
+          </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <button nz-button class="btn-change-account-name" [nzType]="'primary'" [nzLoading]="isLoading">更新机构名称</button>
+      </nz-form-item>
+    </form>
+  </section>
+  
+  <section>
+    <div class="title-change-account">切换机构</div>
+    <nz-select style="width: 400px;margin-right: 18px;" nzShowSearch nzPlaceHolder="选择机构" [(ngModel)]="currentAccount" (ngModelChange)="onAccountChange()">
+      <nz-option *ngFor="let account of allAccounts" [nzLabel]="account.organizationName" [nzValue]="account"></nz-option>
+    </nz-select>
+    <button nz-button nzType="primary" (click)="onCreateAccountClick()">
+      <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>
+      创建机构
+    </button>
+  </section>
 
-<section>
-  <div class="title-change-account">切换机构</div>
-  <nz-select style="width: 400px;margin-right: 18px;" nzShowSearch nzPlaceHolder="选择机构" [(ngModel)]="currentAccount" (ngModelChange)="onAccountChange()">
-    <nz-option *ngFor="let account of allAccounts" [nzLabel]="account.organizationName" [nzValue]="account"></nz-option>
-  </nz-select>
-  <button nz-button nzType="primary" (click)="onCreateAccountClick()">
-    <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>
-    创建机构
-  </button>
-</section>
+  <nz-divider></nz-divider>
+
+  <section class="integrate-sdk">
+    <div class="title-change-account" style="margin-top: 0">集成 SDK</div>
+    <div class="">
+      <nz-radio-group [(ngModel)]="sdkMode">
+        <label nz-radio [nzValue]="sdkModeScript">使用 script</label>
+        <label nz-radio [nzValue]="sdkModeNpm">使用 NPM</label>
+      </nz-radio-group>
+    </div>
+    <div *ngIf="sdkMode === sdkModeScript" class="init-code">
+      将如下代码添加到页面的 head 中， 其中的 data-ffc-client 为当前环境的 Secret
+      <div class="code-wrapper" nz-typography nzCopyable nzCopyText="{{ sdkCodeScript }}">
+        <pre>
+          {{sdkCodeScript}}
+        </pre>
+      </div>
+      
+      上边的代码会为用户自动生成Id，如果要传递自己的用户信息给敏捷开关，请运行以下代码, 否则可以忽略以下代码
+      <div class="code-wrapper" nz-typography nzCopyable nzCopyText="{{ sdkCodeSetUserInfo }}">
+        <pre>
+          {{sdkCodeSetUserInfo}}
+        </pre>
+      </div>
+    </div>
+    <div *ngIf="sdkMode === sdkModeNpm" class="init-code">
+      运行下边命令安装最新版 SDK
+      <div class="code-wrapper" nz-typography nzCopyable nzCopyText="{{ sdkNpmInstall }}">
+        <pre>
+          {{sdkNpmInstall}}
+        </pre>
+      </div>
+      引入并且初始化 SDK
+      <div class="code-wrapper" nz-typography nzCopyable nzCopyText="{{ sdkCodeNpm }}">
+        <pre>
+          {{sdkCodeNpm}}
+        </pre>
+      </div>
+    </div>
+  </section>
+</div>
 
 <app-account-drawer [visible]="creatAccountFormVisible" (close)="onCreateAccountClosed($event)"></app-account-drawer>

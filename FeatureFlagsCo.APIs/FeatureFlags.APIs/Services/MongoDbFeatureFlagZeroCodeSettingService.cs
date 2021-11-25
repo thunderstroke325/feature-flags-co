@@ -33,5 +33,22 @@ namespace FeatureFlags.APIs.Services
             return await _collection
                 .Find(e => e.FeatureFlagId == featureFlagId).ToListAsync();
         }
+
+        /// <summary>
+        /// 更新零代码设置的 env secret
+        /// </summary>
+        /// <param name="oldSecret">旧 secret</param>
+        /// <param name="newSecret">新 secret</param>
+        public async Task UpdateEnvSecretAsync(string oldSecret, string newSecret)
+        {
+            var filter = Builders<FeatureFlagZeroCodeSetting>.Filter.Eq(setting => setting.EnvSecret, oldSecret);
+            
+            var updateDefinition =
+                Builders<FeatureFlagZeroCodeSetting>.Update
+                    .Set(setting => setting.EnvSecret, newSecret)
+                    .Set(setting => setting.UpdatedAt, DateTime.UtcNow);
+            
+            await UpdateManyAsync(filter, updateDefinition);
+        }
     }
 }

@@ -6,7 +6,6 @@ using FeatureFlags.APIs.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.ViewModels.Project;
 using FeatureFlags.APIs.Models;
@@ -14,30 +13,30 @@ using FeatureFlags.APIs.ViewModels.Account;
 
 namespace FeatureFlags.APIs.Controllers
 {
-    //[Authorize(Roles = UserRoles.Admin)]
     [Authorize]
     [ApiController]
     [Route("api/accounts/{accountId}/projects/{projectId}/envs")]
     public class ProjectEnvironmentsController : ControllerBase
     {
         private readonly IGenericRepository _repository;
-        private readonly ILogger<AccountsController> _logger;
         private readonly IAccountUserService _accountUserService;
         private readonly IProjectUserService _projectUserService;
         private readonly IEnvironmentService _environmentService;
+        private readonly MongoDbFeatureFlagZeroCodeSettingService _ffZeroCodeSettingSrv;
+
 
         public ProjectEnvironmentsController(
-            ILogger<AccountsController> logger,
             IGenericRepository repository,
             IAccountUserService accountUserService,
             IProjectUserService projectUserService,
-            IEnvironmentService environmentService)
+            IEnvironmentService environmentService, 
+            MongoDbFeatureFlagZeroCodeSettingService ffZeroCodeSettingSrv)
         {
-            _logger = logger;
             _repository = repository;
             _accountUserService = accountUserService;
             _projectUserService = projectUserService;
             _environmentService = environmentService;
+            _ffZeroCodeSettingSrv = ffZeroCodeSettingSrv;
         }
 
         [HttpGet]
@@ -181,7 +180,9 @@ namespace FeatureFlags.APIs.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad request" });
             }
             
-            await _repository.UpdateAsync<Environment>(env);
+            await _repository.UpdateAsync(env);
+            await _ffZeroCodeSettingSrv.UpdateEnvSecretAsync(param.KeyValue, newKey);
+
             return new EnvKeyViewModel 
             {
                 KeyName = param.KeyName,

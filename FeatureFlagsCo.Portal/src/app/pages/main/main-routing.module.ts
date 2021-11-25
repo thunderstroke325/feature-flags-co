@@ -45,6 +45,13 @@ const routes: Routes = [
         },
       },
       {
+        path: 'analytics',
+        loadChildren: () => import("./analytics/analytics.module").then(m => m.AnalyticsModule),
+        data: {
+          breadcrumb: '数据看板'
+        },
+      },
+      {
         path: 'account-settings',
         loadChildren: () => import("./account-settings/account-settings.module").then(m => m.AccountSettingsModule),
         data: {

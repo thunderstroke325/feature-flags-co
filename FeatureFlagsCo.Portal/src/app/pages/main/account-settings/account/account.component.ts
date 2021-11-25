@@ -22,6 +22,16 @@ export class AccountComponent implements OnInit {
 
   isLoading: boolean = false;
 
+  sdkModeNpm = 'npm';
+  sdkModeScript = 'script';
+  sdkMode = this.sdkModeScript;
+
+  sdkCodeNpm = '';
+  sdkCodeScript = '';
+  sdkCodeSetUserInfo = '';
+  sdkNpmInstall = `
+  npm install ffc-js-client-sdk --save`;
+
   constructor(
     private accountService: AccountService,
     private message: NzMessageService
@@ -34,6 +44,43 @@ export class AccountComponent implements OnInit {
     this.allAccounts = this.accountService.accounts;
 
     this.initOrgForm();
+
+    this.sdkCodeScript = `
+  <script data-ffc-client="${currentAccountProjectEnv.projectEnv.envSecret}" async src="https://assets.feature-flags.co/sdks/ffc-sdk.js"></script>`;
+
+    this.sdkCodeSetUserInfo = `
+  window.onload = (event) => {
+    // 初始化用户信息，通常这一步会在登录后被调用
+    FFCJsClient.initUserInfo({
+        userName: '##{用户名}##',
+        email: '##{用户邮箱（选填）}}##',
+        key: '##{用户在产品中的唯一Id}##',
+        customizeProperties: [ 
+            {
+                name: "##{自定义属性名称}##",
+                value: "##{自定义属性值}##"
+            }
+        ]
+    });
+  });`;
+
+    this.sdkCodeNpm = `
+  import { FFCJsClient } from 'ffc-js-client-sdk/esm';
+
+  FFCJsClient.initialize('${currentAccountProjectEnv.projectEnv.envSecret}');
+
+  // 初始化用户信息，通常这一步会在登录后被调用
+  FFCJsClient.initUserInfo({
+      userName: '##{用户名}##',
+      email: '##{用户邮箱（选填）}}##',
+      key: '##{用户在产品中的唯一Id}##',
+      customizeProperties: [ 
+          {
+              name: "##{自定义属性名称}##",
+              value: "##{自定义属性值}##"
+          }
+      ]
+  });`;
   }
 
   initOrgForm() {

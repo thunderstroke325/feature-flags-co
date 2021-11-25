@@ -10,7 +10,6 @@ import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import {DragDropModule} from '@angular/cdk/drag-drop';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';;
 
@@ -27,7 +26,6 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';;
     NzDividerModule,
     NzTableModule,
     NzIconModule,
-    DragDropModule,
     NzPopconfirmModule,
     FormsModule,
     ComponentsModule,

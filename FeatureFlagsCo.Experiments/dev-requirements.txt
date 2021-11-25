@@ -12,3 +12,5 @@ opencensus-ext-azure
 flake8
 autopep8
 pylint
+supervisor
+statsmodels

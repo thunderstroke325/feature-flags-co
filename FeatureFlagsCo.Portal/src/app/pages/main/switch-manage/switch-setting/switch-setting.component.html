@@ -30,8 +30,8 @@
                     <th nzAlign="center">操作</th>
                   </tr>
                 </thead>
-                <tbody cdkDropList (cdkDropListDropped)="drop($event)">
-                  <tr *ngFor="let variationOption of variationOptions" cdkDrag class="editable-row">
+                <tbody >
+                  <tr *ngFor="let variationOption of variationOptions" class="editable-row">
                     <td>
                       <!-- <div class="editable-cell" [hidden]="variationOptionEditId === variationOption.localId" (click)="startEditVariationOption(variationOption.localId)">
                         {{ variationOption.variationValue || 'Click to edit' }}
@@ -49,7 +49,7 @@
               </nz-table>
             </div>
             <div class="info-item">
-                <button class="submit" nz-button nzType="primary" (click)="onSaveSwitch()">提交</button>
+                <button class="submit" nz-button nzType="primary" (click)="onSaveSwitch()">保存</button>
             </div>
 
             <button nz-button style="background-color: rgba(255, 0, 0, 0.5);color: #fff" nzType="default" (click)="onArchiveClick()">

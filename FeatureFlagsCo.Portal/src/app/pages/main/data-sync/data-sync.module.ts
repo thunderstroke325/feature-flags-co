@@ -10,7 +10,6 @@ import { NzListModule } from 'ng-zorro-antd/list';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { ShareModule } from 'src/app/share/share.module';
 
 
@@ -27,7 +26,6 @@ import { ShareModule } from 'src/app/share/share.module';
     NzDividerModule,
     NzIconModule,
     ShareModule,
-    NzCheckboxModule,
     DataSyncRoutingModule
   ]
 })

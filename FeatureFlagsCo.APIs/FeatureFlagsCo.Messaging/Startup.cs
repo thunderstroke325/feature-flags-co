@@ -1,13 +1,9 @@
 using FeatureFlags.APIs.Services;
 using FeatureFlagsCo.Messaging.Services;
 using FeatureFlagsCo.Messaging.ViewModels;
-using FeatureFlagsCo.MQ;
 using FeatureFlagsCo.MQ.Export;
-using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,10 +12,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FeatureFlagsCo.Messaging
 {
@@ -97,10 +89,31 @@ namespace FeatureFlagsCo.Messaging
                     }
                 });
             });
+            
+            var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
+            if (hostingType == "Azure")
+            {
+                Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
+                    = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
+                aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights")
+                    .GetSection("InstrumentationKey").Value;
+                aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights")
+                    .GetSection("ConnectionString").Value;
+                aiOptions.EnableAdaptiveSampling = false;
+                aiOptions.EnableDependencyTrackingTelemetryModule = false;
+                aiOptions.EnableAppServicesHeartbeatTelemetryModule = false;
+                aiOptions.EnablePerformanceCounterCollectionModule = false;
+                aiOptions.EnableEventCounterCollectionModule = false;
+                // aiOptions.EnableRequestTrackingTelemetryModule = false;
+                services.AddApplicationInsightsTelemetry(aiOptions);
+            }
 
             services.Configure<MySettings>(options => Configuration.GetSection("MySettings").Bind(options));
             services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
             services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
+
+            // register typed clients
+            services.AddHttpClient<ElasticSearchService>();
 
             // services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
             // services.AddSingleton<IFeatureFlagMqService, FeatureFlagMqService>();
@@ -150,24 +163,6 @@ namespace FeatureFlagsCo.Messaging
             var exptsService = serviceProvider.GetService<ExperimentsService>();
             services.AddSingleton<IExperimentResultService>(new ExperimentResultService(insightsRabbitMqUrl,
                 exptsService));
-
-            var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
-            if (hostingType == "Azure")
-            {
-                Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
-                    = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
-                aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights")
-                    .GetSection("InstrumentationKey").Value;
-                aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights")
-                    .GetSection("ConnectionString").Value;
-                aiOptions.EnableAdaptiveSampling = false;
-                aiOptions.EnableDependencyTrackingTelemetryModule = false;
-                aiOptions.EnableAppServicesHeartbeatTelemetryModule = false;
-                aiOptions.EnablePerformanceCounterCollectionModule = false;
-                aiOptions.EnableEventCounterCollectionModule = false;
-                aiOptions.EnableRequestTrackingTelemetryModule = false;
-                services.AddApplicationInsightsTelemetry(aiOptions);
-            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
