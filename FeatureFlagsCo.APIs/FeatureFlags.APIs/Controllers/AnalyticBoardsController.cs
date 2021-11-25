@@ -146,6 +146,7 @@ namespace FeatureFlags.APIs.Controllers
                     dataGroup.EndTime = param.EndTime;
                     dataGroup.Items = param.Items;
                     dataGroup.UpdatedAt = now;
+                    board.DataGroups.Add(dataGroup);
                     board.UpdatedAt = DateTime.UtcNow;
                     
 
