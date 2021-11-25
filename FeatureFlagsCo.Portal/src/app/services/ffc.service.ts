@@ -18,6 +18,6 @@ export class FfcService {
   }
 
   initialize (environmentSecret: string, user?: IFFCUser, option?: IOption): void {
-    this.client.initialize(environmentSecret, user, option);
+    environment.name !== 'Standalone' && this.client.initialize(environmentSecret, user, option);
   }
 }
