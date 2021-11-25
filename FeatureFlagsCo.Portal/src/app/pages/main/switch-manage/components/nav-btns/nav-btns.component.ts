@@ -21,7 +21,7 @@ export class NavBtnsComponent {
     private router: Router,
     private ffcService: FfcService
   ){
-    const experimentation  = environment.name === 'Standalone' ? 'temporary version' : this.ffcService.client.variation('experimentation');
+    const experimentation  = this.ffcService.variation('experimentation', 'V2', 'V2');
     if (experimentation === 'hide') {
       const idx = this.navConfig.findIndex(n => n.id === 'experimentations');
       if (idx > -1) {
@@ -29,7 +29,7 @@ export class NavBtnsComponent {
       }
     }
 
-    if (experimentation === 'temporary version' || experimentation === 'V2') {
+    if (experimentation === 'V2') {
       this.navConfig = this.navConfig.map(n => {
         return Object.assign({}, n, {
           label: n.id === 'experimentations' ? `${n.label}(公测版)` : n.label
@@ -37,7 +37,7 @@ export class NavBtnsComponent {
       })
     }
 
-    const zeroCodeEnabled = environment.name === 'Standalone' ? true : this.ffcService.client.variation('零代码') === 'true';
+    const zeroCodeEnabled = this.ffcService.variation('零代码', 'false', 'true') === 'true';
     if (!zeroCodeEnabled) {
       const idx = this.navConfig.findIndex(n => n.id === 'zero-code-settings');
       if (idx > -1) {

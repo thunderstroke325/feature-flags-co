@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit, SecurityContext } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FfcService } from 'src/app/services/ffc.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IVariationOption } from '../types/switch-new';

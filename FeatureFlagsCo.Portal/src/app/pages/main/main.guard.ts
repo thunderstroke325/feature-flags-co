@@ -27,7 +27,7 @@ export class MainGuard implements CanActivate {
    private initAuth() {
     const auth = getAuth();
 
-    this.ffcService.client.initialize(
+    this.ffcService.initialize(
       environment.projectEnvKey,
       {
         key: auth.email,

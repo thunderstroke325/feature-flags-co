@@ -1,7 +1,6 @@
 export const environment = {
   production: true,
-  projectEnvKey: '#{PROJECT_ENV_KEY_PROD}#',
+  projectEnvKey: '--',
   url: '#{API_URL}#',
-  name: 'Standalone',
-  statisticUrl: '#{STATISTIC_URL}#'
+  name: 'Standalone'
 };

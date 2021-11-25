@@ -5,11 +5,9 @@ import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IAccount } from 'src/app/config/types';
 import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric, UrlMatchType } from 'src/app/pages/main/switch-manage/types/experimentations';
-import { FfcService } from 'src/app/services/ffc.service';
 import { MetricService } from 'src/app/services/metric.service';
 import { TeamService } from 'src/app/services/team.service';
 import { uuidv4 } from 'src/app/utils';
-import { environment } from './../../../../environments/environment';
 
 @Component({
   selector: 'app-metric-drawer',
@@ -58,15 +56,12 @@ export class MetricDrawerComponent implements OnInit {
   @Input() visible: boolean = false;
   @Output() close: EventEmitter<any> = new EventEmitter();
 
-  pageviewClickEnabled = false;
   constructor(
     private fb: FormBuilder,
     private teamService: TeamService,
     private metricService: MetricService,
-    private ffcService: FfcService,
     private message: NzMessageService
   ) {
-    this.pageviewClickEnabled  = (environment.name === 'Standalone' ? 'true' : this.ffcService.client.variation('pageview-click', 'false')) === 'true';
     const currentAccount: IAccount = JSON.parse(localStorage.getItem('current-account'));
 
     this.maintainerSearchChange$.pipe(

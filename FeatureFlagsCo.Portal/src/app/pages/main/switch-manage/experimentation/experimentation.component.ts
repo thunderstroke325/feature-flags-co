@@ -45,7 +45,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     private experimentService: ExperimentService,
     private ffcService: FfcService
   ) {
-    this.experimentation = environment.name === 'Standalone' ? 'temporary version' : this.ffcService.client.variation('experimentation');
+    this.experimentation = this.ffcService.variation('experimentation', 'V2', 'V2');
     const ffId: string = decodeURIComponent(this.route.snapshot.params['id']);
     this.switchServe.getSwitchDetail(ffId).subscribe(res => {
       this.currentFeatureFlag = new CSwitchParams(res);

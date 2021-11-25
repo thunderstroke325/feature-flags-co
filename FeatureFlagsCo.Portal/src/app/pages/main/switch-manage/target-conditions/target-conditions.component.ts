@@ -67,7 +67,7 @@ export class TargetConditionsComponent implements OnInit {
     private ffcService: FfcService,
     private teamService: TeamService
   ) {
-    this.approvalRequestEnabled = environment.name === 'Standalone' ? false : this.ffcService.client.variation('approval-request') === 'true';
+    this.approvalRequestEnabled = this.ffcService.variation('approval-request', 'false', 'false') === 'true';
     this.ListenerResolveData();
   }
 
