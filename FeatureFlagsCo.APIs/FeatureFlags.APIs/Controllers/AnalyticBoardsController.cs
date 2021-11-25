@@ -131,11 +131,13 @@ namespace FeatureFlags.APIs.Controllers
                 else
                 {
                     var dataGroup = board.DataGroups.FirstOrDefault(x => x.Id == param.Id);
+                    var now = DateTime.UtcNow;
                     if (dataGroup == null)
                     {
                         dataGroup = new DataGroup
                         {
-                            Id = param.Id
+                            Id = param.Id,
+                            CreatedAt = now
                         };
                     }
 
@@ -143,8 +145,12 @@ namespace FeatureFlags.APIs.Controllers
                     dataGroup.StartTime = param.StartTime;
                     dataGroup.EndTime = param.EndTime;
                     dataGroup.Items = param.Items;
+                    dataGroup.UpdatedAt = now;
+                    board.UpdatedAt = DateTime.UtcNow;
+                    
 
-                    return await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
+                    var result = await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
+                    return result.DataGroups.FirstOrDefault(x => x.Id == param.Id);
                 }
             }
 

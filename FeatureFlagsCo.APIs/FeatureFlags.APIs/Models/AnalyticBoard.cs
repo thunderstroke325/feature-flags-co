@@ -21,9 +21,11 @@ namespace FeatureFlags.APIs.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateTime? StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
         public List<DataItem> Items { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class DataItem
@@ -49,5 +51,7 @@ namespace FeatureFlags.APIs.Models
         public string Id { get; set; }
         public string Name { get; set; }
         public string DataType { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
     }
 }
