@@ -163,7 +163,11 @@
                       </ng-container>
                       <th style="width: 210px">置信区间</th>
                       <th>变化</th>
-                      <th>P-值</th>
+                      <th>P-值
+                        <span [nzTooltipOverlayStyle]="{'max-width': '300px'}" nz-tooltip [nzTooltipTitle]="'P 值越小越好，小于0.05表示实验结果显著'" [nzTooltipColor]="'cyan'">
+                          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+                        </span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
