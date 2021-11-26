@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Threading.Tasks;
+using StackExchange.Redis;
 
 namespace FeatureFlagsCo.Messaging.Services
 {
@@ -14,8 +15,8 @@ namespace FeatureFlagsCo.Messaging.Services
             get { return Configuration.GetSection("MySettings").GetSection("Q1Name").Value; }
         }
 
-        public ServiceBusQ1Sender(IConfiguration configuration, ILogger<ServiceBusQ1Sender> logger) : base(
-            configuration, logger)
+        public ServiceBusQ1Sender(IConfiguration configuration, ILogger<ServiceBusQ1Sender> logger, IConnectionMultiplexer redis) : base(
+            configuration, logger, redis)
         {
         }
     }

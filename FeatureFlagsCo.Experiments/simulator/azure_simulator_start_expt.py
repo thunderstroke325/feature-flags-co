@@ -47,11 +47,8 @@ if __name__ == '__main__':
             expts.append(Q1_START)
         sender = AzureSender(None, redis_host, redis_port, redis_passwd)
         sender.send(*expts, bus=bus, topic=topic_1, subscription=origin_1)
-        sender.clear()
         logger.info('send to Q1 expt start')
         for expt_num in range(1, 51):
-            sender = AzureSender(None, redis_host, redis_port, redis_passwd)
-
             for group in range(1, 4):
                 events = []
                 for user in range(200):
@@ -110,4 +107,4 @@ if __name__ == '__main__':
                     events.append(Q5)
                 sender.send(*events, bus=bus, topic=topic_5, subscription=origin_5)
 
-            sender.clear()
+        sender.clear()

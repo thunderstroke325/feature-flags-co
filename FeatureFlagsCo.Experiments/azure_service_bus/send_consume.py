@@ -17,7 +17,9 @@ from azure.servicebus.exceptions import (MessageAlreadySettled,
                                          MessageNotFoundError,
                                          MessageSizeExceededError,
                                          ServiceBusError)
-from experiment.constants import FMT, get_azure_instance_id
+from config.config_handling import get_config_value
+from experiment.constants import (ERROR_RETRY_INTERVAL, FMT,
+                                  get_azure_instance_id)
 from experiment.generic_sender_receiver import (MessageHandler, Receiver,
                                                 RedisStub, Sender)
 from experiment.utils import decode, encode, get_custom_properties, quite_app
@@ -31,19 +33,25 @@ except ImportError:
 
 from azure.core.credentials import AzureSasCredential
 
-logger = get_insight_logger('trace_send_consume')
-logger.setLevel(logging.INFO)
-
-debug_logger = logging.getLogger('debug_send_consume')
+debug_logger = logging.getLogger('debug_azure_sb_send_consume')
 debug_logger.setLevel(logging.INFO)
 
-# The logging levels below may need to be changed based on the logging that you want to suppress.
-uamqp_logger = get_insight_logger('uamqp')
-uamqp_logger.setLevel(logging.ERROR)
+engine = get_config_value('general', 'engine')
+if engine == 'azure' or engine == 'redis':
 
-# or even further fine-grained control, suppressing the warnings in uamqp.connection module
-uamqp_connection_logger = get_insight_logger('uamqp.connection')
-uamqp_connection_logger.setLevel(logging.ERROR)
+    logger = get_insight_logger('trace_azure_sb_send_consume')
+    logger.setLevel(logging.INFO)
+
+    # The logging levels below may need to be changed based on the logging that you want to suppress.
+    uamqp_logger = get_insight_logger('uamqp')
+    uamqp_logger.setLevel(logging.ERROR)
+
+    # or even further fine-grained control, suppressing the warnings in uamqp.connection module
+    uamqp_connection_logger = get_insight_logger('uamqp.connection')
+    uamqp_connection_logger.setLevel(logging.ERROR)
+
+else:
+    logger = logging.getLogger('trace_azure_sb_send_consume')
 
 
 class AzureServiceBus(RedisStub):
@@ -195,7 +203,9 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                                     # Abandon returns the message to the queue for another consumer to receive, dead letter moves to the dead letter subqueue.
                                     # maybe put the message into dead_letter_queue
                                     if isinstance(last_error, redis.RedisError):
-                                        if not self.redis.ping():
+                                        try:
+                                            self.redis.ping()
+                                        except:
                                             logger.exception('CANNOT PING redis, trying to reconnect...')
                                             self._init__redis_connection(self._redis_host,
                                                                          self._redis_port,
@@ -265,13 +275,13 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                 logger.exception('An error occurred in service bus level, retrying to connect...', extra=get_custom_properties(
                     topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
                 self.clear()
-                time.sleep(10)
+                time.sleep(ERROR_RETRY_INTERVAL)
                 continue
             except KeyboardInterrupt:
                 debug_logger.info('################Interrupted################')
                 quite_app(0)
             except:
-                logger.exception('unexpected error ooccurs, retrying to connect...', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
+                logger.exception('unexpected error occurs, retrying to connect...', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
                 continue
 
         logger.warning('APP QUIT', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}', reason='TOO MANY RETRIES'))

@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  ffc-experiments-k8s:
+    build:
+      context: ../FeatureFlagsCo.Experiments
+      args:
+        exptenv: k8s
+      dockerfile: Dockerfile.k8s
+    image: ffc-experiments
+    ports:
+      - 8080:80
+    networks:
+      - ffc-network
+    # volumes:
+    #   - ./log:/var/log/
+
+networks:
+  ffc-network:
+    external: true

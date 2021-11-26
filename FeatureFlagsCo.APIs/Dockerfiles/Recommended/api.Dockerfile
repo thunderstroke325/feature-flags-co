@@ -9,7 +9,12 @@ COPY FeatureFlags.APIs/*.csproj ./FeatureFlags.APIs/
 COPY FeatureFlagsCo.MQ/*.csproj ./FeatureFlagsCo.MQ/
 COPY FeatureFlagsCo.MQ.DirectExporter/*.csproj ./FeatureFlagsCo.MQ.DirectExporter/
 COPY FeatureFlagsCo.APIs.Tests/*.csproj ./FeatureFlagsCo.APIs.Tests/
-COPY FeatureFlagsCo.RabbitMQToGrafanaLoki/*.csproj ./FeatureFlagsCo.RabbitMQToGrafanaLoki/
+# COPY FeatureFlagsCo.RabbitMQToGrafanaLoki/*.csproj ./FeatureFlagsCo.RabbitMQToGrafanaLoki/
+COPY FeatureFlagsCo.FeatureInsights/*.csproj ./FeatureFlagsCo.FeatureInsights/
+COPY FeatureFlagsCo.FeatureInsights.ElasticSearch/*.csproj ./FeatureFlagsCo.FeatureInsights.ElasticSearch/
+COPY FeatureFlagsCo.Export/*.csproj ./FeatureFlagsCo.Export/
+COPY FeatureFlagsCo.Messaging/*.csproj ./FeatureFlagsCo.Messaging/
+
 RUN dotnet restore
 
 
@@ -18,7 +23,13 @@ COPY FeatureFlags.APIs/. ./FeatureFlags.APIs/
 COPY FeatureFlagsCo.MQ/. ./FeatureFlagsCo.MQ/
 COPY FeatureFlagsCo.MQ.DirectExporter/. ./FeatureFlagsCo.MQ.DirectExporter/
 COPY FeatureFlagsCo.APIs.Tests/. ./FeatureFlagsCo.APIs.Tests/
-COPY FeatureFlagsCo.RabbitMQToGrafanaLoki/. ./FeatureFlagsCo.RabbitMQToGrafanaLoki/
+# COPY FeatureFlagsCo.RabbitMQToGrafanaLoki/. ./FeatureFlagsCo.RabbitMQToGrafanaLoki/
+COPY FeatureFlagsCo.FeatureInsights/. ./FeatureFlagsCo.FeatureInsights/
+COPY FeatureFlagsCo.FeatureInsights.ElasticSearch/. ./FeatureFlagsCo.FeatureInsights.ElasticSearch/
+COPY FeatureFlagsCo.Export/. ./FeatureFlagsCo.Export/
+COPY FeatureFlagsCo.Messaging/. ./FeatureFlagsCo.Messaging/
+
+
 WORKDIR /source/FeatureFlags.APIs
 RUN dotnet publish -c release -o /app --no-restore
 

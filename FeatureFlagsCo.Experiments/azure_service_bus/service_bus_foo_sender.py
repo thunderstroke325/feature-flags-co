@@ -27,7 +27,7 @@ if __name__ == '__main__':
     sb_sas_key = get_config_value('azure', 'servicebus_sas_key')
     sender = AzureSender(sb_host, sb_sas_policy, sb_sas_key)
     with sender.redis.pipeline() as pipeline:
-        values = [encode(Q1_START) for _ in range(3)]
+        values = [encode(Q1_START) for _ in range(5)]
         pipeline.rpush('FOO_LIST_KEY', *values)
         pipeline.sadd('FOO_SET_KEY', *values)
         pipeline.execute()

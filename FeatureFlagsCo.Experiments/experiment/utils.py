@@ -25,7 +25,10 @@ def decode(value):
     if isinstance(value, bytes):
         data = json.loads(value.decode())
     elif isinstance(value, str):
-        data = json.loads(value)
+        try:
+            data = json.loads(value)
+        except:
+            data = value
     else:
         data = value
     return data

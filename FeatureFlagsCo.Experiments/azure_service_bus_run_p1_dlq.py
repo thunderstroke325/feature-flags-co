@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 
-from azure_service_bus.p1_azure_service_bus_get_expt_recoding_info import \
+from azure_service_bus.azure_service_bus_experiment_imp import \
     P1AzureGetExptRecordingInfoReceiver
 from config.config_handling import get_config_value
 

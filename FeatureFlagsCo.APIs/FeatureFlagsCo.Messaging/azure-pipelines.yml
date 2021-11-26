@@ -59,6 +59,8 @@ stages:
                     $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString_Dev)"
                     $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName_Dev)"
 
+                    $a.MySettings.BusType = "$(BusType_Dev)"
+
                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
 
                     $pathToJsonCheck = "appsettings.json"
@@ -135,6 +137,8 @@ stages:
                     $a.MySettings.ExperimentsServiceHost = "$(MySettings_ExperimentsServiceHost)"
                     $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString)"
                     $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName)"
+
+                    $a.MySettings.BusType = "$(BusType)"
 
                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
 

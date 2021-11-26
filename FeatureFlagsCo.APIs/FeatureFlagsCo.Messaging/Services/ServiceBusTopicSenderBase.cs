@@ -2,7 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Text;
 using System.Threading.Tasks;
+using StackExchange.Redis;
 
 namespace FeatureFlagsCo.Messaging.Services
 {
@@ -13,19 +15,47 @@ namespace FeatureFlagsCo.Messaging.Services
         protected IConfiguration Configuration { get; }
 
         private readonly ServiceBusSender _clientSender;
+        private readonly string _engine;
+
+        private readonly IConnectionMultiplexer _redis;
 
         public ServiceBusTopicSenderBase(
             IConfiguration configuration,
-            ILogger logger)
+            ILogger logger,
+            IConnectionMultiplexer redis)
         {
             Configuration = configuration;
             Logger = logger;
+            
+            
+            _engine = configuration.GetSection("MySettings:BusType").Value;
+            if ("azure".Equals(_engine))
+            {
+                var connectionString = configuration.GetSection("MySettings:ServiceBusConnectionString").Value;
+                _clientSender = new ServiceBusClient(connectionString).CreateSender(TopicPath);
+            }
+            else
+            {
+                _redis = redis;   
+            }
 
-            var connectionString = configuration.GetSection("MySettings:ServiceBusConnectionString").Value;
-            _clientSender = new ServiceBusClient(connectionString).CreateSender(TopicPath);
+        }
+        
+        private async Task RedisSendMessageAsync(string message)
+        {
+            try
+            {
+                var msg = Encoding.UTF8.GetBytes(message);
+                var db = _redis.GetDatabase();
+                await db.ListRightPushAsync(TopicPath, msg);
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e.Message);
+            }
         }
 
-        public async Task SendMessageAsync(string param)
+        private async Task AzureServiceBusSendMessageAsync(string param)
         {
             var message = new ServiceBusMessage(param)
             {
@@ -40,6 +70,18 @@ namespace FeatureFlagsCo.Messaging.Services
             catch (Exception e)
             {
                 Logger.LogError(e.Message);
+            }
+        }
+
+        public async Task SendMessageAsync(string param)
+        {
+            if ("azure".Equals(_engine))
+            {
+                await AzureServiceBusSendMessageAsync(param);
+            }
+            else
+            {
+                await RedisSendMessageAsync(param);
             }
         }
     }

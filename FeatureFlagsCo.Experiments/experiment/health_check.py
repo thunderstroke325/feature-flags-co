@@ -6,7 +6,9 @@ from xmlrpc.client import ServerProxy
 
 import redis
 
-from experiment.constants import FMT, get_azure_instance_id, HEALTH_CHECK_TIMEOUT
+from experiment.constants import (AZURE_HEALTH_CHECK_TIMEOUT,
+                                  DEFAULT_HEALTH_CHECK_TIMEOUT, FMT,
+                                  get_azure_instance_id)
 from experiment.generic_sender_receiver import RedisStub
 from experiment.utils import decode, encode, get_custom_properties, quite_app
 
@@ -20,12 +22,14 @@ class HealthCheck(RedisStub):
                  wait_timeout=180,
                  rpc_server_url='http://localhost:9001/RPC2',
                  trace_health_check_logger=None,
-                 debug_health_check_logger=None):
+                 debug_health_check_logger=None,
+                 engine='azure'):
         super().__init__(redis_host, redis_port, redis_passwd, ssl)
         self._wait_timeout = wait_timeout
         self._server = ServerProxy(rpc_server_url)
         self._trace_logger = trace_health_check_logger if trace_health_check_logger else logging.getLogger('trace_health_check')
         self._debug_logger = debug_health_check_logger if debug_health_check_logger else logging.getLogger('debug_health_check')
+        self._timeout = AZURE_HEALTH_CHECK_TIMEOUT if engine == 'azure' else DEFAULT_HEALTH_CHECK_TIMEOUT
 
     def _stop_process(self, process_name, retries=3):
         for _ in range(retries):
@@ -64,15 +68,15 @@ class HealthCheck(RedisStub):
                     props = get_custom_properties(topic=topic, instance=f'{topic}-{instance_id}')
                     if pulling_time:
                         interval = abs((datetime.utcnow() - datetime.strptime(pulling_time, FMT)).total_seconds())
-                        if interval >= HEALTH_CHECK_TIMEOUT:
+                        if interval >= self._timeout:
                             if self._restart_process(key):
                                 dict_value['datetime'] = datetime.utcnow().strftime(FMT)
                                 self.redis.hset(check_health_id, key, encode(dict_value))
-                                self._trace_logger.error(f'No reponse in {key} more than {HEALTH_CHECK_TIMEOUT}s, {key} is restarted by sys!!!', extra=props)
+                                self._trace_logger.error(f'No reponse in {topic}-{instance_id} more than {self._timeout}s, {topic}-{instance_id} is restarted by sys!!!', extra=props)
                             else:
-                                raise TimeoutError(f'No reponse in {key} more than {HEALTH_CHECK_TIMEOUT}s, {key} is halting now, DO RESTART EXPT!!!!!')
+                                raise TimeoutError(f'No reponse in {topic}-{instance_id} more than {self._timeout}s, {topic}-{instance_id} is halting now, DO RESTART EXPT!!!!!')
                         else:
-                            self._trace_logger.info(f'HEALTH CHECK: {key} healthy', extra=props)
+                            self._trace_logger.info(f'HEALTH CHECK: {topic}-{instance_id} healthy', extra=props)
                     else:
                         self._stop_process(key)
                         raise ValueError('last exec time NOT FOUND')
@@ -80,9 +84,11 @@ class HealthCheck(RedisStub):
                 self._trace_logger.exception(str(e), extra=props)
             except ValueError as e:
                 self._trace_logger.exception(str(e), extra=props)
-            except redis.RedisError:
-                self._debug_logger.exception('################unexpected################')
-                if not self._redis.ping():
+            except redis.RedisError as e:
+                self._trace_logger.exception(str(e), extra=props)
+                try:
+                    self.redis.ping()
+                except:
                     self._trace_logger.exception('CANNOT PING redis, trying to reconnect...')
                     self._init__redis_connection(self._redis_host,
                                                  self._redis_port,

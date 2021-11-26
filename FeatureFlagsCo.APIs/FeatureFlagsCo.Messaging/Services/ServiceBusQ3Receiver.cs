@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using FeatureFlagsCo.Messaging.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using StackExchange.Redis;
 
 namespace FeatureFlagsCo.Messaging.Services
 {
@@ -16,23 +18,20 @@ namespace FeatureFlagsCo.Messaging.Services
             get { return Configuration.GetSection("MySettings").GetSection("Q3Name").Value; }
         }
 
-        private readonly ILogger<ServiceBusQ3Receiver> _logger;
-
         private readonly ExperimentsService _experimentsService;
 
         public ServiceBusQ3Receiver(IConfiguration configuration,
             ExperimentsService experimentsService,
-            ILogger<ServiceBusQ3Receiver> logger) : base(configuration)
+            ILogger<ServiceBusQ3Receiver> logger,
+            IConnectionMultiplexer redis) : base(configuration, logger, redis)
         {
-            _logger = logger;
             _experimentsService = experimentsService;
-            _logger.LogInformation("RECEIVER START: {topic} {subscription}", TopicPath, "standard");
+            Logger.LogInformation("RECEIVER START: {topic} {subscription}", TopicPath, "standard");
         }
 
-        public override Task Processor_ProcessErrorAsync(ProcessErrorEventArgs arg)
+        public override async Task Processor_ProcessErrorAsync(ProcessErrorEventArgs arg)
         {
-            _logger.LogError(arg.Exception, "Q3 ERROR");
-            return Task.CompletedTask;
+            Logger.LogError(arg.Exception, "Q3 ERROR");
         }
 
         public override async Task Processor_ProcessMessageAsync(ProcessMessageEventArgs args)
@@ -44,12 +43,52 @@ namespace FeatureFlagsCo.Messaging.Services
             if (res)
             {
                 await args.CompleteMessageAsync(args.Message);
-                _logger.LogInformation("RESULT OK: {topic} {expt}", TopicPath, messageModel.ExperimentId);
+                Logger.LogInformation("RESULT OK: {topic} {expt}", TopicPath, messageModel.ExperimentId);
             }
             else
             {
                 await args.DeadLetterMessageAsync(args.Message, "RESULT NOT UPDATE");
-                _logger.LogError("RESULT NOT UPDATE: {topic} {expt}", TopicPath, messageModel.ExperimentId);
+                Logger.LogError("RESULT NOT UPDATE: {topic} {expt}", TopicPath, messageModel.ExperimentId);
+            }
+        }
+
+        public override async Task HandleMessageAsync(string result)
+        {
+            Console.WriteLine($"Q3 Received: {result}");
+            var messageModel = JsonConvert.DeserializeObject<ExperimentResult>(result);
+            var res = await _experimentsService.UpdateExperimentResultAsync(messageModel);
+            if (res)
+            {
+                Logger.LogInformation("RESULT OK: {topic} {expt}", TopicPath, messageModel.ExperimentId);
+            }
+            else
+            {
+                var msg = Encoding.UTF8.GetBytes(result);
+                var db = Redis.GetDatabase();
+                await db.ListRightPushAsync($"dead_letters_{TopicPath}", msg);
+                Logger.LogError("RESULT NOT UPDATE: {topic} {expt}", TopicPath, messageModel.ExperimentId);
+            }
+        }
+
+        public override async Task HandleErrorAsync(string result, Exception e)
+        {
+            try
+            {
+                if (!String.IsNullOrEmpty(result))
+                {
+                    var msg = Encoding.UTF8.GetBytes(result);
+                    var db = Redis.GetDatabase();
+                    var latency = await db.PingAsync();
+                    if (latency.Milliseconds < Redis.TimeoutMilliseconds)
+                    {
+                        await db.ListRightPushAsync($"dead_letters_{TopicPath}", msg);
+                    }
+                }
+                Logger.LogError(e, "Q3 ERROR");
+            }
+            catch (Exception exp)
+            {
+                Logger.LogError(exp.Message);
             }
         }
     }

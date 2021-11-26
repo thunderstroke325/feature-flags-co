@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
 namespace FeatureFlagsCo.Messaging.Services
 {
@@ -7,8 +8,8 @@ namespace FeatureFlagsCo.Messaging.Services
     {
         protected override string TopicPath => Configuration.GetSection("MySettings").GetSection("Q4Name").Value;
 
-        public ServiceBusQ4Sender(IConfiguration configuration, ILogger<ServiceBusQ4Sender> logger) 
-            : base(configuration, logger)
+        public ServiceBusQ4Sender(IConfiguration configuration, ILogger<ServiceBusQ4Sender> logger, IConnectionMultiplexer redis) 
+            : base(configuration, logger, redis)
         {
         }
     }

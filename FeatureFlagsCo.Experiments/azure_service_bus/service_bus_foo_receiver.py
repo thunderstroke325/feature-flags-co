@@ -15,8 +15,17 @@ class FooReceiver(AzureReceiver):
         instance_id = kwargs.pop('instance_id', '')
         print('topic: %s' % instance_name)
         print('mq received: %s' % body)
-        for value in self.redis.lrange('FOO_LIST_KEY', 0, -1):
+
+        with self.redis.pipeline() as pipeline:
+            pipeline.lrange('FOO_LIST_KEY', 0, 9)
+            pipeline.ltrim('FOO_LIST_KEY', 10, -1)
+            res = pipeline.execute()
+        for value in res[0]:
             print('redis list received: %s' % decode(value))
+        num = self.redis.llen('FOO_LIST_KEY')
+        print('redis list size: %s' % num)
+        num = self.redis.llen('FOO_LIST_KEY_1')
+        print('redis list size: %s' % num)
 
         for value in self.redis.smembers('FOO_SET_KEY'):
             print('redis set received: %s' % decode(value))
@@ -29,4 +38,4 @@ class FooReceiver(AzureReceiver):
             pipeline.delete('FOO_SET_KEY')
             pipeline.execute()
 
-        foo_logger.info('FOO', extra=get_custom_properties(topic=instance_name, instance=f'{instance_name}-{instance_id}'))
+        foo_logger.info('AZURE-SB-FOO', extra=get_custom_properties(topic=instance_name, instance=f'{instance_name}-{instance_id}'))

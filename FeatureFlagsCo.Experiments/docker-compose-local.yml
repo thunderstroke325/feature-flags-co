@@ -9,14 +9,14 @@ services:
   ffc-experiment-local:
     build:
       context: ../FeatureFlagsCo.Experiments
-      args: 
+      args:
         exptenv: local
       dockerfile: Dockerfile.local
     image: ffc-experiments
-    ports: 
+    ports:
       - 80:80
       - 9001:9001
-    profiles: 
+    profiles:
       - local
     networks:
       - ffc-network
@@ -26,5 +26,3 @@ services:
 networks:
   ffc-network:
     external: true
-
-

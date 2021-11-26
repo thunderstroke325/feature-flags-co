@@ -1,7 +1,5 @@
-using FeatureFlags.APIs.Services;
 using FeatureFlagsCo.Messaging.Services;
 using FeatureFlagsCo.Messaging.ViewModels;
-using FeatureFlagsCo.MQ.Export;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
+using StackExchange.Redis;
 
 namespace FeatureFlagsCo.Messaging
 {
@@ -111,58 +110,31 @@ namespace FeatureFlagsCo.Messaging
             services.Configure<MySettings>(options => Configuration.GetSection("MySettings").Bind(options));
             services.Configure<MongoDbSettings>(Configuration.GetSection(nameof(MongoDbSettings)));
             services.AddSingleton<IMongoDbSettings>(sp => sp.GetRequiredService<IOptions<MongoDbSettings>>().Value);
-
+            
+            //redis
+            var redisUrl = Configuration.GetSection("ConnectionStrings:RedisServerUrl").Value;
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisUrl));
             // register typed clients
             services.AddHttpClient<ElasticSearchService>();
-
-            // services.AddSingleton<IInsighstMqService, InsighstRabbitMqService>();
-            // services.AddSingleton<IFeatureFlagMqService, FeatureFlagMqService>();
-            // services.AddSingleton<IExperimentStartEndMqService, ExperimentStartEndMqService>();
-            // services.AddSingleton<IExperimentMqService, ExperimentstRabbitMqService>();
+            
             services.AddSingleton<ExperimentsService, ExperimentsService>();
 
             var serviceProvider = services.BuildServiceProvider();
-
             // service bus sender
             var q1SenderLogger = serviceProvider.GetService<ILogger<ServiceBusQ1Sender>>();
             var q4SenderLogger = serviceProvider.GetService<ILogger<ServiceBusQ4Sender>>();
             var q5SenderLogger = serviceProvider.GetService<ILogger<ServiceBusQ5Sender>>();
 
-            services.AddSingleton<ServiceBusQ1Sender>(new ServiceBusQ1Sender(Configuration, q1SenderLogger));
-            services.AddSingleton<ServiceBusQ4Sender>(new ServiceBusQ4Sender(Configuration, q4SenderLogger));
-            services.AddSingleton<ServiceBusQ5Sender>(new ServiceBusQ5Sender(Configuration, q5SenderLogger));
+            var redis = serviceProvider.GetService<IConnectionMultiplexer>();
+            
+            services.AddSingleton<ServiceBusQ1Sender>(new ServiceBusQ1Sender(Configuration, q1SenderLogger, redis));
+            services.AddSingleton<ServiceBusQ4Sender>(new ServiceBusQ4Sender(Configuration, q4SenderLogger, redis));
+            services.AddSingleton<ServiceBusQ5Sender>(new ServiceBusQ5Sender(Configuration, q5SenderLogger, redis));
 
             // service bus receiver
-            // var experimentStartEndmqService = serviceProvider.GetService<IExperimentStartEndMqService>();
-            // var ffMqService = serviceProvider.GetService<IFeatureFlagMqService>();
-            // var experimentstRabbitMqService = serviceProvider.GetService<IExperimentMqService>();
             var experimentsService = serviceProvider.GetService<ExperimentsService>();
-            // var q1ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ1Receiver>>();
-            // var q4ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ4Receiver>>();
-            // var q5ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ5Receiver>>();
             var q3ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ3Receiver>>();
-
-            services.AddSingleton(new ServiceBusQ3Receiver(Configuration, experimentsService, q3ReceiverLogger));
-            // services.AddSingleton<ServiceBusQ1Receiver>(new ServiceBusQ1Receiver(Configuration, experimentStartEndmqService, q1ReceiverLogger));
-            // services.AddSingleton<ServiceBusQ4Receiver>(new ServiceBusQ4Receiver(Configuration, ffMqService, q4ReceiverLogger));
-            // services.AddSingleton<ServiceBusQ5Receiver>(new ServiceBusQ5Receiver(Configuration, experimentstRabbitMqService, q5ReceiverLogger));
-
-            var esHost = this.Configuration.GetSection("MySettings").GetSection("ElasticSearchHost").Value;
-
-            var insightsRabbitMqUrl =
-                this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
-/**/
-
-            services.AddSingleton<IExportExperimentsDataToElasticSearchService>(
-                new ExportExperimentsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
-            //services.AddSingleton<IExportInsightsDataToElasticSearchService>(new ExportInsightsDataToElasticSearchService(insightsRabbitMqUrl, esHost));
-            services.AddSingleton<IExportAuditLogDataToElasticSearchService>(
-                new ExportAuditLogDataToElasticSearchService(insightsRabbitMqUrl, esHost));
-
-
-            var exptsService = serviceProvider.GetService<ExperimentsService>();
-            services.AddSingleton<IExperimentResultService>(new ExperimentResultService(insightsRabbitMqUrl,
-                exptsService));
+            services.AddSingleton(new ServiceBusQ3Receiver(Configuration, experimentsService, q3ReceiverLogger, redis));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

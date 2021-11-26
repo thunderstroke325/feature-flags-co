@@ -6,78 +6,13 @@ networks:
     name: ffc-network
 
 services:
-  # loki:
-  #   image: grafana/loki:2.3.0
-  #   container_name: grafana-loki
-  #   restart: always
-  #   ports:
-  #     - "3100:3100"
-  #   command: -config.file=/etc/loki/local-config.yaml
-  #   networks:
-  #     - ffc
-  #   profiles:
-  #     - costeffective
-  #     - recommended
-  #     - development
-  #     - developmentportal
-  #     - developmentapi
-
-  # promtail:
-  #   image: grafana/promtail:2.3.0
-  #   container_name: grafana-promtail
-  #   restart: always
-  #   volumes:
-  #     - /var/log:/var/log
-  #   command: -config.file=/etc/promtail/config.yml
-  #   networks:
-  #     - ffc
-  #   profiles:
-  #     - costeffective
-  #     - recommended
-  #     - development
-  #     - developmentportal
-  #     - developmentapi
-
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   container_name: grafana
-  #   restart: always
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - GF_SECURITY_ADMIN_USER=admin
-  #     - GF_SECURITY_ADMIN_PASSWORD=admin
-  #   networks:
-  #     - ffc
-  #   profiles:
-  #     - docker
-  #     - development
-  #     - developmentportal
-  #     - developmentapi
-
-  rabbitmq:
-    image: rabbitmq:3.9-management
-    container_name: rabbitmq
-    restart: always
-    hostname: rabbitmq
-    ports:
-      - 15672:15672
-      - 5672:5672
-    volumes:
-      - ./data:/var/lib/rabbitmq
-    networks:
-      - ffc
-    profiles:
-      - docker
-      - development
-      - backend
-
+  
   mongodb:
     image: mongo
     container_name: mongodb
     restart: always
     ports:
-      - 27017:27017
+      - "27017:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=password
@@ -89,28 +24,29 @@ services:
     profiles:
       - docker
       - development
-  mongo-express:
-    image: mongo-express
-    container_name: mongo-express
-    ports:
-      - 8081:8081
-    environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongodb
-    restart: unless-stopped
-    networks:
-      - ffc
-    profiles:
-      - docker
-      - development
+  
+#  mongo-express:
+#    image: mongo-express
+#    container_name: mongo-express
+#    ports:
+#      - "8081:8081"
+#    environment:
+#      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+#      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+#      - ME_CONFIG_MONGODB_SERVER=mongodb
+#    restart: unless-stopped
+#    networks:
+#      - ffc
+#    profiles:
+#      - docker
+#      - development
 
   mssql:
     image: "mcr.microsoft.com/mssql/server:2017-latest"
     container_name: sqldb
     restart: always
     ports:
-      - 1433:1433
+      - "1433:1433"
     volumes:
       - /var/opt/mssql
       # we copy our scripts onto the container
@@ -131,6 +67,7 @@ services:
   elasticsearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch:7.14.0"
     container_name: elasticsearch
+    restart: always
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node
@@ -144,49 +81,62 @@ services:
     cap_add:
       - IPC_LOCK
     ports:
-      - 9200:9200
-      - 9300:9300
-    networks:
-      - ffc
-    profiles:
-      - docker
-      - development
-  es-kibana:
-    image: "docker.elastic.co/kibana/kibana:7.14.0"
-    environment:
-      SERVER_NAME: kibana.example.org
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-    ports:
-      - 5601:5601
+      - "9200:9200"
+      - "9300:9300"
     networks:
       - ffc
     profiles:
       - docker
       - development
   
+#  es-kibana:
+#    image: "docker.elastic.co/kibana/kibana:7.14.0"
+#    environment:
+#      SERVER_NAME: kibana.example.org
+#      ELASTICSEARCH_URL: http://elasticsearch:9200
+#    ports:
+#      - "5601:5601"
+#    networks:
+#      - ffc
+#    profiles:
+#      - docker
+#      - development
+  
   redis:
     image: 'bitnami/redis:latest'
+    restart: always
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     networks:
       - ffc
     ports:
-      - 6379:6379
+      - "6379:6379"
     profiles:
       - docker
       - development
       - backend
 
-  
-
   api:
     build:
       context: ../FeatureFlagsCo.APIs
-      dockerfile: ../FeatureFlagsCo.APIs/Dockerfiles/Recommended/Dockerfile
+      dockerfile: ../FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.Dockerfile
     image: ffc-api
     container_name: api
     ports:
-      - 5001:5001
+      - "5001:5001"
+    networks:
+      - ffc
+    profiles:
+      - docker
+
+  messaging:
+    build:
+      context: ../FeatureFlagsCo.APIs
+      dockerfile: ../FeatureFlagsCo.APIs/Dockerfiles/Recommended/messaging.Dockerfile
+    image: ffc-messaging
+    container_name: messaging
+    ports:
+      - "6501:6501"
     networks:
       - ffc
     profiles:
@@ -198,11 +148,31 @@ services:
       dockerfile: Dockerfile
       args:
         API_URL: http://localhost:5001
-        STATISTIC_URL: http://localhost:3000
     image: ffc-portal
     container_name: portal
     ports:
-      - 4200:80
-    restart: unless-stopped
+      - "4200:80"
+    restart: always
+    profiles:
+      - docker
+
+  ffc-experiments:
+    build:
+      context: ../FeatureFlagsCo.Experiments
+      args:
+        exptenv: k8s
+      dockerfile: Dockerfile.k8s
+    image: ffc-experiments
+    container_name: experiments
+    environment:
+      - CUSTOMERS_HOST=redis
+      - CUSTOMERS_PORT=6379
+    depends_on:
+      - redis
+    ports:
+      - "8080:80"
+    networks:
+      - ffc
+    restart: always
     profiles:
       - docker
