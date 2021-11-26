@@ -95,25 +95,38 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("data-source")]
-        public async Task<dynamic> UpdateDataSourceDef([FromBody] DataSourceDefViewModel param)
+        public async Task<dynamic> UpsertDataSource([FromBody] DataSourceDefViewModel param)
         {
-            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
-            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
+            var currentUserId = HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (!await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
             {
-                var board = await _mongoDbAnalyticBoardService.GetAsync(param.AnalyticBoardId);
-                if (board == null)
-                {
-                    return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad Request" });
-                }
-                else
-                {
-                    board.DataSourceDefs = param.DataSourceDefs;
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+            }
+            
+            var board = await _mongoDbAnalyticBoardService.GetAsync(param.AnalyticBoardId);
+            if (board == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, new Response { Code = "Error", Message = "The board does not exist." });
+            }
+            
+            board.UpsertDataSource(param.Id, param.Name, param.DataType);
+            
+            var updatedBoard = await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
+            return updatedBoard;
+        }
 
-                    return await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
-                }
+        [HttpDelete("data-source")]
+        public async Task<dynamic> DeleteDateSource(int envId, string boardId, string dataSourceId)
+        {
+            var currentUserId = HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (!await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
             }
 
-            return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+            await _mongoDbAnalyticBoardService.RemoveDataSourceAsync(boardId, dataSourceId);
+            
+            return StatusCode(StatusCodes.Status204NoContent);
         }
 
         [HttpPost]
@@ -156,6 +169,21 @@ namespace FeatureFlags.APIs.Controllers
             }
 
             return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+        }
+
+        [HttpDelete]
+        [Route("data-group")]
+        public async Task<dynamic> DeleteDataGroup(int envId, string boardId, string groupId)
+        {
+            var currentUserId = HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (!await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+            }
+
+            await _mongoDbAnalyticBoardService.RemoveDataGroupAsync(boardId, groupId);
+
+            return StatusCode(StatusCodes.Status204NoContent);
         }
     }
 }

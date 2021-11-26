@@ -15,7 +15,9 @@ namespace FeatureFlags.APIs.Models
     {
         public string AnalyticBoardId { get; set; }
         public int EnvId { get; set; }
-        public List<DataSourceDef> DataSourceDefs { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string DataType { get; set; }
     }
 
     public class DataGroupViewModel

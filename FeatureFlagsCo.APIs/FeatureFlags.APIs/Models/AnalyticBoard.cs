@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FeatureFlags.APIs.Models
 {
@@ -14,6 +15,30 @@ namespace FeatureFlags.APIs.Models
         public override string GetCollectionName()
         {
             return "AnalyticBoard";
+        }
+
+        public void UpsertDataSource(string dataSourceId, string name, string dataType)
+        {
+            var oldDataSource = DataSourceDefs.FirstOrDefault(x => x.Id == dataSourceId);
+            if (oldDataSource != null)
+            {
+                oldDataSource.Update(name, dataType);
+            }
+            else
+            {
+                var newDataSource = new DataSourceDef(name, dataType);
+                DataSourceDefs.Add(newDataSource);
+            }
+        }
+        
+        public void RemoveDataGroup(string groupId)
+        {
+            DataGroups.RemoveAll(x => x.Id == groupId);
+        }
+
+        public void RemoveDataSource(string sourceId)
+        {
+            DataSourceDefs.RemoveAll(x => x.Id == sourceId);
         }
     }
 
@@ -53,5 +78,35 @@ namespace FeatureFlags.APIs.Models
         public string DataType { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? CreatedAt { get; set; }
+
+        protected DataSourceDef()
+        {
+        }
+        
+        public DataSourceDef(string name, string dataType)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("data source definition name cannot be null or whitespace.");
+            }
+            Name = name;
+            
+            DataType = dataType;
+            
+            CreatedAt = DateTime.UtcNow;
+            UpdatedAt = CreatedAt;
+        }
+        
+        public void Update(string name, string dataType)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("data source definition name cannot be null or whitespace.");
+            }
+            Name = name;
+            
+            DataType = dataType;
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 }
