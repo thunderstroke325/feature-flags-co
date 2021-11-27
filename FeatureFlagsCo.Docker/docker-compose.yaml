@@ -4,6 +4,14 @@ version: "3.2"
 networks:
   ffc:
     name: ffc-network
+    
+volumes:
+  mssql:
+  mongodb:
+  elasticsearch:
+  redis:
+  expt-log:
+  
 
 services:
   
@@ -18,6 +26,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=password
       - MONGO_INITDB_DATABASE=featureflagsco
     volumes:
+      - mongodb:/data/db
       - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - ffc
@@ -48,7 +57,7 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - /var/opt/mssql
+      - mssql:/var/opt/mssql
       # we copy our scripts onto the container
       - ./docker-entrypoint-initdb.d/sql:/usr/src/app
     working_dir: /usr/src/app 
@@ -80,6 +89,9 @@ services:
         hard: 65536
     cap_add:
       - IPC_LOCK
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+      - ./docker-entrypoint-initdb.d/es.jvm.options:/usr/share/elasticsearch/config/jvm.options.d/es.jvm.options
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -115,6 +127,8 @@ services:
       - docker
       - development
       - backend
+    volumes:
+      - redis:/data
 
   api:
     build:
@@ -176,3 +190,5 @@ services:
     restart: always
     profiles:
       - docker
+    volumes:
+      - expt-log:/var/log/
