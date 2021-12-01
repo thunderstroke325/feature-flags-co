@@ -111,6 +111,20 @@ class P2GetExptResult(RedisStub, Sender, MessageHandler, ABC):
             trace_logger.info('EXPT FINISH', extra=get_custom_properties(topic=current_topic, expt=expt_id, instance=f'{current_topic}-{instance_id}'))
             return True
 
+    def __send_result(self, expt_id, output_to_q3, should_output_to_q2, logger, **kwargs):
+        # send result to Q3
+        kwargs['topic'] = get_config_value('p2', 'topic_Q3')
+        kwargs['subscription'] = get_config_value('p2', 'subscription_Q3')
+        output_to_q3['IsFinish'] = not should_output_to_q2
+        self.send(output_to_q3, **kwargs)
+        logger.info(f'#########expt result: {output_to_q3} to Q3#########')
+        if should_output_to_q2:
+            # send back exptId to Q2
+            kwargs['topic'] = get_config_value('p2', 'topic_Q2')
+            kwargs['subscription'] = get_config_value('p2', 'subscription_Q2')
+            self.send(expt_id, **kwargs)
+            logger.info(f'#########expt: {expt_id} back to Q2#########')
+
     def handle_body(self, body, **kwargs):
         trace_logger = kwargs.pop('trace_logger', logging.getLogger(__name__))
         debug_logger = kwargs.pop('debug_logger', logging.getLogger(__name__))
@@ -164,22 +178,10 @@ class P2GetExptResult(RedisStub, Sender, MessageHandler, ABC):
                 # Compatible with NON RECOGNISED experiments
                 output_to_mq = calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=debug_logger)
 
-            # send result to Q3
-            s1 = datetime.now()
-            kwargs['topic'] = get_config_value('p2', 'topic_Q3')
-            kwargs['subscription'] = get_config_value('p2', 'subscription_Q3')
-            self.send(output_to_mq, **kwargs)
-            s2 = datetime.now()
-            debug_logger.info(f'#########expt result: {output_to_mq} to Q3 in seconds: {(s2-s1).total_seconds()}#########')
             # experiment not finished
             if not expt['EndExptTime']:
                 # send back exptId to Q2
-                s1 = datetime.now()
-                kwargs['topic'] = get_config_value('p2', 'topic_Q2')
-                kwargs['subscription'] = get_config_value('p2', 'subscription_Q2')
-                self.send(expt_id, **kwargs)
-                s2 = datetime.now()
-                debug_logger.info(f'#########expt: {expt_id} back to Q2 in seconds: {(s2-s1).total_seconds()}#########')
+                should_output_to_q2 = True
             else:
                 # experiment has got its deadline
                 # Decision to delete or not event related data
@@ -195,13 +197,11 @@ class P2GetExptResult(RedisStub, Sender, MessageHandler, ABC):
                                                         trace_logger,
                                                         debug_logger):
                     # send back exptId to Q2
-                    s1 = datetime.now()
-                    kwargs['topic'] = get_config_value('p2', 'topic_Q2')
-                    kwargs['subscription'] = get_config_value('p2', 'subscription_Q2')
-                    self.send(expt_id, **kwargs)
-                    s2 = datetime.now()
-                    debug_logger.info(f'#########expt: {expt_id} back to Q2 in seconds: {(s2-s1).total_seconds()}#########')
-                    debug_logger.info(f'a delay to acept events after deadline of {expt_id}')
+                    should_output_to_q2 = True
+                else:
+                    # expt is finished
+                    should_output_to_q2 = False
+            self.__send_result(expt_id, output_to_mq, should_output_to_q2, debug_logger, **kwargs)
             endtime = datetime.now()
             delta = endtime - starttime
             debug_logger.info(f'#########p2 processing time in seconds: {delta.total_seconds()}#########')

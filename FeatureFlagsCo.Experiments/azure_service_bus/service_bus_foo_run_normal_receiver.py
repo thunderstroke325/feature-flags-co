@@ -17,6 +17,7 @@ if __name__ == '__main__':
     sb_sas_policy = get_config_value('azure', 'sas_policy')
     sb_sas_key = get_config_value('azure', 'servicebus_sas_key')
     process_name = os.path.basename(__file__)
-    FooReceiver(sb_host, sb_sas_policy, sb_sas_key).consume(process_name=process_name,
-                                                            topic=(TOPIC_NAME, SUBSCRIPTION_NAME),
-                                                            is_dlq=False)
+    FooReceiver(sb_host, sb_sas_policy, sb_sas_key, special_topic=TOPIC_NAME).consume(process_name=process_name,
+                                                                                      topic=(TOPIC_NAME, SUBSCRIPTION_NAME),
+                                                                                      prefetch_count=10,
+                                                                                      is_dlq=False)

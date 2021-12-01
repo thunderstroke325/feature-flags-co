@@ -61,7 +61,8 @@ class AzureServiceBus(RedisStub):
                  sb_sas_key,
                  redis_host='localhost',
                  redis_port=6379,
-                 redis_passwd=''):
+                 redis_passwd='',
+                 special_topic=get_config_value('p2', 'topic_Q2')):
         self._sb_host = sb_host
         self._sb_sas_policy = sb_sas_policy
         self._sb_sas_key = sb_sas_key
@@ -74,6 +75,7 @@ class AzureServiceBus(RedisStub):
             self._ssl = False
         super()._init__redis_connection(redis_host, redis_port, redis_passwd, self._ssl)
         self._sender_pool = {}
+        self._check_dupicated_message_topic = special_topic
 
     def clear(self):
         for _, sender in self._sender_pool.items():
@@ -169,16 +171,25 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                     if process_name:
                         current_pulling_timestamp = {'topic': topic, 'instance': instance_id, 'datetime': datetime.utcnow().strftime(FMT)}
                         self.redis.hset(f'topic_pulling_last_exec_time_in_{machine_id}', process_name, encode(current_pulling_timestamp))
+                    unique_messages = set()
                     for msg in receiver.receive_messages(max_message_count=None, max_wait_time=60):
                         last_error = None
                         try:
                             # Do your application-specific data processing here
-                            self.handle_body(decode(str(msg)),
-                                             bus=self._bus,
-                                             instance_name=topic,
-                                             instance_id=instance_id,
-                                             trace_logger=logger,
-                                             debug_logger=debug_logger)
+                            message, is_handle_message = decode(str(msg)), False
+                            if topic != self._check_dupicated_message_topic:
+                                is_handle_message = True
+                            else:
+                                if message not in unique_messages:
+                                    unique_messages.add(message)
+                                    is_handle_message = True
+                            if is_handle_message:
+                                self.handle_body(message,
+                                                 bus=self._bus,
+                                                 instance_name=topic,
+                                                 instance_id=instance_id,
+                                                 trace_logger=logger,
+                                                 debug_logger=debug_logger)
                             should_complete = True
                         except ServiceBusError:
                             logger.exception("Maybe error in send message, retrying to connect...", extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))

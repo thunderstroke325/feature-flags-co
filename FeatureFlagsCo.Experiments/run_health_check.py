@@ -16,7 +16,7 @@ if __name__ == '__main__':
     redis_passwd = get_config_value('redis', 'redis_passwd')
     try:
         redis_ssl = strtobool(get_config_value('redis', 'redis_ssl'))
-        wait_timeout = float(get_config_value('p2', 'wait_timeout'))
+        wait_timeout = 3 * float(get_config_value('p2', 'wait_timeout'))
     except:
         redis_ssl = False
         wait_timeout = 30.0

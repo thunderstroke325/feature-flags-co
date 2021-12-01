@@ -57,6 +57,10 @@ namespace FeatureFlagsCo.Messaging.Models
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; } // updated time, not the end time of the iteration
         public List<IterationResult> Results { get; set; }
+        
+        public Boolean IsFinish { get; set; }
+        
+        
     }
 
     public class IterationResult

@@ -127,8 +127,7 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
                                'changeToBaseline': -1,
                                'confidenceInterval': [-1, -1],
                                'pValue': -1,
-                               'isBaseline': True if
-                               var_baseline == item else False,
+                               'isBaseline': True if var_baseline == item else False,
                                'isWinner': False,
                                'isInvalid': True
                                })
