@@ -30,7 +30,26 @@ namespace FeatureFlags.APIs.Models
                 DataSourceDefs.Add(newDataSource);
             }
         }
-        
+
+        public void UpsertDataGroup(
+            string dataGroupId,
+            string name,
+            DateTime? startTime,
+            DateTime? endTime,
+            List<DataItem> items)
+        {
+            var oldDataGroup = DataGroups.FirstOrDefault(x => x.Id == dataGroupId);
+            if (oldDataGroup != null)
+            {
+                oldDataGroup.Update(name, startTime, endTime, items);
+            }
+            else
+            {
+                var newDataGroup = new DataGroup(dataGroupId, name, startTime, endTime, items);
+                DataGroups.Add(newDataGroup);
+            }
+        }
+
         public void RemoveDataGroup(string groupId)
         {
             DataGroups.RemoveAll(x => x.Id == groupId);
@@ -51,6 +70,42 @@ namespace FeatureFlags.APIs.Models
         public List<DataItem> Items { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        public DataGroup(
+            string id,
+            string name, 
+            DateTime? startTime, 
+            DateTime? endTime, 
+            List<DataItem> items)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new ArgumentException("data group id cannot be null or whitespace.");
+            }
+            Id = id;
+            CreatedAt = DateTime.UtcNow;
+            
+            Update(name, startTime, endTime, items);
+        }
+
+        public void Update(
+            string name, 
+            DateTime? startTime, 
+            DateTime? endTime, 
+            List<DataItem> items)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("data group name cannot be null or whitespace.");
+            }
+            Name = name;
+            
+            StartTime = startTime;
+            EndTime = endTime;
+            Items = items ?? new List<DataItem>();
+            
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 
     public class DataItem
@@ -82,7 +137,7 @@ namespace FeatureFlags.APIs.Models
         protected DataSourceDef()
         {
         }
-        
+
         public DataSourceDef(string id, string name, string dataType)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -90,17 +145,9 @@ namespace FeatureFlags.APIs.Models
                 throw new ArgumentException("data source definition id cannot be null or whitespace.");
             }
             Id = id;
-            
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException("data source definition name cannot be null or whitespace.");
-            }
-            Name = name;
-            
-            DataType = dataType;
-            
+
             CreatedAt = DateTime.UtcNow;
-            UpdatedAt = CreatedAt;
+            Update(name, dataType);
         }
         
         public void Update(string name, string dataType)

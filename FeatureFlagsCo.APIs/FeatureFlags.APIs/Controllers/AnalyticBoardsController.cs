@@ -134,41 +134,21 @@ namespace FeatureFlags.APIs.Controllers
         public async Task<dynamic> UpsertDataGroup([FromBody] DataGroupViewModel param)
         {
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
-            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
+            if (!await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
             {
-                var board = await _mongoDbAnalyticBoardService.GetAsync(param.AnalyticBoardId);
-                if (board == null)
-                {
-                    return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad Request" });
-                }
-                else
-                {
-                    var dataGroup = board.DataGroups.FirstOrDefault(x => x.Id == param.Id);
-                    var now = DateTime.UtcNow;
-                    if (dataGroup == null)
-                    {
-                        dataGroup = new DataGroup
-                        {
-                            Id = param.Id,
-                            CreatedAt = now
-                        };
-                    }
-
-                    dataGroup.Name = param.Name;
-                    dataGroup.StartTime = param.StartTime;
-                    dataGroup.EndTime = param.EndTime;
-                    dataGroup.Items = param.Items;
-                    dataGroup.UpdatedAt = now;
-                    board.DataGroups.Add(dataGroup);
-                    board.UpdatedAt = DateTime.UtcNow;
-                    
-
-                    var result = await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
-                    return result.DataGroups.FirstOrDefault(x => x.Id == param.Id);
-                }
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+            }
+            
+            var board = await _mongoDbAnalyticBoardService.GetAsync(param.AnalyticBoardId);
+            if (board == null)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new Response { Code = "Error", Message = "Bad Request" });
             }
 
-            return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+            board.UpsertDataGroup(param.Id, param.Name, param.StartTime, param.EndTime, param.Items);
+                
+            var result = await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
+            return result.DataGroups.FirstOrDefault(x => x.Id == param.Id);
         }
 
         [HttpDelete]
