@@ -26,7 +26,7 @@ namespace FeatureFlags.APIs.Models
             }
             else
             {
-                var newDataSource = new DataSourceDef(name, dataType);
+                var newDataSource = new DataSourceDef(dataSourceId, name, dataType);
                 DataSourceDefs.Add(newDataSource);
             }
         }
@@ -83,8 +83,14 @@ namespace FeatureFlags.APIs.Models
         {
         }
         
-        public DataSourceDef(string name, string dataType)
+        public DataSourceDef(string id, string name, string dataType)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new ArgumentException("data source definition id cannot be null or whitespace.");
+            }
+            Id = id;
+            
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("data source definition name cannot be null or whitespace.");
