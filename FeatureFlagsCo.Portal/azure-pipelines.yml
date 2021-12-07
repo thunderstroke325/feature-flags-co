@@ -41,7 +41,7 @@ stages:
                     cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
                     npm install
                     npm audit fix
-                    npm run ng build --prod
+                    npm run build-dev
                     echo current dir is: 
                     ls
                 displayName: 'npm install and build'
@@ -86,9 +86,8 @@ stages:
                   targetType: 'inline'
                   script: |
                     cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
-                    npm install -g @angular/cli
                     npm install
-                    ng build --prod
+                    npm run build-prod
                 displayName: 'npm install and build'
 
               - task: AzureFileCopy@4
