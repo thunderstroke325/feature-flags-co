@@ -4,10 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --configuration development --open --host=0.0.0.0",
-    "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "build-dev": "ng build --configuration development",
+    "build-prod": "ng build --configuration production"
   },
   "private": true,
   "dependencies": {
