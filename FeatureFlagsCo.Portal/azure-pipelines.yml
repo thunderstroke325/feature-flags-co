@@ -24,7 +24,7 @@ stages:
                 inputs:
                   versionSpec: '14.x'
                 displayName: 'Install Node.js'
-              
+
               - task: replacetokens@3
                 displayName: Replace tokens in all tfvars files
                 inputs:
@@ -41,8 +41,7 @@ stages:
                   targetType: 'inline'
                   script: |
                     cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
-                    
-                    npm install -g @angular/cli
+
                     npm install
                     ng build
                     npm audit fix
