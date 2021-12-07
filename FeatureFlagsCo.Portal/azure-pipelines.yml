@@ -44,8 +44,8 @@ stages:
                     
                     npm install -g @angular/cli
                     npm install
-                    npm audit fix
                     ng build
+                    npm audit fix
                 displayName: 'npm install and build'
 
               - task: AzureFileCopy@4
