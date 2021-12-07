@@ -6,7 +6,7 @@
 trigger: none
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: windows-latest
 
 stages:
 - stage: 'Development'
@@ -24,7 +24,6 @@ stages:
                 displayName: 'Install Node.js'
 
               - task: replacetokens@3
-                displayName: Replace tokens in all tfvars files
                 inputs:
                   rootDirectory: '$(Build.SourcesDirectory)/FeatureFlagsCo.Portal/src/environments'
                   targetFiles: '**/environment.ts'
@@ -33,23 +32,31 @@ stages:
                   tokenSuffix: '}#'
                 env:
                   PROJECT_ENV_KEY_DEV: '$(PROJECT_ENV_KEY_DEV)'
+                displayName: Replace tokens in all tfvars files
+
               - task: Bash@3
                 inputs:
                   targetType: 'inline'
                   script: |
                     cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
-
                     npm install
-                    npm build
                     npm audit fix
-                displayName: 'npm install and build'
+                displayName: 'npm install'
+      
+              - task: Bash@3
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
+                    npm build
+                displayName: 'npm build'
 
               - task: Bash@3
                 inputs:
                   targetType: 'inline'
                   script: |
                     cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
-                    dir
+                    ls
 
                     cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal/dist'
                     dir
