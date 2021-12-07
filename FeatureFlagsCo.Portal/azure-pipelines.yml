@@ -35,7 +35,6 @@ stages:
                   tokenSuffix: '}#'
                 env:
                   PROJECT_ENV_KEY_DEV: '$(PROJECT_ENV_KEY_DEV)'
-
               - task: Bash@3
                 inputs:
                   targetType: 'inline'
@@ -46,6 +45,16 @@ stages:
                     ng build
                     npm audit fix
                 displayName: 'npm install and build'
+              - task: Bash@3
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
+                    dir
+
+                    cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal/dist'
+                    dir
+                displayName: 'Check path'
 
               - task: AzureFileCopy@4
                 inputs:
