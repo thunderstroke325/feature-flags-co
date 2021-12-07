@@ -41,7 +41,7 @@ stages:
                     cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
                     npm install
                     npm audit fix
-                    npm run ng build --prod --output-path dist
+                    npm run ng build --prod
                     echo current dir is: 
                     ls
                 displayName: 'npm install and build'
