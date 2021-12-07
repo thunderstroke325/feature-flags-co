@@ -41,26 +41,10 @@ stages:
                     cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
                     npm install
                     npm audit fix
-                displayName: 'npm install'
-      
-              - task: Bash@3
-                inputs:
-                  targetType: 'inline'
-                  script: |
-                    cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
-                    npm build
-                displayName: 'npm build'
-
-              - task: Bash@3
-                inputs:
-                  targetType: 'inline'
-                  script: |
-                    cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
+                    ng build --prod --output-path dist
+                    echo current dir is: 
                     ls
-
-                    cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal/dist'
-                    dir
-                displayName: 'Check path'
+                displayName: 'npm install and build'
 
               - task: AzureFileCopy@4
                 inputs:
