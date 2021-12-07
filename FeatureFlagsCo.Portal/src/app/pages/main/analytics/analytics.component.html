@@ -1,14 +1,20 @@
 <section class="body">
   <div class="content">
     <div nz-row class="header">
+      <button nz-button nzType="primary" (click)="onRefreshPage()">
+        <i nz-icon nzType="redo" nzTheme="outline"></i>刷新页面
+      </button>
+      <button nz-button nzType="primary" (click)="onOpenDataSoureModal()">
+        <i nz-icon nzType="plus" nzTheme="outline"></i>管理数据源
+      </button>
       <button nz-button nzType="primary" (click)="onCreateCard()">
-        <i nz-icon nzType="plus" nzTheme="outline"></i>
-        新建看板
+        <i nz-icon nzType="plus" nzTheme="outline"></i>新建报表
       </button>
     </div>
     
     <nz-list nzGrid class="data-grid">
       <div nz-row [nzGutter]="24">
+        <!-- 报表 -->
         <div nz-col [nzSpan]="12" *ngFor="let data of listData">
           <nz-list-item>
             <nz-card [class]="{'editing': data.isEditing}" [nzLoading]="data.isLoading" [nzActions]="[actionEdit, actionDelete]">
@@ -56,20 +62,24 @@
               </div>
               <nz-list nzGrid class="item-grid">
                 <div nz-row [nzGutter]="16">
+                  <!-- 每一个数据源 -->
                   <div nz-col [nzSpan]="8" *ngFor="let item of data.items">
                     <nz-list-item>
                       <nz-card>
                         <div style="text-align:right;margin-top:-8px;margin-right:-7px" *ngIf="data.isEditing">
-                          <a nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom"
-                          [nzPopconfirmOverlayStyle]="{minWidth: '230px'}"
-                          (nzOnConfirm)="removeDataItem(data, item)" [nzIcon]="iconTpl"><i nz-icon nzType="close" nzTheme="outline"></i></a>
+                          <a nz-popconfirm 
+                              nzPopconfirmTitle="确定删除吗?" 
+                              nzPopconfirmPlacement="bottom"
+                              [nzPopconfirmOverlayStyle]="{minWidth: '230px'}"
+                              (nzOnConfirm)="removeDataItem(data, item)" 
+                              [nzIcon]="iconTpl">
+                              <i nz-icon nzType="close" nzTheme="outline"></i>
+                          </a>
                         </div>
-                        <nz-statistic
-                          [nzValueTemplate]="valueTpl"
-                          [nzTitle]="titleTpl"
-                          [nzSuffix]="suffixTpl"
-                          [nzValueStyle]="{ color: item.color }"
-                        ></nz-statistic>
+                        <nz-statistic  [nzValueTemplate]="valueTpl"
+                                      [nzTitle]="titleTpl"
+                                      [nzSuffix]="suffixTpl"
+                                      [nzValueStyle]="{ color: item.color }"></nz-statistic>
                       </nz-card>
                       <ng-template #suffixTpl>
                         <ng-container *ngIf="!data.isEditing">
@@ -85,45 +95,54 @@
                         </ng-container>
                       </ng-template>
                       <ng-template #valueTpl>
+                        <!-- 计算数据显示 -->
                         <ng-container *ngIf="!data.isEditing">
-                          {{item.value}}
+                          <ng-container *ngIf="!item.isLoading; else valueLoadingTem">
+                            {{item.value}}
+                          </ng-container>
+                          <ng-template #valueLoadingTem>
+                            <nz-spin nzSimple [nzSize]="'small'"></nz-spin>
+                          </ng-template>
                         </ng-container>
-                        <div *ngIf="data.isEditing" (click)="onSetDataSource(data, item)" style="border: 1px solid #4CB287;border-radius: 5px;padding: 12px 15px;font-size:18px;cursor:pointer;color: #4CB287;margin-top:5px">
-                          点击设置数据源
-                        </div>
+                        <div *ngIf="data.isEditing" (click)="onSetDataSource(data, item)" class="operator-btn">点击设置数据源</div>
                       </ng-template>
                     </nz-list-item>
                   </div>
-                  <div nz-col [nzSpan]="8" *ngIf="data.isEditing">
+                  <div nz-col [nzSpan]="8" *ngIf="data.isEditing && data.itemsCount !== 6">
                     <nz-list-item>
                       <nz-card>
-                        <nz-statistic
-                          [nzValueTemplate]="addItemTpl"
-                        ></nz-statistic>
+                        <nz-statistic  [nzValueTemplate]="addItemTpl"></nz-statistic>
                       </nz-card>
                       <ng-template #addItemTpl>
-                        <div (click)="onAddItem(data)" style="border: 1px solid #4CB287;border-radius: 5px;padding: 12px 15px;font-size:18px;cursor:pointer;color: #4CB287;margin-top:5px">
-                          <a><i nz-icon nzType="plus" nzTheme="outline"></i>点击添加</a>
+                        <div (click)="onAddItem(data)" class="operator-btn">
+                          <i nz-icon nzType="plus" nzTheme="outline"></i>点击添加
                         </div>
                       </ng-template>
                     </nz-list-item>
                   </div>
-
                 </div>
               </nz-list>
             </nz-card>
             
             <ng-template #actionDelete>
-              <a nz-popconfirm nzPopconfirmTitle="确定删除吗?" nzPopconfirmPlacement="bottom"
+              <a nz-popconfirm
+                nzPopconfirmTitle="确定删除吗?" 
+                nzPopconfirmPlacement="bottom"
                 [nzPopconfirmOverlayStyle]="{minWidth: '230px'}"
-                (nzOnConfirm)="removeCard(data)" [nzIcon]="iconTpl">
+                (nzOnConfirm)="removeCard(data)" 
+                [nzIcon]="iconTpl">
                 <i style="color: #9A95CC;" nz-icon nzType="delete" nzTheme="fill"></i>
               </a>
             </ng-template>
             <ng-template #actionEdit>
-              <a style="color: #9A95CC;" (click)="toggleEditingCard(data)">
-                <i *ngIf="!data.isEditing" nz-icon nzType="edit" nzTheme="outline"></i>
-                <i *ngIf="data.isEditing" nz-icon nzType="save" nzTheme="outline"></i>
+              <a style="color: #9A95CC;"
+                  nz-popconfirm
+                  [nzPopconfirmTitle]="'没有填写名称和选择数据源的选项将被去除，确认保存吗？'"
+                  [nzPopconfirmTrigger]="null"
+                  [(nzPopconfirmVisible)]="isSureSave"
+                  (nzOnConfirm)="onSureToSave()"
+                  (click)="toggleEditingCard(data)">
+                <i nz-icon [nzType]="data.isEditing ? 'save' : 'edit'" nzTheme="outline"></i>
               </a>
             </ng-template>
           </nz-list-item>
@@ -137,14 +156,34 @@
 </ng-template>
 
 
-<nz-modal nzClassName="data-source" [(nzVisible)]="dataSourceModalVisible" (nzOnCancel)="dataSourceModalVisible=false">
+<nz-modal nzClassName="data-source" [nzMaskClosable]="false" [(nzVisible)]="dataSourceModalVisible" (nzOnCancel)="dataSourceModalVisible=false">
   <ng-container *nzModalContent>
-    <div nz-row [nzGutter]="0" class="">
-      {{currentDataItem.name}}
-    </div>
+    <app-new-report [dataSourceList]="dataSourceList" 
+                    [currentDataSource]="currentDataItem" 
+                    [currentCard]="currentDataCard" 
+                    #newReport></app-new-report>
   </ng-container>
   <div *nzModalFooter>
     <button nz-button nzType="default" (click)="dataSourceModalVisible=false">取消</button>
     <button nz-button nzType="primary" (click)="onApplyDataSource()" >完成</button>
+  </div>
+</nz-modal>
+
+<nz-modal [(nzVisible)]="dataSourcesManageModalVisible" nzTitle="数据源管理" (nzOnCancel)="onCloseAddDataSoureModal()">
+  <ng-container *nzModalContent>
+    <data-sources [(boardType)]="dataSourceBoardType"
+                  [currentDataSource]="currentDataSource"
+                  [dataSourceList]="dataSourceList"
+                  (deleteDataSource)="onDeleteDataSource($event)"
+                  (edit)="dataSourceOperatorType='edit'"
+                  #dataSources></data-sources>
+  </ng-container>
+  <div *nzModalFooter>
+    <button nz-button nzType="default" (click)="onOperatorCancel()">
+      {{ dataSourceBoardType === 'table' ? "关闭" : "返回" }}
+    </button>
+    <button nz-button nzType="primary" (click)="onOperatorDataSource()">
+      {{ dataSourceBoardType === 'table' ? "新数据源" : "保存" }}
+    </button>
   </div>
 </nz-modal>

@@ -1,0 +1,30 @@
+<form nz-form>
+    <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzFor="data-source">数据源</nz-form-label>
+        <nz-form-control [nzSpan]="10">
+            <nz-select [(ngModel)]="dataSource" (ngModelChange)="onSelectDataSource()" name="data-source" id="data-source" nzPlaceHolder="选择数据源...">
+                <nz-option *ngFor="let dataSource of dataSourceList" [nzValue]="dataSource" [nzLabel]="dataSource.name" [nzDisabled]="noSelectableDataSourceIDS.includes(dataSource.id)"></nz-option>
+            </nz-select>
+        </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzFor="measure-units">计量单位</nz-form-label>
+        <nz-form-control [nzSpan]="6">
+            <input [(ngModel)]="unit" nz-input name="measure-units" id="measure-units">
+        </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzFor="count-mode">计数方式</nz-form-label>
+        <nz-form-control [nzSpan]="6">
+            <nz-select [(ngModel)]="calculationType" (ngModelChange)="onSelectCalculationType()" id="count-mode" name="count-mode">
+                <nz-option *ngFor="let mode of countMode" [nzValue]="mode.id" [nzLabel]="mode.label" [nzDisabled]="noSelectableCalculationTypeIDS.includes(mode.id)"></nz-option>
+            </nz-select>
+        </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzFor="font-color">文字颜色</nz-form-label>
+        <nz-form-control [nzSpan]="4">
+            <input [(ngModel)]="color" nz-input type="color" name="font-color" id="font-color">
+        </nz-form-control>
+    </nz-form-item>
+</form>

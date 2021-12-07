@@ -9,6 +9,10 @@ section.body {
     .header {
       justify-content: right;
       margin-bottom: 20px;
+
+      button:not(:last-of-type) {
+        margin-right: 10px;
+      }
     }
   
     .data-grid {
@@ -32,6 +36,15 @@ section.body {
 
         nz-statistic {
           text-align: center;
+        }
+
+        .operator-btn {
+          border: 1px solid #4CB287;
+          border-radius: 5px;
+          padding: 12px 15px;
+          font-size: 18px;
+          cursor: pointer;
+          color: #4CB287;margin-top:5px
         }
       }
     }

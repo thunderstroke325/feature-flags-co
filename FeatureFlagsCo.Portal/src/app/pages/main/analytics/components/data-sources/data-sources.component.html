@@ -1,0 +1,50 @@
+<section class="data-source-body">
+    <ng-container [ngSwitch]="boardType">
+        <ng-container *ngSwitchCase="'table'">
+            <nz-table #basicTable
+                [nzSize]="'small'"
+                [nzData]="dataSourceList"
+                [nzPageSize]="5">
+                <thead>
+                    <tr class="table-th-style">
+                        <th>数据源名字</th>
+                        <th>数据源类型</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="table-td-style" *ngFor="let dataSource of basicTable.data">
+                        <td>{{dataSource.name}}</td>
+                        <td>{{dataSource.dataType}}</td>
+                        <td>
+                            <button nz-button nzType="primary" nzSize="small" (click)="editDataSource(dataSource)">修改</button>
+                            <button nz-button nzType="primary" nzSize="small" nzDanger
+                                    nz-popconfirm
+                                    nzPopconfirmTitle="确认删除该数据源吗?"
+                                    nzPopconfirmPlacement="bottom"
+                                    (nzOnConfirm)="onDeleteDataSource(dataSource)">删除</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </nz-table>
+        </ng-container>
+        <ng-container *ngSwitchCase="'form'">
+            <form nz-form>
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="6" nzFor="data-source-name">数据源名字</nz-form-label>
+                    <nz-form-control [nzSpan]="10">
+                        <input [(ngModel)]="currentDataSource.name" nz-input name="data-source-name" id="data-source-name">
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="6" nzFor="data-source-type">数据源类型</nz-form-label>
+                    <nz-form-control [nzSpan]="10">
+                        <nz-select [(ngModel)]="currentDataSource.dataType" name="data-source-type" id="data-source-type">
+                            <nz-option  nzValue="数值" nzLabel="数值"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </form>
+        </ng-container>
+    </ng-container>
+</section>
