@@ -6,11 +6,9 @@
 trigger: none
 
 pool:
-  vmImage: windows-latest
-
+  vmImage: ubuntu-latest
 
 stages:
-
 - stage: 'Development'
   jobs:
   - deployment: 'DeployToDevelopment'
@@ -42,9 +40,10 @@ stages:
                     cd '$(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal'
 
                     npm install
-                    ng build
+                    npm build
                     npm audit fix
                 displayName: 'npm install and build'
+
               - task: Bash@3
                 inputs:
                   targetType: 'inline'
