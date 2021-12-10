@@ -25,7 +25,7 @@ We currently provide two types of product:
 
 ### Installation with Docker Compose
   
-For more docker-compose information, you can track page: https://github.com/feature-flags-co/feature-flags-co/tree/main/FeatureFlagsCo.Docker
+For more docker-compose information, you can track page: [docker-compose](https://github.com/feature-flags-co/feature-flags-co/tree/main/FeatureFlagsCo.Docker)
 
 This version is a fullly open-sourced (almost) version which can be better controlled and used locally. This is also a free version which can be easily and quickly handled by small teams (and also earlier stage products).
 
