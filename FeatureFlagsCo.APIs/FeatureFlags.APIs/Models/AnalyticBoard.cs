@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FeatureFlagsCo.MQ.ElasticSearch.DataModels;
+using Nest;
+using static Nest.Infer;
 
 namespace FeatureFlags.APIs.Models
 {
@@ -17,7 +20,11 @@ namespace FeatureFlags.APIs.Models
             return "AnalyticBoard";
         }
 
-        public void UpsertDataSource(string dataSourceId, string name, string dataType)
+        public void UpsertDataSource(
+            string dataSourceId, 
+            string name, 
+            string keyName,
+            string dataType)
         {
             var oldDataSource = DataSourceDefs.FirstOrDefault(x => x.Id == dataSourceId);
             if (oldDataSource != null)
@@ -26,7 +33,7 @@ namespace FeatureFlags.APIs.Models
             }
             else
             {
-                var newDataSource = new DataSourceDef(dataSourceId, name, dataType);
+                var newDataSource = new DataSourceDef(dataSourceId, name, keyName, dataType);
                 DataSourceDefs.Add(newDataSource);
             }
         }
@@ -116,6 +123,36 @@ namespace FeatureFlags.APIs.Models
         public string Unit { get; set; }
         public string Color { get; set; }
         public CalculationType CalculationType { get; set; }
+        
+        public string AggregationName => $"{DataSource.KeyName}_{CalculationType}".ToLower();
+
+        public double? AggregationValue(AggregateDictionary aggregations)
+        {
+            var aggregate = aggregations.TryGetValue(AggregationName, out var agg) 
+                ? agg as ValueAggregate 
+                : null;
+
+            return aggregate?.Value;
+        }
+
+        public AggregationContainer AggregationContainer()
+        {
+            AggregationContainer aggregation = CalculationType switch
+            {
+                CalculationType.Count => new ValueCountAggregation(
+                    AggregationName, Field<IntAnalytics>(analytics => analytics.Key)),
+
+                CalculationType.Sum => new SumAggregation(
+                    AggregationName, Field<IntAnalytics>(analytics => analytics.Value)),
+
+                CalculationType.Average => new AverageAggregation(
+                    AggregationName, Field<IntAnalytics>(analytics => analytics.Value)),
+
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            return aggregation;
+        }
     }
 
     public enum CalculationType 
@@ -130,6 +167,7 @@ namespace FeatureFlags.APIs.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
+        public string KeyName { get; set; }
         public string DataType { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public DateTime? CreatedAt { get; set; }
@@ -138,13 +176,23 @@ namespace FeatureFlags.APIs.Models
         {
         }
 
-        public DataSourceDef(string id, string name, string dataType)
+        public DataSourceDef(
+            string id,
+            string name,
+            string keyName,
+            string dataType)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
                 throw new ArgumentException("data source definition id cannot be null or whitespace.");
             }
             Id = id;
+
+            if (string.IsNullOrWhiteSpace(keyName))
+            {
+                throw new ArgumentException("data source definition key name cannot be null or whitespace.");
+            }
+            KeyName = keyName;
 
             CreatedAt = DateTime.UtcNow;
             Update(name, dataType);

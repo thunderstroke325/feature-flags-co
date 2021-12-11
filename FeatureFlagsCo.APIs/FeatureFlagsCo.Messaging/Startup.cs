@@ -10,6 +10,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
+using FeatureFlagsCo.MQ;
+using FeatureFlagsCo.MQ.ElasticSearch;
 using StackExchange.Redis;
 
 namespace FeatureFlagsCo.Messaging
@@ -114,8 +116,9 @@ namespace FeatureFlagsCo.Messaging
             //redis
             var redisUrl = Configuration.GetSection("ConnectionStrings:RedisServerUrl").Value;
             services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisUrl));
-            // register typed clients
-            services.AddHttpClient<ElasticSearchService>();
+            
+            // add elastic search service
+            services.AddElasticsearch(Configuration);
             
             services.AddSingleton<ExperimentsService, ExperimentsService>();
 

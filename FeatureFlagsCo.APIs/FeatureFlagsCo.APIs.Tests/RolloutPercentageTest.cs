@@ -5,7 +5,7 @@ using FeatureFlags.APIs.Services;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace FeatureFlagsCo.APIs.Tests
+namespace FeatureFlags.APIs.Tests
 {
     public class RolloutPercentageTest
     {

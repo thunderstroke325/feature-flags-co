@@ -69,8 +69,6 @@ export class AnalyticsComponent implements OnInit {
         this.envID = result.envId;
         this.dataSourceList = result.dataSourceDefs;
 
-        console.log(result)
-
         let groups = result.dataGroups;
         groups.forEach((group: DataCard) => {
           group.items.length && group.items.map((item: IDataItem) => item.isLoading = true);
@@ -139,8 +137,8 @@ export class AnalyticsComponent implements OnInit {
       id: card.id,
       name: card.name || null,
       items: card.items,
-      startTime: card.startTime ? moment(card.startTime).format("YYYY-MM-DD") : null,
-      endTime: card.endTime ? moment(card.endTime).format("YYYY-MM-DD") : null
+      startTime: card.startTime,
+      endTime: card.endTime
     }
     this.onSaveReportData(param, card);
   }
@@ -153,25 +151,11 @@ export class AnalyticsComponent implements OnInit {
         card.isEditing = false;
         card.itemsCount = card.items.length;
 
-        let items: groupItem[] = [];
-
-        card.items.forEach((item: IDataItem) => {
-
-          item.isLoading = true;
-
-          items.push({
-            id: item.id,
-            name: item.name,
-            dataType: item.dataSource.dataType,
-            calculationType: item.calculationType
-          })
-        })
-
         const param: sameTimeGroup = {
           envId: this.envID,
-          startTime: moment(card.startTime).format("YYYY-MM-DD"),
-          endTime: moment(card.endTime).format("YYYY-MM-DD"),
-          items
+          startTime: card.startTime,
+          endTime: card.endTime,
+          items: card.items
         }
 
         this.analyticServe.computeResult(param)
@@ -297,6 +281,7 @@ export class AnalyticsComponent implements OnInit {
       envID: this.envID,
       id: dataSource.id,
       name: dataSource.name,
+      keyName: dataSource.keyName,
       dataType: dataSource.dataType
     }
     this.analyticServe.addDataSourece(newDataSource)

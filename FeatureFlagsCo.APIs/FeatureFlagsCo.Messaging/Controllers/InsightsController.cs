@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using FeatureFlagsCo.Messaging.Models;
+using FeatureFlagsCo.MQ.ElasticSearch;
 
 namespace FeatureFlagsCo.Messaging.Controllers
 {
@@ -46,7 +46,7 @@ namespace FeatureFlagsCo.Messaging.Controllers
                 var jsonContent = JsonSerializer.Serialize(keyValues);
 
                 var createSuccess = 
-                    await _elasticSearchService.CreateDocumentAsync(ElasticSearchIndices.Variation, jsonContent);
+                    await _elasticSearchService.IndexDocumentAsync(ElasticSearchIndices.Variation, jsonContent);
                 
                 // if send to es failed, terminate this request
                 if (!createSuccess)

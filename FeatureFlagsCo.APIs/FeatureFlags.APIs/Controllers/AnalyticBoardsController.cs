@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FeatureFlags.APIs.ViewModels.Analytic;
+using FeatureFlagsCo.MQ.ElasticSearch;
 
 namespace FeatureFlags.APIs.Controllers
 {
@@ -17,14 +19,17 @@ namespace FeatureFlags.APIs.Controllers
     public class AnalyticBoardsController : ControllerBase
     {
         private readonly MongoDbAnalyticBoardService _mongoDbAnalyticBoardService;
+        private readonly ElasticSearchService _elasticSearchService;
         private readonly IEnvironmentService _envService;
 
         public AnalyticBoardsController(
             MongoDbAnalyticBoardService mongoDbAnalyticBoardService,
+            ElasticSearchService elasticSearchService, 
             IEnvironmentService envService)
         {
             _mongoDbAnalyticBoardService = mongoDbAnalyticBoardService;
             _envService = envService;
+            _elasticSearchService = elasticSearchService;
         }
 
         [HttpGet]
@@ -72,25 +77,30 @@ namespace FeatureFlags.APIs.Controllers
         [Route("results")]
         public async Task<dynamic> CalculateResults([FromBody] CalculationParam param)
         {
-            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
-            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
+            var currentUserId = HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (!await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
             {
-                IEnumerable<CalculationItemResultViewModel> itemResults = null;
-                if (param.Items.Count == 0)
-                {
-                    itemResults = new List<CalculationItemResultViewModel>();
-                }
-                else 
-                {
-                    // TODO calculate values
-                    Random rd = new Random();
-                    itemResults = param.Items.Select(i => new CalculationItemResultViewModel { Id = i.Id, Value = (double)rd.Next(1, 1000) });
-                }
-
-                return new CalculationResultsViewModel { Items = itemResults };
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+            }
+            
+            // if no item, return empty list
+            if (!param.Items.Any())
+            {
+                return new List<CalculationItemResultViewModel>();
             }
 
-            return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+            var searchResult = await _elasticSearchService.SearchDocumentAsync(param.SearchAggregationDescriptor());
+            var itemResults = param.Items.Select(item =>
+            {
+                var aggregationValues = searchResult.Aggregations.Children(item.DataSource.KeyName);
+                return new CalculationItemResultViewModel
+                {
+                    Id = item.Id,
+                    Value = item.AggregationValue(aggregationValues).GetValueOrDefault()
+                };
+            });
+
+            return new CalculationResultsViewModel { Items = itemResults };
         }
 
         [HttpPost]
@@ -109,7 +119,7 @@ namespace FeatureFlags.APIs.Controllers
                 return StatusCode(StatusCodes.Status404NotFound, new Response { Code = "Error", Message = "The board does not exist." });
             }
             
-            board.UpsertDataSource(param.Id, param.Name, param.DataType);
+            board.UpsertDataSource(param.Id, param.Name, param.KeyName, param.DataType);
             
             var updatedBoard = await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
             return updatedBoard;

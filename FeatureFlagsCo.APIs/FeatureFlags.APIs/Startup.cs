@@ -2,7 +2,6 @@ using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
-using FeatureFlagsCo.MQ;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -16,7 +15,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,6 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FeatureFlagsCo.FeatureInsights;
 using FeatureFlagsCo.FeatureInsights.ElasticSearch;
+using FeatureFlagsCo.MQ.ElasticSearch;
 
 namespace FeatureFlags.AdminWebAPIs
 {
@@ -179,6 +178,9 @@ namespace FeatureFlags.AdminWebAPIs
             services.AddSingleton<MongoDbFeatureFlagZeroCodeSettingService>();
             services.AddSingleton<MetricService>();
             services.AddSingleton<MongoDbAnalyticBoardService>();
+            
+            // add elasticsearch
+            services.AddElasticsearch(Configuration);
 
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
             var cacheType = this.Configuration.GetSection("MySettings").GetSection("CacheType").Value;

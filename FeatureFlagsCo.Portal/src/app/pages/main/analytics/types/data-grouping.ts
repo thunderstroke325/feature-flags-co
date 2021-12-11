@@ -12,10 +12,10 @@ export const dataGrouping = (data: DataCard[] = [], envId: number) => {
     let sameTimeSlotList = {};
 
     data.forEach((card: DataCard) => {
-        const startTime = moment(card.startTime).format("YYYY-MM-DD");
-        const endTime = moment(card.endTime).format("YYYY-MM-DD");
+        const startTime = card.startTime;
+        const endTime = card.endTime;
+
         const sameTimeSlotKey = `${startTime}#${endTime}`;
-        
         if(!sameTimeSlotList[sameTimeSlotKey]) {
             sameTimeSlotList[sameTimeSlotKey] = [];
         }
@@ -23,28 +23,17 @@ export const dataGrouping = (data: DataCard[] = [], envId: number) => {
     })
 
     // 相同时间段内对数据的计数方式进行分组
-    Object.entries(sameTimeSlotList).forEach(([key, value]: [string, DataCard[]]) => {
+    Object.entries(sameTimeSlotList).forEach(([_, value]: [string, DataCard[]]) => {
+        const items: IDataItem[] = value.reduce((acc: any, card: DataCard) => {
+            acc = [...acc, ...card.items];
+            return acc;
+        }, []);
 
-        const [startTime, endTime] = key.split("#");
-
-        let items: groupItem[] = [];
-
-        value.forEach((data: DataCard) => {
-            if(data.items.length) {
-                data.items.forEach((item: IDataItem) => {
-                    items.push({
-                        id: item.id,
-                        name: item.name,
-                        dataType: item.dataSource.dataType,
-                        calculationType: item.calculationType
-                    })
-                })
-            }
-        })
-
+        // use first item to get startTime and endTime
+        const { startTime, endTime } = value[0];
         groupingResult.push({
             envId,
-            startTime,
+            startTime, 
             endTime,
             items
         })
@@ -62,7 +51,7 @@ export interface groupItem {
 
 export interface sameTimeGroup {
     envId: number;
-    startTime: string;
-    endTime: string;
-    items: groupItem[];
+    startTime: Date;
+    endTime: Date;
+    items: IDataItem[];
 }

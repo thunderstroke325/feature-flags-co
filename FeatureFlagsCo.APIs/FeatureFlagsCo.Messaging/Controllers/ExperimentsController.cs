@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FeatureFlagsCo.Messaging.Models;
+using FeatureFlagsCo.MQ.ElasticSearch;
 
 namespace FeatureFlagsCo.Messaging.Controllers
 {
@@ -38,9 +38,13 @@ namespace FeatureFlagsCo.Messaging.Controllers
         {
             _logger.LogTrace("Experiments/SendExperimentStartEndData");
 
-            string messagePayload = JsonSerializer.Serialize(param);
+            // send message to queue
+            var messagePayload = JsonSerializer.Serialize(param);
             await _serviceBusQ1Sender.SendMessageAsync(messagePayload);
-            await _elasticSearch.CreateDocumentAsync(ElasticSearchIndices.Experiment, messagePayload);
+            
+            // send message to es
+            await _elasticSearch.IndexDocumentAsync(param, ElasticSearchIndices.Experiment);
+            
             return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
         }
 
@@ -51,9 +55,13 @@ namespace FeatureFlagsCo.Messaging.Controllers
         {
             _logger.LogTrace("Experiments/SendEventData");
 
-            string messagePayload = JsonSerializer.Serialize(param);
+            // send message to queue
+            var messagePayload = JsonSerializer.Serialize(param);
             await _serviceBusQ5Sender.SendMessageAsync(messagePayload);
-            await _elasticSearch.CreateDocumentAsync(ElasticSearchIndices.Experiment, messagePayload);
+            
+            // send message to es
+            await _elasticSearch.IndexDocumentAsync(param, ElasticSearchIndices.Experiment);
+            
             return StatusCode(StatusCodes.Status200OK, new { Code = "OK", Message = "OK" });
         }
     }
