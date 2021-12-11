@@ -7,7 +7,8 @@ import { NewReportComponent } from './components/new-report/new-report.component
 import { CalculationType, DataCard, dataSource, IDataCard, IDataItem, updataReportParam } from './types/analytics';
 import * as moment from 'moment';
 import { DataSourcesComponent } from './components/data-sources/data-sources.component';
-import { dataGrouping, sameTimeGroup } from './types/data-grouping';
+import { dataGrouping, groupItem, sameTimeGroup } from './types/data-grouping';
+import { hasSameKeyName } from './types/same-keyname';
 
 @Component({
   selector: 'app-analytics',
@@ -62,9 +63,13 @@ export class AnalyticsComponent implements OnInit {
         dataSourceDefs: dataSource[],
         dataGroups: DataCard[]
       }) => {
+        this.listData = [];
+
         this.analyticBoardId = result.id;
         this.envID = result.envId;
         this.dataSourceList = result.dataSourceDefs;
+
+        console.log(result)
 
         let groups = result.dataGroups;
         groups.forEach((group: DataCard) => {
@@ -79,15 +84,15 @@ export class AnalyticsComponent implements OnInit {
   // 设置每个 item 的 value 值
   private requestValueForItems() {
     dataGrouping(this.listData, this.envID).forEach((item: sameTimeGroup) => {
-      this.analyticServe.computeResult(item).subscribe(result =>  this.setItemValue(result.items));
+      this.analyticServe.computeResult(item).subscribe(result =>  this.setItemValue(result.items, this.listData));
     })
   }
 
   // 设置 item 的 value 值
-  private setItemValue(result: {id: string, value: number}[]) {
+  private setItemValue(result: {id: string, value: number}[], list: IDataCard[]) {
     result.forEach((item: {id: string, value: number}) => {
-      next: for(let i = 0; i < this.listData.length; i++) {
-        const items = this.listData[i].items;
+      next: for(let i = 0; i < list.length; i++) {
+        const items = list[i].items;
 
         if(items.length) {
           for(let j = 0; j < items.length; j++) {
@@ -147,6 +152,30 @@ export class AnalyticsComponent implements OnInit {
         this.message.success("报表更新成功!");
         card.isEditing = false;
         card.itemsCount = card.items.length;
+
+        let items: groupItem[] = [];
+
+        card.items.forEach((item: IDataItem) => {
+
+          item.isLoading = true;
+
+          items.push({
+            id: item.id,
+            name: item.name,
+            dataType: item.dataSource.dataType,
+            calculationType: item.calculationType
+          })
+        })
+
+        const param: sameTimeGroup = {
+          envId: this.envID,
+          startTime: moment(card.startTime).format("YYYY-MM-DD"),
+          endTime: moment(card.endTime).format("YYYY-MM-DD"),
+          items
+        }
+
+        this.analyticServe.computeResult(param)
+          .subscribe(result => this.setItemValue(result.items, [card]))
       })
   }
 
@@ -205,13 +234,22 @@ export class AnalyticsComponent implements OnInit {
       this.currentDataSource = {
         id: uuidv4(),
         name: "",
-        dataType: "数值"
+        dataType: "数值",
+        keyName: ""
       }
 
       this.dataSourceOperatorType = 'new';
       this.dataSourceBoardType = 'form';
     } else {
-      this.onAddDataSource();
+      // 检查是否有重复的 keyName
+      const dataSource: dataSource = this.dataSourceCom.setParam();
+      const isHas = hasSameKeyName(this.dataSourceList, dataSource);
+
+      if(!isHas) {
+        this.onAddDataSource(dataSource);
+      } else {
+        this.message.error("当前数据源的 keyName 重复，请设置不同的 keyName")
+      }
     }
   }
 
@@ -233,7 +271,7 @@ export class AnalyticsComponent implements OnInit {
 
   // 刷新页面
   public onRefreshPage() {
-
+    this.initBoardData();
   }
 
   // 打开添加数据源弹窗
@@ -252,8 +290,8 @@ export class AnalyticsComponent implements OnInit {
   }
 
   // 确认添加数据源
-  private onAddDataSource = () => {
-    const dataSource: dataSource = this.dataSourceCom.setParam();
+  private onAddDataSource = (dataSource: dataSource) => {
+    
     const newDataSource = {
       analyticBoardId: this.analyticBoardId,
       envID: this.envID,

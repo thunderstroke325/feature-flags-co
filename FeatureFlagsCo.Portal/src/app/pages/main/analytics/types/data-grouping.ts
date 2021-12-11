@@ -27,50 +27,42 @@ export const dataGrouping = (data: DataCard[] = [], envId: number) => {
 
         const [startTime, endTime] = key.split("#");
 
-        let sameCalculationTypeList = {};
+        let items: groupItem[] = [];
 
         value.forEach((data: DataCard) => {
             if(data.items.length) {
                 data.items.forEach((item: IDataItem) => {
-                    const sameCalculationTypeKey = item.calculationType.toString();
-
-                    if(!sameCalculationTypeList[sameCalculationTypeKey]) {
-                        sameCalculationTypeList[sameCalculationTypeKey] = [];
-                    }
-
-                    sameCalculationTypeList[sameCalculationTypeKey].push({
+                    items.push({
                         id: item.id,
                         name: item.name,
-                        dataType: item.dataSource.dataType
+                        dataType: item.dataSource.dataType,
+                        calculationType: item.calculationType
                     })
                 })
             }
         })
 
-        Object.entries(sameCalculationTypeList).forEach(([key, value]: [string, groupItem[]]) => {
-            groupingResult.push({
-                envId,
-                startTime,
-                endTime,
-                calculationType: parseInt(key),
-                items: value
-            })
+        groupingResult.push({
+            envId,
+            startTime,
+            endTime,
+            items
         })
     })
 
     return groupingResult;
 }
 
-interface groupItem {
+export interface groupItem {
     id: string;
     name: string;
     dataType: string;
+    calculationType: number;
 }
 
 export interface sameTimeGroup {
     envId: number;
     startTime: string;
     endTime: string;
-    calculationType: number;
     items: groupItem[];
 }

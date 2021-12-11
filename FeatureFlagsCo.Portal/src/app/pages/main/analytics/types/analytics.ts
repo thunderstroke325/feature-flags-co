@@ -106,6 +106,7 @@ export interface dataSource {
     id: string;
     name: string;
     dataType: string;
+    keyName: string;
 }
 
 // 更新看板数据参数

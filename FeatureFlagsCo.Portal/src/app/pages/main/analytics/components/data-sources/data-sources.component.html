@@ -7,14 +7,16 @@
                 [nzPageSize]="5">
                 <thead>
                     <tr class="table-th-style">
-                        <th>数据源名字</th>
-                        <th>数据源类型</th>
+                        <th>名称</th>
+                        <th>keyName</th>
+                        <th>类型</th>
                         <th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr class="table-td-style" *ngFor="let dataSource of basicTable.data">
                         <td>{{dataSource.name}}</td>
+                        <td>{{dataSource.keyName}}</td>
                         <td>{{dataSource.dataType}}</td>
                         <td>
                             <button nz-button nzType="primary" nzSize="small" (click)="editDataSource(dataSource)">修改</button>
@@ -34,6 +36,12 @@
                     <nz-form-label [nzSpan]="6" nzFor="data-source-name">数据源名字</nz-form-label>
                     <nz-form-control [nzSpan]="10">
                         <input [(ngModel)]="currentDataSource.name" nz-input name="data-source-name" id="data-source-name">
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item>
+                    <nz-form-label [nzSpan]="6" nzFor="data-source-keyName">keyName</nz-form-label>
+                    <nz-form-control [nzSpan]="10">
+                        <input [(ngModel)]="currentDataSource.keyName" nz-input name="data-source-keyName" id="data-source-keyName">
                     </nz-form-control>
                 </nz-form-item>
                 <nz-form-item>

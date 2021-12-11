@@ -15,7 +15,7 @@ export class NewReportComponent {
   set currentDataSource(value: IDataItem) {
     this.unit = value.unit || "";
     this.color = value.color || "#000000";
-    this.dataSource = value.dataSource || {id: null, name: "", dataType: ""};
+    this.dataSource = value.dataSource || {id: null, name: "", dataType: "", keyName: ""};
 
     this.calculationType = value.calculationType || countMode[0].id;
 
@@ -62,7 +62,6 @@ export class NewReportComponent {
 
   // 数据源发生改变，更新不可选择的计数方式列表
   public onSelectDataSource() {
-    console.log(this.dataSource)
     this.initNoSelectableLists();
   }
 
