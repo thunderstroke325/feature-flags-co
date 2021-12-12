@@ -33,7 +33,6 @@
                 <ng-container *ngIf="data.isEditing">
                   <div style="margin-top:5px">
                     <nz-date-picker
-                      [nzRenderExtraFooter]="footerStartDate"
                       [nzShowToday]="false"
                       [nzAllowClear]="false"
                       [nzDisabledDate]="data.disabledStartDate"
@@ -52,9 +51,6 @@
                       nzPlaceHolder="结束日期"
                     ></nz-date-picker>
                   </div>
-                  <ng-template #footerStartDate>
-                    <div style="text-align:center"><a (click)="data.clearStartDate()">清空（设为永远）</a></div>
-                  </ng-template>
                   <ng-template #footerEndDate>
                     <div style="text-align:center"><a (click)="data.clearEndDate()">清空（设为永远）</a></div>
                   </ng-template>

@@ -42,8 +42,8 @@ export class DataCard {
         if (data) {
             this.id = data.id;
             this.name = data.name;
-            this.startTime = data.startTime;
-            this.endTime = data.endTime;
+            this.startTime = !!data.startTime ? new Date(data.startTime) : null;
+            this.endTime = !!data.startTime ? new Date(data.endTime) : null;
             this.isLoading = data.isLoading;
             this.isEditing = data.isEditing;
             this.items = [...data.items];
