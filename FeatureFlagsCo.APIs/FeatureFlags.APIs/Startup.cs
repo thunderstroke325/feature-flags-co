@@ -1,42 +1,38 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
 using FeatureFlags.APIs.Authentication;
+using FeatureFlags.APIs.Middlewares;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
-using Microsoft.ApplicationInsights.DataContracts;
+using FeatureFlagsCo.FeatureInsights;
+using FeatureFlagsCo.FeatureInsights.ElasticSearch;
+using FeatureFlagsCo.MQ.ElasticSearch;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using FeatureFlagsCo.FeatureInsights;
-using FeatureFlagsCo.FeatureInsights.ElasticSearch;
-using FeatureFlagsCo.MQ.ElasticSearch;
 
-namespace FeatureFlags.AdminWebAPIs
+namespace FeatureFlags.APIs
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, Microsoft.AspNetCore.Hosting.IWebHostEnvironment appEnv)
+        public Startup(IConfiguration configuration, IWebHostEnvironment appEnv)
         {
             Configuration = configuration;
             CurrentEnvironment = appEnv;
         }
 
         public IConfiguration Configuration { get; }
-        private Microsoft.AspNetCore.Hosting.IWebHostEnvironment CurrentEnvironment { get; set; }
+        private IWebHostEnvironment CurrentEnvironment { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -201,45 +197,22 @@ namespace FeatureFlags.AdminWebAPIs
             #region Telemetry/Insights
             if (hostingType == HostingTypeEnum.Azure.ToString())
             {
-                Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions aiOptions
-                        = new Microsoft.ApplicationInsights.AspNetCore.Extensions.ApplicationInsightsServiceOptions();
-                aiOptions.InstrumentationKey = this.Configuration.GetSection("ApplicationInsights").GetSection("InstrumentationKey").Value;
-                aiOptions.ConnectionString = this.Configuration.GetSection("ApplicationInsights").GetSection("ConnectionString").Value;
-                aiOptions.EnableAdaptiveSampling = false;
-                aiOptions.EnableDependencyTrackingTelemetryModule = false;
-                aiOptions.EnableAppServicesHeartbeatTelemetryModule = false;
-                aiOptions.EnablePerformanceCounterCollectionModule = false;
-                aiOptions.EnableEventCounterCollectionModule = false;
-                aiOptions.EnableRequestTrackingTelemetryModule = false;
-                services.AddApplicationInsightsTelemetry(aiOptions);
+                var applicationInsightsServiceOptions = new ApplicationInsightsServiceOptions
+                {
+                    InstrumentationKey = Configuration.GetSection("ApplicationInsights:InstrumentationKey").Value,
+                    ConnectionString = Configuration.GetSection("ApplicationInsights:ConnectionString").Value,
+                    EnableAdaptiveSampling = false,
+                    EnableDependencyTrackingTelemetryModule = false,
+                    EnableAppServicesHeartbeatTelemetryModule = false,
+                    EnablePerformanceCounterCollectionModule = false,
+                    EnableEventCounterCollectionModule = false,
+                    EnableRequestTrackingTelemetryModule = false
+                };
+                
+                services.AddApplicationInsightsTelemetry(applicationInsightsServiceOptions);
             }
-            if (hostingType == HostingTypeEnum.Docker.ToString())
-            {
-                //var otlpEndpoint = this.Configuration.GetSection("OpenTelemetry").GetSection("Endpoint").Value;
-                //if (!string.IsNullOrWhiteSpace(otlpEndpoint))
-                //{
-                //    AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
-                //    var serviceName = this.Configuration.GetSection("OpenTelemetry").GetSection("ServiceName").Value;
-                //    services.AddOpenTelemetryTracing((builder) => builder
-                //        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-                //        .AddAspNetCoreInstrumentation()
-                //        .AddHttpClientInstrumentation()
-                //        .AddOtlpExporter(otlpOptions =>
-                //        {
-                //            otlpOptions.Endpoint = new Uri(otlpEndpoint);
-                //    }));
-                //}
-            }
-
-            var StartSleepTimeStr = this.Configuration.GetSection("MySettings").GetSection("StartSleepTime").Value;
-            Thread.Sleep(Convert.ToInt32(StartSleepTimeStr) * 1000);
-
-            var insightsRabbitMqUrl = this.Configuration.GetSection("MySettings").GetSection("InsightsRabbitMqUrl").Value;
-            //services.AddSingleton<IAuditLogMqService, AuditLogMqService>();
-
+            
             services.AddSingleton<MessagingService, MessagingService>();
-
             services.AddScoped<IFeatureFlagsUsageService, ElasticSearchFeatureFlagsUsageService>();
             services.AddScoped<IExperimentationService, ExperimentationService>();
             services.AddScoped<IAuditLogSearchService, AuditLogSearchService>();
@@ -249,86 +222,23 @@ namespace FeatureFlags.AdminWebAPIs
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseExceptionHandler("/error-local-development");
-            }
-            else
-            {
-                app.UseExceptionHandler("/error");
-            }
-
-
-            //app.UseRequestBodyLogging();
-
-            //app.UseStatusCodePages();
-
-            app.UseRouting();
-
+            app.UseException();
+            
             app.UseSwagger(); 
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "FeatureFlags.AdminWebAPIs V0.1.3");
             });
 
-
+            app.UseRouting();
             app.UseCors("AllowMyOrigin");
-
             app.UseAuthentication();
             app.UseAuthorization();
-
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers()
                     .RequireCors("AllowMyOrigin");
             });
-
-
-        }
-    }
-
-    public static class ApplicationInsightExtensions
-    {
-        public static IApplicationBuilder UseRequestBodyLogging(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<RequestBodyLoggingMiddleware>();
-        }
-    }
-
-    public class RequestBodyLoggingMiddleware : IMiddleware
-    {
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
-        {
-            var method = context.Request.Method;
-
-            // Ensure the request body can be read multiple times
-            context.Request.EnableBuffering();
-
-            // Only if we are dealing with POST or PUT, GET and others shouldn't have a body
-            if (context.Request.Body.CanRead && method == HttpMethods.Post &&
-                (context.Request.Path.Value.Contains("GetUserVariationResult") ||
-                context.Request.Path.Value.Contains("redistest")))
-            {
-                // Leave stream open so next middleware can read it
-                using var reader = new StreamReader(
-                    context.Request.Body,
-                    Encoding.UTF8,
-                    detectEncodingFromByteOrderMarks: false,
-                    bufferSize: 512, leaveOpen: true);
-
-                var requestBody = await reader.ReadToEndAsync();
-
-                // Reset stream position, so next middleware can read it
-                context.Request.Body.Position = 0;
-
-                // Write request body to App Insights
-                var requestTelemetry = context.Features.Get<RequestTelemetry>();
-                requestTelemetry?.Properties.Add("RequestBody", requestBody);
-            }
-
-            // Call next middleware in the pipeline
-            await next(context);
         }
     }
 }
