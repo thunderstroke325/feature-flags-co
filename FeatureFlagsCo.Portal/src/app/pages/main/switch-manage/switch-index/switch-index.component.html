@@ -97,7 +97,7 @@
         <nz-form-label>开关类型</nz-form-label>
         <nz-select style="width:100%;" nzPlaceHolder="选择开关类型" [(ngModel)]="switchType">
           <nz-option [nzValue]="ClassicFeatureFlag" nzLabel="传统开关 - 可以用于对终端用户进行条件分流"></nz-option>
-          <nz-option [nzValue]="PretargetedFeatureFlag" nzLabel="预分流开关 - 客户端已提前对终端用户进行了分流，用于无埋点 A/B/n 测试"></nz-option>
+          <!-- <nz-option [nzValue]="PretargetedFeatureFlag" nzLabel="预分流开关 - 客户端已提前对终端用户进行了分流，用于无埋点 A/B/n 测试"></nz-option> -->
         </nz-select>
       </nz-form-item>
     </ng-container>

@@ -8,9 +8,9 @@
 <ng-template #conditionTemplate>
     <ng-container *ngIf="!isLoading; else loadingTem;">
         <div class="detail-body">
-          <div id="demo-link" *ngIf="featureDetail?.ff?.keyName === '示例开关'">
+          <!-- <div id="demo-link" *ngIf="featureDetail?.ff?.keyName === '示例开关'">
             <a target="_blank" href="http://antd.feature-flags.co/user/?envKey={{currentProjectEnv?.envSecret}}">点击查看 Demo</a>
-          </div>
+          </div> -->
           <ng-container *ngIf="featureDetail?.ff?.type === pretargetedFeatureType">
             此开关用于进行无埋点的 A/B/n 测试， 适用于客户端已经对用户进行了预分流而无需使用敏捷开关进行用户分流的使用场景.
           </ng-container>
