@@ -43,7 +43,7 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
     {
         public int EnvId { get; set; }
         public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateTime? EndTime { get; set; }
         public List<DataItem> Items { get; set; }
 
         public SearchDescriptor<IntAnalytics> SearchAggregationDescriptor()
@@ -59,10 +59,21 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
 
         QueryContainer CombinedQuery(QueryContainerDescriptor<IntAnalytics> query)
         {
-            var timeDescriptor = query.DateRange(descriptor => descriptor
-                .Field(item => item.CreateAt)
-                .GreaterThanOrEquals(StartTime)
-                .LessThanOrEquals(EndTime));
+            IDateRangeQuery TimeDescriptor(DateRangeQueryDescriptor<IntAnalytics> descriptor)
+            {
+                var timeDescriptor = descriptor
+                    .Field(item => item.CreateAt)
+                    .GreaterThanOrEquals(StartTime);
+                
+                if (EndTime.HasValue)
+                {
+                    timeDescriptor = timeDescriptor.LessThanOrEquals(EndTime.Value);
+                }
+                
+                return timeDescriptor;
+            }
+
+            var timeDescriptor = query.DateRange(TimeDescriptor);
 
             var envIdDescriptor = query.Term(item => item.EnvId, EnvId);
 
