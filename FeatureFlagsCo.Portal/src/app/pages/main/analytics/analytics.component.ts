@@ -113,6 +113,11 @@ export class AnalyticsComponent implements OnInit {
   public toggleEditingCard(card: IDataCard) {
     if(card.isEditing) {
 
+      if(!card.name) {
+        this.message.error("必须填写报表名字!");
+        return;
+      }
+
       // 表报必须填写开始日期
       const isStartTime = card.startTime;
 
