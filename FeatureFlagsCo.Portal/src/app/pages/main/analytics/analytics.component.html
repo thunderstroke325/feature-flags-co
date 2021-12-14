@@ -62,7 +62,7 @@
                   <div nz-col [nzSpan]="8" *ngFor="let item of data.items">
                     <nz-list-item>
                       <nz-card>
-                        <div style="text-align:right;margin-top:-8px;margin-right:-7px" *ngIf="data.isEditing">
+                        <div style="text-align:right; margin-top:-8px; margin-right:-7px" *ngIf="data.isEditing">
                           <a nz-popconfirm 
                               nzPopconfirmTitle="确定删除吗?" 
                               nzPopconfirmPlacement="bottom"
@@ -100,13 +100,15 @@
                             <nz-spin nzSimple [nzSize]="'small'"></nz-spin>
                           </ng-template>
                         </ng-container>
-                        <div *ngIf="data.isEditing" (click)="onSetDataSource(data, item)" class="operator-btn">点击设置数据源</div>
+                        <div *ngIf="data.isEditing" class="operator-btn" 
+                              [class.setup-datasource]="item.isSetupDataSource" 
+                              (click)="onSetDataSource(data, item)">点击设置数据源</div>
                       </ng-template>
                     </nz-list-item>
                   </div>
                   <div nz-col [nzSpan]="8" *ngIf="data.isEditing && data.itemsCount !== 6">
                     <nz-list-item>
-                      <nz-card>
+                      <nz-card [nzBodyStyle]="{'padding': '31px 0px'}">
                         <nz-statistic  [nzValueTemplate]="addItemTpl"></nz-statistic>
                       </nz-card>
                       <ng-template #addItemTpl>
@@ -135,7 +137,7 @@
                   nz-popconfirm
                   [nzPopconfirmTitle]="'没有填写名称和选择数据源的选项将被去除，确认保存吗？'"
                   [nzPopconfirmTrigger]="null"
-                  [(nzPopconfirmVisible)]="isSureSave"
+                  [(nzPopconfirmVisible)]="data.isTooltip"
                   (nzOnConfirm)="onSureToSave()"
                   (click)="toggleEditingCard(data)">
                 <i nz-icon [nzType]="data.isEditing ? 'save' : 'edit'" nzTheme="outline"></i>

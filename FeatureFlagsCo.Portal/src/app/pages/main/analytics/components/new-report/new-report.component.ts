@@ -24,6 +24,11 @@ export class NewReportComponent {
     }, 0)
   }
 
+  // 相等判定规则
+  onCompareWith = (o1: dataSource, o2: dataSource) => {
+    return o1 && o2 && o1.id === o2.id;
+  }
+
   public countMode = countMode;                              // 计数方式
   public dataSource: dataSource;                             // 数据源
   public unit: string = "";                                  // 单位

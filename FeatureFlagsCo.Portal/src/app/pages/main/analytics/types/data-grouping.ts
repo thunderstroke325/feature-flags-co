@@ -1,5 +1,4 @@
 import { DataCard, IDataItem } from "./analytics";
-import * as moment from 'moment';
 
 /**
  * 数据分组

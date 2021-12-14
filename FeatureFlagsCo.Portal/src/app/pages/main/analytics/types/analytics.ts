@@ -14,7 +14,8 @@ export interface IDataCard {
     items: IDataItem[],
     itemsCount: number,
     isLoading?: boolean, // only for UI
-    isEditing?: boolean
+    isEditing?: boolean,
+    isTooltip?: boolean;
 }
 
 export interface IDataItem {
@@ -26,6 +27,7 @@ export interface IDataItem {
     color: string,
     calculationType: CalculationType,
     isLoading?: boolean;
+    isSetupDataSource?: boolean;
 }
 
 export class DataCard {
@@ -36,6 +38,7 @@ export class DataCard {
     items: IDataItem[];
     isLoading?: boolean; // only for UI
     isEditing?: boolean;
+    isTooltip?: boolean;
     itemsCount: number;
 
     constructor(data?: IDataCard) {
@@ -46,6 +49,7 @@ export class DataCard {
             this.endTime = !!data.startTime ? new Date(data.endTime) : null;
             this.isLoading = data.isLoading;
             this.isEditing = data.isEditing;
+            this.isTooltip = data.isTooltip;
             this.items = [...data.items];
             this.itemsCount = data.itemsCount;
         } else {
@@ -94,10 +98,10 @@ export class DataCard {
                 item.dataSource = data.dataSource;
                 item.unit = data.unit;
                 item.color = data.color;
-                item.calculationType = data.calculationType
+                item.calculationType = data.calculationType,
+                item.isSetupDataSource = data.isSetupDataSource
             }
         })
-        console.log(this.items)
     }
 }
 

@@ -36,7 +36,6 @@ export class AnalyticsComponent implements OnInit {
 
   public reportsForCurrDataSource: any[] = [];              // 当前将要被删除的数据源，被使用的报表列表
   public willSaveCard: IDataCard;                           // 将要保存的报表
-  public isSureSave: boolean = false;                       // 如果有没有 name 值的 item，提示是否确认保存
 
   @ViewChild("addDataSourceTem", {static: false}) addDataSoureTem: TemplateRef<any>;
   @ViewChild("dataSources", {static: false}) dataSourceCom: DataSourcesComponent;
@@ -69,9 +68,14 @@ export class AnalyticsComponent implements OnInit {
         this.envID = result.envId;
         this.dataSourceList = result.dataSourceDefs;
 
+        console.log(result)
+
         let groups = result.dataGroups;
         groups.forEach((group: DataCard) => {
-          group.items.length && group.items.map((item: IDataItem) => item.isLoading = true);
+          group.items.length && group.items.map((item: IDataItem) => {
+            item.isLoading = true;
+            item.isSetupDataSource = true;
+          });
           this.listData[this.listData.length] = new DataCard({...group, isLoading: false, isEditing: false, itemsCount: group.items.length});
         })
 
@@ -109,12 +113,20 @@ export class AnalyticsComponent implements OnInit {
   public toggleEditingCard(card: IDataCard) {
     if(card.isEditing) {
 
+      // 表报必须填写开始日期
+      const isStartTime = card.startTime;
+
+      if(!isStartTime) {
+        this.message.error("必须填写开始日期!");
+        return;
+      }
+
       // 筛选是否有没有 name 值和 DataSource 的 选项
       const result = card.items.filter(item => !item.name || !item.dataSource);
       
       if(result.length) {
         this.willSaveCard = card;
-        this.isSureSave = true;
+        card.isTooltip = true;
       } else {
         this.setSaveReportParam(card);
       }
@@ -145,11 +157,14 @@ export class AnalyticsComponent implements OnInit {
 
   // 保存报表
   private onSaveReportData(param: updataReportParam, card: IDataCard) {
+    card.isLoading = true;
     this.analyticServe.saveReport(param)
       .subscribe(() => {
         this.message.success("报表更新成功!");
         card.isEditing = false;
         card.itemsCount = card.items.length;
+        card.isTooltip = false;
+        card.isLoading = false;
 
         const param: sameTimeGroup = {
           envId: this.envID,
@@ -180,7 +195,8 @@ export class AnalyticsComponent implements OnInit {
         dataSource: null,
         unit: null,
         color: null,
-        calculationType: CalculationType.Count
+        calculationType: CalculationType.Count,
+        isSetupDataSource: false
     }]
 
     data.itemsCount = data.itemsCount + 1;
@@ -210,6 +226,8 @@ export class AnalyticsComponent implements OnInit {
     this.currentDataItem = {...item};
     this.currentDataCard = card;
     this.dataSourceModalVisible = true;
+
+    console.log(this.currentDataItem)
   }
 
   // 切换数据源界面
@@ -248,7 +266,7 @@ export class AnalyticsComponent implements OnInit {
 
   // 设置数据源
   public onApplyDataSource () {
-    this.currentDataItem = {...this.currentDataItem, ...this.newReportCom.setParam()};
+    this.currentDataItem = {...this.currentDataItem, ...this.newReportCom.setParam(), isSetupDataSource: true};
     this.currentDataCard.updateItem(this.currentDataItem);
     this.dataSourceModalVisible = false;
   }

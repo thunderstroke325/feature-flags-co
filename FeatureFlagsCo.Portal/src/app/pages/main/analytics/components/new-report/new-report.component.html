@@ -2,7 +2,7 @@
     <nz-form-item>
         <nz-form-label [nzSpan]="6" nzFor="data-source">数据源</nz-form-label>
         <nz-form-control [nzSpan]="10">
-            <nz-select [(ngModel)]="dataSource" (ngModelChange)="onSelectDataSource()" name="data-source" id="data-source" nzPlaceHolder="选择数据源...">
+            <nz-select [(ngModel)]="dataSource" [compareWith]="onCompareWith" (ngModelChange)="onSelectDataSource()" name="data-source" id="data-source" nzPlaceHolder="选择数据源...">
                 <nz-option *ngFor="let dataSource of dataSourceList" [nzValue]="dataSource" [nzLabel]="dataSource.name" [nzDisabled]="noSelectableDataSourceIDS.includes(dataSource.id)"></nz-option>
             </nz-select>
         </nz-form-control>
