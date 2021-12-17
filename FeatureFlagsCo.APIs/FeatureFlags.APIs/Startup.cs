@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using FeatureFlags.APIs.Authentication;
+using FeatureFlags.APIs.Authentication.Scheme;
 using FeatureFlags.APIs.Middlewares;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
@@ -88,6 +89,9 @@ namespace FeatureFlags.APIs
                 options.Password.RequiredLength = 5;
                 options.Password.RequiredUniqueChars = 1;
             });
+            
+            // public api authentication
+            services.AddPublicApiAuthentication();
             #endregion
 
             services.AddSwaggerGen(c =>
