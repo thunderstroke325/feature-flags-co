@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Http;
 
 namespace FeatureFlags.Common.ExtensionMethods
@@ -27,6 +28,19 @@ namespace FeatureFlags.Common.ExtensionMethods
             var value = values.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
             
             return value;
+        }
+        
+        public static string AbsolutePath(this HttpRequest request)
+        {
+            var uriBuilder = new UriBuilder
+            {
+                Scheme = request.Scheme,
+                Host = request.Host.Host,
+                Path = request.Path.ToString(),
+                Query = request.QueryString.ToString()
+            };
+
+            return uriBuilder.Uri.AbsolutePath;
         }
     }
 }

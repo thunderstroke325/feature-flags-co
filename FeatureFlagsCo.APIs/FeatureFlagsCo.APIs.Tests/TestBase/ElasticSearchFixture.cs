@@ -12,7 +12,7 @@ namespace FeatureFlags.APIs.Tests.TestBase
         public ElasticSearchFixture()
         {
             ElasticSearch = new ElasticSearchService(
-                new ElasticClient(new Uri("http://elastic:abc123456@localhost:9200")),
+                new ElasticClient(new Uri(TestConfigs.ElasticSearchUrl)),
                 new NullLogger<ElasticSearchService>()
             );
         }

@@ -41,7 +41,7 @@ namespace FeatureFlags.APIs.Authentication.Scheme
             // construct ticket
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, "public-api-user-id")
+                new Claim(PublicApiClaims.EnvId, envId.ToString())
             };
             var identity = new ClaimsIdentity(claims, PublicApiAuthenticationConstants.AuthenticationType);
             var principal = new ClaimsPrincipal(identity);

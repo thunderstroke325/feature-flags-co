@@ -4,6 +4,7 @@ using FeatureFlags.APIs.Tests.TestBase;
 using FeatureFlagsCo.MQ.ElasticSearch;
 using FeatureFlagsCo.MQ.ElasticSearch.DataModels;
 using Nest;
+using static Nest.Infer;
 using Shouldly;
 using Xunit;
 
@@ -20,14 +21,7 @@ namespace FeatureFlags.APIs.Tests
         [Fact]
         public async Task Should_Index_A_Document()
         {
-            var doc = new IntAnalytics
-            {
-                CreateAt = DateTime.UtcNow.AddSeconds(6.8),
-                EnvId = 122,
-                Key = "vip",
-                Value = new Random().Next(5)
-            };
-
+            var doc = new IntAnalytics(146, "order", 3, new []{ "location@guangzhou", "hotel@lavande" });
             var success = await _service.IndexDocumentAsync(doc, ElasticSearchIndices.Analytics);
             success.ShouldBeTrue();
         }
@@ -35,40 +29,46 @@ namespace FeatureFlags.APIs.Tests
         [Fact]
         public async Task Should_Count_Document()
         {
-            var start = DateMath.Anchored(Convert.ToDateTime("2021-12-10 00:00:00"));
-            var end = DateMath.Anchored(Convert.ToDateTime("2021-12-11 23:59:59"));
+            var valueQuery = new TermQuery
+            {
+                Field = Field<IntAnalytics>(analytics => analytics.Key),
+                Value = "order"
+            };
 
-            var valueQuery = new QueryContainerDescriptor<IntAnalytics>()
-                .Term(analytics => analytics.Value, 5);
+            var dateRangeQuery = new DateRangeQuery
+            {
+                Field = Field<IntAnalytics>(analytics => analytics.CreateAt),
+                GreaterThanOrEqualTo = Time("2021-12-17 00:00:00"),
+                LessThanOrEqualTo = Time("2021-12-17 23:59:59")
+            };
 
-            var dateRangeQuery = new QueryContainerDescriptor<IntAnalytics>()
-                .DateRange(descriptor => descriptor
-                    .Field(item => item.CreateAt)
-                    .GreaterThanOrEquals(start).LessThanOrEquals(end));
-
+            var termsSetQuery = new TermsSetQuery
+            {
+                Field = Field<IntAnalytics>(analytics => analytics.Dimensions),
+                Terms = new []{ "hotel@Atour" },
+                MinimumShouldMatchScript = new InlineScript("params.num_terms")
+            };
+            
             var countDescriptor = new CountDescriptor<IntAnalytics>()
                 .Query(queryDescriptor => queryDescriptor.Bool(
-                    boolDescriptor => boolDescriptor.Must(valueQuery, dateRangeQuery)))
+                    boolDescriptor => boolDescriptor.Must(valueQuery, dateRangeQuery, termsSetQuery)))
                 .Index(ElasticSearchIndices.Analytics);
             
             var count = await _service.CountDocumentsAsync(countDescriptor);
             
-            count.ShouldBe(1);
+            count.ShouldBe(2);
         }
 
         [Fact]
         public async Task Should_Search_A_Document()
         {
-            var start = DateMath.Anchored(Convert.ToDateTime("2021-12-10 00:00:00"));
-            var end = DateMath.Anchored(Convert.ToDateTime("2021-12-11 23:59:59"));
-
             QueryContainer QueryDescriptor(QueryContainerDescriptor<IntAnalytics> query) =>
                 query.Bool(descriptor => descriptor.Must(
-                        valueDescriptor => valueDescriptor.Term(analytics => analytics.Key, "vip"),
+                        valueDescriptor => valueDescriptor.Term(analytics => analytics.Key, "order"),
                         timeDescriptor => timeDescriptor.DateRange(analytics => analytics
                             .Field(item => item.CreateAt)
-                            .GreaterThanOrEquals(start)
-                            .LessThanOrEquals(end)
+                            .GreaterThanOrEquals(Time("2021/12/17 00:00:00"))
+                            .LessThanOrEquals(Time("2021/12/17 23:59:59"))
                         )
                     )
                 );
@@ -79,7 +79,12 @@ namespace FeatureFlags.APIs.Tests
 
             var response = await _service.SearchDocumentAsync(searchDescriptor);
             response.IsValid.ShouldBeTrue();
-            response.Hits.Count.ShouldBe(6);
+            response.Hits.Count.ShouldBe(5);
+        }
+        
+        private static DateMathExpression Time(string time)
+        {
+            return DateMath.Anchored(Convert.ToDateTime(time));
         }
     }
 }
