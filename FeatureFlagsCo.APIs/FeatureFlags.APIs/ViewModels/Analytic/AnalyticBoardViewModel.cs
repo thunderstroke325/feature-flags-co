@@ -39,6 +39,19 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
         public List<DataItem> Items { get; set; }
     }
 
+    public class DataDimensionViewModel
+    {
+        public string AnalyticBoardId { get; set; }
+
+        public int EnvId { get; set; }
+
+        public string Id { get; set; }
+
+        public string Key { get; set; }
+
+        public string Value { get; set; }
+    }
+
     public class CalculationParam
     {
         public int EnvId { get; set; }

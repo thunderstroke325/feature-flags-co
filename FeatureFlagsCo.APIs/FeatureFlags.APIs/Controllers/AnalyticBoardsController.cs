@@ -48,6 +48,7 @@ namespace FeatureFlags.APIs.Controllers
                         EnvId = envId,
                         DataSourceDefs = new List<DataSourceDef>(),
                         DataGroups = new List<DataGroup>(),
+                        DataDimensions = new List<DataDimension>(),
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     };
@@ -122,7 +123,7 @@ namespace FeatureFlags.APIs.Controllers
             board.UpsertDataSource(param.Id, param.Name, param.KeyName, param.DataType);
             
             var updatedBoard = await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
-            return updatedBoard;
+            return updatedBoard.DataSourceDefs.FirstOrDefault(x => x.Id == param.Id);
         }
 
         [HttpDelete("data-source")]
@@ -157,8 +158,8 @@ namespace FeatureFlags.APIs.Controllers
 
             board.UpsertDataGroup(param.Id, param.Name, param.StartTime, param.EndTime, param.Items);
                 
-            var result = await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
-            return result.DataGroups.FirstOrDefault(x => x.Id == param.Id);
+            var updatedBoard = await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
+            return updatedBoard.DataGroups.FirstOrDefault(x => x.Id == param.Id);
         }
 
         [HttpDelete]
@@ -173,6 +174,41 @@ namespace FeatureFlags.APIs.Controllers
 
             await _mongoDbAnalyticBoardService.RemoveDataGroupAsync(boardId, groupId);
 
+            return StatusCode(StatusCodes.Status204NoContent);
+        }
+        
+        [HttpPost("data-dimension")]
+        public async Task<dynamic> UpsertDataDimension(DataDimensionViewModel param)
+        {
+            var currentUserId = User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (!await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, param.EnvId))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+            }
+            
+            var board = await _mongoDbAnalyticBoardService.GetAsync(param.AnalyticBoardId);
+            if (board == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, new Response { Code = "Error", Message = "The board does not exist." });
+            }
+            
+            board.UpsertDataDimension(param.Id, param.Key, param.Value);
+            
+            var updatedBoard = await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
+            return updatedBoard.DataDimensions.FirstOrDefault(x => x.Id == param.Id);
+        }
+
+        [HttpDelete("data-dimension")]
+        public async Task<dynamic> DeleteDataDimension(int envId, string boardId, string dimensionId)
+        {
+            var currentUserId = User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
+            if (!await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new Response { Code = "Error", Message = "Forbidden" });
+            }
+            
+            await _mongoDbAnalyticBoardService.RemoveDataDimensionAsync(boardId, dimensionId);
+            
             return StatusCode(StatusCodes.Status204NoContent);
         }
     }

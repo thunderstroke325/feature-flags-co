@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using FeatureFlagsCo.MQ.ElasticSearch.DataModels;
 
-namespace FeatureFlagsCo.MQ.ElasticSearch.DataModels
+namespace FeatureFlags.APIs.ViewModels.Analytic
 {
     public class CreateIntAnalyticsRequest
     {

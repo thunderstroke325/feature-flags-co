@@ -12,6 +12,7 @@ namespace FeatureFlags.APIs.Models
         public int EnvId { get; set; }
         public List<DataSourceDef> DataSourceDefs { get; set; }
         public List<DataGroup> DataGroups { get; set; }
+        public List<DataDimension> DataDimensions { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime CreatedAt { get; set; }
 
@@ -57,6 +58,20 @@ namespace FeatureFlags.APIs.Models
             }
         }
 
+        public void UpsertDataDimension(string dimensionId, string key, string value)
+        {
+            var oldDataDimension = DataDimensions.FirstOrDefault(x => x.Id == dimensionId);
+            if (oldDataDimension != null)
+            {
+                oldDataDimension.Update(key, value);
+            }
+            else
+            {
+                var newDataDimension = new DataDimension(dimensionId, key, value);
+                DataDimensions.Add(newDataDimension);
+            }
+        }
+
         public void RemoveDataGroup(string groupId)
         {
             DataGroups.RemoveAll(x => x.Id == groupId);
@@ -65,6 +80,11 @@ namespace FeatureFlags.APIs.Models
         public void RemoveDataSource(string sourceId)
         {
             DataSourceDefs.RemoveAll(x => x.Id == sourceId);
+        }
+
+        public void RemoveDataDimension(string dimensionId)
+        {
+            DataDimensions.RemoveAll(x => x.Id == dimensionId);
         }
     }
 
@@ -169,8 +189,8 @@ namespace FeatureFlags.APIs.Models
         public string Name { get; set; }
         public string KeyName { get; set; }
         public string DataType { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public DateTime? CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         protected DataSourceDef()
         {
@@ -208,6 +228,48 @@ namespace FeatureFlags.APIs.Models
             
             DataType = dataType;
             UpdatedAt = DateTime.UtcNow;
+        }
+    }
+
+    public class DataDimension
+    {
+        public string Id { get; set; }
+
+        public string Key { get; set; }
+
+        public string Value { get; set; }
+
+        public DateTime CreateAt { get; set; }
+
+        public DateTime UpdateAt { get; set; }
+
+        public DataDimension(string id, string key, string value)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new ArgumentException("data dimension id cannot be null or whitespace.");
+            }
+            Id = id;
+            CreateAt = DateTime.UtcNow;
+            
+            Update(key, value);
+        }
+
+        public void Update(string key, string value)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentException("data dimension key cannot be null or whitespace.");
+            }
+            Key = key;
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("data dimension value cannot be null or whitespace.");
+            }
+            Value = value;
+            
+            UpdateAt = DateTime.UtcNow;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using FeatureFlags.APIs.ViewModels.Analytic;
 using FeatureFlagsCo.MQ.ElasticSearch;
 using FeatureFlagsCo.MQ.ElasticSearch.DataModels;
 using Microsoft.AspNetCore.Mvc;
