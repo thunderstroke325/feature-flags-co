@@ -1,6 +1,6 @@
 # feature-flags-co
 
-feature-flags-co is an open source, fully featured product iteration accelerating service. Use our SaaS platform, deploy to your own private cloud, or run on-premise.
+Feature flags-driven product analysis platform that makes iterating on products as fast as Commit code.
 
 
 Official Website: [https://www.feature-flags.co](https://www.feature-flags.co)
