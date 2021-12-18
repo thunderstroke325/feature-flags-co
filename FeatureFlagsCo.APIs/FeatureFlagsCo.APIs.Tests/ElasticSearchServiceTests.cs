@@ -21,7 +21,7 @@ namespace FeatureFlags.APIs.Tests
         [Fact]
         public async Task Should_Index_A_Document()
         {
-            var doc = new IntAnalytics(146, "order", 3, new []{ "location@guangzhou", "hotel@lavande" });
+            var doc = new Analytics(146, "order", 3, new []{ "location@guangzhou", "hotel@lavande" });
             var success = await _service.IndexDocumentAsync(doc, ElasticSearchIndices.Analytics);
             success.ShouldBeTrue();
         }
@@ -31,25 +31,25 @@ namespace FeatureFlags.APIs.Tests
         {
             var valueQuery = new TermQuery
             {
-                Field = Field<IntAnalytics>(analytics => analytics.Key),
+                Field = Field<Analytics>(analytics => analytics.Key),
                 Value = "order"
             };
 
             var dateRangeQuery = new DateRangeQuery
             {
-                Field = Field<IntAnalytics>(analytics => analytics.CreateAt),
+                Field = Field<Analytics>(analytics => analytics.CreateAt),
                 GreaterThanOrEqualTo = Time("2021-12-17 00:00:00"),
                 LessThanOrEqualTo = Time("2021-12-17 23:59:59")
             };
 
             var termsSetQuery = new TermsSetQuery
             {
-                Field = Field<IntAnalytics>(analytics => analytics.Dimensions),
+                Field = Field<Analytics>(analytics => analytics.Dimensions),
                 Terms = new []{ "hotel@Atour" },
                 MinimumShouldMatchScript = new InlineScript("params.num_terms")
             };
             
-            var countDescriptor = new CountDescriptor<IntAnalytics>()
+            var countDescriptor = new CountDescriptor<Analytics>()
                 .Query(queryDescriptor => queryDescriptor.Bool(
                     boolDescriptor => boolDescriptor.Must(valueQuery, dateRangeQuery, termsSetQuery)))
                 .Index(ElasticSearchIndices.Analytics);
@@ -62,7 +62,7 @@ namespace FeatureFlags.APIs.Tests
         [Fact]
         public async Task Should_Search_A_Document()
         {
-            QueryContainer QueryDescriptor(QueryContainerDescriptor<IntAnalytics> query) =>
+            QueryContainer QueryDescriptor(QueryContainerDescriptor<Analytics> query) =>
                 query.Bool(descriptor => descriptor.Must(
                         valueDescriptor => valueDescriptor.Term(analytics => analytics.Key, "order"),
                         timeDescriptor => timeDescriptor.DateRange(analytics => analytics
@@ -73,7 +73,7 @@ namespace FeatureFlags.APIs.Tests
                     )
                 );
 
-            var searchDescriptor = new SearchDescriptor<IntAnalytics>()
+            var searchDescriptor = new SearchDescriptor<Analytics>()
                 .Query(QueryDescriptor)
                 .Index(ElasticSearchIndices.Analytics);
 

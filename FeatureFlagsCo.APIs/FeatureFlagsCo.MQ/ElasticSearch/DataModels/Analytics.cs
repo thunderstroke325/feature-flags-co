@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FeatureFlagsCo.MQ.ElasticSearch.DataModels
 {
-    public class IntAnalytics
+    public class Analytics
     {
         public DateTime CreateAt { get; }
 
@@ -11,14 +11,14 @@ namespace FeatureFlagsCo.MQ.ElasticSearch.DataModels
         
         public string Key { get; }
 
-        public int Value { get; }
+        public float Value { get; }
 
         public IEnumerable<string> Dimensions { get; }
 
-        public IntAnalytics(
+        public Analytics(
             int envId, 
             string key, 
-            int value, 
+            float value, 
             IEnumerable<string> dimensions = null)
         {
             if (string.IsNullOrWhiteSpace(key))

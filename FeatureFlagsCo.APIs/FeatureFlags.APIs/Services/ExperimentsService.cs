@@ -26,8 +26,6 @@ namespace FeatureFlags.APIs.Services
         Task<string> GetEnvironmentEvents(int envId, MetricTypeEnum metricType, string lastItem = "",
             string searchText = "", int pageSize = 20);
 
-        Task<List<ExperimentResultViewModel>> GetExperimentResult(ExperimentQueryViewModel param);
-
         Task<List<ExperimentViewModel>> GetExperimentsByFeatureFlagIds(IEnumerable<string> featureFlagIds, bool shouldIncludeIterations);
         Task<IEnumerable<ExperimentIteration>> GetIterationResults(int envId, List<ExperimentIterationTuple> experimentIterationTuples);
 
@@ -378,27 +376,6 @@ namespace FeatureFlags.APIs.Services
             }
 
             return null;
-        }
-
-        public async Task<List<ExperimentResultViewModel>> GetExperimentResult(ExperimentQueryViewModel param)
-        {
-            string experimentationHost = _mySettings.Value.ExperimentsServiceHost;
-
-            using (var client = new HttpClient())
-            {
-                HttpContent content = new StringContent(JsonConvert.SerializeObject(param));
-                content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-
-                //由HttpClient发出异步Post请求
-                HttpResponseMessage res = await client.PostAsync($"{experimentationHost}/api/nosdk", content);
-                if (res.StatusCode == System.Net.HttpStatusCode.OK)
-                {
-                    var result = await res.Content.ReadAsStringAsync();
-                    return JsonConvert.DeserializeObject<List<ExperimentResultViewModel>>(result);
-                }
-
-                return new List<ExperimentResultViewModel>();
-            }
         }
 
         public async Task<string> GetEnvironmentEvents(int envId, MetricTypeEnum metricType, string lastItem = "", string searchText = "", int pageSize = 20)

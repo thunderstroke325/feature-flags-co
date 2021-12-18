@@ -50,9 +50,9 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
         public DateTime? EndTime { get; set; }
         public List<DataItem> Items { get; set; }
 
-        public SearchDescriptor<IntAnalytics> SearchAggregationDescriptor()
+        public SearchDescriptor<Analytics> SearchAggregationDescriptor()
         {
-            var descriptor = new SearchDescriptor<IntAnalytics>()
+            var descriptor = new SearchDescriptor<Analytics>()
                 .Query(CombinedQuery)
                 .Aggregations(CombinedAggregations())
                 .Index(ElasticSearchIndices.Analytics)
@@ -61,9 +61,9 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
             return descriptor;
         }
 
-        QueryContainer CombinedQuery(QueryContainerDescriptor<IntAnalytics> query)
+        QueryContainer CombinedQuery(QueryContainerDescriptor<Analytics> query)
         {
-            IDateRangeQuery TimeDescriptor(DateRangeQueryDescriptor<IntAnalytics> descriptor)
+            IDateRangeQuery TimeDescriptor(DateRangeQueryDescriptor<Analytics> descriptor)
             {
                 var timeDescriptor = descriptor
                     .Field(item => item.CreateAt)
@@ -81,7 +81,7 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
 
             var envIdDescriptor = query.Term(item => item.EnvId, EnvId);
 
-            var combinedQuery = new QueryContainerDescriptor<IntAnalytics>()
+            var combinedQuery = new QueryContainerDescriptor<Analytics>()
                 .Bool(descriptor => descriptor.Must(timeDescriptor, envIdDescriptor));
 
             return combinedQuery;
@@ -100,7 +100,7 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
                 {
                     Filter = new TermQuery
                     {
-                        Field = Field<IntAnalytics>(analytics => analytics.Key),
+                        Field = Field<Analytics>(analytics => analytics.Key),
                         Value = key
                     },
                     Aggregations = new AggregationDictionary()

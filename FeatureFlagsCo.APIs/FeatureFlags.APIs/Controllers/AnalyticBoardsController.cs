@@ -48,7 +48,7 @@ namespace FeatureFlags.APIs.Controllers
                         EnvId = envId,
                         DataSourceDefs = new List<DataSourceDef>(),
                         DataGroups = new List<DataGroup>(),
-                        AnalyticDimensions = new List<AnalyticDimension>(),
+                        Dimensions = new List<AnalyticDimension>(),
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     };
@@ -164,7 +164,7 @@ namespace FeatureFlags.APIs.Controllers
             return StatusCode(StatusCodes.Status204NoContent);
         }
         
-        [HttpPost("analytic-dimension")]
+        [HttpPost("dimension")]
         public async Task<dynamic> UpsertAnalyticDimension(DataDimensionViewModel param)
         {
             var currentUserId = User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
@@ -182,10 +182,10 @@ namespace FeatureFlags.APIs.Controllers
             board.UpsertAnalyticDimension(param.Id, param.Key, param.Value);
             
             var updatedBoard = await _mongoDbAnalyticBoardService.UpdateAsync(board.Id, board);
-            return updatedBoard.AnalyticDimensions.FirstOrDefault(x => x.Id == param.Id);
+            return updatedBoard.Dimensions.FirstOrDefault(x => x.Id == param.Id);
         }
 
-        [HttpDelete("analytic-dimension")]
+        [HttpDelete("dimension")]
         public async Task<dynamic> DeleteAnalyticDimension(int envId, string boardId, string dimensionId)
         {
             var currentUserId = User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;

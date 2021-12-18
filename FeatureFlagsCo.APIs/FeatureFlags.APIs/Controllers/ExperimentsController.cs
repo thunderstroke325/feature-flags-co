@@ -63,19 +63,6 @@ namespace FeatureFlags.APIs.Controllers
             return new List<string>();
         }
 
-        [HttpPost]
-        [Route("launchQuery/{envId}")]
-        public async Task<List<ExperimentResultViewModel>> GetExperimentsResult(int envId, [FromBody]ExperimentQueryViewModel param)
-        {
-            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
-            if (await _envService.CheckIfUserHasRightToReadEnvAsync(currentUserId, envId))
-            {
-                return await _experimentsService.GetExperimentResult(param);
-            }
-
-            return new List<ExperimentResultViewModel>();
-        }
-
         [HttpGet]
         [Route("")]
         public async Task<dynamic> GetExperiments([FromQuery] int envId, [FromQuery] string searchText, [FromQuery] string featureFlagId = "", [FromQuery] int page = 0)

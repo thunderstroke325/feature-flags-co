@@ -12,7 +12,7 @@ namespace FeatureFlags.APIs.Models
         public int EnvId { get; set; }
         public List<DataSourceDef> DataSourceDefs { get; set; }
         public List<DataGroup> DataGroups { get; set; }
-        public List<AnalyticDimension> AnalyticDimensions { get; set; }
+        public List<AnalyticDimension> Dimensions { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime CreatedAt { get; set; }
 
@@ -60,7 +60,7 @@ namespace FeatureFlags.APIs.Models
 
         public void UpsertAnalyticDimension(string dimensionId, string key, string value)
         {
-            var oldDataDimension = AnalyticDimensions.FirstOrDefault(x => x.Id == dimensionId);
+            var oldDataDimension = Dimensions.FirstOrDefault(x => x.Id == dimensionId);
             if (oldDataDimension != null)
             {
                 oldDataDimension.Update(key, value);
@@ -68,7 +68,7 @@ namespace FeatureFlags.APIs.Models
             else
             {
                 var newDataDimension = new AnalyticDimension(dimensionId, key, value);
-                AnalyticDimensions.Add(newDataDimension);
+                Dimensions.Add(newDataDimension);
             }
         }
 
@@ -84,7 +84,7 @@ namespace FeatureFlags.APIs.Models
 
         public void RemoveDataDimension(string dimensionId)
         {
-            AnalyticDimensions.RemoveAll(x => x.Id == dimensionId);
+            Dimensions.RemoveAll(x => x.Id == dimensionId);
         }
     }
 
@@ -160,13 +160,13 @@ namespace FeatureFlags.APIs.Models
             AggregationContainer aggregation = CalculationType switch
             {
                 CalculationType.Count => new ValueCountAggregation(
-                    AggregationName, Field<IntAnalytics>(analytics => analytics.Key)),
+                    AggregationName, Field<Analytics>(analytics => analytics.Key)),
 
                 CalculationType.Sum => new SumAggregation(
-                    AggregationName, Field<IntAnalytics>(analytics => analytics.Value)),
+                    AggregationName, Field<Analytics>(analytics => analytics.Value)),
 
                 CalculationType.Average => new AverageAggregation(
-                    AggregationName, Field<IntAnalytics>(analytics => analytics.Value)),
+                    AggregationName, Field<Analytics>(analytics => analytics.Value)),
 
                 _ => throw new ArgumentOutOfRangeException()
             };

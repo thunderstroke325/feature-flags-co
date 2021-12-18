@@ -16,18 +16,18 @@ namespace FeatureFlags.APIs.Controllers.Public
         }
 
         [HttpPost]
-        [Route("analytic-board/int-analytics")]
-        public async Task<IntAnalytics> SaveIntAnalytics(CreateIntAnalyticsRequest input)
+        [Route("analytics")]
+        public async Task<Analytics> SaveAnalytics(CreateAnalyticsRequest input)
         {
-            var intAnalytics = input.IntAnalytics(EnvId);
+            var analytics = input.Analytics(EnvId);
 
-            var success = await _esService.IndexDocumentAsync(intAnalytics, ElasticSearchIndices.Analytics);
+            var success = await _esService.IndexDocumentAsync(analytics, ElasticSearchIndices.Analytics);
             if (!success)
             {
                 throw new ElasticSearchException("Failed to index int analytics, please check your elastic search log.");
             }
 
-            return intAnalytics;
+            return analytics;
         }
     }
 }
