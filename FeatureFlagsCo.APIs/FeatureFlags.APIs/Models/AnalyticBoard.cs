@@ -42,7 +42,7 @@ namespace FeatureFlags.APIs.Models
         public void UpsertDataGroup(
             string dataGroupId,
             string name,
-            DateTime? startTime,
+            DateTime startTime,
             DateTime? endTime,
             List<DataItem> items)
         {
@@ -92,7 +92,7 @@ namespace FeatureFlags.APIs.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public DateTime? StartTime { get; set; }
+        public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public List<DataItem> Items { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -101,7 +101,7 @@ namespace FeatureFlags.APIs.Models
         public DataGroup(
             string id,
             string name, 
-            DateTime? startTime, 
+            DateTime startTime, 
             DateTime? endTime, 
             List<DataItem> items)
         {
@@ -117,7 +117,7 @@ namespace FeatureFlags.APIs.Models
 
         public void Update(
             string name, 
-            DateTime? startTime, 
+            DateTime startTime, 
             DateTime? endTime, 
             List<DataItem> items)
         {

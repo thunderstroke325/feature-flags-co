@@ -25,7 +25,7 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
         public int EnvId { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
-        public DateTime? StartTime { get; set; }
+        public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public List<DataItem> Items { get; set; }
     }

@@ -23,7 +23,7 @@ namespace FeatureFlagsCo.MQ.ElasticSearch.DataModels
         {
             if (string.IsNullOrWhiteSpace(key))
             {
-                throw new ArgumentException("int analytics key cannot be null or empty");
+                throw new ArgumentException("analytics key cannot be null or empty");
             }
             Key = key;
             
