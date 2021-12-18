@@ -9,14 +9,6 @@ using static Nest.Infer;
 
 namespace FeatureFlags.APIs.ViewModels.Analytic
 {
-    public class AnalyticBoardViewModel
-    {
-        public string Id { get; set; }
-        public int EnvId { get; set; }
-        public List<DataSourceDef> DataSourceDefs { get; set; }
-        public List<DataGroupViewModel> DataGroups { get; set; }
-    }
-
     public class DataSourceDefViewModel 
     {
         public string AnalyticBoardId { get; set; }
@@ -24,7 +16,6 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
         public string Id { get; set; }
         public string Name { get; set; }
         public string KeyName { get; set; }
-        public CalculationType CalculationType { get; set; }
         public string DataType { get; set; }
     }
 

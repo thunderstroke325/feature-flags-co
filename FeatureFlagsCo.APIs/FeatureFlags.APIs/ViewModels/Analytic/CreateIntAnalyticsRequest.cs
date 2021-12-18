@@ -10,7 +10,7 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
 
         public int Value { get; set; }
 
-        public IEnumerable<AnalyticsDimension> Dimensions { get; set; }
+        public IEnumerable<DataDimension> Dimensions { get; set; }
 
         public IntAnalytics IntAnalytics(int envId)
         {

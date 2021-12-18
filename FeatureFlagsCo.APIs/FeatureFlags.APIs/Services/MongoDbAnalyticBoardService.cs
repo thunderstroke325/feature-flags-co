@@ -39,7 +39,7 @@ namespace FeatureFlags.APIs.Services
             }
         }
 
-        public async Task RemoveDataDimensionAsync(string boardId, string dimensionId)
+        public async Task RemoveAnalyticDimensionAsync(string boardId, string dimensionId)
         {
             var board = await GetAsync(boardId);
             if (board != null)

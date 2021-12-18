@@ -1,6 +1,6 @@
 ﻿namespace FeatureFlagsCo.MQ.ElasticSearch.DataModels
 {
-    public class AnalyticsDimension
+    public class DataDimension
     {
         public string Key { get; set; }
 

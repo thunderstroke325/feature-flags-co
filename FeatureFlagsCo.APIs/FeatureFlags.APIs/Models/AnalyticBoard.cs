@@ -12,7 +12,7 @@ namespace FeatureFlags.APIs.Models
         public int EnvId { get; set; }
         public List<DataSourceDef> DataSourceDefs { get; set; }
         public List<DataGroup> DataGroups { get; set; }
-        public List<DataDimension> DataDimensions { get; set; }
+        public List<AnalyticDimension> AnalyticDimensions { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime CreatedAt { get; set; }
 
@@ -58,17 +58,17 @@ namespace FeatureFlags.APIs.Models
             }
         }
 
-        public void UpsertDataDimension(string dimensionId, string key, string value)
+        public void UpsertAnalyticDimension(string dimensionId, string key, string value)
         {
-            var oldDataDimension = DataDimensions.FirstOrDefault(x => x.Id == dimensionId);
+            var oldDataDimension = AnalyticDimensions.FirstOrDefault(x => x.Id == dimensionId);
             if (oldDataDimension != null)
             {
                 oldDataDimension.Update(key, value);
             }
             else
             {
-                var newDataDimension = new DataDimension(dimensionId, key, value);
-                DataDimensions.Add(newDataDimension);
+                var newDataDimension = new AnalyticDimension(dimensionId, key, value);
+                AnalyticDimensions.Add(newDataDimension);
             }
         }
 
@@ -84,7 +84,7 @@ namespace FeatureFlags.APIs.Models
 
         public void RemoveDataDimension(string dimensionId)
         {
-            DataDimensions.RemoveAll(x => x.Id == dimensionId);
+            AnalyticDimensions.RemoveAll(x => x.Id == dimensionId);
         }
     }
 
@@ -231,7 +231,7 @@ namespace FeatureFlags.APIs.Models
         }
     }
 
-    public class DataDimension
+    public class AnalyticDimension
     {
         public string Id { get; set; }
 
@@ -243,7 +243,7 @@ namespace FeatureFlags.APIs.Models
 
         public DateTime UpdateAt { get; set; }
 
-        public DataDimension(string id, string key, string value)
+        public AnalyticDimension(string id, string key, string value)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
