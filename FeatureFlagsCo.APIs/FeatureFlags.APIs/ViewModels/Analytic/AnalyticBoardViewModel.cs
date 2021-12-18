@@ -48,7 +48,8 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
         public int EnvId { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        public List<DataItem> Items { get; set; }
+        public List<DataItem> Items { get; set; } = new List<DataItem>();
+        public List<DataDimension> Dimensions { get; set; } = new List<DataDimension>();
 
         public SearchDescriptor<Analytics> SearchAggregationDescriptor()
         {
@@ -63,26 +64,36 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
 
         QueryContainer CombinedQuery(QueryContainerDescriptor<Analytics> query)
         {
-            IDateRangeQuery TimeDescriptor(DateRangeQueryDescriptor<Analytics> descriptor)
+            var dateRangeQuery = new DateRangeQuery
             {
-                var timeDescriptor = descriptor
-                    .Field(item => item.CreateAt)
-                    .GreaterThanOrEquals(StartTime);
-                
-                if (EndTime.HasValue)
-                {
-                    timeDescriptor = timeDescriptor.LessThanOrEquals(EndTime.Value);
-                }
-                
-                return timeDescriptor;
+                Field = Field<Analytics>(analytics => analytics.CreateAt),
+                GreaterThanOrEqualTo = StartTime
+            };
+            if (EndTime.HasValue)
+            {
+                dateRangeQuery.LessThanOrEqualTo = EndTime.Value;
             }
 
-            var timeDescriptor = query.DateRange(TimeDescriptor);
+            var envIdQuery = new TermQuery
+            {
+                Field = Field<Analytics>(analytics => analytics.EnvId),
+                Value = EnvId
+            };
 
-            var envIdDescriptor = query.Term(item => item.EnvId, EnvId);
+            var queries = new List<QueryContainer> { dateRangeQuery, envIdQuery };
+            if (Dimensions.Any())
+            {
+                var termsSetQuery = new TermsSetQuery
+                {
+                    Field = Field<Analytics>(analytics => analytics.Dimensions),
+                    Terms = Dimensions.Select(dimension => dimension.ToString()),
+                    MinimumShouldMatchScript = new InlineScript("params.num_terms")
+                };
 
-            var combinedQuery = new QueryContainerDescriptor<Analytics>()
-                .Bool(descriptor => descriptor.Must(timeDescriptor, envIdDescriptor));
+                queries.Add(termsSetQuery);
+            }
+
+            var combinedQuery = query.Bool(descriptor => descriptor.Must(queries.ToArray()));
 
             return combinedQuery;
         }

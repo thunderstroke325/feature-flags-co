@@ -5,6 +5,7 @@ using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Tests.TestBase;
 using FeatureFlags.APIs.ViewModels.Analytic;
 using FeatureFlagsCo.MQ.ElasticSearch;
+using FeatureFlagsCo.MQ.ElasticSearch.DataModels;
 using Shouldly;
 using Xunit;
 
@@ -36,9 +37,9 @@ namespace FeatureFlags.APIs.Tests
         {
             var param = new CalculationParam
             {
-                EnvId = 122,
-                StartTime = Convert.ToDateTime("2021-12-10 00:00:00"),
-                EndTime = Convert.ToDateTime("2021-12-11 23:59:59"),
+                EnvId = 146,
+                StartTime = Convert.ToDateTime("2021-12-17 00:00:00"),
+                EndTime = Convert.ToDateTime("2021-12-18 23:59:59"),
                 Items = new List<DataItem>
                 {
                     new DataItem
@@ -61,6 +62,19 @@ namespace FeatureFlags.APIs.Tests
                         DataSource = new DataSourceDef(Guid.NewGuid().ToString(), "VIP", "vip", "数值型"),
                         CalculationType = CalculationType.Sum
                     },
+                },
+                Dimensions = new List<DataDimension>
+                {
+                    new DataDimension
+                    {
+                        Key = "location",
+                        Value = "beijing"
+                    },
+                    new DataDimension
+                    {
+                        Key = "hotel",
+                        Value = "lavande"
+                    }
                 }
             };
 
@@ -73,13 +87,13 @@ namespace FeatureFlags.APIs.Tests
             // assert order aggregation
             var orderAgg = result.Aggregations.Children("order");
             orderAgg.ShouldNotBeNull();
-            orderAgg.Sum("order_sum").Value.ShouldBe(21.0);
+            orderAgg.Sum("order_sum").Value.ShouldBe(7.0);
             orderAgg.Average("order_average").Value.ShouldBe(3.5);
 
             // assert vip aggregation
             var vipAgg = result.Aggregations.Children("vip");
             vipAgg.ShouldNotBeNull();
-            vipAgg.Sum("vip_sum").Value.ShouldBe(18.0);
+            vipAgg.Sum("vip_sum").Value.ShouldBe(6.0);
             vipAgg.Average("vip_average").Value.ShouldBe(3.0);
         }
     }

@@ -21,7 +21,7 @@ namespace FeatureFlags.APIs.Tests
         [Fact]
         public async Task Should_Index_A_Document()
         {
-            var doc = new Analytics(146, "order", 3, new []{ "location@guangzhou", "hotel@lavande" });
+            var doc = new Analytics(146, "order", 3, new []{ "location@beijing", "hotel@lavande" });
             var success = await _service.IndexDocumentAsync(doc, ElasticSearchIndices.Analytics);
             success.ShouldBeTrue();
         }
