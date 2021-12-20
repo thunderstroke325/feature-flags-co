@@ -4,7 +4,7 @@ import { dataSource } from '../../types/analytics';
 @Component({
   selector: 'data-sources',
   templateUrl: './data-sources.component.html',
-  styleUrls: ['./data-sources.component.less']
+  styleUrls: [ "../../analytics.component.less" ]
 })
 export class DataSourcesComponent implements OnInit {
 

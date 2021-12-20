@@ -1,0 +1,55 @@
+<section class="modal-table">
+  <ng-container [ngSwitch]="options.mode">
+
+    <!-- show all analytic dimensions -->
+    <ng-container *ngSwitchCase="'show-list'">
+      <nz-table #table [nzData]="options.dimensions" nzSize="small" nzPageSize="5">
+        <thead>
+        <tr>
+          <th>维度名称</th>
+          <th>维度值</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let dimension of table.data">
+          <td>{{dimension.key}}</td>
+          <td>{{dimension.value}}</td>
+          <td>
+            <button nz-button nzType="primary" nzSize="small"
+                    (click)="updateDimension(dimension)">修改
+            </button>
+            <button nz-button nzType="primary" nzSize="small"
+                    nzDanger
+                    nz-popconfirm
+                    nzPopconfirmTitle="确认删除该分析维度吗?"
+                    nzPopconfirmPlacement="bottom"
+                    (nzOnConfirm)="deleteDimension(dimension)">删除
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </ng-container>
+
+    <!-- add or update analytic dimension form -->
+    <ng-container *ngSwitchCase="'upsert-form'">
+      <form nz-form>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6" nzFor="key">维度名称</nz-form-label>
+          <nz-form-control [nzSpan]="10">
+            <input [(ngModel)]="options.currentDimension.key" placeholder="ex: location" nz-input id="key" name="key">
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="6" nzFor="value">维度值</nz-form-label>
+          <nz-form-control [nzSpan]="10">
+            <input [(ngModel)]="options.currentDimension.value" placeholder="ex: shanghai" nz-input id="value"
+                   name="value">
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    </ng-container>
+
+  </ng-container>
+</section>

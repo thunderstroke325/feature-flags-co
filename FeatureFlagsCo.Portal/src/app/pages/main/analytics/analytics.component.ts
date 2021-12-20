@@ -4,10 +4,18 @@ import { AccountService } from 'src/app/services/account.service';
 import { AnalyticsService } from 'src/app/services/analytics.service';
 import { uuidv4 } from 'src/app/utils';
 import { NewReportComponent } from './components/new-report/new-report.component';
-import { CalculationType, DataCard, dataSource, IDataCard, IDataItem, updataReportParam } from './types/analytics';
-import * as moment from 'moment';
+import {
+  CalculationType,
+  DataCard,
+  dataSource,
+  IDataCard,
+  IDataItem,
+  updataReportParam,
+  Dimension,
+  DimensionModalOptions
+} from './types/analytics';
 import { DataSourcesComponent } from './components/data-sources/data-sources.component';
-import { dataGrouping, groupItem, sameTimeGroup } from './types/data-grouping';
+import { dataGrouping, sameTimeGroup } from './types/data-grouping';
 import { hasSameKeyName } from './types/same-keyname';
 
 @Component({
@@ -17,7 +25,6 @@ import { hasSameKeyName } from './types/same-keyname';
 })
 export class AnalyticsComponent implements OnInit {
 
-  //ranges = { 今天: [new Date(), new Date()], '本月': [new Date(), endOfMonth(new Date())] };
   listData: DataCard[] = [];
   isLoading = false;
   dataSourceModalVisible = false;
@@ -36,6 +43,9 @@ export class AnalyticsComponent implements OnInit {
 
   public reportsForCurrDataSource: any[] = [];              // 当前将要被删除的数据源，被使用的报表列表
   public willSaveCard: IDataCard;                           // 将要保存的报表
+
+  // analytic dimension modal options
+  public dimensionModalOptions = new DimensionModalOptions();
 
   @ViewChild("addDataSourceTem", {static: false}) addDataSoureTem: TemplateRef<any>;
   @ViewChild("dataSources", {static: false}) dataSourceCom: DataSourcesComponent;
@@ -60,6 +70,7 @@ export class AnalyticsComponent implements OnInit {
         id: string;
         envId: number;
         dataSourceDefs: dataSource[],
+        dimensions: Dimension[],
         dataGroups: DataCard[]
       }) => {
         this.listData = [];
@@ -67,8 +78,7 @@ export class AnalyticsComponent implements OnInit {
         this.analyticBoardId = result.id;
         this.envID = result.envId;
         this.dataSourceList = result.dataSourceDefs;
-
-        console.log(result)
+        this.dimensionModalOptions.dimensions = result.dimensions;
 
         let groups = result.dataGroups;
         groups.forEach((group: DataCard) => {
@@ -128,7 +138,7 @@ export class AnalyticsComponent implements OnInit {
 
       // 筛选是否有没有 name 值和 DataSource 的 选项
       const result = card.items.filter(item => !item.name || !item.dataSource);
-      
+
       if(result.length) {
         this.willSaveCard = card;
         card.isTooltip = true;
@@ -231,8 +241,6 @@ export class AnalyticsComponent implements OnInit {
     this.currentDataItem = {...item};
     this.currentDataCard = card;
     this.dataSourceModalVisible = true;
-
-    console.log(this.currentDataItem)
   }
 
   // 切换数据源界面
@@ -291,14 +299,49 @@ export class AnalyticsComponent implements OnInit {
     this.dataSourcesManageModalVisible = false;
   }
 
-  // 返回表格界面
-  public onReturnTable() {
-    this.dataSourceBoardType = 'table';
+  // 关闭/返回 分析维度弹窗
+  public onCloseDimensionModal() {
+    this.dimensionModalOptions.handleCancel();
+  }
+
+  // 新建/提交 分析维度弹窗
+  public onSaveDimensionModal() {
+    if (this.dimensionModalOptions.mode === 'show-list') {
+      // set current dimension
+      const initialDimension = {
+        id: uuidv4(),
+        key: "",
+        value: ""
+      };
+      this.dimensionModalOptions.handleOk(initialDimension);
+    } else {
+      let currentDimension = this.dimensionModalOptions.currentDimension;
+      const param = {
+        analyticBoardId: this.analyticBoardId,
+        envID: this.envID,
+        id: currentDimension.id,
+        key: currentDimension.key,
+        value: currentDimension.value
+      };
+
+      this.analyticServe.upsertDimension(param)
+        .subscribe(() => {
+          this.dimensionModalOptions.upsertDimension();
+        });
+    }
+  }
+
+  // 删除分析维度
+  public onDeleteDimension(dimension: Dimension) {
+    this.analyticServe.deleteDimension(this.envID, this.analyticBoardId, dimension.id)
+      .subscribe(() => {
+        this.dimensionModalOptions.deleteDimension(dimension);
+      })
   }
 
   // 确认添加数据源
   private onAddDataSource = (dataSource: dataSource) => {
-    
+
     const newDataSource = {
       analyticBoardId: this.analyticBoardId,
       envID: this.envID,

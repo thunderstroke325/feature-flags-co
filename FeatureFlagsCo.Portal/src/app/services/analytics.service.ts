@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { updataReportParam } from '../pages/main/analytics/types/analytics';
+import { updataReportParam, UpsertDimensionVm } from '../pages/main/analytics/types/analytics';
 import { sameTimeGroup } from '../pages/main/analytics/types/data-grouping';
 
 @Injectable({
@@ -50,6 +50,19 @@ export class AnalyticsService {
       envId, boardId, dataSourceId
     }
     return this.http.delete(url, { params });
+  }
+
+  // 新增/更新 维度
+  public upsertDimension(dimensionVm: UpsertDimensionVm) {
+    const url = `${this.baseUrl}/dimension`;
+    return this.http.post(url, dimensionVm);
+  }
+
+  // 删除维度
+  public deleteDimension(envId: number, boardId: string, dimensionId: string) {
+    const url = `${this.baseUrl}/dimension`;
+    const params = {envId, boardId, dimensionId}
+    return this.http.delete(url, {params});
   }
 
   // 计算结果

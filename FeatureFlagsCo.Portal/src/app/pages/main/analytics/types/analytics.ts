@@ -98,7 +98,7 @@ export class DataCard {
                 item.dataSource = data.dataSource;
                 item.unit = data.unit;
                 item.color = data.color;
-                item.calculationType = data.calculationType,
+                item.calculationType = data.calculationType;
                 item.isSetupDataSource = data.isSetupDataSource
             }
         })
@@ -111,6 +111,93 @@ export interface dataSource {
     name: string;
     dataType: string;
     keyName: string;
+}
+
+// 维度
+export interface Dimension {
+  id: string;
+  key: string;
+  value: string;
+}
+
+export interface UpsertDimensionVm {
+  analyticBoardId: string,
+  envID: number,
+  id: string;
+  key: string;
+  value: string;
+}
+
+// 维度模态框配置
+export class DimensionModalOptions {
+  visible: boolean;
+  mode: "show-list" | "upsert-form";
+  dimensions: Dimension[];
+  currentDimension: Dimension;
+
+  constructor() {
+    this.visible = false;
+    this.mode = 'show-list';
+    this.dimensions = [];
+    this.currentDimension = null;
+  }
+
+  handleCancel() {
+    switch (this.mode) {
+      // close dialog
+      case "show-list":
+        this.visible = !this.visible;
+        break;
+
+      // back to show-list
+      case "upsert-form":
+        this.mode = 'show-list';
+    }
+  }
+
+  handleOk(dimension?: Dimension) {
+    if (dimension) {
+      // update current dimension
+      this.currentDimension = dimension;
+    }
+
+    switch (this.mode) {
+      // go to add form
+      case "show-list":
+        this.mode = 'upsert-form';
+        break;
+
+      // after upsert, back to show-list
+      case "upsert-form":
+        this.mode = 'show-list';
+        break;
+    }
+  }
+
+  upsertDimension(dimension?: Dimension) {
+    if (dimension) {
+      this.currentDimension = dimension;
+    }
+
+    let theIndex = this.dimensions.findIndex(dimension => dimension.id === this.currentDimension.id);
+    if (theIndex !== -1) {
+      // update
+      this.dimensions.splice(theIndex, 1, this.currentDimension);
+      this.dimensions = Object.assign([], this.dimensions);
+    } else {
+      // insert
+      this.dimensions = [...this.dimensions, this.currentDimension];
+    }
+
+    this.handleOk();
+  }
+
+  deleteDimension(toDelete: Dimension) {
+    const theIndex = this.dimensions.findIndex(dimension => dimension.id == toDelete.id);
+    if (theIndex !== -1) {
+      this.dimensions = this.dimensions.filter(x => x.id !== toDelete.id);
+    }
+  }
 }
 
 // 更新看板数据参数

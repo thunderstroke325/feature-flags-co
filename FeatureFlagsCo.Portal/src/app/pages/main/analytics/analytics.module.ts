@@ -23,9 +23,10 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NewReportComponent } from './components/new-report/new-report.component';
 import { DataSourcesComponent } from './components/data-sources/data-sources.component';
 import { NzTableModule } from 'ng-zorro-antd/table';
+import { DimensionsComponent } from './components/dimensions/dimensions.component';
 
 @NgModule({
-  declarations: [AnalyticsComponent, NewReportComponent, DataSourcesComponent],
+  declarations: [AnalyticsComponent, NewReportComponent, DataSourcesComponent, DimensionsComponent],
   imports: [
     CommonModule,
     FormsModule,
