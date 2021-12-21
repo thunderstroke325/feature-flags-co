@@ -38,15 +38,5 @@ namespace FeatureFlags.APIs.Services
                 await UpdateAsync(board.Id, board);
             }
         }
-
-        public async Task RemoveAnalyticDimensionAsync(string boardId, string dimensionId)
-        {
-            var board = await GetAsync(boardId);
-            if (board != null)
-            {
-                board.RemoveDataDimension(dimensionId);
-                await UpdateAsync(board.Id, board);
-            }
-        }
     }
 }

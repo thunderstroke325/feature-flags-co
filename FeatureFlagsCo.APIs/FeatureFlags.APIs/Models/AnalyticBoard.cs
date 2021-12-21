@@ -58,18 +58,18 @@ namespace FeatureFlags.APIs.Models
             }
         }
 
-        public void UpsertAnalyticDimension(string dimensionId, string key, string value)
+        public bool TryAddDimension(string key, string value)
         {
-            var oldDataDimension = Dimensions.FirstOrDefault(x => x.Id == dimensionId);
-            if (oldDataDimension != null)
+            var exist = Dimensions.Any(dimension => dimension.Key == key && dimension.Value == value);
+            if (exist)
             {
-                oldDataDimension.Update(key, value);
+                return false;
             }
-            else
-            {
-                var newDataDimension = new AnalyticDimension(dimensionId, key, value);
-                Dimensions.Add(newDataDimension);
-            }
+
+            var dimension = new AnalyticDimension(Guid.NewGuid().ToString("D"), key, value);
+            Dimensions.Add(dimension);
+            
+            return true;
         }
 
         public void RemoveDataGroup(string groupId)
@@ -80,11 +80,6 @@ namespace FeatureFlags.APIs.Models
         public void RemoveDataSource(string sourceId)
         {
             DataSourceDefs.RemoveAll(x => x.Id == sourceId);
-        }
-
-        public void RemoveDataDimension(string dimensionId)
-        {
-            Dimensions.RemoveAll(x => x.Id == dimensionId);
         }
     }
 
