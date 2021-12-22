@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FeatureFlags.Common\FeatureFlags.Common.csproj" />
+    <ProjectReference Include="..\FeatureFlags.Utils\FeatureFlags.Utils.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.FeatureInsights.ElasticSearch\FeatureFlagsCo.FeatureInsights.ElasticSearch.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.FeatureInsights\FeatureFlagsCo.FeatureInsights.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.MQ\FeatureFlagsCo.MQ.csproj" />

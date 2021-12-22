@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Controllers.Base;
-using FeatureFlags.Common.ExtensionMethods;
+using FeatureFlags.Utils.ExtensionMethods;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 

@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureFlagsCo.MQ.Export", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlagsCo.Messaging", "FeatureFlagsCo.Messaging\FeatureFlagsCo.Messaging.csproj", "{CBDA87C0-C013-4A5D-9CF6-B4F0395AA67F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlags.Common", "FeatureFlags.Common\FeatureFlags.Common.csproj", "{8A08D3CB-A4BF-4E0F-B69C-5D60792C9A5A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeatureFlags.Utils", "FeatureFlags.Utils\FeatureFlags.Utils.csproj", "{8DB029E0-6FFB-45B1-BA79-902364421F68}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,10 +59,10 @@ Global
 		{CBDA87C0-C013-4A5D-9CF6-B4F0395AA67F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBDA87C0-C013-4A5D-9CF6-B4F0395AA67F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBDA87C0-C013-4A5D-9CF6-B4F0395AA67F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8A08D3CB-A4BF-4E0F-B69C-5D60792C9A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8A08D3CB-A4BF-4E0F-B69C-5D60792C9A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8A08D3CB-A4BF-4E0F-B69C-5D60792C9A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8A08D3CB-A4BF-4E0F-B69C-5D60792C9A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DB029E0-6FFB-45B1-BA79-902364421F68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DB029E0-6FFB-45B1-BA79-902364421F68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DB029E0-6FFB-45B1-BA79-902364421F68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DB029E0-6FFB-45B1-BA79-902364421F68}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

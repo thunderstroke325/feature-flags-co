@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace FeatureFlags.Common.ExtensionMethods
+namespace FeatureFlags.Utils.ExtensionMethods
 {
     public static class ExceptionExtensions
     {

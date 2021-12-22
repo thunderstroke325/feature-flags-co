@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 
-namespace FeatureFlags.Common.ExtensionMethods
+namespace FeatureFlags.Utils.ExtensionMethods
 {
     public class RequestAuthKeys
     {

@@ -2,7 +2,7 @@
 using System.Linq;
 using FeatureFlags.APIs.Authentication.Scheme;
 using FeatureFlags.APIs.MvcFilters;
-using FeatureFlags.Common.ExtensionMethods;
+using FeatureFlags.Utils.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

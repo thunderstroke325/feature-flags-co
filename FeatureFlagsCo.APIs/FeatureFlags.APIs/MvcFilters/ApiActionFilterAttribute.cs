@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Controllers.Base;
-using FeatureFlags.Common.ExtensionMethods;
+using FeatureFlags.Utils.ExtensionMethods;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 

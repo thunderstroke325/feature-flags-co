@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace FeatureFlags.Common.ExtensionMethods
+namespace FeatureFlags.Utils.ExtensionMethods
 {
     public static class HttpResponseExtensions
     {
