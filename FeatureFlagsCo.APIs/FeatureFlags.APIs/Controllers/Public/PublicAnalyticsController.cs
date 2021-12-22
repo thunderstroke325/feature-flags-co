@@ -22,7 +22,7 @@ namespace FeatureFlags.APIs.Controllers.Public
 
         [HttpPost]
         [Route("analytics")]
-        public async Task<Analytics> SaveAnalytics(CreateAnalyticsRequest input)
+        public async Task<Analytics> TrackAsync(CreateAnalyticsRequest input)
         {
             var analytics = input.Analytics(EnvId);
 
@@ -30,7 +30,7 @@ namespace FeatureFlags.APIs.Controllers.Public
             var success = await _elasticSearch.IndexDocumentAsync(analytics, ElasticSearchIndices.Analytics);
             if (!success)
             {
-                throw new ElasticSearchException("Failed to index int analytics, please check your elastic search log.");
+                throw new ElasticSearchException("Failed to index analytics, please check your elastic search log.");
             }
             
             // try add new dimension
