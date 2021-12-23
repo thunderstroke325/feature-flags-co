@@ -328,7 +328,7 @@ export class AnalyticsComponent implements OnInit {
     this.dimensionModalOptions.handleCancel();
   }
 
-  // 新建/提交 分析维度弹窗
+  // 新建/更新 分析维度弹窗
   public onSaveDimensionModal() {
     if (this.dimensionModalOptions.mode === 'show-list') {
       // set current dimension
@@ -351,16 +351,41 @@ export class AnalyticsComponent implements OnInit {
       this.analyticServe.upsertDimension(param)
         .subscribe(() => {
           this.dimensionModalOptions.upsertDimension();
+          this.syncCardDimensions();
+          this.message.success("新增分析维度成功!");
         });
     }
   }
 
   // 删除分析维度
   public onDeleteDimension(dimension: Dimension) {
+    const cardsUseThisDimension = this.findCardsUseThisDimension(dimension);
+    if (cardsUseThisDimension.length) {
+      cardsUseThisDimension.forEach(card => {
+        this.message.error(`当前分析维度正在被报表 ${card.name} 使用，不能删除！`);
+      });
+
+      return;
+    }
+
     this.analyticServe.deleteDimension(this.envID, this.analyticBoardId, dimension.id)
       .subscribe(() => {
         this.dimensionModalOptions.deleteDimension(dimension);
+        this.syncCardDimensions();
+        this.message.success("删除分析维度成功!");
       })
+  }
+
+  private findCardsUseThisDimension(dimension: Dimension): DataCard[] {
+    const cardsUseThisDimension : DataCard[] = [];
+
+    this.listData.forEach(card => {
+      if (card.dimensions.includes(dimension.id)) {
+        cardsUseThisDimension.push(card);
+      }
+    });
+
+    return cardsUseThisDimension;
   }
 
   // 确认添加数据源
@@ -450,6 +475,13 @@ export class AnalyticsComponent implements OnInit {
 
     // 必须要排序 否则下拉组件会出现顺序错乱 :<
     return initialOptions.sort(compareOption);
+  }
+
+  private syncCardDimensions() {
+    this.listData.forEach(card => {
+      card.dimensionOptions = this.createDimensionOptions(this.dimensionModalOptions.dimensions);
+      card.onSelectDimension();
+    })
   }
 }
 

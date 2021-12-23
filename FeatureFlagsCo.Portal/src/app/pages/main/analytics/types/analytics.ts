@@ -123,15 +123,15 @@ export class DataCard {
         return;
       }
 
-      const selected = this.selectedDimensions().map(item => ({group: item.key, value: item.id}));
-      const selectedValues = selected.map(item => item.value);
-      const selectedGroups = selected.map(item => item.group);
-      newOptions.forEach(item => {
-        if (selectedValues.includes(item.value)) {
+      const selectedOptions = this.dimensionOptions.filter(item => this.dimensions.includes(item.value));
+      newOptions.forEach(option => {
+        if (selectedOptions.includes(option)) {
           return;
         }
 
-        item.disabled = selectedGroups.includes(item.groupLabel as string);
+        option.disabled = selectedOptions
+          .map(item => item.groupLabel)
+          .includes(option.groupLabel);
       });
 
       this.dimensionOptions = newOptions;
