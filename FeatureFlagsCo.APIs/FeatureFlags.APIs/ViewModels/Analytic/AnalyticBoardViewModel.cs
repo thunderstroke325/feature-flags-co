@@ -28,6 +28,7 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public List<DataItem> Items { get; set; }
+        public List<string> Dimensions { get; set; }
     }
 
     public class DataDimensionViewModel

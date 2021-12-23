@@ -29,12 +29,12 @@
                   <input style="font-size: 15px;min-width:250px" nz-input placeholder="看板名称" [(ngModel)]="data.name" />
                 </ng-container>
               </div>
-              <div class="date-range">
+              <div class="options-container">
                 <ng-container *ngIf="!data.isEditing">
-                  {{data.startTime | ffcDate}} 至 {{data.endTime | ffcDate}}
+                  <span class="option-text">{{data.startTime | ffcDate}} 至 {{data.endTime | ffcDate}}</span>
                 </ng-container>
                 <ng-container *ngIf="data.isEditing">
-                  <div style="margin-top:5px">
+                  <div>
                     <nz-date-picker
                       [nzShowToday]="false"
                       [nzAllowClear]="false"
@@ -58,6 +58,23 @@
                     <div style="text-align:center"><a (click)="data.clearEndDate()">清空（设为永远）</a></div>
                   </ng-template>
                 </ng-container>
+                <div class="dimensions-select"
+                     *ngIf="!data.isEditing; then showSelectedDimension else selectDimensions">
+                </div>
+                <ng-template #showSelectedDimension>
+                  <span class="option-text">{{data.prettyPrintSelectedDimensions()}}</span>
+                </ng-template>
+                <ng-template #selectDimensions>
+                  <nz-select
+                    nzMode="multiple"
+                    nzShowSearch
+                    nzAllowClear
+                    nzPlaceHolder="选择分析维度"
+                    [(ngModel)]="data.dimensions"
+                    [nzOptions]="data.dimensionOptions"
+                    (ngModelChange)="data.onSelectDimension()">
+                  </nz-select>
+                </ng-template>
               </div>
               <nz-list nzGrid class="item-grid">
                 <div nz-row [nzGutter]="16">

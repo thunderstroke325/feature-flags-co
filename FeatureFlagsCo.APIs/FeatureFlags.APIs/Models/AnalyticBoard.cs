@@ -44,16 +44,17 @@ namespace FeatureFlags.APIs.Models
             string name,
             DateTime startTime,
             DateTime? endTime,
-            List<DataItem> items)
+            List<DataItem> items, 
+            List<string> dimensions)
         {
             var oldDataGroup = DataGroups.FirstOrDefault(x => x.Id == dataGroupId);
             if (oldDataGroup != null)
             {
-                oldDataGroup.Update(name, startTime, endTime, items);
+                oldDataGroup.Update(name, startTime, endTime, items, dimensions);
             }
             else
             {
-                var newDataGroup = new DataGroup(dataGroupId, name, startTime, endTime, items);
+                var newDataGroup = new DataGroup(dataGroupId, name, startTime, endTime, items, dimensions);
                 DataGroups.Add(newDataGroup);
             }
         }
@@ -70,6 +71,25 @@ namespace FeatureFlags.APIs.Models
             Dimensions.Add(dimension);
             
             return true;
+        }
+        
+        public void UpsertDimension(string dimensionId, string key, string value)
+        {
+            var oldDataDimension = Dimensions.FirstOrDefault(x => x.Id == dimensionId);
+            if (oldDataDimension != null)
+            {
+                oldDataDimension.Update(key, value);
+            }
+            else
+            {
+                var newDataDimension = new AnalyticDimension(dimensionId, key, value);
+                Dimensions.Add(newDataDimension);
+            }
+        }
+        
+        public void RemoveDimension(string dimensionId)
+        {
+            Dimensions.RemoveAll(x => x.Id == dimensionId);
         }
 
         public void RemoveDataGroup(string groupId)
@@ -90,6 +110,7 @@ namespace FeatureFlags.APIs.Models
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public List<DataItem> Items { get; set; }
+        public List<string> Dimensions { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime CreatedAt { get; set; }
 
@@ -98,7 +119,8 @@ namespace FeatureFlags.APIs.Models
             string name, 
             DateTime startTime, 
             DateTime? endTime, 
-            List<DataItem> items)
+            List<DataItem> items,
+            List<string> dimensions)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -107,14 +129,15 @@ namespace FeatureFlags.APIs.Models
             Id = id;
             CreatedAt = DateTime.UtcNow;
             
-            Update(name, startTime, endTime, items);
+            Update(name, startTime, endTime, items, dimensions);
         }
 
         public void Update(
             string name, 
             DateTime startTime, 
             DateTime? endTime, 
-            List<DataItem> items)
+            List<DataItem> items, 
+            List<string> dimensions)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -125,6 +148,7 @@ namespace FeatureFlags.APIs.Models
             StartTime = startTime;
             EndTime = endTime;
             Items = items ?? new List<DataItem>();
+            Dimensions = dimensions ?? new List<string>();
             
             UpdatedAt = DateTime.UtcNow;
         }

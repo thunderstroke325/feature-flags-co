@@ -26,9 +26,20 @@ section.body {
         text-align: center;
       }
 
-      .date-range {
-        text-align: center;
-        color: #bdbdbd;
+      .options-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-top: 5px;
+
+        .option-text {
+          text-align: center;
+          color: #bdbdbd;
+        }
+
+        nz-select {
+          width: 250px;
+        }
       }
 
       .item-grid {

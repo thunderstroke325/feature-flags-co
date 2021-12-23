@@ -6,6 +6,6 @@
 
         public string Value { get; set; }
 
-        public override string ToString() => $"{Key}@{Value}";
+        public override string ToString() => $"{Key}:{Value}";
     }
 }

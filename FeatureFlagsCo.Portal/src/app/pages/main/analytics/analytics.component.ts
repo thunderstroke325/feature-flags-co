@@ -8,15 +8,16 @@ import {
   CalculationType,
   DataCard,
   dataSource,
+  Dimension,
+  DimensionModalOptions,
   IDataCard,
   IDataItem,
-  updataReportParam,
-  Dimension,
-  DimensionModalOptions
+  updataReportParam
 } from './types/analytics';
 import { DataSourcesComponent } from './components/data-sources/data-sources.component';
 import { dataGrouping, sameTimeGroup } from './types/data-grouping';
 import { hasSameKeyName } from './types/same-keyname';
+import { NzSelectOptionInterface } from "ng-zorro-antd/select";
 
 @Component({
   selector: 'app-analytics',
@@ -86,7 +87,16 @@ export class AnalyticsComponent implements OnInit {
             item.isLoading = true;
             item.isSetupDataSource = true;
           });
-          this.listData[this.listData.length] = new DataCard({...group, isLoading: false, isEditing: false, itemsCount: group.items.length});
+
+          const dimensionOptions = this.createDimensionOptions(result.dimensions);
+          this.listData[this.listData.length] = new DataCard({
+              ...group,
+              itemsCount: group.items.length,
+              isLoading: false,
+              isEditing: false,
+              dimensionOptions: dimensionOptions
+            }
+          );
         })
 
         this.requestValueForItems();
@@ -165,7 +175,8 @@ export class AnalyticsComponent implements OnInit {
       name: card.name || null,
       items: card.items,
       startTime: card.startTime,
-      endTime: card.endTime
+      endTime: card.endTime,
+      dimensions: card.dimensions
     }
     this.onSaveReportData(param, card);
   }
@@ -181,11 +192,21 @@ export class AnalyticsComponent implements OnInit {
         card.isTooltip = false;
         card.isLoading = false;
 
+        const dimensions = card.dimensionOptions
+          .filter(option => card.dimensions.includes(option.value))
+          .map(item => ({
+            id: item.value as string,
+            key: item.groupLabel as string,
+            value: item.label as string
+          })
+        );
+
         const param: sameTimeGroup = {
           envId: this.envID,
           startTime: card.startTime,
           endTime: card.endTime,
-          items: card.items
+          items: card.items,
+          dimensions: dimensions
         }
 
         this.analyticServe.computeResult(param)
@@ -196,6 +217,9 @@ export class AnalyticsComponent implements OnInit {
   // 创建报表
   public onCreateCard() {
     const card = new DataCard();
+    card.dimensionOptions = this.createDimensionOptions(this.dimensionModalOptions.dimensions);
+    card.dimensions = [];
+
     this.currentDataCard = card;
     this.onAddItem(card);
     this.listData = [card, ...this.listData];
@@ -402,6 +426,30 @@ export class AnalyticsComponent implements OnInit {
           this.dataSourceList = [...this.dataSourceList];
         }
       })
+  }
+
+  private createDimensionOptions(dimensions: Dimension[]): NzSelectOptionInterface[] {
+    const initialOptions = dimensions.map(dimension => {
+      return {
+        groupLabel: dimension.key,
+        label: dimension.value,
+        value: dimension.id,
+        disabled: false
+      }
+    });
+
+    function compareOption(itemOne: NzSelectOptionInterface, itemTwo: NzSelectOptionInterface) {
+      if (itemOne.groupLabel < itemTwo.groupLabel) {
+        return -1;
+      }
+      if (itemOne.groupLabel > itemTwo.groupLabel) {
+        return 1;
+      }
+      return 0;
+    }
+
+    // 必须要排序 否则下拉组件会出现顺序错乱 :<
+    return initialOptions.sort(compareOption);
   }
 }
 

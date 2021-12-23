@@ -1,8 +1,7 @@
-import { DataCard, IDataItem } from "./analytics";
+import { DataCard, Dimension, IDataItem } from "./analytics";
 
 /**
  * 数据分组
- *  按相同时间段和相同计数方式分组
  */
 export const dataGrouping = (data: DataCard[] = [], envId: number) => {
     let groupingResult: sameTimeGroup[] = [];
@@ -14,7 +13,9 @@ export const dataGrouping = (data: DataCard[] = [], envId: number) => {
         const startTime = card.startTime;
         const endTime = card.endTime;
 
-        const sameTimeSlotKey = `${startTime}#${endTime}`;
+        // 按 开始时间、结束时间、分析维度 分组
+        const sortedDimensions = [...card.dimensions].sort();
+        const sameTimeSlotKey = `${startTime}#${endTime}#${sortedDimensions}`;
         if(!sameTimeSlotList[sameTimeSlotKey]) {
             sameTimeSlotList[sameTimeSlotKey] = [];
         }
@@ -28,13 +29,14 @@ export const dataGrouping = (data: DataCard[] = [], envId: number) => {
             return acc;
         }, []);
 
-        // use first item to get startTime and endTime
+        // use first item to get startTime, endTime and selectedOptions
         const { startTime, endTime } = value[0];
         groupingResult.push({
             envId,
-            startTime, 
+            startTime,
             endTime,
-            items
+            items,
+            dimensions: value[0].selectedDimensions()
         })
     })
 
@@ -53,4 +55,5 @@ export interface sameTimeGroup {
     startTime: Date;
     endTime: Date;
     items: IDataItem[];
+    dimensions: Dimension[];
 }

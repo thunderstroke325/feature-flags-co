@@ -1,4 +1,5 @@
 import { uuidv4 } from 'src/app/utils';
+import { NzSelectOptionInterface } from "ng-zorro-antd/select";
 
 export enum CalculationType {
     Count = 1,
@@ -13,9 +14,13 @@ export interface IDataCard {
     endTime: Date,
     items: IDataItem[],
     itemsCount: number,
-    isLoading?: boolean, // only for UI
+    dimensions: string[];
+
+    // only for UI
+    isLoading?: boolean,
     isEditing?: boolean,
     isTooltip?: boolean;
+    dimensionOptions: NzSelectOptionInterface[];
 }
 
 export interface IDataItem {
@@ -36,10 +41,14 @@ export class DataCard {
     startTime: Date;
     endTime: Date;
     items: IDataItem[];
-    isLoading?: boolean; // only for UI
+    dimensions: string[] = [];
+    itemsCount: number;
+
+    // only for UI
+    isLoading?: boolean;
     isEditing?: boolean;
     isTooltip?: boolean;
-    itemsCount: number;
+    dimensionOptions: NzSelectOptionInterface[] = [];
 
     constructor(data?: IDataCard) {
         if (data) {
@@ -52,20 +61,19 @@ export class DataCard {
             this.isTooltip = data.isTooltip;
             this.items = [...data.items];
             this.itemsCount = data.itemsCount;
+
+            // dimension select options
+            this.dimensions = [...data.dimensions];
+            this.dimensionOptions = [...data.dimensionOptions];
+            if (this.dimensions.length) {
+              this.onSelectDimension();
+            }
         } else {
             this.id = uuidv4();
             this.name = null;
             this.isLoading = false;
             this.isEditing = true;
             this.items = [];
-            // new Array(6).fill({}).map((_i, index) => ({
-            //   id: uuidv4(),
-            //   name: null,
-            //   value: null,
-            //   unit: null,
-            //   color: null,
-            //   calculationType: CalculationType.Count
-            // }))
         }
     }
 
@@ -102,6 +110,54 @@ export class DataCard {
                 item.isSetupDataSource = data.isSetupDataSource
             }
         })
+    }
+
+    onSelectDimension() {
+      const newOptions = [...this.dimensionOptions];
+      if (!this.dimensions.length) {
+        newOptions.forEach(item => {
+          item.disabled = false;
+        });
+
+        this.dimensionOptions = newOptions;
+        return;
+      }
+
+      const selected = this.selectedDimensions().map(item => ({group: item.key, value: item.id}));
+      const selectedValues = selected.map(item => item.value);
+      const selectedGroups = selected.map(item => item.group);
+      newOptions.forEach(item => {
+        if (selectedValues.includes(item.value)) {
+          return;
+        }
+
+        item.disabled = selectedGroups.includes(item.groupLabel as string);
+      });
+
+      this.dimensionOptions = newOptions;
+    }
+
+    selectedDimensions(): Dimension[] {
+      const selected: Dimension[] = [];
+
+      this.dimensions.forEach(dimension => {
+        const option = this.dimensionOptions.find(option => option.value == dimension);
+        if (option) {
+          selected.push({
+            id: option.value,
+            key: option.groupLabel as string,
+            value: option.label as string
+          });
+        }
+      })
+
+      return selected;
+    }
+
+    prettyPrintSelectedDimensions() {
+      return this.selectedDimensions()
+        .map(option => `${option.key}:${option.value}`)
+        .join(', ');
     }
 }
 
@@ -208,5 +264,6 @@ export interface updataReportParam {
     name: string;
     startTime: Date;
     endTime: Date;
-    items: IDataItem[]
+    items: IDataItem[],
+    dimensions: string[],
 }
