@@ -28,7 +28,7 @@
 
           <ng-container *ngIf="!isInitLoading && experimentList.length > 0">
             <nz-card class="experiment" style="margin-top: 20px;">
-              进入实验的用户满足以下<a (click)="onSetExptRulesClick()">规则</a> 
+              进入实验的用户满足以下<a (click)="onSetExptRulesClick()">规则</a>
             </nz-card>
           </ng-container>
 
@@ -108,9 +108,16 @@
                 </div>
                 <div class="third-line" *ngIf="experiment.status !== 1">
                   <ul *ngIf="experiment.selectedIteration?.results?.length > 0">
-                    <li *ngIf="experiment.hasInvalidVariation"><i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i> 相对于基准特性并不具有统计学上的优势</li>
-                    <li *ngIf="experiment.hasWinnerVariation"><i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i> 该特性胜出</li>
-                    <li *ngIf="!experiment.hasWinnerVariation"><i nz-icon nzType="info-circle" nzTheme="outline"></i> 需要更多的实验数据才能在统计学上确认表格中的结论</li>
+                    <li *ngIf="experiment.selectedIteration.invalidVariation">
+                      <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i> 相对于基准特性并不具有统计学上的优势
+                    </li>
+                    <li *ngIf="experiment.selectedIteration.winnerVariation">
+                      <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i>
+                      <span style="font-weight: bold">&nbsp;{{experiment.selectedIteration.winnerVariation.variationValue}}</span> 特性胜出
+                    </li>
+                    <li *ngIf="!experiment.selectedIteration.winnerVariation">
+                      <i nz-icon nzType="info-circle" nzTheme="outline"></i> 需要更多的实验数据才能在统计学上确认表格中的结论
+                    </li>
                   </ul>
                 </div>
               </div>

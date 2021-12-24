@@ -22,10 +22,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   selectedBaseline: IVariationOption = null;
   isInitLoading = true;
   experimentation: string;
-
-  hasInvalidVariation: boolean = false;
-  hasWinnerVariation: boolean = false;
-
   onGoingExperiments: IExperiment[] = [];
   refreshIntervalId;
   refreshInterval: number = 1000 * 30; // 1 minute
@@ -256,13 +252,12 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         })
       });
 
-    const hasInvalidVariation = iterationResults.findIndex(e => e.isInvalid && !e.isBaseline) > -1;
-    const hasWinnerVariation = iterationResults.findIndex(e => e.isWinner) > -1;
+    const invalidVariation = iterationResults.find(e => e.isInvalid && !e.isBaseline);
+    const winnerVariation = iterationResults.find(e => e.isWinner);
 
-    const iterationEndTime = iteration.endTime || new Date();
     return Object.assign({}, iteration, {
-      hasInvalidVariation,
-      hasWinnerVariation,
+      invalidVariation,
+      winnerVariation,
       results: iterationResults,
       dateTimeInterval: `${moment(iteration.startTime).format('YYYY-MM-DD HH:mm')} - ${iteration.endTime? moment(iteration.endTime).format('YYYY-MM-DD HH:mm') : moment(new Date()).format('YYYY-MM-DD HH:mm') + ' (现在)'}`
     });

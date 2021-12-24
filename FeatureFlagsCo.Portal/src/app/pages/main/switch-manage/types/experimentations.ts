@@ -75,7 +75,9 @@ export interface IExperimentIteration {
   dateTimeInterval?: string,
   numericConfidenceIntervalBoundary?: number[], // [min, max, max - min]
   customEventTrackOption: CustomEventTrackOption,
-  customEventUnit: string
+  customEventUnit: string,
+  invalidVariation?: IExperimentIterationResult,
+  winnerVariation?: IExperimentIterationResult
 }
 
 export interface IExperimentIterationResult {
