@@ -17,7 +17,6 @@ import { RuleComponent } from './find-rule/rule/rule.component';
 import { ServeComponent } from './find-rule/serve/serve.component';
 import { ServeMultistatesComponent } from './find-rule/serve-multistates/serve-multistates.component';
 import { FlagTriggersComponent } from './flag-triggers/flag-triggers.component';
-import { ExperimentComponent } from './experiment/experiment.component';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
@@ -45,7 +44,6 @@ import {NzCollapseModule} from "ng-zorro-antd/collapse";
     ServeComponent ,
     ServeMultistatesComponent,
     FlagTriggersComponent,
-    ExperimentComponent
   ],
   imports: [
     CommonModule,
@@ -81,7 +79,6 @@ import {NzCollapseModule} from "ng-zorro-antd/collapse";
     ServeComponent,
     ServeMultistatesComponent,
     FlagTriggersComponent,
-    ExperimentComponent
   ]
 })
 export class ComponentsModule { }
