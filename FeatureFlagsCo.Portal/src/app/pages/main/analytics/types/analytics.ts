@@ -198,6 +198,11 @@ export class DimensionModalOptions {
     this.currentDimension = null;
   }
 
+  open() {
+    this.visible = true;
+    this.mode = 'show-list';
+  }
+
   handleCancel() {
     switch (this.mode) {
       // close dialog

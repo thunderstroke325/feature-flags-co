@@ -11,8 +11,8 @@ export class DimensionsComponent {
   @Input() options: DimensionModalOptions = new DimensionModalOptions();
   @Output() onDeleteDimension = new EventEmitter<Dimension>();
 
-  updateDimension() {
-    this.options.handleOk();
+  updateDimension(dimension: Dimension) {
+    this.options.handleOk(dimension);
   }
 
   deleteDimension(dimension: Dimension) {
