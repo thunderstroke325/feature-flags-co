@@ -108,15 +108,14 @@
                 </div>
                 <div class="third-line" *ngIf="experiment.status !== 1">
                   <ul *ngIf="experiment.selectedIteration?.results?.length > 0">
-                    <li *ngIf="experiment.selectedIteration.invalidVariation">
-                      <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i> 相对于基准特性并不具有统计学上的优势
-                    </li>
-                    <li *ngIf="experiment.selectedIteration.winnerVariation">
-                      <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i>
-                      <span style="font-weight: bold">&nbsp;{{experiment.selectedIteration.winnerVariation.variationValue}}</span> 特性胜出
-                    </li>
                     <li *ngIf="!experiment.selectedIteration.winnerVariation">
                       <i nz-icon nzType="info-circle" nzTheme="outline"></i> 需要更多的实验数据才能在统计学上确认表格中的结论
+                    </li>
+                    <li *ngIf="experiment.selectedIteration.invalidVariation">
+                      <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i> 该特性相对于基准特性，统计学上差异效果不显著
+                    </li>
+                    <li *ngIf="experiment.selectedIteration.winnerVariation">
+                      <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i> 该特性胜出
                     </li>
                   </ul>
                 </div>
@@ -170,14 +169,12 @@
                           <span *ngIf="data.isWinner" nz-tooltip [nzTooltipTitle]="'该特性胜出'" [nzTooltipColor]="'cyan'">
                             <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i>
                           </span>
-                          <span *ngIf="data.isInvalid" nz-tooltip [nzTooltipTitle]="'相对于基准特性并不具有统计学上的优势'" [nzTooltipColor]="'cyan'">
-                            <ng-container *ngIf="!data.isBaseline">
-                              <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i>
-                            </ng-container>
-                            <ng-container *ngIf="data.isBaseline">
-                              <span class="icon_placeholder"></span>
-                            </ng-container>
+                          <span *ngIf="data.isInvalid && !data.isBaseline" nz-tooltip [nzTooltipTitle]="'该特性相对于基准特性，统计学上差异效果不显著'" [nzTooltipColor]="'cyan'">
+                            <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i>
                           </span>
+                          <ng-container *ngIf="data.isBaseline">
+                            <span class="icon_placeholder"></span>
+                          </ng-container>
                           <span class="icon_placeholder" *ngIf="!data.isWinner && !data.isInvalid"></span>
                           &nbsp;{{ data.variationValue }}</td>
                         <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metric.customEventTrackOption)">
