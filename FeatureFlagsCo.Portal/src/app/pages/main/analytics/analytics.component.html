@@ -114,7 +114,7 @@
                         <!-- 计算数据显示 -->
                         <ng-container *ngIf="!data.isEditing">
                           <ng-container *ngIf="!item.isLoading; else valueLoadingTem">
-                            {{item.value}}
+                            {{ item.value % 1 === 0 ? item.value : item.value.toFixed(2)}}
                           </ng-container>
                           <ng-template #valueLoadingTem>
                             <nz-spin nzSimple [nzSize]="'small'"></nz-spin>
