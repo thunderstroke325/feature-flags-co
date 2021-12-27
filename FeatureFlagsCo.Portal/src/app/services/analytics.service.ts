@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { updataReportParam, UpsertDimensionVm } from '../pages/main/analytics/types/analytics';
 import { sameTimeGroup } from '../pages/main/analytics/types/data-grouping';
+import moment from "moment";
 
 @Injectable({
   providedIn: "root"
@@ -68,6 +69,13 @@ export class AnalyticsService {
   // 计算结果
   public computeResult(param: sameTimeGroup): Observable<any> {
     const url = `${this.baseUrl}/results`;
-    return this.http.post(url, param);
+
+    // use hour time to compute result
+    const payload = Object.assign({}, param, {
+      startTime: moment(param.startTime).startOf('hour').toDate(),
+      endTime: moment(param.endTime).startOf('hour').toDate()
+    });
+
+    return this.http.post(url, payload);
   }
 }
