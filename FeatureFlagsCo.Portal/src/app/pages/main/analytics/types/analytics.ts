@@ -55,7 +55,7 @@ export class DataCard {
             this.id = data.id;
             this.name = data.name;
             this.startTime = !!data.startTime ? new Date(data.startTime) : null;
-            this.endTime = !!data.startTime ? new Date(data.endTime) : null;
+            this.endTime = !!data.endTime ? new Date(data.endTime) : null;
             this.isLoading = data.isLoading;
             this.isEditing = data.isEditing;
             this.isTooltip = data.isTooltip;
