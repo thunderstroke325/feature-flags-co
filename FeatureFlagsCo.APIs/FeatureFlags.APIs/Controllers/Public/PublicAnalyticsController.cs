@@ -2,7 +2,6 @@
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Analytic;
 using FeatureFlagsCo.MQ.ElasticSearch;
-using FeatureFlagsCo.MQ.ElasticSearch.DataModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FeatureFlags.APIs.Controllers.Public
@@ -20,9 +19,14 @@ namespace FeatureFlags.APIs.Controllers.Public
             _mongoDb = mongoDb;
         }
 
+        /// <summary>
+        /// 数据报表数据收集
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ElasticSearchException"></exception>
         [HttpPost]
-        [Route("analytics")]
-        public async Task<Analytics> TrackAsync(CreateAnalyticsRequest input)
+        [Route("analytics/track")]
+        public async Task TrackAsync(CreateAnalyticsRequest input)
         {
             var analytics = input.Analytics(EnvId);
 
@@ -44,8 +48,6 @@ namespace FeatureFlags.APIs.Controllers.Public
 
                 await _mongoDb.UpdateAsync(board.Id, board);
             }
-            
-            return analytics;
         }
     }
 }
