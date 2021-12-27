@@ -1,9 +1,6 @@
-﻿using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.ViewModels.Metrics;
-using System;
+﻿using FeatureFlags.APIs.ViewModels.Metrics;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using FeatureFlagsCo.MQ;
 
 namespace FeatureFlags.APIs.ViewModels.Experiments
 {

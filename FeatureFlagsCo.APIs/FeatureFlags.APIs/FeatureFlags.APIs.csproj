@@ -24,7 +24,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
-    <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="OpenTelemetry" Version="1.1.0" />
     <PackageReference Include="OpenTelemetry.Api" Version="1.1.0" />
@@ -42,6 +41,11 @@
     <ProjectReference Include="..\FeatureFlagsCo.FeatureInsights.ElasticSearch\FeatureFlagsCo.FeatureInsights.ElasticSearch.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.FeatureInsights\FeatureFlagsCo.FeatureInsights.csproj" />
     <ProjectReference Include="..\FeatureFlagsCo.MQ\FeatureFlagsCo.MQ.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Models\Experiment.cs" />
+    <Compile Remove="Models\MongoModelBase.cs" />
   </ItemGroup>
 
 

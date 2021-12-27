@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FeatureFlagsCo.MQ;
 using FeatureFlagsCo.MQ.ElasticSearch.DataModels;
 using Nest;
 using static Nest.Infer;

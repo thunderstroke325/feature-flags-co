@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
-using FeatureFlagsCo.Messaging.Models;
+using FeatureFlagsCo.MQ;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;

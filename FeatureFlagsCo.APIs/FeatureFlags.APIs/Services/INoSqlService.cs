@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.ViewModels.FeatureFlagTrigger;
+using FeatureFlagsCo.MQ;
 
 namespace FeatureFlags.APIs.Services
 {

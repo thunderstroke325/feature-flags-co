@@ -1,6 +1,4 @@
-﻿using FeatureFlagsCo.Messaging.Models;
-using FeatureFlagsCo.Messaging.Services;
-using FeatureFlagsCo.Messaging.ViewModels;
+﻿using FeatureFlagsCo.Messaging.ViewModels;
 using FeatureFlagsCo.MQ;
 using MongoDB.Driver;
 using System.Threading.Tasks;

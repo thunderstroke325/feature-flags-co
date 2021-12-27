@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using FeatureFlagsCo.MQ;
 
 namespace FeatureFlags.APIs.Models
 {

@@ -241,13 +241,14 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         const found = iteration.results.find(r => r.variation == option.localId);
 
         return !found ? this.createEmptyIterationResult(option, baselineVariation) : Object.assign({}, found, {
-          conversion: found.conversion === -1 ? '--' : found.conversion,
-          conversionRate: found.conversionRate === -1 ? '--' : found.conversionRate,
-          uniqueUsers: found.uniqueUsers === -1 ? '--' : found.uniqueUsers,
-          totalEvents: found.totalEvents === -1 ? '--' : found.totalEvents,
-          average: found.average === -1 ? '--' : found.average,
+          conversion: !found.conversion ? '--' : found.conversion,
+          conversionRate: !found.conversionRate ? '--' : found.conversionRate,
+          uniqueUsers: !found.uniqueUsers ? '--' : found.uniqueUsers,
+          totalEvents: !found.totalEvents ? '--' : found.totalEvents,
+          average: !found.average ? '--' : found.average,
           variationValue: option.variationValue,
-          pValue: found.pValue === -1 ? '--' : found.pValue,
+          pValue: !found.pValue ? '--' : found.pValue,
+          confidenceInterval: !found.confidenceInterval ? [-1, -1] : found.confidenceInterval,
           isEmpty: false,
         })
       });

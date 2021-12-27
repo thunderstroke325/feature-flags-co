@@ -1,7 +1,7 @@
-﻿using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.ViewModels;
+﻿using FeatureFlags.APIs.ViewModels;
 using MongoDB.Driver;
 using System.Threading.Tasks;
+using FeatureFlagsCo.MQ;
 
 namespace FeatureFlags.APIs.Services
 { 
