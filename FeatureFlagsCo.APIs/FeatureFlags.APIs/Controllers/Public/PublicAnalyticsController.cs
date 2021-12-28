@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Net;
+using System.Threading.Tasks;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Analytic;
 using FeatureFlagsCo.MQ.ElasticSearch;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FeatureFlags.APIs.Controllers.Public
@@ -48,6 +50,23 @@ namespace FeatureFlags.APIs.Controllers.Public
 
                 await _mongoDb.UpdateAsync(board.Id, board);
             }
+        }
+
+        [HttpPost]
+        [Route("analytics/userbehaviortrack")]
+        [AllowAnonymous]
+        public async Task UserBehaviorTrackAsync(TrackUserBehaviorEventParam param)
+        {
+            if(string.IsNullOrEmpty(param.EnvironmentKey))
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotFound;
+            }
+            var env = FeatureFlagKeyExtension.GetEnvIdsByEnvKey(param.EnvironmentKey);
+            if(env == null || string.IsNullOrEmpty(env.EnvId))
+            {
+                Response.StatusCode = (int)HttpStatusCode.Conflict;
+            }
+            return;
         }
     }
 }
