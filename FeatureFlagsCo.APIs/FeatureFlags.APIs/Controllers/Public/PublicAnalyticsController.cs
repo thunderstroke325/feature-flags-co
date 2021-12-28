@@ -57,14 +57,9 @@ namespace FeatureFlags.APIs.Controllers.Public
         [AllowAnonymous]
         public async Task UserBehaviorTrackAsync(TrackUserBehaviorEventParam param)
         {
-            if(string.IsNullOrEmpty(param.EnvironmentKey))
+            if(EnvId == 0)
             {
                 Response.StatusCode = (int)HttpStatusCode.NotFound;
-            }
-            var env = FeatureFlagKeyExtension.GetEnvIdsByEnvKey(param.EnvironmentKey);
-            if(env == null || string.IsNullOrEmpty(env.EnvId))
-            {
-                Response.StatusCode = (int)HttpStatusCode.Conflict;
             }
             return;
         }

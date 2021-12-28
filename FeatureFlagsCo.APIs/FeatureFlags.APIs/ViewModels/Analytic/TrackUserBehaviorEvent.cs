@@ -12,7 +12,6 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
         public TrackUserBehaviorPageViewEvent PageViewEvent { get; set; }
         public TrackCustomEvent CustomEvent { get; set; }
         public TrackPageStayDurationEvent PageStayDurationEvent { get; set; }
-        public string EnvironmentKey { get; set; }
     }
     public class TrackUserBehaviorEvent
     {
