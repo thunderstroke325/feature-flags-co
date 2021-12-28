@@ -144,16 +144,20 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
                 else:
                     confidenceInterval =  [0 if round(min, 2) < 0 else round(min, 2), 1 if round(max, 2) > 1 else round(max, 2)]
                 # Calculate pValue
-                pValue = round(proportions_ztest(sum(dist_item), len(dist_item), alternative='two-sided', prop_var=False)[1], 2)
+                pValue = round(proportions_ztest([sum(dist_baseline),sum(dist_item)], [len(dist_item),len(dist_item)], alternative='two-sided', prop_var=False)[1], 2)
                 # Calculate Power
                 try:
                     s1 = int(dict_var_occurence[var_baseline])
                     s2 = int(dict_var_occurence[item])
                     sampleNow = s1 if s1 < s2 else s2
+                    try:
+                        ratio_power = s2/s1 
+                    except :
+                        ratio_power = 1
                     if Compare_Power:
                         # calculate power compared to default power value
                         Effect = (rate - BaselineRate) / BaselineRate
-                        power_now = NormalIndPower.power(Effect, sampleNow, para_alpha)
+                        power_now = NormalIndPower(ddof=0).power(Effect, s1, para_alpha, ratio_power)
                         if power_now > para_power:
                             power_valid = True
                         else:
@@ -176,7 +180,7 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
                     logger.info('ERROR in power calculation, return power_valid False')
                     power_valid = False
 
-                if (pValue.value > para_alpha) or math.isnan(pValue.value):
+                if (pValue > para_alpha) or math.isnan(pValue):
                     pValue_valid = False
                 else:
                     pValue_valid = True
@@ -185,7 +189,7 @@ def calc_customevent_conversion(expt, list_ff_events, list_user_events, logger=l
                 else:
                     isInvalid = True
                     
-                if math.isnan(pValue.value):
+                if math.isnan(pValue):
                     pValue = None
                                         
                 output.append({'variation': item,
@@ -376,10 +380,14 @@ def calc_customevent_numeric(expt, list_ff_events, list_user_events, logger=logg
                     s1 = int(dict_var_occurence[var_baseline])
                     s2 = int(dict_var_occurence[item])
                     sampleNow = s1 if s1 < s2 else s2
+                    try:
+                        ratio_power = s2/s1 
+                    except :
+                        ratio_power = 1
                     if Compare_Power:
                         # calculate power compared to default power value
                         Effect = (rate - BaselineRate) / BaselineRate
-                        power_now = TTestIndPower.power(Effect, sampleNow, para_alpha)
+                        power_now = TTestIndPower.power(Effect, s1, para_alpha, para_power, ratio_power)
                         if power_now > para_power:
                             power_valid = True
                         else:
@@ -402,7 +410,7 @@ def calc_customevent_numeric(expt, list_ff_events, list_user_events, logger=logg
                     logger.info('ERROR in power calculation, return power_valid False')
                     power_valid = False
 
-                if (pValue.value > para_alpha) or math.isnan(pValue.value):
+                if (pValue > para_alpha) or math.isnan(pValue):
                     pValue_valid = False
                 else:
                     pValue_valid = True
@@ -411,7 +419,7 @@ def calc_customevent_numeric(expt, list_ff_events, list_user_events, logger=logg
                 else:
                     isInvalid = True
                     
-                if math.isnan(pValue.value):
+                if math.isnan(pValue):
                     pValue = None
 
                 output.append({'variation': item,

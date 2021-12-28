@@ -5,6 +5,7 @@ WORKDIR /source
 
 # copy csproj and restore as distinct layers
 COPY *.sln .
+COPY FeatureFlags.Utils/*.csproj ./FeatureFlags.Utils/
 COPY FeatureFlags.APIs/*.csproj ./FeatureFlags.APIs/
 COPY FeatureFlagsCo.MQ/*.csproj ./FeatureFlagsCo.MQ/
 COPY FeatureFlagsCo.MQ.DirectExporter/*.csproj ./FeatureFlagsCo.MQ.DirectExporter/
@@ -19,6 +20,7 @@ RUN dotnet restore
 
 
 # copy everything else and build app
+COPY FeatureFlags.Utils/. ./FeatureFlags.Utils/
 COPY FeatureFlags.APIs/. ./FeatureFlags.APIs/
 COPY FeatureFlagsCo.MQ/. ./FeatureFlagsCo.MQ/
 COPY FeatureFlagsCo.MQ.DirectExporter/. ./FeatureFlagsCo.MQ.DirectExporter/

@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -30,6 +31,16 @@ namespace FeatureFlagsCo.MQ.ElasticSearch
         public async Task<bool> IndexDocumentAsync<TDocument>(TDocument document, string indexName)
             where TDocument : class
         {
+            if (!ElasticSearchIndices.IsRegistered(indexName))
+            {
+                var exception = new ArgumentException(
+                    $"Failed to index document because the index '{indexName}' is not registered in ElasticSearchIndices"
+                );
+                
+                _logger.LogError(exception, exception.Message);
+                throw exception;
+            }
+            
             var response = await _client.IndexAsync(document, descriptor => descriptor.Index(indexName));
             if (!response.IsValid)
             {

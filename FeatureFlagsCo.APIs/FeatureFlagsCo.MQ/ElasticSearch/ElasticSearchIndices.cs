@@ -1,4 +1,6 @@
-﻿namespace FeatureFlagsCo.MQ.ElasticSearch
+﻿using System.Linq;
+
+namespace FeatureFlagsCo.MQ.ElasticSearch
 {
     /// <summary>
     /// es search indexes [from `GET /_cat/indices`]
@@ -10,5 +12,9 @@
         public const string Variation = "ffvariationrequestindex";
         
         public const string Analytics = "analytics";
+
+        public static readonly string[] All = { Experiment, Variation, Analytics };
+
+        public static bool IsRegistered(string name) => All.Contains(name);
     }
 }

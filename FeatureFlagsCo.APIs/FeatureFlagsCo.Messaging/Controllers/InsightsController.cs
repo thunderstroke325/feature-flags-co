@@ -43,10 +43,9 @@ namespace FeatureFlagsCo.Messaging.Controllers
             {
                 var keyValues = new Dictionary<string, string>();
                 param.Message.Labels.ForEach(label => keyValues.TryAdd(label.LabelName, label.LabelValue));
-                var jsonContent = JsonSerializer.Serialize(keyValues);
-
+                
                 var createSuccess = 
-                    await _elasticSearchService.IndexDocumentAsync(ElasticSearchIndices.Variation, jsonContent);
+                    await _elasticSearchService.IndexDocumentAsync(keyValues, ElasticSearchIndices.Variation);
                 
                 // if send to es failed, terminate this request
                 if (!createSuccess)
