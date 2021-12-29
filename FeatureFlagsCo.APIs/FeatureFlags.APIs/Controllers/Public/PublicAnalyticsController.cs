@@ -49,5 +49,12 @@ namespace FeatureFlags.APIs.Controllers.Public
                 await _mongoDb.UpdateAsync(board.Id, board);
             }
         }
+
+        [HttpPost]
+        [Route("analytics/userbehaviortrack")]
+        public IActionResult UserBehaviorTrackAsync(TrackUserBehaviorEventParam param)
+        {
+            return Ok();
+        }
     }
 }
