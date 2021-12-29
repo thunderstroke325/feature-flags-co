@@ -1,9 +1,7 @@
-﻿using System.Net;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Analytic;
 using FeatureFlagsCo.MQ.ElasticSearch;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FeatureFlags.APIs.Controllers.Public
@@ -54,14 +52,9 @@ namespace FeatureFlags.APIs.Controllers.Public
 
         [HttpPost]
         [Route("analytics/userbehaviortrack")]
-        [AllowAnonymous]
-        public async Task UserBehaviorTrackAsync(TrackUserBehaviorEventParam param)
+        public IActionResult UserBehaviorTrackAsync(TrackUserBehaviorEventParam param)
         {
-            if(EnvId == 0)
-            {
-                Response.StatusCode = (int)HttpStatusCode.NotFound;
-            }
-            return;
+            return Ok();
         }
     }
 }
