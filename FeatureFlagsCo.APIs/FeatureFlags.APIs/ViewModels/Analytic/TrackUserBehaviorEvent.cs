@@ -8,7 +8,7 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
     public class TrackUserBehaviorEventParam
     {
         public string UserKey { get; set; }
-        public DateTime UtcTimeStampFromClientEnd { get; set; }
+        public long? UtcTimeStampFromClientEnd { get; set; }
         public TrackUserBehaviorClickEvent ClickEvent { get; set; }
         public TrackUserBehaviorPageViewEvent PageViewEvent { get; set; }
         public TrackCustomEvent CustomEvent { get; set; }
@@ -23,8 +23,8 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
         public string MediaType { get; set; }
         public string EventType { get; set; }
         public string UserKey { get; set; }
-        public DateTime? TimeStamp { get; set; }
-        public DateTime TimeStampFromClientEnd { get; set; }
+        public long TimeStamp { get; set; }
+        public long TimeStampFromClientEnd { get; set; }
         public TrackUserBehaviorClickEvent ClickEvent { get; set; }
         public TrackUserBehaviorPageViewEvent PageViewEvent { get; set; }
         public TrackCustomEvent CustomEvent { get; set; }

@@ -64,6 +64,7 @@ namespace FeatureFlags.APIs.Controllers.Public
                 eventType = "PageStayDurationEvent";
             if (param.PageViewEvent != null)
                 eventType = "PageViewEvent";
+
             if(param.UtcTimeStampFromClientEnd == null)
             {
                 throw new Exception("TimeStampFromClientEnd is empty");
@@ -75,11 +76,11 @@ namespace FeatureFlags.APIs.Controllers.Public
                 PageStayDurationEvent = param.PageStayDurationEvent,
                 PageViewEvent = param.PageViewEvent,
                 EnvironmentId = EnvId,
-                TimeStamp = DateTime.UtcNow,
+                TimeStamp = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds,
                 UserKey = param.UserKey,
                 EventType = eventType,
                 MediaType = MediaTypeEnum.WebAPP.ToString(),
-                TimeStampFromClientEnd = param.UtcTimeStampFromClientEnd
+                TimeStampFromClientEnd = param.UtcTimeStampFromClientEnd ?? 0
             };
             // index document
             var success = await _elasticSearch.IndexDocumentAsync(newEventObject, ElasticSearchIndices.UserBehaviorTrack);
