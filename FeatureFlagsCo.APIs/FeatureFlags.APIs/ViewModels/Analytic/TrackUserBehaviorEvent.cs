@@ -40,7 +40,6 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
 
     public class TrackUserBehaviorClickEvent
     {
-        public string ClickType { get; set; }
         public string InnerText { get; set; }
         public string CssSelector { get; set; }
         public string ElementType { get; set; }
