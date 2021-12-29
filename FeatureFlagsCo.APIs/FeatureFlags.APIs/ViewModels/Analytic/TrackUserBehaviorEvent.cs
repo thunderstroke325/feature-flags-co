@@ -13,19 +13,21 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
         public TrackCustomEvent CustomEvent { get; set; }
         public TrackPageStayDurationEvent PageStayDurationEvent { get; set; }
     }
+    public enum MediaTypeEnum
+    {
+        WebAPP
+    }
     public class TrackUserBehaviorEvent
     {
+        public string MediaType { get; set; }
+        public string EventType { get; set; }
         public string UserKey { get; set; }
         public DateTime? TimeStamp { get; set; }
-        public long TimeStampInLong { get; set; }
         public TrackUserBehaviorClickEvent ClickEvent { get; set; }
         public TrackUserBehaviorPageViewEvent PageViewEvent { get; set; }
         public TrackCustomEvent CustomEvent { get; set; }
         public TrackPageStayDurationEvent PageStayDurationEvent { get; set; }
-        public string EnvironmentId { get; set; }
-        public string ProjectId { get; set; }
-        public string EnvironmentKey { get; set; }
-        public string AccountId { get; set; }
+        public int EnvironmentId { get; set; }
     }
 
     public enum UserBehaviorEnum
