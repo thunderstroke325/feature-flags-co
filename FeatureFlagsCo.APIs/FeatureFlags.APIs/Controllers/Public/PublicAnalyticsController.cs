@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Analytic;
 using FeatureFlagsCo.MQ.ElasticSearch;
@@ -52,9 +53,36 @@ namespace FeatureFlags.APIs.Controllers.Public
 
         [HttpPost]
         [Route("analytics/userbehaviortrack")]
-        public IActionResult UserBehaviorTrackAsync(TrackUserBehaviorEventParam param)
+        public async Task<TrackUserBehaviorEvent> UserBehaviorTrackAsync(TrackUserBehaviorEventParam param)
         {
-            return Ok();
+            string eventType = "";
+            if (param.ClickEvent != null)
+                eventType = "ClickEvent";
+            if (param.CustomEvent != null)
+                eventType = "CustomEvent";
+            if (param.PageStayDurationEvent != null)
+                eventType = "PageStayDurationEvent";
+            if (param.PageViewEvent != null)
+                eventType = "PageViewEvent";
+            var newEventObject = new TrackUserBehaviorEvent()
+            {
+                ClickEvent = param.ClickEvent,
+                CustomEvent = param.CustomEvent,
+                PageStayDurationEvent = param.PageStayDurationEvent,
+                PageViewEvent = param.PageViewEvent,
+                EnvironmentId = EnvId,
+                TimeStamp = DateTime.UtcNow,
+                UserKey = param.UserKey,
+                EventType = eventType,
+                MediaType = MediaTypeEnum.WebAPP.ToString()
+            };
+            // index document
+            var success = await _elasticSearch.IndexDocumentAsync(newEventObject, ElasticSearchIndices.UserBehaviorTrack);
+            if (!success)
+            {
+                throw new ElasticSearchException("Failed to index analytics, please check your elastic search log.");
+            }
+            return newEventObject;
         }
     }
 }
