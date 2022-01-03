@@ -5,11 +5,11 @@ namespace FeatureFlags.APIs.ViewModels.Public
 {
     public class GetUserVariationsRequest
     {
-        public string Name { get; set; }
+        public string UserName { get; set; }
 
         public string Email { get; set; }
 
-        public string KeyId { get; set; }
+        public string UserKeyId { get; set; }
 
         public string Country { get; set; }
 
@@ -23,8 +23,8 @@ namespace FeatureFlags.APIs.ViewModels.Public
                 Country = Country,
                 CustomizedProperties = CustomizedProperties,
                 Email = Email,
-                KeyId = KeyId,
-                Name = Name
+                KeyId = UserKeyId,
+                Name = UserName
             };
 
             return envUser;

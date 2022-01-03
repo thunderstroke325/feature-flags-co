@@ -35,7 +35,7 @@ namespace FeatureFlags.APIs.Controllers.Public
         }
 
         [HttpPost]
-        [Route("feature-flag/user-variations")]
+        [Route("feature-flag/variations")]
         public async Task<IEnumerable<UserVariationViewModel>> GetFeatureFlagVariations(GetUserVariationsRequest request)
         {
             var variations = new List<UserVariationViewModel>();
