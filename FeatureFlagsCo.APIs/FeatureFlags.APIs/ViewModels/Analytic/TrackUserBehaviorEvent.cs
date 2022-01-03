@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace FeatureFlags.APIs.ViewModels.Analytic
+﻿namespace FeatureFlags.APIs.ViewModels.Analytic
 {
     public class TrackUserBehaviorEventParam
     {
@@ -49,6 +44,7 @@ namespace FeatureFlags.APIs.ViewModels.Analytic
         public string Origin { get; set; }
         public string Hash { get; set; }
         public string Pathname { get; set; }
+        public string Extra { get; set; }
     }
 
     public class TrackUserBehaviorPageViewEvent
