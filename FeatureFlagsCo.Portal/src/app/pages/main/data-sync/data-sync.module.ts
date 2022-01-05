@@ -11,6 +11,7 @@ import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { ShareModule } from 'src/app/share/share.module';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 
 
 @NgModule({
@@ -25,6 +26,7 @@ import { ShareModule } from 'src/app/share/share.module';
     NzSpaceModule,
     NzDividerModule,
     NzIconModule,
+    NzDatePickerModule,
     ShareModule,
     DataSyncRoutingModule
   ]

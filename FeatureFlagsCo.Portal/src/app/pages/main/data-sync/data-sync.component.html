@@ -34,7 +34,6 @@
           </nz-list-item-meta>
         </nz-list-item>
       </nz-list>
-      <nz-divider></nz-divider>
       <nz-space [nzSize]="20">
         <button (click)="onDownload()" *nzSpaceItem nz-button class="submit" nz-button nzType="primary">
           <i nz-icon nzType="download" nzTheme="outline"></i>
@@ -46,8 +45,34 @@
         </button>
         <a style="visibility: hidden;" #downloadRef [href]="downloadUri" [download]="downloadFileName"></a>
       </nz-space>
+      <nz-divider style="background-color: rgba(0, 0, 0, 0.3);" *ngIf="userBehaviorDataDownloadFunc"></nz-divider>
     </nz-spin>
-  </div>
+
+    <ng-container *ngIf="userBehaviorDataDownloadFunc">
+      <nz-spin style="margin-top: 50px;" [nzSpinning]="userBehaviorDataDownloading" nzTip="下载中...">
+        <div class="data-sync-title" nz-typography>下载用户行为数据</div>
+        <nz-list nzItemLayout="vertical" [nzSplit]="false" class="data-sync-list">
+          <nz-list-item>
+            <nz-list-item-meta>
+              <nz-list-item-meta-title>
+                <p>时间范围</p>
+              </nz-list-item-meta-title>
+              <nz-list-item-meta-description>
+                <nz-range-picker [(ngModel)]="dataDateRange"></nz-range-picker>
+              </nz-list-item-meta-description>
+            </nz-list-item-meta>
+          </nz-list-item>
+        </nz-list>
+        <nz-space [nzSize]="20">
+          <button (click)="onDownloadUserBehaviorData()" *nzSpaceItem nz-button class="submit" nz-button nzType="primary">
+            <i nz-icon nzType="download" nzTheme="outline"></i>
+            下载
+          </button>
+        </nz-space>
+      </nz-spin>
+    </ng-container>
+
+  </div> 
 </section>
 
 <app-upload-drawer [visible]="uploadFormVisible" (close)="onUploadClosed($event)"></app-upload-drawer>

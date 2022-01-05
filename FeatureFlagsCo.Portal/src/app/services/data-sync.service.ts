@@ -22,4 +22,9 @@ export class DataSyncService {
     const url = this.baseUrl.replace(/#envId/ig, `${envId}`) + `download`;
     return this.http.get(url);
   }
+
+  getUserBehaviorData(envId: number, params: any): Observable<any> {
+    const url = this.baseUrl.replace(/#envId/ig, `${envId}`) + `user-behavior`;
+    return this.http.get(url, {params});
+  }
 }
