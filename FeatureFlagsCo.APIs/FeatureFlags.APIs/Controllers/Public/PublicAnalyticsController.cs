@@ -21,7 +21,7 @@ namespace FeatureFlags.APIs.Controllers.Public
         }
 
         /// <summary>
-        /// 数据报表数据收集
+        /// collect business analytics data
         /// </summary>
         /// <returns></returns>
         /// <exception cref="ElasticSearchException"></exception>

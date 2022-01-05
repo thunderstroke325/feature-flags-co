@@ -1,14 +1,15 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Authentication;
-using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
+using FeatureFlags.APIs.ViewModels.Analytic;
 using FeatureFlags.APIs.ViewModels.DataSync;
+using FeatureFlagsCo.MQ.ElasticSearch;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace FeatureFlags.APIs.Controllers
@@ -19,19 +20,18 @@ namespace FeatureFlags.APIs.Controllers
     [Route("api/datasync/envs/{envId}")]
     public class DataSyncController : ControllerBase
     {
-        private readonly IGenericRepository _repository;
-        private readonly ILogger<AccountsController> _logger;
         private readonly IEnvironmentService _envService;
         private readonly IDataSyncService _dataSyncService;
+        private readonly ElasticSearchService _elasticSearch;
 
-        public DataSyncController(ILogger<AccountsController> logger, IGenericRepository repository,
+        public DataSyncController(
             IEnvironmentService envService,
-            IDataSyncService dataSyncService)
+            IDataSyncService dataSyncService, 
+            ElasticSearchService elasticSearch)
         {
-            _logger = logger;
-            _repository = repository;
             _envService = envService;
             _dataSyncService = dataSyncService;
+            _elasticSearch = elasticSearch;
         }
 
         [HttpGet]
@@ -78,6 +78,24 @@ namespace FeatureFlags.APIs.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("user-behavior")]
+        public async Task<IEnumerable<TrackUserBehaviorEvent>> SearchUserBehaviorAsync(
+            [FromQuery] SearchUserBehaviorRequest request)
+        {
+            request.Validate();
+
+            var descriptor = request.SearchDescriptor();
+
+            var response = await _elasticSearch.SearchDocumentAsync(descriptor);
+            if (!response.IsValid)
+            {
+                throw new ElasticSearchException("search user behavior failed, please check to elastic search log.");
+            }
+
+            return response.Documents;
         }
     }
 }
