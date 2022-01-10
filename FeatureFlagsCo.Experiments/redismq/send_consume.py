@@ -44,10 +44,47 @@ class RedisSender(RedisStub, Sender):
 
 class RedisReceiver(RedisSender, Receiver, MessageHandler, ABC):
 
+    def _multi_pop(self, topic, instance_id, n):
+        with self.redis.pipeline() as pipeline:
+            pipeline.multi()
+            pipeline.lrange(topic, 0, n - 1)
+            pipeline.ltrim(topic, n, -1)
+            items, _ = pipeline.execute()
+        if items:
+            last_error_in_loop = None
+            debug_logger.info(f'################pulling the {len(items)} message(s) into {topic}-{instance_id}################')
+            for item in items:
+                try:
+                    message = decode(item)
+                    self.handle_body(message,
+                                     instance_name=topic,
+                                     instance_id=instance_id,
+                                     trace_logger=logger,
+                                     debug_logger=debug_logger)
+                except redis.RedisError as e:
+                    raise e
+                except Exception as e:
+                    last_error_in_loop = e
+                if last_error_in_loop:
+                    raise last_error_in_loop
+
+    def _blocking_single_pop(self, topic, instance_id, health_check_interval):
+        item = item if (item := self.redis.blpop(topic, timeout=health_check_interval)) else None
+        if item:
+            debug_logger.info(f'################pulling the message into {topic}-{instance_id}################')
+            message = decode(item[1])
+            self.handle_body(message,
+                             instance_name=topic,
+                             instance_id=instance_id,
+                             trace_logger=logger,
+                             debug_logger=debug_logger)
+
     def consume(self, **kwargs):
         process_name = kwargs.pop('process_name', '')
         topic = kwargs.pop('topic', '')
+        prefetch_count = kwargs.pop('prefetch_count', 50)
         health_check_interval = kwargs.pop('health_check_interval', 30)
+        fetch_mode = kwargs.pop('fetch_mode', 'single')
         instance_id = choice([i for i in range(1000, 100000)])
         machine_id = get_azure_instance_id()
         is_exit_in_error = False
@@ -56,16 +93,13 @@ class RedisReceiver(RedisSender, Receiver, MessageHandler, ABC):
         logger.info('RECEIVER START', extra=get_custom_properties(topic=topic, instance=f'{topic}-{instance_id}'))
         while True:
             try:
-                debug_logger.info(f'################pulling the message into {topic}-{instance_id}################')
                 self.__health_check_reponse(process_name, machine_id, topic, instance_id)
-                item = item if (item := self.redis.blpop(topic, timeout=health_check_interval)) else None
-                if item:
-                    message = decode(item[1])
-                    self.handle_body(message,
-                                     instance_name=topic,
-                                     instance_id=instance_id,
-                                     trace_logger=logger,
-                                     debug_logger=debug_logger)
+                if fetch_mode == 'single':
+                    self._blocking_single_pop(topic, instance_id, health_check_interval)
+                elif fetch_mode == 'multi':
+                    self._multi_pop(topic, instance_id, prefetch_count)
+                else:
+                    self._blocking_single_pop(topic, instance_id, health_check_interval)
                 sleep(SYS_HEARTBEAT)
             except redis.RedisError:
                 logger.exception('redis error', extra=get_custom_properties(topic=topic, instance=f'{topic}-{instance_id}'))

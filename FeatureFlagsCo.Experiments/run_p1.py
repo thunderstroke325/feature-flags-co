@@ -40,7 +40,10 @@ if __name__ == '__main__':
                      prefetch_count=prefetch_count,
                      is_dlq=False)
     elif engine == 'redis':
-        redis_p1(redis_host, redis_port, redis_passwd, redis_ssl).consume(process_name=process_name, topic=topic)
+        redis_p1(redis_host, redis_port, redis_passwd, redis_ssl) \
+            .consume(process_name=process_name,
+                     topic=topic,
+                     fetch_mode='single')
     else:
         redis_host = cus_redis_host if (cus_redis_host := os.getenv('CUSTOMERS_HOST', False)) else redis_host
         redis_port = cus_redis_port if (cus_redis_port := os.getenv('CUSTOMERS_PORT', False)) else redis_port
@@ -50,4 +53,7 @@ if __name__ == '__main__':
                 redis_ssl = strtobool(cus_redis_ssl)
         except:
             pass
-        redis_p1(redis_host, redis_port, redis_passwd, redis_ssl).consume(process_name=process_name, topic=topic)
+        redis_p1(redis_host, redis_port, redis_passwd, redis_ssl) \
+            .consume(process_name=process_name,
+                     topic=topic,
+                     fetch_mode='single')
