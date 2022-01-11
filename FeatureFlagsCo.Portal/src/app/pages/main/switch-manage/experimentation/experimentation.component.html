@@ -176,7 +176,8 @@
                             <span class="icon_placeholder"></span>
                           </ng-container>
                           <span class="icon_placeholder" *ngIf="!data.isWinner && !data.isInvalid"></span>
-                          &nbsp;{{ data.variationValue }}</td>
+                          &nbsp;{{ data.variationValue }}
+                        </td>
                         <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metric.customEventTrackOption)">
                           <td>{{ data.conversion }}/{{data.uniqueUsers}}</td>
                           <td>{{ data.conversionRate | percentage }}</td>

@@ -6,7 +6,8 @@ import {ChartConfig} from "../../../../share/uis/g2-chart/g2-line-chart/g2-line-
 
 @Component({
   selector: 'report',
-  templateUrl: './statistical-report.component.html'
+  templateUrl: './statistical-report.component.html',
+  styleUrls: ['./statistical-report.component.less']
 })
 export class StatisticalReportComponent implements OnInit {
 

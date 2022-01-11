@@ -1,4 +1,13 @@
 .account-settings-layout {
     padding: 20px;
     height: 100%;
+
+    nz-tabset {
+        height: 100%;
+
+        ::ng-deep .ant-tabs-content,
+        ::ng-deep .ant-tabs-tabpane {
+            height: 100% !important;
+        }
+    }
 }

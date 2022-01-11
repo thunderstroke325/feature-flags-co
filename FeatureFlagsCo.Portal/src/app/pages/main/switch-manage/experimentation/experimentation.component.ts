@@ -270,7 +270,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       variationValue: option.variationValue,
       confidenceInterval: [-1, -1],
       isBaseline: baselineVariation === `${option.localId}`
-     };
+    };
   }
 
   private initChartConfig(experiment: IExperiment) {
