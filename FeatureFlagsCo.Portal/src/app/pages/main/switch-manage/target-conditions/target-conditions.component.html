@@ -57,28 +57,34 @@
                 </nz-collapse-panel>
               </nz-collapse>
             </div>
+
+            <!-- 拖拽容器 -->
             <div>
               <div class="item" style="display: flex;flex-direction: row;justify-content: space-between;">
                 <div class="label">使用匹配条件找到目标用户</div>
                 <button nz-button nzType="primary" (click)="onAddRule()">
                   <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>添加规则</button>
               </div>
+              <!-- 容器 -->
+              <div cdkDropList (cdkDropListDropped)="onDragEnd($event)">
                 <ng-container *ngFor="let condition of featureDetail?.getFftuwmtr(); let key=index;">
-                    <div class="content">
+
+                  <div class="content" cdkDrag>
                       <div *ngIf="featureDetail?.exptIncludeAllRules || condition.isIncludedInExpt" style="text-align: right;margin-top:20px">
                         <i nz-icon nzType="aim" nzTheme="outline"></i>分流进入数据实验 <a (click)="onSetExptRulesClick(data)"><i nz-icon nzType="edit" nzTheme="fill"></i>编辑</a>
                       </div>
                         <find-rule [data]="condition"
-                                   [properties]="propertiesList"
-                                   [index]="key"
-                                   (deleteRule)="onDeleteRule(key)"
-                                   (percentageChange)="onPercentageChange($event, key)"
-                                   (ruleConfigChange)="onRuleConfigChange($event, key)"
-                                   [variationOptions]="variationOptions"
-                                   [rulePercentageRollouts]="condition?.valueOptionsVariationRuleValues"
-                                   (onPercentageChangeMultistates)="onPercentageChangeMultistates($event, key)"></find-rule>
+                                  [properties]="propertiesList"
+                                  (deleteRule)="onDeleteRule(key)"
+                                  (percentageChange)="onPercentageChange($event, key)"
+                                  (ruleConfigChange)="onRuleConfigChange($event, key)"
+                                  (updateRuleName)="condition.ruleName = $event"
+                                  [variationOptions]="variationOptions"
+                                  [rulePercentageRollouts]="condition?.valueOptionsVariationRuleValues"
+                                  (onPercentageChangeMultistates)="onPercentageChangeMultistates($event, key)"></find-rule>
                     </div>
                 </ng-container>
+              </div>
             </div>
             <div class="item item-short" style="margin-top:32px;display: flex;justify-content: space-between;align-items: flex-start;">
               <div>

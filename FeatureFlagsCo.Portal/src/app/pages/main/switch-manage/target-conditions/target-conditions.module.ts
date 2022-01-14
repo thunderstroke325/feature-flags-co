@@ -15,6 +15,7 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { FormsModule } from '@angular/forms';
 import {NzCollapseModule} from "ng-zorro-antd/collapse";
 import { ShareModule } from 'src/app/share/share.module';
+import { DragDropModule } from "@angular/cdk/drag-drop";
 
 @NgModule({
   declarations: [TargetConditionsComponent, SafeHtmlPipe ],
@@ -31,6 +32,7 @@ import { ShareModule } from 'src/app/share/share.module';
     NzSwitchModule,
     FormsModule,
     NzCollapseModule,
+    DragDropModule,
     ShareModule
   ]
 })

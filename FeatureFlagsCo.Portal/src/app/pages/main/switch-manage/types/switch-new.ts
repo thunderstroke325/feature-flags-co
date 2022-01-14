@@ -1,4 +1,5 @@
 import { uuidv4 } from "src/app/utils";
+import { dragConfig } from "./dragConfig";
 
 export enum FeatureFlagType {
   Classic = 1,
@@ -167,7 +168,7 @@ export class CSwitchParams {
     public addFftuwmtr() {
         this.fftuwmtr.push({
             ruleId: uuidv4(),
-            ruleName: '',
+            ruleName: '规则' + (this.fftuwmtr.length + 1),
             ruleJsonContent: [],
             valueOptionsVariationRuleValues: [],
         })
@@ -182,8 +183,9 @@ export class CSwitchParams {
 
           return result;
         });
-
+        console.log(this.fftuwmtr);
         this.fftuwmtr = this.fftuwmtr.filter(f => f.ruleJsonContent.length > 0);
+        console.log(this.fftuwmtr);
         this.fftuwmtr.forEach((item: IFftuwmtrParams) => {
             item.ruleJsonContent.forEach((rule: IJsonContent) => {
                 if(rule.type === 'multi') {
@@ -269,7 +271,7 @@ export class CSwitchParams {
       })
 
       return validatonErrs;
-   }
+  }
 
   // 设置目标用户
   public setTargetIndividuals(data: {[key: string]: IUserType[]}) {
