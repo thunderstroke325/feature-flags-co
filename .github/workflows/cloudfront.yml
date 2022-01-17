@@ -35,7 +35,7 @@ jobs:
         run: |
               cd 'FeatureFlagsCo.Portal'
               npm install
-              npm audit fix
+              npm audit fix --force
               npm run build-dev
               echo current dir is: 
               ls
@@ -92,7 +92,6 @@ jobs:
         run: |
               cd 'FeatureFlagsCo.Portal'
               npm install
-              npm audit fix
               npm run build-prod
               echo current dir is: 
               ls
