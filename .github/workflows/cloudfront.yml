@@ -35,7 +35,6 @@ jobs:
         run: |
               cd 'FeatureFlagsCo.Portal'
               npm install
-              npm audit fix --force
               npm run build-dev
               echo current dir is: 
               ls
