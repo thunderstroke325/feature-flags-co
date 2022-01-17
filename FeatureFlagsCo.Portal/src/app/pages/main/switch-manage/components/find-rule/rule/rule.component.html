@@ -29,16 +29,6 @@
         <input style="width: 200px;margin-right: 10px;" nz-input [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" placeholder="Eg. ^foo$"/>
       </ng-container>
       <ng-container *ngSwitchCase="'multi'">
-        <!-- <nz-select nzMode="tags"
-                    nzPlaceHolder="Select users"
-                    nzAllowClear
-                    [compareWith]="compareWith"
-                    [(ngModel)]="ruleContent.multipleValue"
-                    (ngModelChange)="onModelChange()">
-                    <ng-container *ngFor="let item of selectValueList">
-                        <nz-option [nzValue]="item" [nzLabel]="item"></nz-option>
-                    </ng-container>
-        </nz-select> -->
         <nz-select style="min-width: 200px;margin-right: 10px;" nzMode="tags" nzPlaceHolder="Tag Mode" [(ngModel)]="ruleContent.multipleValue" (ngModelChange)="onModelChange()">
           <nz-option *ngFor="let option of listOfOption" [nzLabel]="option.label" [nzValue]="option.value"></nz-option>
         </nz-select>
