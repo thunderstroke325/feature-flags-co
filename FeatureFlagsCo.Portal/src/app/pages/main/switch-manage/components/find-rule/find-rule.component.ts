@@ -11,6 +11,7 @@ export class FindRuleComponent {
 
   @Input()
   set data(value: IFftuwmtrParams) {
+    this.ruleName = value.ruleName;
     this.ruleContentList = [];
     // 新创建的
     if(value.ruleJsonContent.length === 0) {
@@ -45,10 +46,10 @@ export class FindRuleComponent {
     }
   }
 
-  @Input() properties: string[] = [];                 // 字段配置
-  @Input() index: number = 0;
+  @Input() properties: string[] = [];                           // 字段配置
 
-  @Output() deleteRule = new EventEmitter();          // 删除规则
+  @Output() deleteRule = new EventEmitter();                    // 删除规则
+  @Output() updateRuleName = new EventEmitter<string>();        // 修改规则名字
   @Output() percentageChange = new EventEmitter<{ serve:boolean, T: number, F: number }>();     // serve 配置发生改变
   @Output() ruleConfigChange = new EventEmitter<IJsonContent[]>();
 
@@ -56,6 +57,7 @@ export class FindRuleComponent {
   public variationRuleValue: boolean | string = null;          // serve 的值 true false null
   public percentageRolloutForTrue: number = null;        // serve 为 null 时的 状态为 true 的百分比
   public percentageRolloutForFalse: number = null;       // serve 为 null 时的 状态为 false 的百分比
+  public ruleName: string = "";                          // 规则名称
 
   // 添加规则
   onAddRule() {
@@ -104,6 +106,11 @@ export class FindRuleComponent {
   // 确认删除规则
   public confirm() {
     this.onDeleteRule();
+  }
+
+  // 修改规则名字
+  public onRuleNameChange() {
+    this.updateRuleName.emit(this.ruleName);
   }
 
   /**************Multi states */

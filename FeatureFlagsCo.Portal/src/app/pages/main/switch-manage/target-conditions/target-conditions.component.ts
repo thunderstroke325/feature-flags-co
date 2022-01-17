@@ -4,12 +4,13 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SwitchService } from 'src/app/services/switch.service';
-import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType, IVariationOption, IFftiuParams, IRulePercentageRollout, IPrequisiteFeatureFlag, FeatureFlagType } from '../types/switch-new';
+import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IUserType, IVariationOption, IFftiuParams, IRulePercentageRollout, IPrequisiteFeatureFlag, FeatureFlagType, IFftuwmtrParams } from '../types/switch-new';
 import { FfcService } from 'src/app/services/ffc.service';
 import { PendingChange } from '../types/pending-changes';
 import { TeamService } from 'src/app/services/team.service';
 import { IAccount, IProjectEnv } from 'src/app/config/types';
 import { environment } from './../../../../../environments/environment';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'conditions',
@@ -332,5 +333,10 @@ export class TargetConditionsComponent implements OnInit {
     );
     this.requestApprovalModalVisible = true;
     this.isApprovalRequestModal = true;
+  }
+
+  // 拖放完成
+  public onDragEnd(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.featureDetail.getFftuwmtr(), event.previousIndex, event.currentIndex);
   }
 }
