@@ -31,7 +31,15 @@ export class MainComponent implements OnInit, OnDestroy {
     private switchService: SwitchService,
     private userService: UserService,
     private ffcService: FfcService,
-  )
+  ) {
+
+    if (environment.name === 'Production') {
+      // setup the microsoft insights
+      const angularPlugin = new AngularPlugin();
+    }
+
+    this.setMenus();
+  }
 
   ngOnInit(): void {
     this.auth = getAuth();
