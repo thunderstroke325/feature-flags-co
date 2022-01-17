@@ -33,24 +33,7 @@ export class MainComponent implements OnInit, OnDestroy {
     private switchService: SwitchService,
     private userService: UserService,
     private ffcService: FfcService,
-  ) {
-
-    if (environment.name === 'Production') {
-      // setup the microsoft insights
-      const angularPlugin = new AngularPlugin();
-      const appInsights = new ApplicationInsights({ config: {
-      instrumentationKey: 'c706330b-e4e1-cf9b-9aef-ff26397502d7',
-      endpointUrl: 'https://dc.applicationinsights.azure.cn/v2/track', // this points to azure china, ref https://docs.microsoft.com/en-us/azure/azure-monitor/app/custom-endpoints?tabs=nodejs
-      extensions: [angularPlugin],
-      extensionConfig: {
-          [angularPlugin.identifier]: { router: this.router }
-      }
-      } });
-      appInsights.loadAppInsights();
-    }
-
-    this.setMenus();
-  }
+  )
 
   ngOnInit(): void {
     this.auth = getAuth();
