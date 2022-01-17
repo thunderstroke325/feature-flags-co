@@ -5,43 +5,34 @@ using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Account;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using FeatureFlags.APIs.Authentication;
 using Microsoft.AspNetCore.Identity;
 using System;
+using FeatureFlags.APIs.Controllers.Base;
 
 namespace FeatureFlags.APIs.Controllers
 {
-    //[Authorize(Roles = UserRoles.Admin)]
-    [Authorize]
-    [ApiController]
-    [Route("api/accounts/{accountId}/members")]
-    public class AccountMembersController : ControllerBase
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/accounts/{accountId}/members")]
+    public class AccountMembersController : ApiControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IGenericRepository _repository;
-        private readonly ILogger<AccountsController> _logger;
         private readonly IAccountService _accountService;
         private readonly IAccountUserService _accountUserService;
-        private readonly IEnvironmentService _envService;
 
         public AccountMembersController(
             UserManager<ApplicationUser> userManager,
-            ILogger<AccountsController> logger, 
             IGenericRepository repository,
             IAccountService accountService,
-            IEnvironmentService envService,
             IAccountUserService accountUserService)
         {
             _userManager = userManager;
-            _logger = logger;
             _repository = repository;
             _accountService = accountService;
             _accountUserService = accountUserService;
-            _envService = envService;
         }
 
         [HttpGet]

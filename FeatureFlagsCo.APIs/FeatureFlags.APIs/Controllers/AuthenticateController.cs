@@ -1,6 +1,4 @@
 ﻿using FeatureFlags.APIs.Authentication;
-using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +17,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using FeatureFlags.APIs.Authentication.Scheme;
 
 namespace FeatureFlags.APIs.Controllers
 {
@@ -26,35 +25,26 @@ namespace FeatureFlags.APIs.Controllers
     [ApiController]
     public class AuthenticateController : ControllerBase
     {
-        private readonly IGenericRepository _repository;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly IAccountService _accountService;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly IOptions<MySettings> _mySettings;
         private readonly IUserInvitationService _userInvitationService;
-        private readonly IAccountUserService _accountUserService;
         private readonly ILogger<AuthenticateController> _logger;
 
         public AuthenticateController(
-            IGenericRepository repository,
             UserManager<ApplicationUser> userManager, 
             RoleManager<IdentityRole> roleManager,
-            IAccountService accountService,
             IConfiguration configuration,
             IOptions<MySettings> mySettings,
             IUserInvitationService userInvitationService,
-            IAccountUserService accountUserService,
             ILogger<AuthenticateController> logger)
         {
-            _repository = repository;
-            this._userManager = userManager;
-            this.roleManager = roleManager;
-            _accountService = accountService;
+            _userManager = userManager;
+            _roleManager = roleManager;
             _configuration = configuration;
             _mySettings = mySettings;
             _userInvitationService = userInvitationService;
-            _accountUserService = accountUserService;
             _logger = logger;
         }
 
@@ -71,7 +61,7 @@ namespace FeatureFlags.APIs.Controllers
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim("UserId", user.Id)
+                    new Claim(ApiClaims.UserId, user.Id)
                 };
 
                 foreach (var userRole in userRoles)
@@ -100,7 +90,9 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        public async Task<IActionResult> Register(
+            [FromServices] AccountV2AppService accountAppService,
+            [FromBody] RegisterModel model)
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
@@ -128,14 +120,10 @@ namespace FeatureFlags.APIs.Controllers
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = result.Errors.ToList().First().Description });
 
-            // create account
             var user = await _userManager.FindByEmailAsync(model.Email);
-            var account = new AccountViewModel 
-            {
-                OrganizationName = model.OrgName
-            };
 
-            await _accountService.CreateAccountAsync(user.Id, account, true);
+            // create account for new user
+            var account = await accountAppService.CreateAsync(model.OrgName, user.Id, true);
 
             _logger.LogTrace($"{model.OrgName}的{model.Email}使用{model.InviteCode}注册了账户");
 
@@ -161,12 +149,12 @@ namespace FeatureFlags.APIs.Controllers
             if (!result.Succeeded)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "User creation failed! Please check user details and try again." });
 
-            if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
-                await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-            if (!await roleManager.RoleExistsAsync(UserRoles.User))
-                await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+            if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
 
-            if (await roleManager.RoleExistsAsync(UserRoles.Admin))
+            if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
             {
                 await _userManager.AddToRoleAsync(user, UserRoles.Admin);
             }

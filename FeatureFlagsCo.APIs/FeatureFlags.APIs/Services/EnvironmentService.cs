@@ -3,16 +3,16 @@ using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.ViewModels.Project;
-using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FeatureFlags.APIs.Services.MongoDb;
+using MongoDB.Driver.Linq;
 
 namespace FeatureFlags.APIs.Services
 {
     public interface IEnvironmentService
     {
-        public Task<int> GetEnvIdBySecretAsync(string envSecret);
         public Task<IEnumerable<EnvironmentViewModel>> GetEnvs(int accountId, int projectId);
 
         // Remove all envs of a project
@@ -26,39 +26,28 @@ namespace FeatureFlags.APIs.Services
         public Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param, int accountId, string currentUserId, bool isInitializingAccount = false);
 
         Task<bool> CheckIfUserHasRightToReadEnvAsync(string userId, int envId);
-
-        Task<EnvProjectInfoViewModel> GetProjectAndEnvInformationAsync(int envId);
     }
 
     public class EnvironmentService : IEnvironmentService
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IGenericRepository _repository;
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly INoSqlService _noSqlDbService;
         private readonly IEnvironmentUserPropertyService _environmentService;
+        private readonly MongoDbPersist _mongoDb;
 
         public EnvironmentService(
             ApplicationDbContext context,
             IGenericRepository repository,
-            UserManager<ApplicationUser> userManager,
             IEnvironmentUserPropertyService environmentService,
-            INoSqlService noSqlDbService)
+            INoSqlService noSqlDbService, 
+            MongoDbPersist mongoDb)
         {
             _dbContext = context;
             _repository = repository;
-            _userManager = userManager;
             _environmentService = environmentService;
             _noSqlDbService = noSqlDbService;
-        }
-
-        public async Task<int> GetEnvIdBySecretAsync(string envSecret) 
-        {
-            var query = from env in _dbContext.Environments
-                        where env.Secret == envSecret
-                        select env.Id;
-
-            return await query.FirstOrDefaultAsync();
+            _mongoDb = mongoDb;
         }
 
         public async Task<IEnumerable<EnvironmentViewModel>> GetEnvs(int accountId, int projectId)
@@ -159,22 +148,36 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<bool> CheckIfUserHasRightToReadEnvAsync(string userId, int envId)
         {
-            var env = await _dbContext.Environments.FirstOrDefaultAsync(p => p.Id == envId);
-            var proj = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == env.ProjectId);
-            return await _dbContext.AccountUserMappings.AnyAsync(p => p.AccountId == proj.AccountId && p.UserId == userId);
-        }
-
-        public async Task<EnvProjectInfoViewModel> GetProjectAndEnvInformationAsync(int envId)
-        {
-            var env = await _dbContext.Environments.FirstOrDefaultAsync(p => p.Id == envId);
-            var proj = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == env.ProjectId);
-            return new EnvProjectInfoViewModel()
+            // adapted to sqlserver & mongodb
+            
+            // check sqlserver
+            var mssqlQuery =
+                from project in _dbContext.Projects
+                join env in _dbContext.Environments on project.Id equals env.ProjectId
+                join accountUser in _dbContext.AccountUserMappings on project.AccountId equals accountUser.AccountId
+                where env.Id == envId && accountUser.UserId == userId
+                select accountUser;
+            var mssqlResult = await mssqlQuery.FirstOrDefaultAsync();
+            if (mssqlResult != null)
             {
-                EnvId = env.Id,
-                EnvName = env.Name,
-                ProjectId = proj.Id,
-                ProjectName = proj.Name
-            };
+                return true;
+            }
+
+            // check mongodb
+            var mongoQuery =
+                from project in _mongoDb.QueryableOf<ProjectV2>()
+                join env in _mongoDb.QueryableOf<EnvironmentV2>() on project.Id equals env.ProjectId
+                join accountUser in _mongoDb.QueryableOf<AccountUserV2>()
+                    on project.AccountId equals accountUser.AccountId
+                where env.Id == envId && accountUser.UserId == userId
+                select accountUser;
+            var mongoResult = await mongoQuery.FirstOrDefaultAsync();
+            if (mongoResult != null)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -3,37 +3,31 @@ using System.Linq;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using FeatureFlags.APIs.Authentication;
+using FeatureFlags.APIs.Controllers.Base;
 using FeatureFlags.APIs.ViewModels.Project;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels.Account;
 
 namespace FeatureFlags.APIs.Controllers
 {
-    //[Authorize(Roles = UserRoles.Admin)]
-    [Authorize]
-    [ApiController]
-    [Route("api/accounts/{accountId}/[controller]")]
-    public class ProjectsController : ControllerBase
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/accounts/{accountId}/[controller]")]
+    public class ProjectsController : ApiControllerBase
     {
         private readonly IGenericRepository _repository;
-        private readonly ILogger<AccountsController> _logger;
         private readonly IAccountUserService _accountUserService;
         private readonly IProjectUserService _projectUserService;
         private readonly IProjectService _projectService;
 
         public ProjectsController(
-            ILogger<AccountsController> logger,
             IGenericRepository repository,
             IAccountUserService accountUserService,
             IProjectUserService projectUserService,
             IProjectService projectService)
         {
-            _logger = logger;
             _repository = repository;
             _accountUserService = accountUserService;
             _projectUserService = projectUserService;

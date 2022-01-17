@@ -15,14 +15,7 @@ namespace FeatureFlags.APIs.Repositories
     {
         Task<List<AccountViewModel>> GetAccountsAsync(string userId);
         Task<AccountViewModel> CreateAccountAsync(string currentUserId, AccountViewModel param, bool isInitializingAccount = false);
-        // Delete account, including all of its users, projects and envs
         Task DeleteAccountAsync(int accountId);
-
-        //Task<List<ApplicationUser>> GetAccountMembersAsync(int accountId);
-        //Task RemoveAccountMemberAsync(string currentUserId, int accountId, string userId);
-
-        // Task<CosmosDBEnvironmentUserProperty> GetCosmosDBEnvironmentUserPropertiesForCRUDAsync(int environmentId);
-        // Task CreateOrUpdateCosmosDBEnvironmentUserPropertiesForCRUDAsync(CosmosDBEnvironmentUserProperty param);
     }
 
     public class AccountService : IAccountService

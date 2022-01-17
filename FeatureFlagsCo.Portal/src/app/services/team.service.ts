@@ -2,16 +2,26 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { FfcService } from "./ffc.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class TeamService {
 
-  baseUrl: string = environment.url + '/api/accounts/#accountId/members';
+  private _baseUrl: string;
+  public get baseUrl(): string {
+    if (!this._baseUrl) {
+      const apiVersion = this.ffcService.variation('backend-api-version', 'v1');
+      this._baseUrl = `${environment.url}/api/${apiVersion}/accounts/#accountId/members`;
+    }
+
+    return this._baseUrl;
+  }
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private ffcService: FfcService
   ) { }
 
   public getMembers(accountId: number): Observable<any> {

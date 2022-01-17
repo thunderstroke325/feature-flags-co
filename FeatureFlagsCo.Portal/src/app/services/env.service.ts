@@ -1,20 +1,30 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IEnvironment, IEnvKey } from '../config/types';
+import { FfcService } from "./ffc.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnvService {
 
-  baseUrl: string = environment.url + '/api/accounts/#accountId/projects/#projectId/envs';
+  private _baseUrl: string;
+  public get baseUrl(): string {
+    if (!this._baseUrl) {
+      const apiVersion = this.ffcService.variation('backend-api-version', 'v1');
+      this._baseUrl = `${environment.url}/api/${apiVersion}/accounts/#accountId/projects/#projectId/envs`;
+    }
+
+    return this._baseUrl;
+  }
 
   envs: IEnvironment[] = [];
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private ffcService: FfcService
   ) { }
 
   // 获取 env 列表

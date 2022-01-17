@@ -39,8 +39,8 @@ namespace FeatureFlags.APIs.Services
 
         public async Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data)
         {
-            var ids = await _featureFlagService.GetAccountAndProjectIdByEnvironmentIdAsync(envId);
-            await _noSqlService.SaveEnvironmentDataAsync(ids[1], ids[0], envId, data);
+            var envSecret = await _featureFlagService.GetEnvironmentSecretAsync(envId);
+            await _noSqlService.SaveEnvironmentDataAsync(envSecret.AccountId, envSecret.ProjectId, envId, data);
         }
     }
 }

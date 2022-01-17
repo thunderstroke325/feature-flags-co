@@ -4,21 +4,30 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IAccount, IProjectEnv, IAccountProjectEnv } from '../config/types';
 import { ProjectService } from './project.service';
+import { FfcService } from "./ffc.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountService {
 
-  baseUrl: string = environment.url + '/api/accounts';
+  private _baseUrl: string;
+  public get baseUrl(): string {
+    if (!this._baseUrl) {
+      const apiVersion = this.ffcService.variation('backend-api-version', 'v1');
+      this._baseUrl = `${environment.url}/api/${apiVersion}/accounts`;
+    }
+
+    return this._baseUrl;
+  }
 
   accounts: IAccount[] = [];
 
   constructor(
     private http: HttpClient,
-    private projectService: ProjectService
-  ) {
-  }
+    private projectService: ProjectService,
+    private ffcService: FfcService
+  ) { }
 
   // 获取 account 列表
   getAccounts(): Observable<any> {

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '../config/types';
+import { FfcService } from "./ffc.service";
 
 @Injectable({
   providedIn: 'root'
@@ -10,13 +11,24 @@ import { IProject, IProjectEnv } from '../config/types';
 export class ProjectService {
 
   readonly projectEnvKey: string = 'current-project';
-  baseUrl: string = environment.url + '/api/accounts/#accountId/projects';
   currentProjectEnvChanged$: Subject<void> = new Subject<void>();
   projectListChanged$: Subject<void> = new Subject<void>();
 
+  private _baseUrl: string;
+  public get baseUrl(): string {
+    if (!this._baseUrl) {
+      const apiVersion = this.ffcService.variation('backend-api-version', 'v1');
+      this._baseUrl = `${environment.url}/api/${apiVersion}/accounts/#accountId/projects`;
+    }
+
+    return this._baseUrl;
+  }
+
   constructor(
-    private http: HttpClient
-  ) {}
+    private http: HttpClient,
+    private ffcService: FfcService
+  ) {
+  }
 
   // 获取 project 列表
   public getProjects(accountId: number): Observable<IProject[]> {

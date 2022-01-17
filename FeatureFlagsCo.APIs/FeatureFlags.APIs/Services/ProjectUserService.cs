@@ -1,8 +1,5 @@
 ﻿using FeatureFlags.APIs.Authentication;
-using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.ViewModels.Project;
-using Microsoft.AspNetCore.Identity;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,26 +12,16 @@ namespace FeatureFlags.APIs.Services
         // The currentUser must be the owner/admin of the account, or the owner of the project, must be checked before calling this method
         public Task RemoveAllUsersAsync(int projectId);
 
-        // Remove a specific user of a project
-        // The currentUser must be the owner/admin of the account, or owner of the project, must be checked before calling this method
-        public Task RemoveUserAsync(int projectId, string userId);
-
         public bool IsInProjectUserRoles(int projectId, string userId, IEnumerable<ProjectUserRoleEnum> roles);
     }
 
     public class ProjectUserService : IProjectUserService
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly IGenericRepository _repository;
-        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProjectUserService(ApplicationDbContext context, IGenericRepository repository,
-           UserManager<ApplicationUser> userManager)
+        public ProjectUserService(ApplicationDbContext context)
         {
             _dbContext = context;
-            _repository = repository;
-            _userManager = userManager;
-
         }
 
         public async Task RemoveAllUsersAsync(int projectId)
@@ -47,17 +34,6 @@ namespace FeatureFlags.APIs.Services
                 {
                     _dbContext.ProjectUserMappings.Remove(item);
                 }
-            }
-
-            await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task RemoveUserAsync(int projectId, string userId)
-        {
-            var pum = _dbContext.ProjectUserMappings.Where(p => p.ProjectId == projectId && p.UserId == userId).FirstOrDefault();
-            if (pum != null)
-            {
-                _dbContext.ProjectUserMappings.Remove(pum);
             }
 
             await _dbContext.SaveChangesAsync();
