@@ -3,32 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Authentication;
+using FeatureFlags.APIs.Controllers.Base;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace FeatureFlags.APIs.Controllers
 {
-    //[Authorize(Roles = UserRoles.Admin)]
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AccountsController : ControllerBase
+    [ApiVersion("1.0")]
+    public class AccountsController : ApiControllerBase
     {
         private readonly IGenericRepository _repository;
-        private readonly ILogger<AccountsController> _logger;
         private readonly IAccountService _accountService;
         private readonly IAccountUserService _accountUserService;
 
-        public AccountsController(ILogger<AccountsController> logger, IGenericRepository repository,
+        public AccountsController(
+            IGenericRepository repository,
             IAccountService accountService,
             IAccountUserService accountUserService)
         {
-            _logger = logger;
             _repository = repository;
             _accountService = accountService;
             _accountUserService = accountUserService;

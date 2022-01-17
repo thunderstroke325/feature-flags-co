@@ -45,8 +45,8 @@ namespace FeatureFlags.APIs.Controllers
         [Route("{envSecret}")]
         public async Task<IEnumerable<ExperimentMetricSetting>> GetActiveExperimentMetricSettings(string envSecret)
         {
-            var envId = await _environmentService.GetEnvIdBySecretAsync(envSecret);
-            return await _experimentsService.GetActiveExperimentMetricSettingsAsync(envId);
+            var secret = EnvironmentSecretV2.Parse(envSecret);
+            return await _experimentsService.GetActiveExperimentMetricSettingsAsync(secret.EnvId);
         }
 
 

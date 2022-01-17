@@ -6,15 +6,8 @@ namespace FeatureFlags.APIs.Authentication
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        // https://www.c-sharpcorner.com/article/authentication-and-authorization-in-asp-net-core-web-api-with-json-web-tokens/
-
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-
-        }
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
         }
 
         public DbSet<Account> Accounts { get; set; }

@@ -1,83 +1,54 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using FeatureFlags.Utils.ConfigureOptions;
+using FeatureFlags.Utils.ConventionalDependencyInjection;
+using FeatureFlags.Utils.DependencyInjectionExtensions;
+using FeatureFlags.Utils.SwaggerOperationFilters;
+using Microsoft.Extensions.Options;
 
 namespace FeatureFlags.Utils.ExtensionMethods
 {
     public static class ServiceCollectionExtensions
     {
+        public static void AddApiVersion(this IServiceCollection services)
+        {
+            // add api versioning
+            services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = ApiVersion.Default;
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+            });
+
+            services.AddVersionedApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+        }
+
         public static void AddSwagger(this IServiceCollection services)
         {
+            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerGenConfigureOptions>();
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "FeatureFlags API",
-                    Description = "backend api for feature flags",
-                });
-
-                options.AddJwtAuth();
-                options.AddPublicApiAuth();
+                // add a custom operation filter which sets default values
+                options.OperationFilter<SwaggerDefaultValues>();
             });
         }
 
-        public static SwaggerGenOptions AddJwtAuth(this SwaggerGenOptions options)
+        public static void AddAssembly(this IServiceCollection services, Assembly assembly)
         {
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n" +
-                              "Example Input: **Bearer the-token-string**",
-                Name = "Authorization",
-                Scheme = "Bearer",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-            });
-
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    new string[] { }
-                }
-            });
-
-            return options;
+            var registrar = new DefaultConventionalRegistrar();
+            
+            registrar.AddAssembly(services, assembly);
         }
 
-        public static SwaggerGenOptions AddPublicApiAuth(this SwaggerGenOptions options)
+        public static void AddNamedServiceProvider(this IServiceCollection services)
         {
-            options.AddSecurityDefinition(RequestAuthKeys.EnvSecret, new OpenApiSecurityScheme
-            {
-                Name = RequestAuthKeys.EnvSecret,
-                Type = SecuritySchemeType.ApiKey,
-                In = ParameterLocation.Header,
-                Description = "envSecret Authorization for **Public Api**, fill your envSecret below."
-            });
-
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = RequestAuthKeys.EnvSecret
-                        }
-                    },
-                    new string[] { }
-                }
-            });
-
-            return options;
+            services.AddSingleton<NamedServiceProvider>();
         }
     }
 }

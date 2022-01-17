@@ -22,8 +22,6 @@ namespace FeatureFlags.APIs.Services
 
         Task<List<AccountUserViewModel>> SearchAccountMemberAsync(int accountId, string searchText, int returnSize = 5);
 
-        public Task<AccountUserMapping> GetOwnerAccountAsync(string userId);
-
         public bool IsInAccountUserRoles(int accountId, string userId, IEnumerable<AccountUserRoleEnum> roles);
 
         public bool IsAccountMember(int accountId, string userId);
@@ -46,13 +44,6 @@ namespace FeatureFlags.APIs.Services
             return await _dbContext
                 .AccountUserMappings
                 .FirstOrDefaultAsync(x => x.AccountId == accountId && x.Role == AccountUserRoleEnum.Owner.ToString());
-        }
-
-        public async Task<AccountUserMapping> GetOwnerAccountAsync(string userId) 
-        {
-            return await _dbContext
-                    .AccountUserMappings
-                    .FirstOrDefaultAsync(x => x.UserId == userId && x.Role == AccountUserRoleEnum.Owner.ToString());
         }
 
         public async Task<List<AccountUserViewModel>> GetAccountMembersAsync(string currentUserId, int accountId)

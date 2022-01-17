@@ -12,7 +12,6 @@ using FeatureFlagsCo.MQ.ElasticSearch;
 using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,14 +23,12 @@ namespace FeatureFlags.APIs
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IWebHostEnvironment appEnv)
+        public IConfiguration Configuration { get; }
+
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            CurrentEnvironment = appEnv;
         }
-
-        public IConfiguration Configuration { get; }
-        private IWebHostEnvironment CurrentEnvironment { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -92,8 +89,22 @@ namespace FeatureFlags.APIs
             services.AddPublicApiAuthentication();
             #endregion
 
+            // add api versioning and swagger
+            services.AddApiVersion();
             services.AddSwagger();
-
+            
+            // add elasticsearch
+            services.AddElasticsearch(Configuration);
+            
+            // auto register assembly services
+            services.AddAssembly(typeof(Startup).Assembly);
+            
+            // add named service provider
+            services.AddNamedServiceProvider();
+            
+            // add auto mapper
+            services.AddAutoMapper(typeof(Startup));
+            
             services.AddScoped<IGenericRepository, GenericRepository<ApplicationDbContext>>();
             services.AddTransient<IEnvironmentUserPropertyService, EnvironmentUserPropertyService>();
             services.AddTransient<IAccountService, AccountService>();
@@ -128,9 +139,6 @@ namespace FeatureFlags.APIs
             services.AddSingleton<MetricService>();
             services.AddSingleton<MongoDbAnalyticBoardService>();
             
-            // add elasticsearch
-            services.AddElasticsearch(Configuration);
-
             var hostingType = this.Configuration.GetSection("MySettings").GetSection("HostingType").Value;
             var cacheType = this.Configuration.GetSection("MySettings").GetSection("CacheType").Value;
 
@@ -142,7 +150,7 @@ namespace FeatureFlags.APIs
             {
                 services.AddStackExchangeRedisCache(options =>
                 {
-                    options.Configuration = this.Configuration.GetConnectionString("RedisServerUrl");
+                    options.Configuration = Configuration.GetConnectionString("RedisServerUrl");
                     options.InstanceName = "feature-flags-users";
                 });
             }
@@ -173,16 +181,10 @@ namespace FeatureFlags.APIs
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseException();
-            
-            app.UseSwagger(); 
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "FeatureFlags.AdminWebAPIs V0.1.3");
-            });
-
+            app.UseVersionedSwagger();
             app.UseRouting();
             app.UseCors("AllowMyOrigin");
             app.UseAuthentication();

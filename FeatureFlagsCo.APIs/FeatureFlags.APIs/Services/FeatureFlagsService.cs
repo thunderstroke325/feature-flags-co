@@ -1,45 +1,41 @@
 ﻿using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services;
-using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
-using FeatureFlags.APIs.ViewModels.Environment;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using FeatureFlags.APIs.Services.MongoDb;
+using MongoDB.Driver.Linq;
 
 namespace FeatureFlags.APIs.Repositories
 {
     public interface IFeatureFlagsService
     {
         Task<EnvironmentUserQueryResultViewModel> QueryEnvironmentFeatureFlagUsersAsync(string searchText, int environmentId, int pageIndex, int pageSize, string currentUserId);
-        Task<List<int>> GetAccountAndProjectIdByEnvironmentIdAsync(int environmentId);
+        Task<EnvironmentSecretV2> GetEnvironmentSecretAsync(int envId);
+
+        Task CreateDefaultAsync(
+            int accountId,
+            int projectId,
+            int envId,
+            string creatorId
+        );
     }
 
     public class FeatureFlagsService : IFeatureFlagsService
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly IGenericRepository _repository;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IDistributedCache _redisCache;
         private readonly INoSqlService _cosmosDbService;
+        private readonly MongoDbPersist _mongoDb;
 
         public FeatureFlagsService(
             ApplicationDbContext context,
-            IGenericRepository repository,
-            UserManager<ApplicationUser> userManager,
-            IDistributedCache redisCache,
-            INoSqlService cosmosDbService)
+            INoSqlService cosmosDbService, 
+            MongoDbPersist mongoDb)
         {
             _dbContext = context;
-            _repository = repository;
-            _userManager = userManager;
-            _redisCache = redisCache;
             _cosmosDbService = cosmosDbService;
+            _mongoDb = mongoDb;
         }
 
 
@@ -54,14 +50,49 @@ namespace FeatureFlags.APIs.Repositories
             };
         }
 
-        public async Task<List<int>> GetAccountAndProjectIdByEnvironmentIdAsync(int environmentId)
+        public async Task<EnvironmentSecretV2> GetEnvironmentSecretAsync(int envId)
         {
-            var returnList = new List<int>();
-            var env = await _dbContext.Environments.FirstOrDefaultAsync(p => p.Id == environmentId);
-            var proj = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == env.ProjectId);
-            returnList.Add(proj.Id);
-            returnList.Add(proj.AccountId);
-            return returnList;
+            string envSecret;
+
+            // adapted to sqlserver & mongodb
+            var sqlserverEnv = await _dbContext.Environments.FirstOrDefaultAsync(x => x.Id == envId);
+            if (sqlserverEnv != null)
+            {
+                envSecret = sqlserverEnv.Secret;
+            }
+            else
+            {
+                var mongoEnv = await _mongoDb.QueryableOf<EnvironmentV2>().FirstOrDefaultAsync(x => x.Id == envId);
+                envSecret = mongoEnv.Secret;
+            }
+
+            var secret = EnvironmentSecretV2.Parse(envSecret);
+            return secret;
+        }
+
+        public async Task CreateDefaultAsync(
+            int accountId,
+            int projectId,
+            int envId,
+            string creatorId)
+        {
+            // set customized user properties
+            var userProperty = new EnvironmentUserProperty
+            {
+                EnvironmentId = envId,
+                Properties = new List<string> { "age" }
+            };
+
+            await _cosmosDbService.CreateOrUpdateEnvironmentUserPropertiesForCRUDAsync(userProperty);
+
+            var demoFeatureFlag = new CreateFeatureFlagViewModel
+            {
+                Name = "示例开关",
+                Status = "Enabled",
+                EnvironmentId = envId
+            };
+
+            await _cosmosDbService.CreateDemoFeatureFlagAsync(demoFeatureFlag, creatorId, projectId, accountId);
         }
     }
 

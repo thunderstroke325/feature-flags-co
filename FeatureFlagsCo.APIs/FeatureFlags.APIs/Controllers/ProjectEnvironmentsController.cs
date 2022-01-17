@@ -3,20 +3,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using FeatureFlags.APIs.Authentication;
+using FeatureFlags.APIs.Controllers.Base;
 using FeatureFlags.APIs.ViewModels.Project;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.ViewModels.Account;
 
 namespace FeatureFlags.APIs.Controllers
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/accounts/{accountId}/projects/{projectId}/envs")]
-    public class ProjectEnvironmentsController : ControllerBase
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/accounts/{accountId}/projects/{projectId}/envs")]
+    public class ProjectEnvironmentsController : ApiControllerBase
     {
         private readonly IGenericRepository _repository;
         private readonly IAccountUserService _accountUserService;

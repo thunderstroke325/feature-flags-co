@@ -1,30 +1,13 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Controllers.Base;
+using FeatureFlags.Utils.Exceptions;
 using FeatureFlags.Utils.ExtensionMethods;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace FeatureFlags.APIs.MvcFilters
 {
-    public class ApiException : Exception
-    {
-        public ApiException()
-        {
-        }
-
-        public ApiException(string message)
-            : base(message)
-        {
-        }
-
-        public ApiException(string message, Exception inner)
-            : base(message, inner)
-        {
-        }
-    }
-
     public class ApiActionFilterAttribute : ActionFilterAttribute
     {
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)

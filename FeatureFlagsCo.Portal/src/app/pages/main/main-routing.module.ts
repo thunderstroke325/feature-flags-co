@@ -1,12 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { MainComponent } from './main.component';
-import { MainGuard } from './main.guard';
 
 const routes: Routes = [
   {
     path: '',
-    canActivate: [MainGuard],
     component: MainComponent,
     children: [
       {

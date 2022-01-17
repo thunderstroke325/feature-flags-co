@@ -2,7 +2,11 @@ import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from './services/auth.service';
+import { getAuth } from 'src/app/utils';
 import { AccountService } from './services/account.service';
+import { FfcService } from './services/ffc.service';
+import { environment } from 'src/environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +16,8 @@ export class AuthGuard implements CanActivate {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private ffcService: FfcService
   ) { }
 
   canActivate(
@@ -23,9 +28,20 @@ export class AuthGuard implements CanActivate {
   }
 
   checkLogin(url: string): true | UrlTree {
-    const token = localStorage.getItem('token');
+    const auth = getAuth();
+    if (auth) {
+      this.ffcService.initialize(
+        environment.projectEnvKey,
+        {
+          key: auth.email,
+          email: auth.email,
+          userName: auth.email.split("@")[0],
+          customizeProperties: [{
+            name: 'phoneNumber',
+            value: auth.phoneNumber
+          }]
+        });
 
-    if (token) {
       this.accountService.afterLoginSelectAccount();
       return true;
     }
