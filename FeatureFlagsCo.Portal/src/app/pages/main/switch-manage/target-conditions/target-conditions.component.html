@@ -66,10 +66,10 @@
                   <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>添加规则</button>
               </div>
               <!-- 容器 -->
-              <div cdkDropList (cdkDropListDropped)="onDragEnd($event)">
+              <div cdkDropList class="drop-list" (cdkDropListDropped)="onDragEnd($event)">
                 <ng-container *ngFor="let condition of featureDetail?.getFftuwmtr(); let key=index;">
 
-                  <div class="content" style="cursor: pointer;" cdkDrag>
+                  <div class="drop-box" cdkDrag>
                       <div *ngIf="featureDetail?.exptIncludeAllRules || condition.isIncludedInExpt" style="text-align: right;margin-top:20px">
                         <i nz-icon nzType="aim" nzTheme="outline"></i>分流进入数据实验 <a (click)="onSetExptRulesClick(data)"><i nz-icon nzType="edit" nzTheme="fill"></i>编辑</a>
                       </div>
