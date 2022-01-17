@@ -5,14 +5,115 @@ on:
       - migration
 
 jobs:
-  deploy:
+  deploy-dev:
+    name : Deploy to development
     runs-on: ubuntu-latest
+    environment : dev
+    strategy:
+      matrix:
+        node-version: [14.x]    
     steps:
-    - uses: actions/checkout@master
-    - uses: awact/cloudfront-action@master
-      env:
-        SOURCE_PATH: '/FeatureFlagsCo.Portal/src/*'
-        AWS_REGION: 'cn-north-1'
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        DISTRIBUTION_ID: ${{ secrets.DISTRIBUTION_ID }}
+
+      - name: Extract branch name if push
+        if: github.event_name == 'push'
+        run: echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: convert push develop to dev
+        if: env.GIT_BRANCH != 'main'
+        run: echo "DEPLOY_ENV=dev" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v2
+      - name: Find and Replace
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "#{PROJECT_ENV_KEY_DEV}#"
+          replace: ${{ secrets.PROJECT_ENV_KEY_DEV }}
+          include: "FeatureFlagsCo.Portal/src/environments/**"
+          regex: false
+      
+      - name: npm build and install
+        run: |
+              cd 'FeatureFlagsCo.Portal'
+              npm install
+              npm audit fix
+              npm run build-dev
+              echo current dir is: 
+              ls
+        shell: bash
+  
+      - uses: jakejarvis/s3-sync-action@master
+        name: Upload App to S3 Bucket
+        with:
+          args: --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ env.S3_CLOUDFRONT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "cn-north-1"
+          SOURCE_DIR: "FeatureFlagsCo.Portal/dist/feature-flagsco-fontend"
+
+      - name: Create CloudFront Cache Invalidation
+        uses: chetan/invalidate-cloudfront-action@master
+        env:
+          DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
+          PATHS: "/*"
+          AWS_REGION: "cn-north-1"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  deploy-prod:
+    name : Deploy to production
+    runs-on: ubuntu-latest
+    needs: [deploy-dev]
+    environment : prod
+    strategy:
+      matrix:
+        node-version: [14.x]    
+    steps:
+
+      - name: Extract branch name if push
+        if: github.event_name == 'push'
+        run: echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: convert push develop to dev
+        if: env.GIT_BRANCH != 'main'
+        run: echo "DEPLOY_ENV=dev" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v2
+      - name: Find and Replace
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "#{PROJECT_ENV_KEY_DEV}#"
+          replace: ${{ secrets.PROJECT_ENV_KEY_PROD }}
+          include: "FeatureFlagsCo.Portal/src/environments/**"
+          regex: false
+      
+      - name: npm build and install
+        run: |
+              cd 'FeatureFlagsCo.Portal'
+              npm install
+              npm audit fix
+              npm run build-prod
+              echo current dir is: 
+              ls
+        shell: bash
+  
+      - uses: jakejarvis/s3-sync-action@master
+        name: Upload App to S3 Bucket
+        with:
+          args: --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ env.S3_CLOUDFRONT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "cn-north-1"
+          SOURCE_DIR: "FeatureFlagsCo.Portal/dist/feature-flagsco-fontend"
+
+      - name: Create CloudFront Cache Invalidation
+        uses: chetan/invalidate-cloudfront-action@master
+        env:
+          DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
+          PATHS: "/*"
+          AWS_REGION: "cn-north-1"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
