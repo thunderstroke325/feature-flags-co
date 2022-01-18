@@ -7,10 +7,8 @@ import { UserService } from 'src/app/services/user.service';
 import { IMenuItem } from 'src/app/share/uis/menu/menu';
 import { QUICK_COMBAT_DOCUMENT} from 'src/app/config';
 import { getAuth } from 'src/app/utils';
-import { ProjectService } from 'src/app/services/project.service';
 import { SwitchService } from 'src/app/services/switch.service';
 import { FfcService } from 'src/app/services/ffc.service';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-main',
@@ -27,17 +25,10 @@ export class MainComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private projectService: ProjectService,
     private switchService: SwitchService,
     private userService: UserService,
     private ffcService: FfcService,
   ) {
-
-    if (environment.name === 'Production') {
-      // setup the microsoft insights
-      const angularPlugin = new AngularPlugin();
-    }
-
     this.setMenus();
   }
 
