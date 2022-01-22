@@ -18,14 +18,9 @@
     <div class="chart-container">
       <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
         <ng-container *ngIf="!isLoading">
-          <g2-line-chart containerStyle="height: 600px; width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
+          <g2-line-chart [defaultChartHeight]="600"  containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
         </ng-container>
       </nz-spin>
     </div>
-    <!-- <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
-      <ng-container *ngIf="!isLoading">
-        <g2-line-chart containerStyle="height: 600px; width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
-      </ng-container>
-    </nz-spin> -->
   </div>
 </app-layout>

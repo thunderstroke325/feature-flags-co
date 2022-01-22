@@ -1,22 +1,36 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
+import {AfterViewInit, Component, Input, OnDestroy} from '@angular/core';
 import {Chart} from "@antv/g2";
 import {AxisConfig, ChartConfig, defaultTooltipItemTplPlaceholder} from "./g2-line-chart";
 import {MacaronColors} from "../g2-chart";
+import { fromEvent, Subscription } from 'rxjs';
 
 @Component({
   selector: 'g2-line-chart',
   template: `
-    <div id="line-chart-container-{{this.containerId ? this.containerId : ''}}" [style]="containerStyle">
+    <div id="line-chart-container-{{this.containerId ? this.containerId : ''}}" [ngStyle]="{width, height}">
     </div>
   `
 })
-export class G2LineChartComponent implements AfterViewInit {
+export class G2LineChartComponent implements AfterViewInit, OnDestroy {
   @Input()
   containerId: string = '';
-  @Input()
-  containerStyle: string = "height: 400px; width: 100%;";
+  @Input() width: string = "100%";
   @Input()
   chartConfig: ChartConfig;
+
+  @Input() defaultWindowHeight: number = 968;
+
+  @Input()
+  set defaultChartHeight(value: number) {
+    this.defaultChartMaxHeight = value;
+    if(this.defaultChartMaxHeight) {
+      this.computeCurrentChartHeight();
+    }
+  }
+
+  private resizeSubscription: Subscription;
+  private defaultChartMaxHeight: number = 0;
+  public height: string = "400px";
 
   chart: Chart;
 
@@ -27,6 +41,23 @@ export class G2LineChartComponent implements AfterViewInit {
     }
 
     this.renderChart();
+  }
+
+  constructor() {
+    this.listenerWindowResize();
+  }
+
+  // 计算当前图表的高度
+  private computeCurrentChartHeight() {
+    const bodyHeight = document.body.clientHeight;
+    this.height = this.defaultChartMaxHeight * (bodyHeight / this.defaultWindowHeight) + 'px';
+  }
+
+  // 监听窗口大小改变
+  private listenerWindowResize() {
+    this.resizeSubscription = fromEvent(window, "resize").subscribe(_ => {
+      this.defaultWindowHeight && this.computeCurrentChartHeight();
+    })
   }
 
   private renderChart() {
@@ -84,5 +115,9 @@ export class G2LineChartComponent implements AfterViewInit {
     if (scale) {
       this.chart.scale(field, scale);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.resizeSubscription && this.resizeSubscription.unsubscribe();
   }
 }
