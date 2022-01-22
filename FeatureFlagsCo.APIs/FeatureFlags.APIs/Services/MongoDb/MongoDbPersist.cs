@@ -16,7 +16,9 @@ namespace FeatureFlags.APIs.Services.MongoDb
             { typeof(AccountUserV2), "AccountUsers" },
             { typeof(ProjectV2), "Projects" },
             { typeof(ProjectUserV2), "ProjectUsers" },
-            { typeof(EnvironmentV2), "Environments" }
+            { typeof(EnvironmentV2), "Environments" },
+            { typeof(FeatureFlagTagTrees), "FeatureFlagTrees" },
+            { typeof(FeatureFlag), "FeatureFlags" }
         };
 
         public MongoClient Client { get; }

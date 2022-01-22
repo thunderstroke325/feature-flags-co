@@ -42,8 +42,4 @@
     <ProjectReference Include="..\FeatureFlagsCo.MQ\FeatureFlagsCo.MQ.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Models\Example.cs" />
-  </ItemGroup>
-
 </Project>

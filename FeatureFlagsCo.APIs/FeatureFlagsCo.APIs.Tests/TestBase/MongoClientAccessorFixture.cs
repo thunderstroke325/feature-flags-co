@@ -14,6 +14,8 @@ namespace FeatureFlags.APIs.Tests.TestBase
                 .Build();
             
             ClientAccessor = new MongoClientAccessor(configuration);
+            
+            MongoClassMapping.Register();
         }
     }
 }

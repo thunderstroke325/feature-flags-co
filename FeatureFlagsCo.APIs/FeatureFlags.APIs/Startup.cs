@@ -4,6 +4,7 @@ using FeatureFlags.APIs.Authentication.Scheme;
 using FeatureFlags.APIs.Middlewares;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
+using FeatureFlags.APIs.Services.MongoDb;
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.Utils.ExtensionMethods;
 using FeatureFlagsCo.FeatureInsights;
@@ -84,27 +85,31 @@ namespace FeatureFlags.APIs
                 options.Password.RequiredLength = 5;
                 options.Password.RequiredUniqueChars = 1;
             });
-            
+
+            #endregion
+
             // public api authentication
             services.AddPublicApiAuthentication();
-            #endregion
 
             // add api versioning and swagger
             services.AddApiVersion();
             services.AddSwagger();
-            
+
             // add elasticsearch
             services.AddElasticsearch(Configuration);
-            
+
+            // register custom mongodb class mapping
+            MongoClassMapping.Register();
+
             // auto register assembly services
             services.AddAssembly(typeof(Startup).Assembly);
-            
+
             // add named service provider
             services.AddNamedServiceProvider();
-            
+
             // add auto mapper
             services.AddAutoMapper(typeof(Startup));
-            
+
             services.AddScoped<IGenericRepository, GenericRepository<ApplicationDbContext>>();
             services.AddTransient<IEnvironmentUserPropertyService, EnvironmentUserPropertyService>();
             services.AddTransient<IAccountService, AccountService>();
