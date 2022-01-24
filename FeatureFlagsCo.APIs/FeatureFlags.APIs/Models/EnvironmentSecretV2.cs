@@ -47,22 +47,36 @@ namespace FeatureFlags.APIs.Models
 
         public static EnvironmentSecretV2 Parse(string envSecret)
         {
-            var originTextBytes = Convert.FromBase64String(envSecret);
-            var originText = System.Text.Encoding.UTF8.GetString(originTextBytes);
-
-            var parts = originText.Split("__");
-            var ids = new[] { parts[1], parts[2], parts[3] };
-            if (parts.Length != 5 || ids.Any(id => !int.TryParse(id, out _)))
+            try
             {
-                throw new ArgumentException("envSecret is not valid");
+                var originTextBytes = Convert.FromBase64String(envSecret);
+                var originText = System.Text.Encoding.UTF8.GetString(originTextBytes);
+
+                var parts = originText.Split("__");
+                var accountId = int.Parse(parts[1]);
+                var projectId = int.Parse(parts[2]);
+                var envId = int.Parse(parts[3]);
+
+                var secret = new EnvironmentSecretV2(accountId, envId, projectId);
+                return secret;
             }
+            catch (Exception ex)
+            {
+                throw new InvalidEnvSecretException($"envSecret '{envSecret}' is invalid, please check again.", ex);
+            }
+        }
+    }
 
-            var accountId = int.Parse(ids[0]);
-            var projectId = int.Parse(ids[1]);
-            var envId = int.Parse(ids[2]);
+    public class InvalidEnvSecretException : Exception
+    {
+        public InvalidEnvSecretException(string message)
+            : base(message)
+        {
+        }
 
-            var secret = new EnvironmentSecretV2(accountId, envId, projectId);
-            return secret;
+        public InvalidEnvSecretException(string message, Exception innerException)
+            : base(message, innerException)
+        {
         }
     }
 }

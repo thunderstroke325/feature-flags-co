@@ -8,21 +8,22 @@ namespace FeatureFlags.APIs.Tests
     public class EnvSecretTests
     {
         [Fact]
-        public void Should_Generate_New_Key()
+        public void Should_Generate_New_Env_Secret_Key()
         {
-            var secret = NewEnvSecret().New("default");
-            var mobileSecret = NewEnvSecret().New("mobile");
+            var defaultKey = NewEnvSecret().New("default");
+            var mobileKey = NewEnvSecret().New("mobile");
 
-            secret.ShouldNotBeNullOrWhiteSpace();
-            mobileSecret.ShouldNotBeNullOrWhiteSpace();
+            defaultKey.ShouldNotBeNullOrWhiteSpace();
+            mobileKey.ShouldNotBeNullOrWhiteSpace();
         }
 
         [Fact]
-        public void Should_Parse_Generated_Key()
+        public void Should_Parse_Generated_Env_Secret_Key()
         {
             var envSecret = NewEnvSecret();
+            var key = envSecret.New("whatever");
 
-            var parsedEnvSecret = EnvironmentSecretV2.Parse(envSecret.New("whatever"));
+            var parsedEnvSecret = EnvironmentSecretV2.Parse(key);
 
             parsedEnvSecret.AccountId.ShouldBe(envSecret.AccountId);
             parsedEnvSecret.EnvId.ShouldBe(envSecret.EnvId);
@@ -30,19 +31,27 @@ namespace FeatureFlags.APIs.Tests
         }
 
         [Fact]
-        public void Should_Parse_Old_Key()
+        public void Should_Parse_Old_Env_Secret_Key()
         {
-            var oldEnvSecret = FeatureFlagKeyExtension.GenerateEnvironmentKey(1, 1, 1);
-            var newEnvSecret = EnvironmentSecretV2.Parse(oldEnvSecret);
-            
-            newEnvSecret.EnvId.ShouldBe(1);
-            newEnvSecret.AccountId.ShouldBe(1);
-            newEnvSecret.ProjectId.ShouldBe(1);
+            var oldKey = FeatureFlagKeyExtension.GenerateEnvironmentKey(46, 57, 93);
+            var newEnvSecret = EnvironmentSecretV2.Parse(oldKey);
+
+            newEnvSecret.EnvId.ShouldBe(46);
+            newEnvSecret.AccountId.ShouldBe(57);
+            newEnvSecret.ProjectId.ShouldBe(93);
+        }
+
+        [Fact]
+        public void Should_Throw_Exception_When_Parse_Invalid_EnvSecret()
+        {
+            Should.Throw<InvalidEnvSecretException>(() => EnvironmentSecretV2.Parse(""));
+            Should.Throw<InvalidEnvSecretException>(() => EnvironmentSecretV2.Parse(null));
+            Should.Throw<InvalidEnvSecretException>(() => EnvironmentSecretV2.Parse("any other invalid secret"));
         }
 
         private EnvironmentSecretV2 NewEnvSecret()
         {
-            var envSecret = new EnvironmentSecretV2(1, 2, 3);
+            var envSecret = new EnvironmentSecretV2(46, 57, 93);
             return envSecret;
         }
     }
