@@ -77,6 +77,7 @@ export class SwitchArchiveComponent implements OnInit, OnDestroy {
         this.switchService.unarchiveEnvFeatureFlag(st.id, st.name)
           .subscribe(
             res => {
+              this.switchLists = this.switchLists.filter(s => s.id !== st.id);
               this.message.success('开关复位成功！');
               this.search$.next(this.searchText);
             },
