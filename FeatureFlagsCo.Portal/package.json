@@ -7,7 +7,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "build-dev": "npx code-refs && ng build --configuration development",
+    "build-dev": "npx code-refs --config ffcconfig.dev.json && ng build --configuration development",
     "build-prod": "npx code-refs && ng build --configuration production"
   },
   "private": true,
