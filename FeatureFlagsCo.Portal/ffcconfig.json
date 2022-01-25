@@ -4,6 +4,6 @@
     "excluded": ["package.json", "package-lock.json", "readme.md", ".gitignore", "LICENSE", "node_modules", "dist"],
     "fileExtensions": ["ts", "js"],
     "numberOfContextLines": 3,
-    "silence": true,
-    "exitWithErrorWhenStaleFeatureFlagFound": true
+    "exitWithErrorWhenStaleFeatureFlagFound": true,
+    "logErrorOnly": false
 }
