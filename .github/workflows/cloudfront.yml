@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - migration
+    paths:
+    - 'FeatureFlagsCo.Portal/**'
 
 jobs:
   deploy-dev:

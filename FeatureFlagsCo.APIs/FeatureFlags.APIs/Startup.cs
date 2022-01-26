@@ -11,7 +11,7 @@ using FeatureFlags.Utils.ExtensionMethods;
 using FeatureFlagsCo.FeatureInsights;
 using FeatureFlagsCo.FeatureInsights.ElasticSearch;
 using FeatureFlagsCo.MQ.ElasticSearch;
-using Microsoft.ApplicationInsights.AspNetCore.Extensions;
+//using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -159,7 +159,7 @@ namespace FeatureFlags.APIs
                     options.InstanceName = "feature-flags-users";
                 });
             }
-
+/*
             #region Telemetry/Insights
             if (hostingType == HostingTypeEnum.Azure.ToString())
             {
@@ -184,7 +184,7 @@ namespace FeatureFlags.APIs
             services.AddScoped<IAuditLogSearchService, AuditLogSearchService>();
             #endregion
         }
-
+*/
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
