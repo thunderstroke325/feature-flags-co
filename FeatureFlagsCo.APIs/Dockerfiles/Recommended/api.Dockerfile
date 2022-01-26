@@ -4,8 +4,8 @@ WORKDIR /source
 
 
 # copy csproj and restore as distinct layers
-#COPY *.sln .
-COPY ./FeatureFlagsCo.APIs/FeatureFlags.Utils/*.csproj ./FeatureFlags.Utils/
+COPY *.sln .
+COPY FeatureFlags.Utils/*.csproj ./FeatureFlags.Utils/
 COPY FeatureFlags.APIs/*.csproj ./FeatureFlags.APIs/
 COPY FeatureFlagsCo.MQ/*.csproj ./FeatureFlagsCo.MQ/
 COPY FeatureFlagsCo.MQ.DirectExporter/*.csproj ./FeatureFlagsCo.MQ.DirectExporter/

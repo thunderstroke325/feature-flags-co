@@ -40,7 +40,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           echo $GITHUB_WORKSPACE
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.Dockerfile .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.githubactions.Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
   deploy-prod:
