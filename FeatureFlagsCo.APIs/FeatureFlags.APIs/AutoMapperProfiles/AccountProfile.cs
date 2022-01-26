@@ -3,9 +3,9 @@ using FeatureFlags.APIs.Models;
 
 namespace FeatureFlags.APIs.AutoMapperProfiles
 {
-    public class AccountMapper : Profile
+    public class AccountProfile : Profile
     {
-        public AccountMapper()
+        public AccountProfile()
         {
             CreateMap<AccountV2, AccountViewModel>();
         }
