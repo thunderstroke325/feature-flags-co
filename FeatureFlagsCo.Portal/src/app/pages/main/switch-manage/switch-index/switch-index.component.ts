@@ -1,12 +1,12 @@
-import { Component, OnDestroy, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { SwitchService } from 'src/app/services/switch.service';
 import { FeatureFlagType, IFfParams } from '../types/switch-new';
 import { AccountService } from 'src/app/services/account.service';
-import {NzTableQueryParams} from "ng-zorro-antd/table";
 import { encodeURIComponentFfc } from 'src/app/utils';
+import { FfcService } from "../../../../services/ffc.service";
 
 @Component({
   selector: 'index',
@@ -15,8 +15,16 @@ import { encodeURIComponentFfc } from 'src/app/utils';
 })
 export class SwitchIndexComponent implements OnInit, OnDestroy {
 
-  @ViewChild('switchTable') elementView: ElementRef;
-  switchTableHeight: number;
+  // the switch index version
+  private _switchIndexVersion: 'v1' | 'v2';
+  get switchIndexVersion(): string {
+    if (!this._switchIndexVersion) {
+      const version = this.ffcService.variation('switch-index-version', 'v1');
+      this._switchIndexVersion = version === 'v2' ? 'v2' : 'v1';
+    }
+
+    return this._switchIndexVersion;
+  }
 
   private destory$: Subject<void> = new Subject();
   private currentAccountId: number;
@@ -38,16 +46,18 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
   switchType: FeatureFlagType = FeatureFlagType.Classic;
 
   ClassicFeatureFlag: FeatureFlagType = FeatureFlagType.Classic;
-  PretargetedFeatureFlag: FeatureFlagType = FeatureFlagType.Pretargeted;
-
   public isIntoing: boolean = false;                      // 是否点击了一条开关，防止路由切换慢的双击效果
   public totalCount: number = 0;
+
+  // tag tree modal
+  tagTreeModalVisible: boolean = false;
 
   constructor(
     private router: Router,
     public switchServe: SwitchService,
     private msg: NzMessageService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private ffcService: FfcService
   ) {}
 
   ngOnInit(): void {
@@ -56,11 +66,6 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
     const envId = currentAccountProjectEnv.projectEnv.envId;
     this.switchServe.envId = envId;
     this.initSwitchList(envId);
-  }
-
-  ngAfterViewInit(): void{
-    //console.log('switchTableHeight==', this.elementView.nativeElement.offsetHeight);
-    this.switchTableHeight = this.elementView.nativeElement.offsetHeight;
   }
 
   private initSwitchList(id: number): void{
@@ -170,7 +175,7 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
     }
   }
   // 根据 name 筛选
-  onSearchByName(params: string): void{
+  onSearchByName(): void{
     this.switchLists = this.initSwitchLists.filter(e => e.name.includes(this.nameSearchValue));
     this.resetSwitchListsShowData();
   }
