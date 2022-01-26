@@ -39,7 +39,7 @@ jobs:
           ECR_REPOSITORY: ffc-dev-main-ecr-repo
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --file ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.Dockerfile ./FeatureFlagsCo.APIs 
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --file Dockerfiles/Recommended/api.Dockerfile ./FeatureFlagsCo.APIs 
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
   deploy-prod:
