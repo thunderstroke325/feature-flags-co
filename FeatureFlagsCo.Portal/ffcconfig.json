@@ -1,6 +1,7 @@
 {
     "envSecret": "ZmFhLTg1MTMtNCUyMDIxMDYwOTEzNTU1MV9fMl9fM19fNV9fZGVmYXVsdF8wNTU4OQ==",
     "apiUrl": "https://api.feature-flags.co",
+    "entry": [],
     "excluded": ["package.json", "package-lock.json", "readme.md", ".gitignore", "LICENSE", "node_modules", "dist"],
     "fileExtensions": ["ts", "js"],
     "numberOfContextLines": 3,
