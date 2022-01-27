@@ -8,7 +8,8 @@ namespace FeatureFlags.APIs.AutoMapperProfiles
     {
         public FeatureFlagProfile()
         {
-            CreateMap<FeatureFlag, FullFeatureFlagViewModel>();
+            CreateMap<FeatureFlag, SdkFeatureFlag>()
+                .ForMember(des => des.Version, opt => opt.Ignore());
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Public;
@@ -14,7 +13,6 @@ namespace FeatureFlags.APIs.Controllers.Public
     {
         private readonly IVariationService _variationService;
         private readonly MongoDbFeatureFlagService _mongoDb;
-        private readonly IMapper _mapper;
 
         public PublicFeatureFlagsController(
             IVariationService variationService,
@@ -23,7 +21,6 @@ namespace FeatureFlags.APIs.Controllers.Public
         {
             _variationService = variationService;
             _mongoDb = mongoDb;
-            _mapper = mapper;
         }
 
         /// <summary>
@@ -37,20 +34,6 @@ namespace FeatureFlags.APIs.Controllers.Public
             var activeFeatureFlags = await _mongoDb.GetActiveFeatureFlags(EnvId);
 
             return activeFeatureFlags.Select(f => new FeatureFlagViewModel { Id = f.Id, KeyName = f.FF.KeyName });
-        }
-
-        /// <summary>
-        /// 获取某个环境下所有未存档开关的所有信息
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("full-feature-flag")]
-        public async Task<IEnumerable<FullFeatureFlagViewModel>> GetFullFeatureFlags()
-        {
-            var activeFeatureFlags = await _mongoDb.GetActiveFeatureFlags(EnvId);
-
-            var vms = _mapper.Map<IEnumerable<FeatureFlag>, IEnumerable<FullFeatureFlagViewModel>>(activeFeatureFlags);
-            return vms;
         }
 
         /// <summary>

@@ -5,7 +5,7 @@ using FeatureFlags.Utils.ExtensionMethods;
 
 namespace FeatureFlags.APIs.ViewModels.Public
 {
-    public class FullFeatureFlagViewModel
+    public class SdkFeatureFlag
     {
         [JsonPropertyName("_id")]
         public string _Id { get; set; }
@@ -30,5 +30,10 @@ namespace FeatureFlags.APIs.ViewModels.Public
         public bool? ExptIncludeAllRules { get; set; }
 
         public long Version => FF.LastUpdatedTime?.UnixTimestamp() ?? 0;
+    }
+
+    public class SdkLatestFeatureFlags
+    {
+        public IEnumerable<SdkFeatureFlag> FeatureFlags { get; set; }
     }
 }
