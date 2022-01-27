@@ -20,6 +20,7 @@ import { NzTreeSelectModule } from "ng-zorro-antd/tree-select";
 import { SwitchTagTreeSelectComponent } from './switch-tag-tree-select.component';
 import { NzTransferModule } from "ng-zorro-antd/transfer";
 import { NzTagModule } from "ng-zorro-antd/tag";
+import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 
 
 @NgModule({
@@ -41,7 +42,8 @@ import { NzTagModule } from "ng-zorro-antd/tag";
     NzTreeViewModule,
     NzTreeSelectModule,
     NzTransferModule,
-    NzTagModule
+    NzTagModule,
+    NzToolTipModule
   ]
 })
 export class SwitchIndexModule { }

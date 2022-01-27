@@ -3,14 +3,16 @@ import { TransferChange, TransferItem, TransferSelectChange } from "ng-zorro-ant
 import { SelectionModel } from '@angular/cdk/collections';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { NzTreeFlatDataSource, NzTreeFlattener } from 'ng-zorro-antd/tree-view';
+import { NzMessageService } from "ng-zorro-antd/message";
 
 interface TreeNode {
   name: string;
   key: string;
   children?: TreeNode[];
+  isEditing?: boolean;
 }
 
-const TREE_DATA: TreeNode[] = [
+let TREE_DATA: TreeNode[] = [
   {
     name: 'parent 1',
     key: '1',
@@ -38,49 +40,76 @@ const TREE_DATA: TreeNode[] = [
 ];
 
 interface FlatNode {
-  expandable: boolean;
   name: string;
   key: string;
   level: number;
+  isEditing?: boolean;
 }
 
 @Component({
   selector: 'switch-tag-tree-view',
   template: `
     <div nz-row>
-      <div nz-col nzSpan="7">
+      <div nz-col nzSpan="8">
         <nz-tree-view [nzTreeControl]="treeControl" [nzDataSource]="dataSource" [trackBy]="trackBy">
-          <nz-tree-node *nzTreeNodeDef="let node" nzTreeNodeIndentLine>
+          <nz-tree-node nzTreeNodePadding *nzTreeNodeDef="let node">
             <nz-tree-node-option
               [nzDisabled]="node.disabled"
               [nzSelected]="selectListSelection.isSelected(node)"
-              (nzClick)="selectListSelection.toggle(node)"
-            >
-              {{ node.name }}
+              (nzClick)="selectListSelection.toggle(node)">
+
+              <!-- node name -->
+              <div *ngIf="node.isEditing; then editMode else showMode"></div>
+              <ng-template #editMode>
+                <input nz-input nzSize="small" [(ngModel)]="node.name" style="width: 120px; margin-right: 2px">
+              </ng-template>
+              <ng-template #showMode>
+                <span>{{node.name}}</span>
+              </ng-template>
             </nz-tree-node-option>
-            <button nz-button nzType="text" nzSize="small" (click)="delete(node)">
-              <i nz-icon nzType="minus" nzTheme="outline"></i>
-            </button>
-          </nz-tree-node>
 
-          <nz-tree-node *nzTreeNodeDef="let node; when: hasNoContent" nzTreeNodeIndentLine>
-            <input nz-input placeholder="Input node name" nzSize="small" #inputElement/>
-            &nbsp;
-            <button nz-button nzSize="small" (click)="saveNode(node, inputElement.value)">Add</button>
-          </nz-tree-node>
+            <!-- node operations -->
+            <div *ngIf="node.isEditing; then saveOperations else editOperations"></div>
+            <!-- save operations -->
+            <ng-template #saveOperations>
+              <button nz-button nzType="text" nzSize="small"
+                      nz-tooltip nzTooltipTitle="保存"
+                      (click)="saveNode(node)">
+                <i nz-icon nzType="save" nzTheme="outline"></i>
+              </button>
+            </ng-template>
+            <!-- edit operations -->
+            <ng-template #editOperations>
+              <!-- create -->
+              <button nz-button nzType="text" nzSize="small"
+                      nz-tooltip nzTooltipTitle="创建节点"
+                      (click)="newNode(node)">
+                <i nz-icon nzType="plus" nzTheme="outline"></i>
+              </button>
 
-          <nz-tree-node *nzTreeNodeDef="let node; when: hasChild" nzTreeNodeIndentLine>
-            <nz-tree-node-toggle>
-              <i nz-icon nzType="caret-down" nzTreeNodeToggleRotateIcon></i>
+              <!-- update -->
+              <button nz-button nzType="text" nzSize="small"
+                      nz-tooltip nzTooltipTitle="修改名称"
+                      (click)="editNode(node)">
+                <i nz-icon nzType="edit" nzTheme="outline"></i>
+              </button>
+            </ng-template>
+
+            <!-- caret down -->
+            <nz-tree-node-toggle *ngIf="hasChild(node)">
+              <i nz-icon nzType="down" nzTreeNodeToggleRotateIcon></i>
             </nz-tree-node-toggle>
-            {{ node.name }}
-            <button nz-button nzType="text" nzSize="small" (click)="addNewNode(node)">
-              <i nz-icon nzType="plus" nzTheme="outline"></i>
+
+            <!-- delete -->
+            <button nz-button nzType="text" nzSize="small" nzDanger
+                    nz-tooltip nzTooltipTitle="删除节点"
+                    (click)="delete(node)">
+              <i nz-icon nzType="delete" nzTheme="outline"></i>
             </button>
           </nz-tree-node>
         </nz-tree-view>
       </div>
-      <div nz-col nzSpan="17">
+      <div nz-col nzSpan="16">
         <nz-transfer
           [nzDataSource]="list"
           [nzShowSearch]="true"
@@ -99,11 +128,18 @@ interface FlatNode {
   styles: []
 })
 export class SwitchTagTreeViewComponent implements OnInit {
-  //#region transfer
 
-  list: TransferItem[] = [];
+  constructor(private message: NzMessageService) {
+
+  }
 
   ngOnInit(): void {
+    // init tree
+    this.treeData = TREE_DATA;
+    this.dataSource.setData(this.treeData);
+    this.treeControl.expandAll();
+
+    // init transfer
     for (let i = 0; i < 20; i++) {
       this.list.push({
         key: i.toString(),
@@ -114,6 +150,10 @@ export class SwitchTagTreeViewComponent implements OnInit {
 
     [2, 3].forEach(idx => (this.list[idx].direction = 'right'));
   }
+
+  //#region transfer
+
+  list: TransferItem[] = [];
 
   select(ret: TransferSelectChange): void {
     console.log('nzSelectChange', ret);
@@ -148,7 +188,8 @@ export class SwitchTagTreeViewComponent implements OnInit {
           expandable: !!node.children && node.children.length > 0,
           name: node.name,
           level,
-          key: node.key
+          key: node.key,
+          isEditing: node.isEditing
         };
     flatNode.name = node.name;
     this.flatNodeMap.set(flatNode, node);
@@ -156,32 +197,33 @@ export class SwitchTagTreeViewComponent implements OnInit {
     return flatNode;
   };
 
-  treeData = TREE_DATA;
+  treeData: TreeNode[] = [];
   flatNodeMap = new Map<FlatNode, TreeNode>();
   nestedNodeMap = new Map<TreeNode, FlatNode>();
-  selectListSelection = new SelectionModel<FlatNode>(true);
+  selectListSelection = new SelectionModel<FlatNode>(false);
 
   treeControl = new FlatTreeControl<FlatNode>(
     node => node.level,
-    node => node.expandable
+    _ => true
   );
   treeFlattener = new NzTreeFlattener(
     this.transformer,
     node => node.level,
-    node => node.expandable,
+    _ => true,
     node => node.children
   );
 
   dataSource = new NzTreeFlatDataSource(this.treeControl, this.treeFlattener);
-
-  constructor() {
-    this.dataSource.setData(this.treeData);
-    this.treeControl.expandAll();
-  }
-
-  hasChild = (_: number, node: FlatNode): boolean => node.expandable;
-  hasNoContent = (_: number, node: FlatNode): boolean => node.name === '';
   trackBy = (_: number, node: FlatNode): string => `${node.key}-${node.name}`;
+
+  hasChild(node: FlatNode) {
+    const nestedNode = this.flatNodeMap.get(node);
+    if (nestedNode) {
+      return !!nestedNode.children && nestedNode.children.length > 0;
+    }
+
+    return false;
+  }
 
   delete(node: FlatNode): void {
     const originNode = this.flatNodeMap.get(node);
@@ -205,29 +247,52 @@ export class SwitchTagTreeViewComponent implements OnInit {
 
     const parentNode = dfsParentNode();
     if (parentNode && parentNode.children) {
+      // has parent node
       parentNode.children = parentNode.children.filter(e => e !== originNode);
+    } else {
+      // no parent node
+      if (this.treeData.length === 1) {
+        this.message.warning('标签树需要至少保留一个节点');
+        return;
+      }
+
+      this.treeData = this.treeData.filter(e => e.key !== originNode.key);
+      TREE_DATA = TREE_DATA.filter(e => e.key !== originNode.key);
     }
 
     this.dataSource.setData(this.treeData);
   }
 
-  addNewNode(node: FlatNode): void {
-    const parentNode = this.flatNodeMap.get(node);
-    if (parentNode) {
-      parentNode.children = parentNode.children || [];
-      parentNode.children.push({
+  newNode(node: FlatNode): void {
+    const nestedNode = this.flatNodeMap.get(node);
+    if (nestedNode) {
+      nestedNode.children = nestedNode.children || [];
+      nestedNode.children.push({
         name: '',
-        key: `${parentNode.key}-${parentNode.children.length}`
+        key: `${nestedNode.key}-${nestedNode.children.length}`,
+        isEditing: true
       });
       this.dataSource.setData(this.treeData);
       this.treeControl.expand(node);
     }
   }
 
-  saveNode(node: FlatNode, value: string): void {
+  editNode(node: FlatNode): void {
+    node.isEditing = true;
+  }
+
+  saveNode(node: FlatNode): void {
+    if (node.name.trim() === '') {
+      this.message.warning('节点名称不能为空');
+      return;
+    }
+
+    node.isEditing = false;
+
     const nestedNode = this.flatNodeMap.get(node);
     if (nestedNode) {
-      nestedNode.name = value;
+      nestedNode.isEditing = false;
+      nestedNode.name = node.name;
       this.dataSource.setData(this.treeData);
     }
   }
