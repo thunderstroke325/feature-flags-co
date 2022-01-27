@@ -14,10 +14,17 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import {NzSwitchModule} from 'ng-zorro-antd/switch';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { SwitchTagTreeViewComponent } from './switch-tag-tree-view.component';
+import { NzTreeViewModule } from "ng-zorro-antd/tree-view";
+import { NzTreeSelectModule } from "ng-zorro-antd/tree-select";
+import { SwitchTagTreeSelectComponent } from './switch-tag-tree-select.component';
+import { NzTransferModule } from "ng-zorro-antd/transfer";
+import { NzTagModule } from "ng-zorro-antd/tag";
+import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 
 
 @NgModule({
-  declarations: [SwitchIndexComponent],
+  declarations: [SwitchIndexComponent, SwitchTagTreeViewComponent, SwitchTagTreeSelectComponent],
   imports: [
     CommonModule,
     NzSelectModule,
@@ -31,7 +38,12 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
     NzSpinModule,
     SwitchIndexRoutingModule,
     NzSwitchModule,
-    NzIconModule
+    NzIconModule,
+    NzTreeViewModule,
+    NzTreeSelectModule,
+    NzTransferModule,
+    NzTagModule,
+    NzToolTipModule
   ]
 })
 export class SwitchIndexModule { }

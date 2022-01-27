@@ -1,81 +1,134 @@
 <section class="body">
-    <div class="content">
-        <div class="switch-wrap">
-            <div class="search">
-                <div nz-row>
-                    <div class="search-wrap" nz-col nzSpan="8">
-                        <input nz-input placeholder="按名字查找" [(ngModel)]="nameSearchValue" (ngModelChange)="onSearchByName($event)"/>
-                    </div>
-                    <div class="search-wrap" nz-col nzSpan="8">
-                        <nz-select style="width: 70%;" [(ngModel)]="showType" (ngModelChange)="onSearchByOnOff($event)">
-                            <nz-option nzValue="" nzLabel="展示所有开关"></nz-option>
-                            <nz-option nzValue="Enabled" nzLabel="展示 Enabled 的开关"></nz-option>
-                            <nz-option nzValue="Disabled" nzLabel="展示 Disabled 的开关"></nz-option>
-                        </nz-select>
-                    </div>
-                    <div nz-col nzSpan="8" class="wrap-right">
-                        <button nz-button nzType="primary" (click)="addSwitch()">
-                          <i nz-icon nzType="plus" nzTheme="outline"></i>
-                            添加开关
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="switch-list" #switchTable>
-                <nz-table #basicTable nzSize="small"
-                          [nzScroll]="{ y: '520px' }"
-                          [nzData]="switchListsShowData"
-                          [nzLoading]="isLoading"
-                          [nzFrontPagination]="false"
-                          [nzTotal]="totalCount"
-                          [nzPageSize]="pageSize"
-                          [nzPageIndex]="pageIndex + 1"
-                          (nzPageIndexChange)="onChangePageIndex($event)">
-                  <thead>
-                  <tr class="table-th-style">
-                    <th>名称</th>
-                    <th>状态</th>
-                    <th>最近修改</th>
-                    <th nzAlign="center">操作</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr *ngFor="let switch of basicTable.data">
-                    <td style="cursor: pointer;" (click)="onIntoSwitchDetail(switch)">{{switch.name}}</td>
-                    <td>
-                      <nz-switch [ngModel]="switch.status === 'Enabled'" (click)="onChangeSwitchStatus(switch)" nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
-                    </td>
-<!--                    <td>{{switch.keyName}}</td>-->
-                    <td>{{getLocalDate(switch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
-                    <td style="text-align: center"><a nz-button nzType="link" style="color: #9A95CC;" (click)="onIntoSwitchDetail(switch)">详情</a></td>
-                  </tr>
-                  </tbody>
-                </nz-table>
-<!--              <ng-container *ngFor="let switch of switchLists">-->
-<!--                <div class="switch" *ngIf="switch.name.includes(nameSearchValue) && switch.status?.includes(showType)" (click)="onIntoSwitchDetail(switch)">-->
-<!--                  <section>-->
-<!--                    <div class="title">-->
-<!--                        {{switch.name}}-->
-<!--                    </div>-->
-<!--                    <div class="description">-->
-<!--                        {{switch.keyName}}-->
-<!--                    </div>-->
-<!--                  </section>-->
-<!--                  <span>最近修改：{{getLocalDate(switch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</span>-->
-
-<!--                  <nz-button-group>-->
-<!--                      <button nz-button [nzType]="switch.status === 'Enabled' ? 'primary' : 'default'" (click)="onChangeSwitchStatus(switch, 'Enabled', $event)">开</button>-->
-<!--                      <button nz-button [nzType]="switch.status === 'Disabled' ? 'primary' : 'default'" (click)="onChangeSwitchStatus(switch, 'Disabled', $event)">关</button>-->
-<!--                  </nz-button-group>-->
-<!--                </div>-->
-<!--              </ng-container>-->
-
-<!--              <div class="mask" *ngIf="isInitLoading">-->
-<!--                  <nz-spin></nz-spin>-->
-<!--              </div>-->
-            </div>
+  <div class="content">
+    <div class="switch-wrap">
+      <!--search bar-->
+      <div *ngIf="switchIndexVersion === 'v2', then v2Search else v1Search"></div>
+      <!--v1 search bar-->
+      <ng-template #v1Search>
+        <div nz-row nzGutter="16" nzAlign="middle" nzJustify="start">
+          <div nz-col nzFlex="0 1 250px">
+            <input nz-input placeholder="按名字查找" [(ngModel)]="nameSearchValue" (ngModelChange)="onSearchByName()"/>
+          </div>
+          <div nz-col nzFlex="0 1 250px">
+            <nz-select style="width: 80%;" [(ngModel)]="showType" (ngModelChange)="onSearchByOnOff($event)">
+              <nz-option nzValue="" nzLabel="展示所有开关"></nz-option>
+              <nz-option nzValue="Enabled" nzLabel="展示 Enabled 的开关"></nz-option>
+              <nz-option nzValue="Disabled" nzLabel="展示 Disabled 的开关"></nz-option>
+            </nz-select>
+          </div>
+          <div nz-col nzFlex="end" style="margin-left: auto">
+            <button nz-button nzType="primary" (click)="addSwitch()">
+              <i nz-icon nzType="plus" nzTheme="outline"></i>
+              添加开关
+            </button>
+          </div>
         </div>
+      </ng-template>
+      <!--v2 search bar-->
+      <ng-template #v2Search>
+        <div nz-row nzGutter="16" nzAlign="middle" nzJustify="start">
+          <div nz-col nzFlex="0 1 250px">
+            <switch-tag-tree-select></switch-tag-tree-select>
+          </div>
+          <div nz-col nzFlex="0 1 250px">
+            <input nz-input placeholder="按名字查找" [(ngModel)]="nameSearchValue" (ngModelChange)="onSearchByName()"/>
+          </div>
+          <div nz-col nzFlex="0 1 250px">
+            <nz-select style="width: 80%;" [(ngModel)]="showType" (ngModelChange)="onSearchByOnOff($event)">
+              <nz-option nzValue="" nzLabel="展示所有开关"></nz-option>
+              <nz-option nzValue="Enabled" nzLabel="展示 Enabled 的开关"></nz-option>
+              <nz-option nzValue="Disabled" nzLabel="展示 Disabled 的开关"></nz-option>
+            </nz-select>
+          </div>
+          <div nz-col nzFlex="end" style="margin-left: auto">
+            <button nz-button nzType="primary" (click)="addSwitch()">
+              <i nz-icon nzType="plus" nzTheme="outline"></i>
+              添加开关
+            </button>
+            <button style="margin-left: 9px" nz-button nzType="primary" (click)="tagTreeModalVisible = true">
+              <i nz-icon nzType="plus" nzTheme="outline"></i>
+              标签树管理
+            </button>
+          </div>
+        </div>
+      </ng-template>
+
+      <!--switch table-->
+      <div class="switch-list">
+        <div *ngIf="switchIndexVersion === 'v2', then v2switchTable else v1switchTable"></div>
+        <!--v1 switch table-->
+        <ng-template #v1switchTable>
+          <nz-table #table nzSize="small"
+                    [nzScroll]="{ y: '520px' }"
+                    [nzData]="switchListsShowData"
+                    [nzLoading]="isLoading"
+                    [nzFrontPagination]="false"
+                    [nzTotal]="totalCount"
+                    [nzPageSize]="pageSize"
+                    [nzPageIndex]="pageIndex + 1"
+                    (nzPageIndexChange)="onChangePageIndex($event)">
+            <thead>
+            <tr class="table-th-style">
+              <th>名称</th>
+              <th>状态</th>
+              <th>最近修改</th>
+              <th nzAlign="center">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let theSwitch of table.data">
+              <td style="cursor: pointer;" (click)="onIntoSwitchDetail(theSwitch)">{{theSwitch.name}}</td>
+              <td>
+                <nz-switch [ngModel]="theSwitch.status === 'Enabled'" (click)="onChangeSwitchStatus(theSwitch)"
+                           nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
+              </td>
+              <td>{{getLocalDate(theSwitch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
+              <td style="text-align: center">
+                <a nz-button nzType="link" style="color: #9A95CC;" (click)="onIntoSwitchDetail(theSwitch)">详情</a>
+              </td>
+            </tr>
+            </tbody>
+          </nz-table>
+        </ng-template>
+        <!--v2 switch table-->
+        <ng-template #v2switchTable>
+          <nz-table #table nzSize="small"
+                    [nzScroll]="{ y: '520px' }"
+                    [nzData]="switchListsShowData"
+                    [nzLoading]="isLoading"
+                    [nzFrontPagination]="false"
+                    [nzTotal]="totalCount"
+                    [nzPageSize]="pageSize"
+                    [nzPageIndex]="pageIndex + 1"
+                    (nzPageIndexChange)="onChangePageIndex($event)">
+            <thead>
+            <tr class="table-th-style">
+              <th>名称</th>
+              <th>状态</th>
+              <th>标签</th>
+              <th>最近修改</th>
+              <th nzAlign="center">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let theSwitch of table.data">
+              <td style="cursor: pointer;" (click)="onIntoSwitchDetail(theSwitch)">{{theSwitch.name}}</td>
+              <td>
+                <nz-switch [ngModel]="theSwitch.status === 'Enabled'" (click)="onChangeSwitchStatus(theSwitch)"
+                           nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
+              </td>
+              <td>{{ theSwitch.tags }}</td>
+              <td>{{getLocalDate(theSwitch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
+              <td style="text-align: center">
+                <a nz-button nzType="link" style="color: #9A95CC;" (click)="onIntoSwitchDetail(theSwitch)">详情</a>
+              </td>
+            </tr>
+            </tbody>
+          </nz-table>
+        </ng-template>
+      </div>
     </div>
+  </div>
 </section>
 
 <nz-modal [(nzVisible)]="createModalVisible"
@@ -87,18 +140,31 @@
           (nzOnCancel)="handleCancel()"
           (nzOnOk)="handleOk()"
           [nzOkLoading]="isOkLoading">
-    <ng-container *nzModalContent>
-      <nz-form-item>
-        <nz-form-label>开关名称</nz-form-label>
-        <input nz-input placeholder="开关名称" [(ngModel)]="switchName"/>
-      </nz-form-item>
-      <br/>
-      <nz-form-item>
-        <nz-form-label>开关类型</nz-form-label>
-        <nz-select style="width:100%;" nzPlaceHolder="选择开关类型" [(ngModel)]="switchType">
-          <nz-option [nzValue]="ClassicFeatureFlag" nzLabel="传统开关 - 可以用于对终端用户进行条件分流"></nz-option>
-          <!-- <nz-option [nzValue]="PretargetedFeatureFlag" nzLabel="预分流开关 - 客户端已提前对终端用户进行了分流，用于无埋点 A/B/n 测试"></nz-option> -->
-        </nz-select>
-      </nz-form-item>
-    </ng-container>
+  <ng-container *nzModalContent>
+    <nz-form-item>
+      <nz-form-label>开关名称</nz-form-label>
+      <input nz-input placeholder="开关名称" [(ngModel)]="switchName"/>
+    </nz-form-item>
+    <br/>
+    <nz-form-item>
+      <nz-form-label>开关类型</nz-form-label>
+      <nz-select style="width:100%;" nzPlaceHolder="选择开关类型" [(ngModel)]="switchType">
+        <nz-option [nzValue]="ClassicFeatureFlag" nzLabel="传统开关 - 可以用于对终端用户进行条件分流"></nz-option>
+      </nz-select>
+    </nz-form-item>
+  </ng-container>
+</nz-modal>
+
+<nz-modal
+  nzAutofocus="cancel"
+  [(nzVisible)]="tagTreeModalVisible"
+  (nzOnCancel)="tagTreeModalVisible = false"
+  [nzCentered]="true"
+  [nzBodyStyle]="{minHeight: '400px'}"
+  nzWidth="850px"
+  nzTitle="标签树管理"
+  nzMaskClosable="false">
+  <ng-container *nzModalContent>
+    <switch-tag-tree-view></switch-tag-tree-view>
+  </ng-container>
 </nz-modal>
