@@ -38,7 +38,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ffc-dev-main-ecr-repo
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: api:latest
         run: |
           echo $GITHUB_WORKSPACE
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.githubactions.Dockerfile .
@@ -47,7 +47,7 @@ jobs:
 
       - name: Download task definition
         run: |
-          aws ecs describe-task-definition --task-definition ffc-dev-back-ecs-task:1 > task-definition.json
+          aws ecs describe-task-definition --task-definition ffc-dev-back-ecs-task:2 > task-definition.json
       
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
