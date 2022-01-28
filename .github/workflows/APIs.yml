@@ -103,7 +103,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ffc-dev-main-ecr-repo
-          IMAGE_TAG: api:latest
+          IMAGE_TAG: latest
         run: |
           echo $GITHUB_WORKSPACE
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.githubactions.Dockerfile .
