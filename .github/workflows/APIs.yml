@@ -98,6 +98,11 @@ jobs:
               Write-Host $aCheck.MongoDbSettings.DatabaseName
               Write-Host $aCheck.MongoDbSettings.ExperimentsServiceHost
 
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ffc-dev-back-ecs-task:2 > task-definition.json
+          aws ecs describe-task-definition --task-definition ffc-dev-back-ecs-task:2
+          
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
@@ -109,11 +114,6 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.githubactions.Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-
-      - name: Download task definition
-        run: |
-          aws ecs describe-task-definition --task-definition ffc-dev-back-ecs-task:2 > task-definition.json
-          aws ecs describe-task-definition --task-definition ffc-dev-back-ecs-task:2
       
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
