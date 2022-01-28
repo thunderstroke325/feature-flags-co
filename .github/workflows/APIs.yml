@@ -58,10 +58,10 @@ jobs:
 
               $a.ConnectionStrings.ConnStr = ""
               $a.ConnectionStrings.RedisServerUrl = $env:REDISCACHE_ConnectionString
-              $a.JWT.Secret = "$(JWT_Secret)"
+              $a.JWT.Secret = $env:JWT_Secret
 
               $a.ApplicationInsights.InstrumentationKey = $env:AppInsights_InstrumentationKey
-              $a.ApplicationInsights.ConnectionString = $env:AppInsights_ConnectionString)
+              $a.ApplicationInsights.ConnectionString = $env:AppInsights_ConnectionString
               
               $a.MySettings.SendCloudAPIUser = $env:SendCloudAPIUser
               $a.MySettings.SendCloudAPIKey = $env:SendCloudAPIKey
