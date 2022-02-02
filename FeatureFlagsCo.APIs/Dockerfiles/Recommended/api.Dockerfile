@@ -39,7 +39,7 @@ RUN dotnet publish -c release -o /app --no-restore
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:3.1
 WORKDIR /app
-ENV ASPNETCORE_URLS=http://+:5001  ASPNETCORE_ENVIRONMENT=DockerDevelopment
+ENV ASPNETCORE_URLS=http://+:5001  ASPNETCORE_ENVIRONMENT=DockerRecommended
 EXPOSE 5001
 COPY --from=build /app ./
 ENTRYPOINT ["dotnet", "FeatureFlags.APIs.dll"]
