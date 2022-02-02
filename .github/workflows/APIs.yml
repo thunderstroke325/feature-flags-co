@@ -85,7 +85,7 @@ jobs:
               
               ConvertTo-Json $a -depth 100  | set-content $pathToJson
 
-              $pathToJsonCheck = "appsettings.DockerRecommended.json"
+              $pathToJsonCheck = "appsettings.DockerDevelopment.json"
               $aCheck = Get-Content $pathToJson | ConvertFrom-Json
               Write-Host $aCheck.ConnectionStrings.ConnStr
               Write-Host $aCheck.ConnectionStrings.RedisServerUrl
