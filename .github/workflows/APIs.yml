@@ -54,7 +54,7 @@ jobs:
         shell: pwsh
         run: |   
               cd FeatureFlagsCo.APIs/FeatureFlags.APIs
-              $pathToJson = "appsettings.DockerDevelopement.json"
+              $pathToJson = "appsettings.DockerDevelopment.json"
               $a = Get-Content $pathToJson | ConvertFrom-Json
 
               $a.ConnectionStrings.ConnStr = $env:Connstr_ConnectionString
