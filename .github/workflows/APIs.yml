@@ -36,7 +36,8 @@ jobs:
       - name: Replace apisetting env
         id: setting-env
         env:
-          REDISCACHE_ConnectionString :  ${{ secrets.REDISCACHE_ConnectionString }}
+          Connstr_ConnectionString : ${{ secrets.Connstr_ConnectionString }}
+          REDISCACHE_ConnectionString : ${{ secrets.REDISCACHE_ConnectionString }}
           JWT_Secret: ${{ secrets.JWT_Secret }}
           AppInsights_InstrumentationKey: ${{ secrets.AppInsights_InstrumentationKey }}
           AppInsights_ConnectionString: ${{ secrets.AppInsights_ConnectionString }}
@@ -53,10 +54,10 @@ jobs:
         shell: pwsh
         run: |   
               cd FeatureFlagsCo.APIs/FeatureFlags.APIs
-              $pathToJson = "appsettings.DockerRecommended.json"
+              $pathToJson = "appsettings.DockerDevelopement.json"
               $a = Get-Content $pathToJson | ConvertFrom-Json
 
-              $a.ConnectionStrings.ConnStr = ""
+              $a.ConnectionStrings.ConnStr = $env:Connstr_ConnectionString
               $a.ConnectionStrings.RedisServerUrl = $env:REDISCACHE_ConnectionString
               $a.JWT.Secret = $env:JWT_Secret
 
