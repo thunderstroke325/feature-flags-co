@@ -36,7 +36,7 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<FeatureFlagTagTrees> UpsertAsync(int envId, List<FeatureFlagTagTree> trees)
         {
-            var featureFlagTrees = await _trees.FirstOrDefaultAsync(x => x.EnvId == envId);
+            var featureFlagTrees = await FindAsync(envId);
             if (featureFlagTrees == null)
             {
                 return await CreateAsync(envId, trees);

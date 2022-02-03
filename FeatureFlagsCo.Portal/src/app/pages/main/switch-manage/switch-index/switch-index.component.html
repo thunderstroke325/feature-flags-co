@@ -27,14 +27,14 @@
       <!--v2 search bar-->
       <ng-template #v2Search>
         <div nz-row nzGutter="16" nzAlign="middle" nzJustify="start">
-          <div nz-col nzFlex="0 1 250px">
-            <switch-tag-tree-select></switch-tag-tree-select>
+          <div nz-col nzFlex="0 1 350px">
+            <switch-tag-tree-select (onSelect)="onSelectTagV2($event)" [tagTree]="tagTree"></switch-tag-tree-select>
           </div>
           <div nz-col nzFlex="0 1 250px">
-            <input nz-input placeholder="按名字查找" [(ngModel)]="nameSearchValue" (ngModelChange)="onSearchByName()"/>
+            <input nz-input placeholder="按名字查找" [(ngModel)]="switchFilterV2.name" (ngModelChange)="onSearchV2()"/>
           </div>
           <div nz-col nzFlex="0 1 250px">
-            <nz-select style="width: 80%;" [(ngModel)]="showType" (ngModelChange)="onSearchByOnOff($event)">
+            <nz-select style="width: 80%;" [(ngModel)]="switchFilterV2.status" (ngModelChange)="onSearchV2()">
               <nz-option nzValue="" nzLabel="展示所有开关"></nz-option>
               <nz-option nzValue="Enabled" nzLabel="展示 Enabled 的开关"></nz-option>
               <nz-option nzValue="Disabled" nzLabel="展示 Disabled 的开关"></nz-option>
@@ -93,14 +93,17 @@
         <!--v2 switch table-->
         <ng-template #v2switchTable>
           <nz-table #table nzSize="small"
+                    nzShowSizeChanger
                     [nzScroll]="{ y: '520px' }"
-                    [nzData]="switchListsShowData"
-                    [nzLoading]="isLoading"
+                    [nzData]="switchListModel.items"
                     [nzFrontPagination]="false"
-                    [nzTotal]="totalCount"
-                    [nzPageSize]="pageSize"
-                    [nzPageIndex]="pageIndex + 1"
-                    (nzPageIndexChange)="onChangePageIndex($event)">
+                    [nzLoading]="v2Loading"
+                    [nzTotal]="switchListModel.totalCount"
+                    [(nzPageSize)]="switchFilterV2.pageSize"
+                    (nzPageSizeChange)="onSearchV2()"
+                    [nzPageSizeOptions]="[10,20,30]"
+                    [(nzPageIndex)]="switchFilterV2.pageIndex"
+                    (nzPageIndexChange)="onSearchV2()">
             <thead>
             <tr class="table-th-style">
               <th>名称</th>
@@ -117,8 +120,10 @@
                 <nz-switch [ngModel]="theSwitch.status === 'Enabled'" (click)="onChangeSwitchStatus(theSwitch)"
                            nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
               </td>
-              <td>{{ theSwitch.tags }}</td>
-              <td>{{getLocalDate(theSwitch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
+              <td>
+                <nz-tag [nzColor]="'#4CB287'" *ngFor="let tag of theSwitch.tags">{{tag}}</nz-tag>
+              </td>
+              <td>{{getLocalDate(theSwitch.lastModificationTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
               <td style="text-align: center">
                 <a nz-button nzType="link" style="color: #9A95CC;" (click)="onIntoSwitchDetail(theSwitch)">详情</a>
               </td>
@@ -158,6 +163,7 @@
 <nz-modal
   nzAutofocus="cancel"
   [(nzVisible)]="tagTreeModalVisible"
+  (nzOnOk)="saveTagTree()"
   (nzOnCancel)="tagTreeModalVisible = false"
   [nzCentered]="true"
   [nzBodyStyle]="{minHeight: '400px'}"
@@ -165,6 +171,6 @@
   nzTitle="标签树管理"
   nzMaskClosable="false">
   <ng-container *nzModalContent>
-    <switch-tag-tree-view></switch-tag-tree-view>
+    <switch-tag-tree-view [tagTree]="tagTree"></switch-tag-tree-view>
   </ng-container>
 </nz-modal>

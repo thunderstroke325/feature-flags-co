@@ -24,7 +24,7 @@ namespace FeatureFlags.APIs.Services
             int envId,
             SearchFeatureFlagRequest request)
         {
-            var flagIds = new List<string>();
+            List<string> flagIds = null;
 
             // filter flags by tagIds
             var tagTrees = await _tagTreeService.FindAsync(envId);
@@ -32,6 +32,7 @@ namespace FeatureFlags.APIs.Services
                 request.TagIds != null &&
                 request.TagIds.Any())
             {
+                flagIds = new List<string>();
                 foreach (var tagId in request.TagIds)
                 {
                     var node = tagTrees.Node(tagId);
@@ -42,14 +43,13 @@ namespace FeatureFlags.APIs.Services
                         flagIds.AddRange(ids);
                     }
                 }
+
+                flagIds = flagIds.Distinct().ToList();
             }
 
-            // remove empty ids
-            flagIds.RemoveAll(string.IsNullOrWhiteSpace);
-            
             var pagedFlags = await _flagService.GetListAsync(
-                envId, request.Name, request.Status, flagIds.Distinct(),
-                request.Page, request.PageSize
+                envId, request.Name, request.Status, flagIds,
+                request.PageIndex, request.PageSize
             );
 
             var vms = new List<FeatureFlagListViewModel>();
@@ -63,7 +63,7 @@ namespace FeatureFlags.APIs.Services
                 {
                     Id = flag.Id,
                     Name = flag.Name,
-                    Tags = string.Join(",", tags),
+                    Tags = tags,
                     Status = flag.Status,
                     LastModificationTime = flag.LastUpdatedTime,
                 };

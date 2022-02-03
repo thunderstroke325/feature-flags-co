@@ -1,47 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { TransferChange, TransferItem, TransferSelectChange } from "ng-zorro-antd/transfer";
+import { Component, Input, OnInit } from '@angular/core';
+import { TransferChange, TransferItem } from "ng-zorro-antd/transfer";
 import { SelectionModel } from '@angular/cdk/collections';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { NzTreeFlatDataSource, NzTreeFlattener } from 'ng-zorro-antd/tree-view';
 import { NzMessageService } from "ng-zorro-antd/message";
-
-interface TreeNode {
-  name: string;
-  key: string;
-  children?: TreeNode[];
-  isEditing?: boolean;
-}
-
-let TREE_DATA: TreeNode[] = [
-  {
-    name: 'parent 1',
-    key: '1',
-    children: [
-      {
-        name: 'parent 1-0',
-        key: '1-0',
-        children: [
-          {name: 'leaf', key: '1-0-0'},
-          {name: 'leaf', key: '1-0-1'}
-        ]
-      },
-      {
-        name: 'parent 1-1',
-        key: '1-1',
-        children: [{name: 'leaf', key: '1-1-0'}]
-      }
-    ]
-  },
-  {
-    key: '2',
-    name: 'parent 2',
-    children: [{name: 'leaf', key: '2-0'}]
-  }
-];
+import { SwitchTagTree, SwitchTagTreeNode } from "../types/switch-index";
+import { SwitchV2Service } from "../../../../services/switch-v2.service";
+import { AccountService } from "../../../../services/account.service";
 
 interface FlatNode {
+  id: number;
   name: string;
-  key: string;
   level: number;
   isEditing?: boolean;
 }
@@ -51,14 +20,22 @@ interface FlatNode {
   template: `
     <div nz-row>
       <div nz-col nzSpan="8">
+        <button style="margin-left: 17px" nz-button nzSize="small" nzType="text" (click)="newNode(undefined)">创建根节点
+        </button>
         <nz-tree-view [nzTreeControl]="treeControl" [nzDataSource]="dataSource" [trackBy]="trackBy">
           <nz-tree-node nzTreeNodePadding *nzTreeNodeDef="let node">
+            <!-- caret down or placeholder -->
+            <nz-tree-node-toggle *ngIf="hasChild(node)">
+              <i nz-icon nzType="down" nzTreeNodeToggleRotateIcon></i>
+            </nz-tree-node-toggle>
+            <nz-tree-node-toggle *ngIf="!hasChild(node)" nzTreeNodeNoopToggle>
+            </nz-tree-node-toggle>
+
+            <!-- node name -->
             <nz-tree-node-option
               [nzDisabled]="node.disabled"
               [nzSelected]="selectListSelection.isSelected(node)"
-              (nzClick)="selectListSelection.toggle(node)">
-
-              <!-- node name -->
+              (nzClick)="toggleNode(node)">
               <div *ngIf="node.isEditing; then editMode else showMode"></div>
               <ng-template #editMode>
                 <input nz-input nzSize="small" [(ngModel)]="node.name" style="width: 120px; margin-right: 2px">
@@ -95,15 +72,10 @@ interface FlatNode {
               </button>
             </ng-template>
 
-            <!-- caret down -->
-            <nz-tree-node-toggle *ngIf="hasChild(node)">
-              <i nz-icon nzType="down" nzTreeNodeToggleRotateIcon></i>
-            </nz-tree-node-toggle>
-
-            <!-- delete -->
+            <!-- delete operation -->
             <button nz-button nzType="text" nzSize="small" nzDanger
                     nz-tooltip nzTooltipTitle="删除节点"
-                    (click)="delete(node)">
+                    (click)="deleteNode(node)">
               <i nz-icon nzType="delete" nzTheme="outline"></i>
             </button>
           </nz-tree-node>
@@ -111,15 +83,14 @@ interface FlatNode {
       </div>
       <div nz-col nzSpan="16">
         <nz-transfer
-          [nzDataSource]="list"
+          [nzDisabled]="!this.selectedNode"
+          [nzDataSource]="transferItems"
           [nzShowSearch]="true"
-          [nzTitles]="['未选择', '已选择']"
+          [nzTitles]="['未关联', '已关联']"
           nzSearchPlaceholder="按名称查找"
           [nzListStyle]="{ 'width.px': 250, 'height.px': 350 }"
           [nzRender]="render"
-          (nzSelectChange)="select($event)"
-          (nzChange)="change($event)"
-        >
+          (nzChange)="onTransfer($event)">
           <ng-template #render let-item>{{ item.title }}</ng-template>
         </nz-transfer>
       </div>
@@ -129,79 +100,107 @@ interface FlatNode {
 })
 export class SwitchTagTreeViewComponent implements OnInit {
 
-  constructor(private message: NzMessageService) {
-
+  constructor(
+    private message: NzMessageService,
+    private switchV2Service: SwitchV2Service,
+    private accountService: AccountService
+  ) {
   }
 
   ngOnInit(): void {
+    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    const envId = currentAccountProjectEnv.projectEnv.envId;
+
     // init tree
-    this.treeData = TREE_DATA;
-    this.dataSource.setData(this.treeData);
+    this.refreshTree();
     this.treeControl.expandAll();
 
     // init transfer
-    for (let i = 0; i < 20; i++) {
-      this.list.push({
-        key: i.toString(),
-        title: `feature flag ${i + 1}`,
-        checked: false
-      });
-    }
-
-    [2, 3].forEach(idx => (this.list[idx].direction = 'right'));
+    this.switchV2Service.getSwitchDropDown(envId)
+      .subscribe(dropDowns => {
+          this.transferItems = dropDowns.map(
+            dropDown => ({
+              key: dropDown.key,
+              title: dropDown.value
+            })
+          )
+        }
+      );
   }
 
   //#region transfer
 
-  list: TransferItem[] = [];
+  transferItems: TransferItem[] = [];
 
-  select(ret: TransferSelectChange): void {
-    console.log('nzSelectChange', ret);
+  onTransfer(change: TransferChange) {
+    const keys = change.list.map(item => item.key);
+    if (keys.length === 0) {
+      return;
+    }
+
+    switch (change.from) {
+      case 'left':
+        this.selectedNode.value = [...this.selectedNode.value, ...keys];
+        break;
+      case 'right':
+        this.selectedNode.value = this.selectedNode.value.filter(
+          key => keys.indexOf(key) !== -1
+        );
+        break;
+      default:
+        break;
+    }
   }
 
-  change(ret: TransferChange): void {
-    console.log('nzChange', ret);
-    const listKeys = ret.list.map(l => l.key);
-    const hasOwnKey = (e: TransferItem): boolean => e.hasOwnProperty('key');
-    this.list = this.list.map(e => {
-      if (listKeys.includes(e.key) && hasOwnKey(e)) {
-        if (ret.to === 'left') {
-          delete e.hide;
-        } else if (ret.to === 'right') {
-          e.hide = false;
-        }
-      }
-      return e;
-    });
+  refreshTransfer() {
+    if (this.selectedNode) {
+      this.transferItems = this.transferItems.map(
+        item => ({
+          key: item.key,
+          title: item.title,
+          direction: this.selectedNode.value.indexOf(item.key) !== -1
+            ? 'right' : 'left'
+        })
+      );
+    }
   }
 
   //#endregion
 
   //#region tree view
 
-  private transformer = (node: TreeNode, level: number): FlatNode => {
+  private transformer = (node: SwitchTagTreeNode, level: number): FlatNode => {
     const existingNode = this.nestedNodeMap.get(node);
     const flatNode =
-      existingNode && existingNode.key === node.key
+      existingNode && existingNode.id === node.id
         ? existingNode
         : {
-          expandable: !!node.children && node.children.length > 0,
+          id: node.id,
           name: node.name,
-          level,
-          key: node.key,
+          level: level,
           isEditing: node.isEditing
         };
-    flatNode.name = node.name;
     this.flatNodeMap.set(flatNode, node);
     this.nestedNodeMap.set(node, flatNode);
     return flatNode;
   };
 
-  treeData: TreeNode[] = [];
-  flatNodeMap = new Map<FlatNode, TreeNode>();
-  nestedNodeMap = new Map<TreeNode, FlatNode>();
-  selectListSelection = new SelectionModel<FlatNode>(false);
+  private _tagTree: SwitchTagTree = new SwitchTagTree([]);
+  @Input()
+  set tagTree(tree: SwitchTagTree) {
+    if (tree) {
+      this._tagTree = tree;
+    }
+  }
 
+  get tagTree() {
+    return this._tagTree;
+  }
+
+  flatNodeMap = new Map<FlatNode, SwitchTagTreeNode>();
+  nestedNodeMap = new Map<SwitchTagTreeNode, FlatNode>();
+  selectedNode: SwitchTagTreeNode;
+  selectListSelection = new SelectionModel<FlatNode>(false);
   treeControl = new FlatTreeControl<FlatNode>(
     node => node.level,
     _ => true
@@ -214,7 +213,7 @@ export class SwitchTagTreeViewComponent implements OnInit {
   );
 
   dataSource = new NzTreeFlatDataSource(this.treeControl, this.treeFlattener);
-  trackBy = (_: number, node: FlatNode): string => `${node.key}-${node.name}`;
+  trackBy = (_: number, node: FlatNode): string => `${node.id}-${node.name}`;
 
   hasChild(node: FlatNode) {
     const nestedNode = this.flatNodeMap.get(node);
@@ -225,56 +224,33 @@ export class SwitchTagTreeViewComponent implements OnInit {
     return false;
   }
 
-  delete(node: FlatNode): void {
-    const originNode = this.flatNodeMap.get(node);
+  toggleNode(node: FlatNode) {
+    this.selectedNode = this.selectListSelection.isSelected(node)
+      ? null
+      : this.flatNodeMap.get(node);
+    this.selectListSelection.toggle(node);
 
-    const dfsParentNode = (): TreeNode | null => {
-      const stack = [...this.treeData];
-      while (stack.length > 0) {
-        const n = stack.pop()!;
-        if (n.children) {
-          if (n.children.find(e => e === originNode)) {
-            return n;
-          }
-
-          for (let i = n.children.length - 1; i >= 0; i--) {
-            stack.push(n.children[i]);
-          }
-        }
-      }
-      return null;
-    };
-
-    const parentNode = dfsParentNode();
-    if (parentNode && parentNode.children) {
-      // has parent node
-      parentNode.children = parentNode.children.filter(e => e !== originNode);
-    } else {
-      // no parent node
-      if (this.treeData.length === 1) {
-        this.message.warning('标签树需要至少保留一个节点');
-        return;
-      }
-
-      this.treeData = this.treeData.filter(e => e.key !== originNode.key);
-      TREE_DATA = TREE_DATA.filter(e => e.key !== originNode.key);
-    }
-
-    this.dataSource.setData(this.treeData);
+    this.refreshTransfer();
   }
 
   newNode(node: FlatNode): void {
-    const nestedNode = this.flatNodeMap.get(node);
-    if (nestedNode) {
-      nestedNode.children = nestedNode.children || [];
-      nestedNode.children.push({
-        name: '',
-        key: `${nestedNode.key}-${nestedNode.children.length}`,
-        isEditing: true
-      });
-      this.dataSource.setData(this.treeData);
+    let parentNode: SwitchTagTreeNode = undefined;
+    if (node) {
+      parentNode = this.flatNodeMap.get(node);
       this.treeControl.expand(node);
     }
+
+    const newNode = {
+      id: -1,
+      name: '',
+      value: [],
+      children: [],
+      isEditing: true
+    };
+
+    const insertedNode = this.tagTree.insertNode(newNode, parentNode);
+    insertedNode.isEditing = true;
+    this.refreshTree();
   }
 
   editNode(node: FlatNode): void {
@@ -288,13 +264,22 @@ export class SwitchTagTreeViewComponent implements OnInit {
     }
 
     node.isEditing = false;
-
     const nestedNode = this.flatNodeMap.get(node);
     if (nestedNode) {
       nestedNode.isEditing = false;
-      nestedNode.name = node.name;
-      this.dataSource.setData(this.treeData);
+      this.tagTree.updateNode(nestedNode, node.name);
+      this.refreshTree();
     }
+  }
+
+  deleteNode(node: FlatNode): void {
+    const treeNode = this.flatNodeMap.get(node);
+    this.tagTree.deleteNode(treeNode);
+    this.refreshTree();
+  }
+
+  refreshTree() {
+    this.dataSource.setData(this.tagTree.trees);
   }
 
   //#endregion

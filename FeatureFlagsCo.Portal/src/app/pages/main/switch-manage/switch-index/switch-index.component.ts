@@ -7,6 +7,10 @@ import { FeatureFlagType, IFfParams } from '../types/switch-new';
 import { AccountService } from 'src/app/services/account.service';
 import { encodeURIComponentFfc } from 'src/app/utils';
 import { FfcService } from "../../../../services/ffc.service";
+import { SwitchTagTreeService } from "../../../../services/switch-tag-tree.service";
+import { SwitchListFilter, SwitchListModel, SwitchTagTree } from "../types/switch-index";
+import { SwitchV2Service } from "../../../../services/switch-v2.service";
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'index',
@@ -40,7 +44,6 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
   public switchListsShowData: IFfParams[] = [];
   public createModalVisible: boolean = false;             // 创建开关的弹窗显示
   public isOkLoading: boolean = false;                    // 创建开关加载中动画
-  public isInitLoading: boolean = true;                  // 数据加载中对话
 
   public switchName: string = '';
   switchType: FeatureFlagType = FeatureFlagType.Classic;
@@ -49,14 +52,61 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
   public isIntoing: boolean = false;                      // 是否点击了一条开关，防止路由切换慢的双击效果
   public totalCount: number = 0;
 
-  // tag tree modal
+  envId: number;
+
+  // tag tree
   tagTreeModalVisible: boolean = false;
+  tagTree: SwitchTagTree = new SwitchTagTree([]);
+  //#region v2 switch list
+
+  switchListModel: SwitchListModel = {
+    items: [],
+    totalCount: 0
+  };
+
+  v2Loading: boolean = true;
+
+  loadSwitchListV2() {
+    this.v2Loading = true;
+    this.switchV2Service
+      .getSwitchList(this.envId, this.switchFilterV2)
+      .subscribe((switches: SwitchListModel) => {
+        this.switchListModel = switches;
+        this.v2Loading = false;
+      });
+  }
+
+  switchFilterV2: SwitchListFilter = new SwitchListFilter();
+
+  onSelectTagV2(nodeIds: number[]) {
+    this.switchFilterV2.tagIds = nodeIds;
+
+    this.onSearchV2();
+  }
+
+  $searchV2: Subject<void> = new Subject();
+
+  onSearchV2() {
+    this.$searchV2.next();
+  }
+
+  subscribeSearch() {
+    this.$searchV2.pipe(
+      debounceTime(400)
+    ).subscribe(() => {
+      this.loadSwitchListV2();
+    });
+  }
+
+  //#endregion
 
   constructor(
     private router: Router,
     public switchServe: SwitchService,
+    private switchV2Service: SwitchV2Service,
     private msg: NzMessageService,
     private accountService: AccountService,
+    private switchTagTreeService: SwitchTagTreeService,
     private ffcService: FfcService
   ) {}
 
@@ -64,23 +114,22 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
     const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
     this.currentAccountId = currentAccountProjectEnv.account.id;
     const envId = currentAccountProjectEnv.projectEnv.envId;
+    this.envId = envId;
     this.switchServe.envId = envId;
+    this.switchTagTreeService.getTree(envId)
+      .subscribe(res => this.tagTree = res);
+    this.subscribeSearch();
+    this.$searchV2.next();
     this.initSwitchList(envId);
   }
 
   private initSwitchList(id: number): void{
-    this.isInitLoading = true;
     this.switchServe.getSwitchList(id).subscribe((result: IFfParams[]) => {
-        this.isInitLoading = false;
         if (result.length) {
           this.initSwitchLists = result;
           this.switchLists = result;
           this.totalCount = result.length;
           this.switchListsShowData = result.slice(this.pageIndex * this.pageSize, this.pageIndex * this.pageSize + this.pageSize);
-        } else {
-          // this.msg.info("当前 Project 没有开关，请添加!");
-          // this.initSwitchLists = [];
-          // this.createModalVisible = true;
         }
         this.isLoading = false;
     });
@@ -184,5 +233,20 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
     this.pageIndex = 0;
     this.switchListsShowData = this.switchLists
       .slice( this.pageIndex  * this.pageSize, this.pageIndex * this.pageSize + this.pageSize);
+  }
+
+  // 保存标签树
+  saveTagTree() {
+    this.switchTagTreeService.saveTree(this.envId, this.tagTree)
+      .subscribe(savedTagTree => {
+        // for trigger change detection
+        this.tagTree = savedTagTree;
+        this.msg.success('保存成功!');
+      }, err => {
+        this.msg.error(err.error);
+      });
+
+    // close modal
+    this.tagTreeModalVisible = false;
   }
 }

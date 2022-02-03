@@ -20,9 +20,9 @@ namespace FeatureFlags.APIs.Controllers
         [HttpGet]
         public async Task<FeatureFlagTagTrees> GetAsync(int envId)
         {
-            var tagTrees = await _service.GetAsync(envId);
+            var tagTrees = await _service.FindAsync(envId);
 
-            return tagTrees;
+            return tagTrees ?? new FeatureFlagTagTrees(envId, new List<FeatureFlagTagTree>());
         }
 
         [HttpPost]

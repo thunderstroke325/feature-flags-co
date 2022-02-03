@@ -65,9 +65,9 @@ namespace FeatureFlags.APIs.Services
             }
 
             // flagIds filter
-            if (flagIds != null && flagIds.Any())
+            if (flagIds != null)
             {
-                var flagIdsFilter = filterBuilder.In(flag => flag.Id, flagIds);
+                var flagIdsFilter = filterBuilder.In(flag => flag.Id, flagIds.Distinct());
                 filters.Add(flagIdsFilter);
             }
 

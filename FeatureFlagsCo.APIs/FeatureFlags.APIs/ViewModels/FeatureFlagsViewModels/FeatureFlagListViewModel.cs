@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels
 {
@@ -8,7 +9,7 @@ namespace FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels
 
         public string Name { get; set; }
 
-        public string Tags { get; set; }
+        public IEnumerable<string> Tags { get; set; }
 
         public string Status { get; set; }
 
