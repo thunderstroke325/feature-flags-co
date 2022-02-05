@@ -165,4 +165,24 @@ export class SwitchTagTree {
       this.trees = this.trees.filter(root => root !== node);
     }
   }
+
+  getSwitchTags(theSwitchId: string): string[] {
+    let tags = [];
+
+    for (const tree of this.trees) {
+      this.getSwitchTagsRecursive(tree, theSwitchId, tags);
+    }
+
+    return tags;
+  }
+
+  getSwitchTagsRecursive(node: SwitchTagTreeNode, theSwitchId: string, tags: string[]) {
+    if (node.value && node.value.find(switchId => switchId === theSwitchId)) {
+      tags.push(node.name);
+    }
+
+    for (const child of node.children) {
+      this.getSwitchTagsRecursive(child, theSwitchId, tags);
+    }
+  }
 }

@@ -241,6 +241,12 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
       .subscribe(savedTagTree => {
         // for trigger change detection
         this.tagTree = savedTagTree;
+
+        // update switch tags when save tagTree
+        for (const switchItem of this.switchListModel.items) {
+          switchItem.tags = this.tagTree.getSwitchTags(switchItem.id);
+        }
+
         this.msg.success('保存成功!');
       }, err => {
         this.msg.error(err.error);
