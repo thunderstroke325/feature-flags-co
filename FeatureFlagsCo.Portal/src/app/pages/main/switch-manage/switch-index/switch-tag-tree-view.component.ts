@@ -134,17 +134,13 @@ export class SwitchTagTreeViewComponent implements OnInit {
 
   onTransfer(change: TransferChange) {
     const keys = change.list.map(item => item.key);
-    if (keys.length === 0) {
-      return;
-    }
-
     switch (change.from) {
       case 'left':
         this.selectedNode.value = [...this.selectedNode.value, ...keys];
         break;
       case 'right':
         this.selectedNode.value = this.selectedNode.value.filter(
-          key => keys.indexOf(key) !== -1
+          key => keys.indexOf(key) === -1
         );
         break;
       default:
