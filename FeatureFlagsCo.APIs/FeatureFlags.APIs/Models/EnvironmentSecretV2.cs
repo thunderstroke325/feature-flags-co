@@ -65,6 +65,20 @@ namespace FeatureFlags.APIs.Models
                 throw new InvalidEnvSecretException($"envSecret '{envSecret}' is invalid, please check again.", ex);
             }
         }
+
+        public static bool TryParse(string envSecret, out EnvironmentSecretV2 secret)
+        {
+            try
+            {
+                secret = Parse(envSecret);
+                return true;
+            }
+            catch (Exception)
+            {
+                secret = null;
+                return false;
+            }
+        }
     }
 
     public class InvalidEnvSecretException : Exception

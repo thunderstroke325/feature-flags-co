@@ -22,14 +22,14 @@ namespace FeatureFlags.APIs.Authentication.Scheme
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var envSecret = Request.EnvSecret();
-            if (string.IsNullOrWhiteSpace(envSecret))
+            var key = Request.EnvSecret();
+            if (string.IsNullOrWhiteSpace(key))
             {
                 return Task.FromResult(AuthenticateResult.Fail("EnvSecret Not Found."));
             }
 
-            var secret = EnvironmentSecretV2.Parse(envSecret);
-            if (secret.EnvId == 0)
+            var isValidKey = EnvironmentSecretV2.TryParse(key, out var envSecret);
+            if (!isValidKey || envSecret.EnvId == 0)
             {
                 return Task.FromResult(AuthenticateResult.Fail("Invalid EnvSecret Provided."));
             }
@@ -37,7 +37,7 @@ namespace FeatureFlags.APIs.Authentication.Scheme
             // construct ticket
             var claims = new[]
             {
-                new Claim(PublicApiClaims.EnvId, secret.EnvId.ToString())
+                new Claim(PublicApiClaims.EnvId, envSecret.EnvId.ToString())
             };
             var identity = new ClaimsIdentity(claims, PublicApiAuthenticationConstants.AuthenticationType);
             var principal = new ClaimsPrincipal(identity);
