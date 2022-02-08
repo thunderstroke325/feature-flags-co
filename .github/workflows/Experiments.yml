@@ -5,7 +5,7 @@ on:
       - migration
     paths:
     - 'FeatureFlagsCo.Experiments/**'
-    -'.github/workflows/Experiments.yml'
+    -'Experiments.yml'
 jobs:
   deploy-dev:
     name : Deploy to development
