@@ -5,7 +5,6 @@ on:
       - migration
     paths:
     - 'FeatureFlagsCo.Experiments/**'
-    -'Experiments.yml'
 jobs:
   deploy-dev:
     name : Deploy to development
