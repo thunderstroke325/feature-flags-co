@@ -3,7 +3,8 @@ on:
   push:
     branches:
       - migration
-
+    paths:
+    - 'FeatureFlagsCo.APIs/**'
 jobs:
   deploy-dev:
     name : Deploy to development
