@@ -1,0 +1,154 @@
+name: APIs 
+on: 
+  push:
+    branches:
+      - migration
+
+jobs:
+  deploy-dev:
+    name : Deploy to development
+    runs-on: ubuntu-latest
+    environment : dev  
+    steps:
+
+      - name: Extract branch name if push
+        if: github.event_name == 'push'
+        run: echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: convert push develop to dev
+        if: env.GIT_BRANCH != 'main'
+        run: echo "DEPLOY_ENV=dev" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Replace apisetting env
+        id: setting-env
+        env:
+          ES_Url : ${{ secrets.ES_Url }}
+          ES_Password : ${{ secrets.ES_Password }}
+          mq_host: ${{ secrets.mq_host }}
+          mq_port: ${{ secrets.mq_port }}
+          mq_username: ${{ secrets.mq_username }}
+          mq_password: ${{ secrets.mq_password}}
+          redis_host: ${{ secrets.redis_host }}
+          redis_port: ${{ secrets.redis_port }}
+          redis_password: ${{ secrets.redis_password}}
+          redis_ssl: ${{ secrets.redis_ssl}}
+          wait_timeout: ${{ secrets.wait_timeout }}
+          fully_qualified_namespace: ${{ secrets.fully_qualified_namespace }}
+          sas_policy: ${{ secrets.sas_policy }}
+          servicebus_sas_key: ${{ secrets.servicebus_sas_key }}
+          insignt_conn_str: ${{ secrets.insignt_conn_str }}
+          p1_prefetch_count: ${{ secrets.p1_prefetch_count }}
+          p2_prefetch_count: ${{ secrets.p2_prefetch_count }}
+          p3_prefetch_count: ${{ secrets.p3_prefetch_count }}
+          engine: ${{ secrets.engine }}
+        shell: pwsh
+        run: |   
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{elasticurl}}','$(ES_Url)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{elasticusername}}','elastic' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{elasticpassword}}','$(ES_Password)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{mq_host}}','$(mq_host)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{mq_port}}','$(mq_port_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{mq_username}}','$(mq_username)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{mq_passwd}}','$(mq_passwd)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{redis_host}}','$(redis_host)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{redis_port}}','$(redis_port)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{redis_passwd}}','$(redis_passwd)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{wait_timeout}}','$(wait_timeout)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{fully_qualified_namespace}}','$(fully_qualified_namespace)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{sas_policy}}','$(sas_policy)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{servicebus_sas_key}}','$(servicebus_sas_key)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{insignt_conn_str}}','$(insignt_conn_str)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{p1_prefetch_count}}','$(p1_prefetch_count)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{p2_prefetch_count}}','$(p2_prefetch_count_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{p3_prefetch_count}}','$(p3_prefetch_count_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{redis_ssl}}','$(redis_ssl)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{engine}}','$(engine)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            
+            $a = Get-Content $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+            Write-Host $a
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ffc-dev-back-ecs-task  | jq -r '.taskDefinition'> task-definition.json
+          aws ecs describe-task-definition --task-definition ffc-dev-back-ecs-task | jq -r '.taskDefinition'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ffc-dev-main-ecr-repo
+          IMAGE_TAG: latest
+        run: |
+          echo $GITHUB_WORKSPACE
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.githubactions.Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ secrets.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ secrets.ECS_SERVICE }}
+          cluster: ${{ secrets.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-prod:
+    name : Deploy to production
+    runs-on: ubuntu-latest
+    needs: [deploy-dev]
+    environment : prod
+    steps:
+    
+      - name: Extract branch name if push
+        if: github.event_name == 'push'
+        run: echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: convert push develop to dev
+        if: env.GIT_BRANCH != 'main'
+        run: echo "DEPLOY_ENV=dev" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ffc-prod-main-ecr-repo
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --file ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.Dockerfile ./FeatureFlagsCo.APIs 
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
