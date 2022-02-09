@@ -4,7 +4,7 @@ on:
     branches:
       - migration
     paths:
-    - 'FeatureFlagsCo.APIs/FeatureFlags.Messaging/**'
+    - 'FeatureFlagsCo.APIs/**'
 jobs:
   deploy-dev:
     name : Deploy to development
