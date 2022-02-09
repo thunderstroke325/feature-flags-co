@@ -55,7 +55,7 @@ jobs:
           MongoDbSettings_DatabaseName: ${{ secrets.MongoDbSettings_DatabaseName }}
         shell: pwsh
         run: |   
-              cd FeatureFlagsCo.APIs/FeatureFlags.Messaging/
+              cd FeatureFlagsCo.APIs/FeatureFlagsCo.Messaging/
               $pathToJson = "appsettings.DockerDevelopment.json"
               $a = Get-Content $pathToJson | ConvertFrom-Json
 
