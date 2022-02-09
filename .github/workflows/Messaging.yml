@@ -1,0 +1,164 @@
+name: APIs 
+on: 
+  push:
+    branches:
+      - migration
+    paths:
+    - 'FeatureFlagsCo.APIs/FeatureFlags.Messaging/**'
+jobs:
+  deploy-dev:
+    name : Deploy to development
+    runs-on: ubuntu-latest
+    environment : dev  
+    steps:
+
+      - name: Extract branch name if push
+        if: github.event_name == 'push'
+        run: echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: convert push develop to dev
+        if: env.GIT_BRANCH != 'main'
+        run: echo "DEPLOY_ENV=dev" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Replace apisetting env
+        id: setting-env
+        env:
+          Connstr_ConnectionString : ${{ secrets.Connstr_ConnectionString }}
+          REDISCACHE_ConnectionString : ${{ secrets.REDISCACHE_ConnectionString }}
+          JWT_Secret: ${{ secrets.JWT_Secret }}
+          AppInsights_InstrumentationKey: ${{ secrets.AppInsights_InstrumentationKey_Messaging }}
+          AppInsights_ConnectionString: ${{ secrets.AppInsights_ConnectionString }}
+          AppInsights_ApplicationId: ${{ secrets.AppInsights_ApplicationId }}
+          AppInsights_ApplicationApiSecret: ${{ secrets.AppInsights_ApplicationApiSecret }}
+          SendCloudAPIUser: ${{ secrets.SendCloudAPIUser }}
+          SendCloudAPIKey: ${{ secrets.SendCloudAPIKey }}
+          MySettings_ElasticSearchHost: ${{ secrets.MySettings_ElasticSearchHost }}
+          MySettings_ServiceBusConnectionString: ${{ secrets.MySettings_ServiceBusConnectionString }}
+          MySettings_CacheType: ${{ secrets.MySettings_CacheType }}
+          MySettings_ExperimentsServiceHost: ${{ secrets.MYSETTINGS_EXPERIMENTSSERVICEHOST }}
+          MySettings_MessagingServiceHost: ${{ secrets.MySettings_MessagingServiceHost }}
+          MongoDbSettings_ConnectionString: ${{ secrets.MongoDbSettings_ConnectionString }}
+          MongoDbSettings_DatabaseName: ${{ secrets.MongoDbSettings_DatabaseName }}
+        shell: pwsh
+        run: |   
+              cd FeatureFlagsCo.APIs/FeatureFlags.APIs
+              $pathToJson = "appsettings.DockerDevelopment.json"
+              $a = Get-Content $pathToJson | ConvertFrom-Json
+
+              $a.ConnectionStrings.ConnStr = $env:Connstr_ConnectionString
+              $a.ConnectionStrings.RedisServerUrl = $env:REDISCACHE_ConnectionString
+              $a.JWT.Secret = $env:JWT_Secret
+
+              $a.ApplicationInsights.InstrumentationKey = $env:AppInsights_InstrumentationKey
+              $a.ApplicationInsights.ConnectionString = $env:AppInsights_ConnectionString
+              $a.MySettings.ServiceBusConnectionString = $env: MySettings_ServiceBusConnectionString
+              $a.MySettings.SendCloudAPIUser = $env:SendCloudAPIUser
+              $a.MySettings.SendCloudAPIKey = $env:SendCloudAPIKey
+              $a.MySettings.SendCloudFrom = "noreply@feature-flags.co"
+              $a.MySettings.SendCloudFromName = "feature-flags.co"
+              $a.MySettings.SendCloudTemplate = "forgetpassword"
+              $a.MySettings.SendCloudEmailSubject = "feature-flags.co"
+              
+              $a.MySettings.AppInsightsApplicationId = $env:AppInsights_ApplicationId
+              $a.MySettings.AppInsightsApplicationApiSecret = $env:AppInsights_ApplicationApiSecret
+
+              $a.MySettings.InsightsRabbitMqUrl = ""
+              $a.MySettings.ElasticSearchHost = $env:MySettings_ElasticSearchHost
+              $a.MySettings.CacheType = $env:MySettings_CacheType
+              
+              $a.MySettings.MessagingServiceHost = $env:MySettings_MessagingServiceHost
+              $a.MySettings.ExperimentsServiceHost = $env:MYSETTINGS_EXPERIMENTSSERVICEHOST
+
+              $a.MongoDbSettings.ConnectionString = $env:MongoDbSettings_ConnectionString
+              $a.MongoDbSettings.DatabaseName = $env:MongoDbSettings_DatabaseName
+              
+              ConvertTo-Json $a -depth 100  | set-content $pathToJson
+
+              $pathToJsonCheck = "appsettings.DockerDevelopment.json"
+              $aCheck = Get-Content $pathToJson | ConvertFrom-Json
+              Write-Host $aCheck.ConnectionStrings.ConnStr
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition ffc-dev-msg-ecs-task  | jq -r '.taskDefinition'> task-definition.json
+          aws ecs describe-task-definition --task-definition ffc-dev-msg-ecs-task | jq -r '.taskDefinition'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ffc-dev-msg-ecr-repo
+          IMAGE_TAG: latest
+        run: |
+          echo $GITHUB_WORKSPACE
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.githubactions.Dockerfile .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ secrets.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ secrets.ECS_SERVICE }}
+          cluster: ${{ secrets.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+  deploy-prod:
+    name : Deploy to production
+    runs-on: ubuntu-latest
+    needs: [deploy-dev]
+    environment : prod
+    steps:
+    
+      - name: Extract branch name if push
+        if: github.event_name == 'push'
+        run: echo "GIT_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: convert push develop to dev
+        if: env.GIT_BRANCH != 'main'
+        run: echo "DEPLOY_ENV=dev" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ffc-prod-main-ecr-repo
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --file ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.Dockerfile ./FeatureFlagsCo.APIs 
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

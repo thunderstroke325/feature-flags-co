@@ -85,14 +85,14 @@ jobs:
 
       - name: Download task definition
         run: |
-          aws ecs describe-task-definition --task-definition ffc-dev-back-ecs-task  | jq -r '.taskDefinition'> task-definition.json
-          aws ecs describe-task-definition --task-definition ffc-dev-back-ecs-task | jq -r '.taskDefinition'
+          aws ecs describe-task-definition --task-definition ffc-dev-exp-ecs-task  | jq -r '.taskDefinition'> task-definition.json
+          aws ecs describe-task-definition --task-definition ffc-dev-exp-ecs-task | jq -r '.taskDefinition'
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ffc-dev-main-ecr-repo
+          ECR_REPOSITORY: ffc-dev-exp-ecr-repo
           IMAGE_TAG: latest
         run: |
           echo $GITHUB_WORKSPACE
@@ -148,7 +148,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ffc-prod-main-ecr-repo
+          ECR_REPOSITORY: ffc-prod-exp-ecr-repo
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --file ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.Dockerfile ./FeatureFlagsCo.APIs 
