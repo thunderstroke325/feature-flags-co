@@ -80,7 +80,6 @@ jobs:
               $a.MySettings.ElasticSearchHost = $env:MySettings_ElasticSearchHost
               $a.MySettings.CacheType = $env:MySettings_CacheType
               
-              $a.MySettings.MessagingServiceHost = $env:MySettings_MessagingServiceHost
               $a.MySettings.ExperimentsServiceHost = $env:MYSETTINGS_EXPERIMENTSSERVICEHOST
 
               $a.MongoDbSettings.ConnectionString = $env:MongoDbSettings_ConnectionString
