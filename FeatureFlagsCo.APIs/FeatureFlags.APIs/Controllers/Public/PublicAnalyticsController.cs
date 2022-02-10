@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Analytic;
 using FeatureFlagsCo.MQ.ElasticSearch;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -67,12 +69,12 @@ namespace FeatureFlags.APIs.Controllers.Public
         /// <returns></returns>
         [HttpPost]
         [Route("analytics/track/feature-flags")]
-        public void TrackFeatureFlagUsageAsync(FeatureFlagUsageParam param)
+        public async Task<object> TrackFeatureFlagUsageAsync(FeatureFlagUsageParam param)
         {
             if (!param.IsValid())
             {
                 _logger.LogError(new Exception("Invalid param"), "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(param));
-                return;
+                return StatusCode(StatusCodes.Status200OK, new Response { Code = "OK", Message = "OK" });
             }
 
             try
@@ -88,6 +90,8 @@ namespace FeatureFlags.APIs.Controllers.Public
             {
                 _logger.LogError(ex, "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(param));
             }
+
+            return StatusCode(StatusCodes.Status200OK, new Response { Code = "OK", Message = "OK" });
         }
 
         [HttpPost]
