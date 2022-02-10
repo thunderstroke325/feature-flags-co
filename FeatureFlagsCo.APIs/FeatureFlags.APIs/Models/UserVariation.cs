@@ -4,18 +4,34 @@ namespace FeatureFlags.APIs.Models
 {
     public abstract class UserVariation
     {
-        public VariationOption Variation { get; }
-        public abstract bool SendToExperiment { get; }
+        public VariationOption Variation { get; set; }
+        public abstract bool SendToExperiment { get; set; }
 
         protected UserVariation(VariationOption variation)
         {
             Variation = variation;
         }
+
+        protected UserVariation()
+        {
+        }
+    }
+
+    public class InsightUserVariation: UserVariation
+    { 
+        public override bool SendToExperiment { get; set;  }
+        public InsightUserVariation(VariationOption variation) : base(variation)
+        {
+        }
+
+        public InsightUserVariation()
+        {
+        }
     }
 
     public class CachedUserVariation : UserVariation
     {
-        public override bool SendToExperiment { get; }
+        public override bool SendToExperiment { get; set; }
 
         public CachedUserVariation(VariationOption variation, bool? sendToExperiment)
             : base(variation)
@@ -29,7 +45,7 @@ namespace FeatureFlags.APIs.Models
 
     public class FeatureFlagDisabledUserVariation : UserVariation
     {
-        public override bool SendToExperiment => false;
+        public override bool SendToExperiment { get; set; } = false;
 
         public FeatureFlagDisabledUserVariation(VariationOption variation) : base(variation)
         {
@@ -38,7 +54,7 @@ namespace FeatureFlags.APIs.Models
 
     public class TargetedUserVariation : UserVariation
     {
-        public override bool SendToExperiment { get; }
+        public override bool SendToExperiment { get; set; }
 
         public TargetedUserVariation(
             VariationOption variation,
@@ -53,7 +69,7 @@ namespace FeatureFlags.APIs.Models
 
     public class ConditionedUserVariation : UserVariation
     {
-        public override bool SendToExperiment { get; }
+        public override bool SendToExperiment { get; set; }
 
         public ConditionedUserVariation(
             VariationOptionPercentageRollout percentageRollout,
@@ -95,7 +111,7 @@ namespace FeatureFlags.APIs.Models
 
     public class DefaultUserVariation : UserVariation
     {
-        public override bool SendToExperiment { get; }
+        public override bool SendToExperiment { get; set; }
 
         public DefaultUserVariation(
             VariationOptionPercentageRollout percentageRollout,

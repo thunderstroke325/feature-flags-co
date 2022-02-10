@@ -20,18 +20,19 @@ namespace FeatureFlags.APIs.Controllers
     {
         private readonly ILogger<VariationController> _logger;
         private readonly IVariationService _variationService;
-        private readonly MessagingService _messagingService;
         private readonly MongoDbFeatureFlagService _mongoDbFeatureFlagService;
+        private readonly IFeatureFlagsService _featureFlagService;
 
         public VariationController(
             ILogger<VariationController> logger, 
             IVariationService variationService,
             MongoDbFeatureFlagService mongoDbFeatureFlagService,
+            IFeatureFlagsService featureFlagService,
             MessagingService messagingService)
         {
             _logger = logger;
             _variationService = variationService;
-            _messagingService = messagingService;
+            _featureFlagService = featureFlagService;
             _mongoDbFeatureFlagService = mongoDbFeatureFlagService;
         }
 
@@ -78,7 +79,17 @@ namespace FeatureFlags.APIs.Controllers
 
                 try
                 {
-                    SendToRabbitMQ(param, ffIdVM, new CachedUserVariation(variation, true));
+                    var featureFlagUsage = new FeatureFlagUsageParam
+                    {
+                        FeatureFlagKeyName = param.FeatureFlagKeyName,
+                        UserName = param.FFUserName,
+                        Email = param.FFUserEmail,
+                        Country = param.FFUserCountry,
+                        UserKeyId = param.FFUserKeyId,
+                        UserCustomizedProperties = param.FFUserCustomizedProperties
+                    };
+
+                    _featureFlagService.SendFeatureFlagUsageToMQ(featureFlagUsage, ffIdVM, new CachedUserVariation(variation, true));
                 }
                 catch (Exception exp)
                 {
@@ -141,7 +152,17 @@ namespace FeatureFlags.APIs.Controllers
 
                 try
                 {
-                    SendToRabbitMQ(param, ffIdVm, userVariation);
+                    var featureFlagUsage = new FeatureFlagUsageParam
+                    {
+                        FeatureFlagKeyName = param.FeatureFlagKeyName,
+                        UserName = param.FFUserName,
+                        Email = param.FFUserEmail,
+                        Country = param.FFUserCountry,
+                        UserKeyId = param.FFUserKeyId,
+                        UserCustomizedProperties = param.FFUserCustomizedProperties
+                    };
+
+                    _featureFlagService.SendFeatureFlagUsageToMQ(featureFlagUsage, ffIdVm, userVariation);
                 }
                 catch(Exception exp)
                 {
@@ -156,109 +177,6 @@ namespace FeatureFlags.APIs.Controllers
                 Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 return new JsonResult(exp.Message);
             }
-        }
-        
-        private void SendToRabbitMQ(GetUserVariationResultParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, UserVariation userVariation)
-        {
-            var variation = userVariation.Variation;
-            var ffEvent = new FeatureFlagMessageModel()
-            {
-                RequestPath = "/Variation/GetMultiOptionVariation",
-                FeatureFlagId = ffIdVM.FeatureFlagId,
-                EnvId = ffIdVM.EnvId,
-                AccountId = ffIdVM.AccountId,
-                ProjectId = ffIdVM.ProjectId,
-                FeatureFlagKeyName = param.FeatureFlagKeyName,
-                UserKeyId = param.FFUserKeyId,
-                FFUserName = param.FFUserName,
-                VariationLocalId = variation.LocalId.ToString(),
-                VariationValue = variation.VariationValue,
-                TimeStamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
-            };
-            
-            var labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
-                         {
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "RequestPath",
-                                  LabelValue = "/Variation/GetMultiOptionVariation"
-                              },
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "FeatureFlagId",
-                                  LabelValue = ffIdVM.FeatureFlagId
-                              },
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "EnvId",
-                                  LabelValue = ffIdVM.EnvId
-                              },
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "AccountId",
-                                  LabelValue = ffIdVM.AccountId
-                              },
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "ProjectId",
-                                  LabelValue = ffIdVM.ProjectId
-                              },
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "FeatureFlagKeyName",
-                                  LabelValue = param.FeatureFlagKeyName
-                              },
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "UserKeyId",
-                                  LabelValue = param.FFUserKeyId
-                              },
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "FFUserName",
-                                  LabelValue = param.FFUserName
-                              },
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "VariationLocalId",
-                                  LabelValue = variation.LocalId.ToString()
-                              },
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "VariationValue",
-                                  LabelValue = variation.VariationValue
-                              },
-                              new FeatureFlagsCo.MQ.MessageLabel
-                              {
-                                  LabelName = "TimeStamp",
-                                  LabelValue = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
-                              } 
-                        };
-            if(param.FFUserCustomizedProperties != null && param.FFUserCustomizedProperties.Count > 0)
-            {
-                foreach (var item in param.FFUserCustomizedProperties)
-                {
-                    labels.Add(new FeatureFlagsCo.MQ.MessageLabel
-                    {
-                        LabelName = item.Name,
-                        LabelValue = item.Value
-                    });
-                }
-            }
-
-            _messagingService.SendAPIServiceToMQServiceWithoutResponse(new APIServiceToMQServiceModel
-            {
-                SendToExperiment = userVariation.SendToExperiment,
-                FFMessage = ffEvent,
-                Message = new FeatureFlagsCo.MQ.MessageModel
-                {
-                    SendDateTime = DateTime.UtcNow,
-                    Labels = labels,
-                    Message = JsonConvert.SerializeObject(param ?? new GetUserVariationResultParam()),
-                    FeatureFlagId = ffIdVM.FeatureFlagId,
-                    IndexTarget = "ffvariationrequestindex"
-                }
-            });
         }
     }
 }

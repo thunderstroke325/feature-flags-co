@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FeatureFlags.APIs.Models;
+using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Analytic;
 using FeatureFlagsCo.MQ.ElasticSearch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace FeatureFlags.APIs.Controllers.Public
 {
@@ -11,13 +15,19 @@ namespace FeatureFlags.APIs.Controllers.Public
     {
         private readonly MongoDbAnalyticBoardService _mongoDb;
         private readonly ElasticSearchService _elasticSearch;
+        private readonly ILogger<PublicAnalyticsController> _logger;
+        private readonly IFeatureFlagsService _featureFlagService;
 
         public PublicAnalyticsController(
-            ElasticSearchService elasticSearch, 
+            ILogger<PublicAnalyticsController> logger,
+            ElasticSearchService elasticSearch,
+            IFeatureFlagsService featureFlagService,
             MongoDbAnalyticBoardService mongoDb)
         {
+            _logger = logger;
             _elasticSearch = elasticSearch;
             _mongoDb = mongoDb;
+            _featureFlagService = featureFlagService;
         }
 
         /// <summary>
@@ -37,7 +47,7 @@ namespace FeatureFlags.APIs.Controllers.Public
             {
                 throw new ElasticSearchException("Failed to index analytics, please check your elastic search log.");
             }
-            
+
             // try add new dimension
             var board = await _mongoDb.GetByEnvIdAsync(EnvId);
             if (board != null)
@@ -48,6 +58,35 @@ namespace FeatureFlags.APIs.Controllers.Public
                 }
 
                 await _mongoDb.UpdateAsync(board.Id, board);
+            }
+        }
+
+        /// <summary>
+        /// collect feature flag usage data
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("analytics/track/feature-flags")]
+        public void TrackFeatureFlagUsageAsync(FeatureFlagUsageParam param)
+        {
+            if (!param.IsValid())
+            {
+                _logger.LogError(new Exception("Invalid param"), "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(param));
+                return;
+            }
+
+            try
+            {
+                var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, param.FeatureFlagKeyName);
+
+                param.UserVariations.ForEach(uv =>
+                {
+                    _featureFlagService.SendFeatureFlagUsageToMQ(param, ffIdVm, uv);
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(param));
             }
         }
 
