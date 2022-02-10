@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels.Public;
@@ -42,7 +43,7 @@ namespace FeatureFlags.APIs.Controllers.Public
         /// <returns></returns>
         [HttpPost]
         [Route("feature-flag/variations")]
-        public async Task<IEnumerable<UserVariationViewModel>> GetFeatureFlagVariations(GetUserVariationsRequest request)
+        public async Task<IEnumerable<UserVariationViewModel>> GetFeatureFlagVariations(FeatureFlagUser user)
         {
             var variations = new List<UserVariationViewModel>();
 
@@ -53,7 +54,7 @@ namespace FeatureFlags.APIs.Controllers.Public
                     FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, featureFlag.FF.KeyName);
 
                 var variation =
-                    await _variationService.GetUserVariationAsync(EnvSecret, request.EnvironmentUser(), ffIdVm);
+                    await _variationService.GetUserVariationAsync(EnvSecret, user.EnvironmentUser(), ffIdVm);
 
                 variations.Add(new UserVariationViewModel
                 {

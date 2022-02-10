@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.ViewModels.Public;
 
 namespace FeatureFlags.APIs.AutoMapperProfiles
 {
@@ -8,8 +7,8 @@ namespace FeatureFlags.APIs.AutoMapperProfiles
     {
         public FeatureFlagProfile()
         {
-            CreateMap<FeatureFlag, SdkFeatureFlag>()
-                .ForMember(des => des.Version, opt => opt.Ignore());
+            CreateMap<FeatureFlag, ServerSdkFeatureFlag>()
+                .ForMember(des => des.Timestamp, opt => opt.Ignore());
         }
     }
 }

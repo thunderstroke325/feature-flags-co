@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services.MongoDb;
-using FeatureFlags.APIs.ViewModels.Public;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -28,15 +27,15 @@ namespace FeatureFlags.APIs.Controllers.Public
         /// <returns></returns>
         [HttpGet]
         [Route("latest-feature-flag")]
-        public async Task<SdkLatestFeatureFlags> GetFullFeatureFlags()
+        public async Task<object> GetFullFeatureFlags()
         {
             var activeFeatureFlags = await _mongoDb.QueryableOf<FeatureFlag>()
                 .Where(featureFlag => featureFlag.EnvironmentId == EnvId && !featureFlag.IsArchived)
                 .ToListAsync();
 
-            var sdkFlags = _mapper.Map<IEnumerable<FeatureFlag>, IEnumerable<SdkFeatureFlag>>(activeFeatureFlags);
+            var sdkFlags = _mapper.Map<IEnumerable<FeatureFlag>, IEnumerable<ServerSdkFeatureFlag>>(activeFeatureFlags);
 
-            return new SdkLatestFeatureFlags
+            return new
             {
                 FeatureFlags = sdkFlags
             };

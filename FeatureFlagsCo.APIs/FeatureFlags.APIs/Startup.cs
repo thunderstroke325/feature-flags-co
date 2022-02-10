@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Authentication.Scheme;
@@ -193,6 +194,15 @@ namespace FeatureFlags.APIs
             app.UseCors("AllowMyOrigin");
             app.UseAuthentication();
             app.UseAuthorization();
+
+            // use sdk web socket server
+            var websocketOptions = new WebSocketOptions
+            {
+                KeepAliveInterval = TimeSpan.FromSeconds(60)
+            };
+            app.UseWebSockets(websocketOptions);
+            app.UseSdkWebSocketServer();
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers()

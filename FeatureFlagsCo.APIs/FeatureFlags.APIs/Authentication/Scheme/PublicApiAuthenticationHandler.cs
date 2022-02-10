@@ -29,7 +29,7 @@ namespace FeatureFlags.APIs.Authentication.Scheme
             }
 
             var isValidKey = EnvironmentSecretV2.TryParse(key, out var envSecret);
-            if (!isValidKey || envSecret.EnvId == 0)
+            if (!isValidKey)
             {
                 return Task.FromResult(AuthenticateResult.Fail("Invalid EnvSecret Provided."));
             }
