@@ -9,5 +9,5 @@ EXPOSE 80
 COPY . /expt
 COPY FeatureFlagsCo.Experiments/env/docker-${exptenv}-config.ini /expt/config/config.ini
 WORKDIR /expt
-RUN pip install -r docker-requirements.txt
+RUN pip install -r FeatureFlagsCo.Experiments/docker-requirements.txt
 CMD ["/usr/bin/supervisord","-c","supervisord.conf"]
