@@ -104,7 +104,7 @@ jobs:
           IMAGE_TAG: latest
         run: |
           echo $GITHUB_WORKSPACE
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/api.githubactions.Dockerfile .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./FeatureFlagsCo.APIs/Dockerfiles/Recommended/messaging.githubactions.Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
       
