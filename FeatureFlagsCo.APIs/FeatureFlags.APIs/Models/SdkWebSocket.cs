@@ -4,11 +4,14 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace FeatureFlags.APIs.Models
 {
     public class SdkWebSocket
     {
+        public int EnvId { get; protected set; }
+
         public string EnvSecret { get; protected set; }
 
         public string ConnectionId { get; protected set; }
@@ -17,15 +20,22 @@ namespace FeatureFlags.APIs.Models
 
         public string SdkType { get; protected set; }
 
+        /// <summary>
+        /// client-side sdk use only
+        /// </summary>
+        [CanBeNull]
+        public FeatureFlagUser User { get; set; }
+
         public SdkWebSocket(string envSecret, string sdkType)
         {
             ConnectionId = Guid.NewGuid().ToString("D");
 
-            if (!EnvironmentSecretV2.TryParse(envSecret, out _))
+            if (!EnvironmentSecretV2.TryParse(envSecret, out var secret))
             {
                 throw new ArgumentException($"invalid envSecret {envSecret}", nameof(envSecret));
             }
 
+            EnvId = secret.EnvId;
             EnvSecret = envSecret;
 
             if (string.IsNullOrWhiteSpace(sdkType))
@@ -56,6 +66,14 @@ namespace FeatureFlags.APIs.Models
             WebSocket = webSocket;
         }
 
+        /// <summary>
+        /// client-side sdk use only
+        /// </summary>
+        public void AttachUser(FeatureFlagUser user)
+        {
+            User = user;
+        }
+
         public async Task SendAsync(SdkWebSocketMessage message)
         {
             var bytes = Encoding.UTF8.GetBytes(message.AsJson());
@@ -78,7 +96,8 @@ namespace FeatureFlags.APIs.Models
         public override string ToString()
         {
             var info =
-                $"connectionId: {ConnectionId}, envSecret: {EnvSecret}, sdkType: {SdkType}";
+                $"connectionId: {ConnectionId}, envSecret: {EnvSecret}, sdkType: {SdkType}" +
+                $"{(User == null ? "" : User.UserKeyId)}";
 
             return info;
         }

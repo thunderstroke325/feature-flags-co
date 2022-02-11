@@ -23,6 +23,15 @@ namespace FeatureFlags.APIs.Services
             _mongoDbServiceV1 = mongoDbServiceV1;
         }
 
+        public async Task<FeatureFlag> GetAsync(string id)
+        {
+            var featureFlag = await _mongoDb
+                .QueryableOf<FeatureFlag>()
+                .FirstOrDefaultAsync(flag => flag.Id == id);
+
+            return featureFlag;
+        }
+
         public async Task<List<DropdownItem>> GetDropDownsAsync(int envId)
         {
             var query = _mongoDb.QueryableOf<FeatureFlag>()

@@ -10,61 +10,54 @@ namespace FeatureFlags.APIs.Services
 {
     public class SdkWebSocketConnectionManager : ISingletonDependency
     {
-        // envSecret -> SdkWebSocket[], SdkWebSocket GroupBy envId
-        private readonly ConcurrentDictionary<string, List<SdkWebSocket>> _sockets;
+        // envId -> SdkWebSocket[], SdkWebSocket GroupBy envId
+        private readonly ConcurrentDictionary<int, List<SdkWebSocket>> _sockets;
 
         public SdkWebSocketConnectionManager()
         {
-            _sockets = new ConcurrentDictionary<string, List<SdkWebSocket>>();
+            _sockets = new ConcurrentDictionary<int, List<SdkWebSocket>>();
         }
 
         public void RegisterSocket(SdkWebSocket socket)
         {
-            var envSecret = socket.EnvSecret;
+            var envId = socket.EnvId;
 
-            if (_sockets.ContainsKey(envSecret))
+            if (_sockets.ContainsKey(envId))
             {
-                _sockets[envSecret].Add(socket);
+                _sockets[envId].Add(socket);
             }
             else
             {
-                _sockets[envSecret] = new List<SdkWebSocket> { socket };
+                _sockets[envId] = new List<SdkWebSocket> { socket };
             }
         }
 
-        public SdkWebSocket GetSocket(string connectionId)
+        public IEnumerable<SdkWebSocket> GetSockets(int envId)
         {
-            var socket = _sockets.Values.SelectMany(x => x).FirstOrDefault(x => x.ConnectionId == connectionId);
-
-            return socket;
-        }
-
-        public IEnumerable<SdkWebSocket> GetSockets(string envSecret)
-        {
-            if (!_sockets.ContainsKey(envSecret))
+            if (!_sockets.ContainsKey(envId))
             {
                 return Array.Empty<SdkWebSocket>();
             }
 
-            var sockets = _sockets[envSecret];
+            var sockets = _sockets[envId];
             return sockets;
         }
 
         public async Task UnregisterSocket(SdkWebSocket socket)
         {
-            var envSecret = socket.EnvSecret;
+            var envId = socket.EnvId;
 
-            if (!_sockets.ContainsKey(envSecret))
+            if (!_sockets.ContainsKey(envId))
             {
                 return;
             }
 
-            var socketToRemove = _sockets[envSecret].FirstOrDefault(x => x.ConnectionId == socket.ConnectionId);
+            var socketToRemove = _sockets[envId].FirstOrDefault(x => x.ConnectionId == socket.ConnectionId);
             if (socketToRemove != null)
             {
                 await socketToRemove.CloseAsync();
 
-                _sockets[envSecret].Remove(socketToRemove);
+                _sockets[envId].Remove(socketToRemove);
             }
         }
     }

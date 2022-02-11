@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 using FeatureFlags.Utils.ExtensionMethods;
 using JetBrains.Annotations;
@@ -32,7 +33,7 @@ namespace FeatureFlags.APIs.Models
         }
     }
 
-    public class SdkDataSync
+    public class SdkDataSyncRequest
     {
         [CanBeNull] 
         public FeatureFlagUser User { get; set; }
@@ -40,6 +41,13 @@ namespace FeatureFlags.APIs.Models
         public long Timestamp { get; set; }
     }
 
+    public class SdkDataSyncTypes
+    {
+        public const string Full = "full";
+
+        public const string Patch = "patch";
+    }
+    
     public class ServerSdkFeatureFlag
     {
         [JsonPropertyName("_id")] public string _Id { get; set; }
@@ -75,9 +83,27 @@ namespace FeatureFlags.APIs.Models
 
         public bool IsArchived { get; set; }
 
-        public IEnumerable<ClientSdkVariation> Options { get; set; }
+        public IEnumerable<ClientSdkVariation> VariationOptions { get; set; }
 
         public long Timestamp { get; set; }
+
+        public ClientSdkFeatureFlag()
+        {
+        }
+
+        public ClientSdkFeatureFlag(FeatureFlag flag, UserVariation userVariation)
+        {
+            Id = flag.FF.KeyName;
+            Variation = userVariation.Variation.VariationValue;
+            SendToExperiment = userVariation.SendToExperiment;
+            IsArchived = flag.IsArchived;
+            VariationOptions = flag.VariationOptions.Select(option => new ClientSdkVariation
+            {
+                Id = option.LocalId,
+                Value = option.VariationValue
+            });
+            Timestamp = flag.FF.LastUpdatedTime?.UnixTimestampInMilliseconds() ?? 0;
+        }
     }
 
     public class ClientSdkVariation

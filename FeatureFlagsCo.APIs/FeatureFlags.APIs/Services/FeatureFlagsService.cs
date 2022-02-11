@@ -1,7 +1,6 @@
 ﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.Utils.ExtensionMethods;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FeatureFlagsCo.MQ;

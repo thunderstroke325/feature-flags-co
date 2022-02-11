@@ -59,7 +59,7 @@ namespace FeatureFlags.APIs.Middlewares
 
             await _wsService.OnConnectedAsync(sdkWebSocket);
 
-            await ReceiveAsync(context.RequestServices, sdkWebSocket, _wsService.OnMessageAsync);
+            await ReceiveAsync(sdkWebSocket, _wsService.OnMessageAsync);
         }
 
         private (bool isValid, SdkWebSocket socket) TryAcceptRequest(HttpContext context)
@@ -94,9 +94,8 @@ namespace FeatureFlags.APIs.Middlewares
         }
 
         private async Task ReceiveAsync(
-            IServiceProvider serviceProvider, 
             SdkWebSocket sdkWebSocket,
-            Func<IServiceProvider, SdkWebSocket, string, Task> handleMessageAsync)
+            Func<SdkWebSocket, string, Task> handleMessageAsync)
         {
             var socket = sdkWebSocket.WebSocket;
 
@@ -130,7 +129,7 @@ namespace FeatureFlags.APIs.Middlewares
                     // handle text message only
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
-                        await handleMessageAsync(serviceProvider, sdkWebSocket, message);
+                        await handleMessageAsync(sdkWebSocket, message);
                     }
                 }
                 catch (WebSocketException e)
