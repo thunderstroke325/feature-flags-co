@@ -55,7 +55,7 @@ namespace FeatureFlags.APIs.Repositories
                 FFUserName = param.UserName,
                 VariationLocalId = variation.LocalId.ToString(),
                 VariationValue = variation.VariationValue,
-                TimeStamp = unixTimestamp.UnixTimestampInMillisecondsToDateTime().ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
+                TimeStamp = timestamp.UnixTimestampInMillisecondsToDateTime().ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
             };
 
             var labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
