@@ -26,6 +26,8 @@ namespace FeatureFlags.APIs.Services
         public Task<EnvironmentViewModel> CreateEnvAsync(EnvironmentViewModel param, int accountId, string currentUserId, bool isInitializingAccount = false);
 
         Task<bool> CheckIfUserHasRightToReadEnvAsync(string userId, int envId);
+        
+        Task<EnvironmentSecretV2> GetSecretAsync(int envId);
     }
 
     public class EnvironmentService : IEnvironmentService
@@ -178,6 +180,26 @@ namespace FeatureFlags.APIs.Services
             }
 
             return false;
+        }
+        
+        public async Task<EnvironmentSecretV2> GetSecretAsync(int envId)
+        {
+            string envSecret;
+
+            // adapted to sqlserver & mongodb
+            var sqlserverEnv = await _dbContext.Environments.FirstOrDefaultAsync(x => x.Id == envId);
+            if (sqlserverEnv != null)
+            {
+                envSecret = sqlserverEnv.Secret;
+            }
+            else
+            {
+                var mongoEnv = await _mongoDb.QueryableOf<EnvironmentV2>().FirstOrDefaultAsync(x => x.Id == envId);
+                envSecret = mongoEnv.Secret;
+            }
+
+            var secret = EnvironmentSecretV2.Parse(envSecret);
+            return secret;
         }
     }
 }

@@ -134,7 +134,7 @@ namespace FeatureFlags.APIs.Controllers
             try
             {
                 var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
-                var userVariation = await _variationService.GetUserVariationAsync(param.EnvironmentSecret,
+                var userVariation = await _variationService.GetUserVariationAsync(
                     new EnvironmentUser()
                     {
                         Country = param.FFUserCountry,

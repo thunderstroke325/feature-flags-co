@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using FeatureFlags.APIs.Models;
 using FeatureFlags.Utils.ConventionalDependencyInjection;
 using FeatureFlags.Utils.Exceptions;
 
@@ -9,18 +11,21 @@ namespace FeatureFlags.APIs.Services
         private readonly AccountV2Service _accountService;
         private readonly ProjectV2Service _projectService;
         private readonly EnvironmentV2Service _envService;
+        private readonly FeatureFlagV2Service _featureFlagService;
         private readonly MongoDbFeatureFlagZeroCodeSettingService _ffZeroCodeSettingSrv;
 
         public EnvironmentV2AppService(
             AccountV2Service accountService,
             ProjectV2Service projectService,
             EnvironmentV2Service envService, 
+            FeatureFlagV2Service featureFlagService, 
             MongoDbFeatureFlagZeroCodeSettingService ffZeroCodeSettingSrv)
         {
             _accountService = accountService;
             _projectService = projectService;
             _envService = envService;
             _ffZeroCodeSettingSrv = ffZeroCodeSettingSrv;
+            _featureFlagService = featureFlagService;
         }
 
         public async Task CheckPermissionAsync(int accountId, int projectId, string userId)
@@ -51,6 +56,29 @@ namespace FeatureFlags.APIs.Services
             await _ffZeroCodeSettingSrv.UpdateEnvSecretAsync(oldSecret, newSecret);
 
             return newSecret;
+        }
+        
+        public async Task<IEnumerable<EnvironmentV2>> CreateDefaultAsync(
+            int accountId,
+            int projectId,
+            string creatorId,
+            bool createDefaultFeatureFlag = false)
+        {
+            var prodEnv = await _envService.CreateAsync(accountId, projectId, "Production", "production");
+            var testEnv = await _envService.CreateAsync(accountId, projectId, "Test", "test");
+
+            var envs = new[] { prodEnv, testEnv };
+
+            // create default feature flags
+            if (createDefaultFeatureFlag)
+            {
+                foreach (var env in envs)
+                {
+                    await _featureFlagService.CreateDefaultAsync(accountId, projectId, env.Id, creatorId);
+                }
+            }
+
+            return envs;
         }
     }
 }

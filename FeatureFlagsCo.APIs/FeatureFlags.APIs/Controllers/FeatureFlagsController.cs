@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
@@ -23,7 +22,6 @@ namespace FeatureFlags.APIs.Controllers
     public class FeatureFlagsController : ControllerBase
     {
         private readonly ILogger<FeatureFlagsController> _logger;
-        private readonly IFeatureFlagsService _featureFlagService;
         private readonly INoSqlService _noSqlDbService;
         private readonly IDistributedCache _redisCache;
         private readonly IEnvironmentService _envService;
@@ -32,7 +30,6 @@ namespace FeatureFlags.APIs.Controllers
 
         public FeatureFlagsController(
             ILogger<FeatureFlagsController> logger,
-            IFeatureFlagsService featureFlagService,
             INoSqlService noSqlDbService,
             IDistributedCache redisCache,
             IEnvironmentService envService,
@@ -40,7 +37,6 @@ namespace FeatureFlags.APIs.Controllers
             MongoDbFeatureFlagZeroCodeSettingService mongoDbFFZCSService)
         {
             _logger = logger;
-            _featureFlagService = featureFlagService;
             _noSqlDbService = noSqlDbService;
             _redisCache = redisCache;
 
@@ -134,7 +130,7 @@ namespace FeatureFlags.APIs.Controllers
             
             var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             param.CreatorUserId = currentUserId;
-            var envSecret = await _featureFlagService.GetEnvironmentSecretAsync(param.EnvironmentId);
+            var envSecret = await _envService.GetSecretAsync(param.EnvironmentId);
             var newFF = await _noSqlDbService.CreateFeatureFlagAsync(param, currentUserId, envSecret.ProjectId, envSecret.AccountId);
             param.Id = newFF.Id;
             param.KeyName = newFF.FF.KeyName;
