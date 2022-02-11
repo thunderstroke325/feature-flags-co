@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services.MongoDb;
 using FeatureFlags.Utils.ConventionalDependencyInjection;
 using FeatureFlags.Utils.Exceptions;
@@ -13,14 +11,10 @@ namespace FeatureFlags.APIs.Services
     public class EnvironmentV2Service : ITransientDependency
     {
         private readonly MongoDbIntIdRepository<EnvironmentV2> _environments;
-        private readonly IFeatureFlagsService _featureFlagsService;
 
-        public EnvironmentV2Service(
-            MongoDbIntIdRepository<EnvironmentV2> environments,
-            IFeatureFlagsService featureFlagsService)
+        public EnvironmentV2Service(MongoDbIntIdRepository<EnvironmentV2> environments)
         {
             _environments = environments;
-            _featureFlagsService = featureFlagsService;
         }
 
         public async Task<EnvironmentV2> GetAsync(int id)
@@ -49,29 +43,6 @@ namespace FeatureFlags.APIs.Services
             await _environments.UpdateAsync(environment);
 
             return environment;
-        }
-
-        public async Task<IEnumerable<EnvironmentV2>> CreateDefaultAsync(
-            int accountId,
-            int projectId,
-            string creatorId,
-            bool createDefaultFeatureFlag = false)
-        {
-            var prodEnv = await CreateAsync(accountId, projectId, "Production", "production");
-            var testEnv = await CreateAsync(accountId, projectId, "Test", "test");
-
-            var envs = new[] { prodEnv, testEnv };
-
-            // create default feature flags
-            if (createDefaultFeatureFlag)
-            {
-                foreach (var env in envs)
-                {
-                    await _featureFlagsService.CreateDefaultAsync(accountId, projectId, env.Id, creatorId);
-                }
-            }
-
-            return envs;
         }
 
         public async Task<bool> DeleteAsync(int envId)

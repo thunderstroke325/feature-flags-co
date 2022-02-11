@@ -13,15 +13,18 @@ namespace FeatureFlags.APIs.Services
         private readonly ProjectV2Service _projectService;
         private readonly AccountV2Service _accountService;
         private readonly EnvironmentV2Service _envService;
+        private readonly EnvironmentV2AppService _envAppService;
 
         public ProjectV2AppService(
             ProjectV2Service projectService,
             AccountV2Service accountService,
-            EnvironmentV2Service envService)
+            EnvironmentV2Service envService, 
+            EnvironmentV2AppService envAppService)
         {
             _projectService = projectService;
             _accountService = accountService;
             _envService = envService;
+            _envAppService = envAppService;
         }
 
         public async Task<ProjectEnvironmentV2> CreateAsync(
@@ -35,7 +38,7 @@ namespace FeatureFlags.APIs.Services
 
             // create default environments for the project
             var environments =
-                await _envService.CreateDefaultAsync(accountId, project.Id, creatorId, createDefaultFeatureFlag);
+                await _envAppService.CreateDefaultAsync(accountId, project.Id, creatorId, createDefaultFeatureFlag);
 
             var projectWithEnvs = new ProjectEnvironmentV2
             {

@@ -13,10 +13,14 @@ namespace FeatureFlags.APIs.Services
     public class FeatureFlagV2Service : ITransientDependency
     {
         private readonly MongoDbPersist _mongoDb;
+        private readonly INoSqlService _mongoDbServiceV1;
 
-        public FeatureFlagV2Service(MongoDbPersist mongoDb)
+        public FeatureFlagV2Service(
+            MongoDbPersist mongoDb, 
+            INoSqlService mongoDbServiceV1)
         {
             _mongoDb = mongoDb;
+            _mongoDbServiceV1 = mongoDbServiceV1;
         }
 
         public async Task<List<DropdownItem>> GetDropDownsAsync(int envId)
@@ -85,6 +89,31 @@ namespace FeatureFlags.APIs.Services
             var items = await itemsQuery.ToListAsync();
 
             return new PagedResult<FeatureFlagBasicInfo>(totalCount, items);
+        }
+
+        public async Task CreateDefaultAsync(
+            int accountId,
+            int projectId,
+            int envId,
+            string creatorId)
+        {
+            // set customized user properties
+            var userProperty = new EnvironmentUserProperty
+            {
+                EnvironmentId = envId,
+                Properties = new List<string> { "age" }
+            };
+
+            await _mongoDbServiceV1.CreateOrUpdateEnvironmentUserPropertiesForCRUDAsync(userProperty);
+
+            var demoFeatureFlag = new CreateFeatureFlagViewModel
+            {
+                Name = "示例开关",
+                Status = "Enabled",
+                EnvironmentId = envId
+            };
+
+            await _mongoDbServiceV1.CreateDemoFeatureFlagAsync(demoFeatureFlag, creatorId, projectId, accountId);
         }
     }
 }

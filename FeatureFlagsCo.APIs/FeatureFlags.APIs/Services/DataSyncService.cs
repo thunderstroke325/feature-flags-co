@@ -1,5 +1,4 @@
 ﻿using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.ViewModels.DataSync;
 using System;
 using System.Linq;
@@ -15,14 +14,14 @@ namespace FeatureFlags.APIs.Services
     public class DataSyncService : IDataSyncService
     {
         private readonly INoSqlService _noSqlService;
-        private readonly IFeatureFlagsService _featureFlagService;
+        private readonly IEnvironmentService _envService;
 
         public DataSyncService(
             INoSqlService noSqlService,
-            IFeatureFlagsService featureFlagService)
+            IEnvironmentService envService)
         {
             _noSqlService = noSqlService;
-            _featureFlagService = featureFlagService;
+            _envService = envService;
         }
 
         public async Task<EnvironmentDataViewModel> GetEnvironmentDataAsync(int envId)
@@ -39,7 +38,7 @@ namespace FeatureFlags.APIs.Services
 
         public async Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data)
         {
-            var envSecret = await _featureFlagService.GetEnvironmentSecretAsync(envId);
+            var envSecret = await _envService.GetSecretAsync(envId);
             await _noSqlService.SaveEnvironmentDataAsync(envSecret.AccountId, envSecret.ProjectId, envId, data);
         }
     }
