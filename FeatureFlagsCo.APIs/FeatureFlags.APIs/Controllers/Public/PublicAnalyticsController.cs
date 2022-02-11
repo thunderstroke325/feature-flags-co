@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
@@ -69,26 +70,33 @@ namespace FeatureFlags.APIs.Controllers.Public
         /// <returns></returns>
         [HttpPost]
         [Route("analytics/track/feature-flags")]
-        public async Task<object> TrackFeatureFlagUsageAsync(FeatureFlagUsageParam param)
+        public async Task<object> TrackFeatureFlagUsageAsync(List<FeatureFlagUsageParam> param)
         {
-            if (!param.IsValid())
+            if (param != null && param.Count > 0)
             {
-                _logger.LogError(new Exception("Invalid param"), "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(param));
-                return StatusCode(StatusCodes.Status200OK, new Response { Code = "OK", Message = "OK" });
-            }
-
-            try
-            {
-                var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, param.FeatureFlagKeyName);
-
-                param.UserVariations.ForEach(uv =>
+                foreach (var item in param)
                 {
-                    _featureFlagService.SendFeatureFlagUsageToMQ(param, ffIdVm, uv, uv.Timestamp);
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(param));
+                    if (!item.IsValid())
+                    {
+                        _logger.LogError(new Exception("Invalid param"), "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(item));
+                    } 
+                    else 
+                    {
+                        try
+                        {
+                            var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, item.FeatureFlagKeyName);
+
+                            item.UserVariations.ForEach(uv =>
+                            {
+                                _featureFlagService.SendFeatureFlagUsageToMQ(item, ffIdVm, uv, uv.Timestamp);
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(param));
+                        }
+                    }
+                }
             }
 
             return StatusCode(StatusCodes.Status200OK, new Response { Code = "OK", Message = "OK" });
