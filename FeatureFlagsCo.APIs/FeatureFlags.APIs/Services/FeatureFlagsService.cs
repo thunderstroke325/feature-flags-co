@@ -1,6 +1,7 @@
 ﻿using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services;
+using FeatureFlags.Utils.ExtensionMethods;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace FeatureFlags.APIs.Repositories
     {
         Task<EnvironmentUserQueryResultViewModel> QueryEnvironmentFeatureFlagUsersAsync(string searchText, int environmentId, int pageIndex, int pageSize, string currentUserId);
         Task<EnvironmentSecretV2> GetEnvironmentSecretAsync(int envId);
-        void SendFeatureFlagUsageToMQ(FeatureFlagUsageParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, UserVariation userVariation);
+        void SendFeatureFlagUsageToMQ(FeatureFlagUsageParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, UserVariation userVariation, long unixTimestamp);
 
         Task CreateDefaultAsync(
             int accountId,
@@ -102,7 +103,7 @@ namespace FeatureFlags.APIs.Repositories
             await _cosmosDbService.CreateDemoFeatureFlagAsync(demoFeatureFlag, creatorId, projectId, accountId);
         }
 
-        public void SendFeatureFlagUsageToMQ(FeatureFlagUsageParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, UserVariation userVariation)
+        public void SendFeatureFlagUsageToMQ(FeatureFlagUsageParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, UserVariation userVariation, long unixTimestamp)
         {
             var variation = userVariation.Variation;
             var ffEvent = new FeatureFlagMessageModel()
@@ -117,7 +118,7 @@ namespace FeatureFlags.APIs.Repositories
                 FFUserName = param.UserName,
                 VariationLocalId = variation.LocalId.ToString(),
                 VariationValue = variation.VariationValue,
-                TimeStamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
+                TimeStamp = unixTimestamp.UnixTimestampInMillisecondsToDateTime().ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
             };
 
             var labels = new List<FeatureFlagsCo.MQ.MessageLabel>()

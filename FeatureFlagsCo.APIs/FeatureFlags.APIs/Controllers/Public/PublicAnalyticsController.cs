@@ -83,7 +83,7 @@ namespace FeatureFlags.APIs.Controllers.Public
 
                 param.UserVariations.ForEach(uv =>
                 {
-                    _featureFlagService.SendFeatureFlagUsageToMQ(param, ffIdVm, uv);
+                    _featureFlagService.SendFeatureFlagUsageToMQ(param, ffIdVm, uv, uv.Timestamp);
                 });
             }
             catch (Exception ex)

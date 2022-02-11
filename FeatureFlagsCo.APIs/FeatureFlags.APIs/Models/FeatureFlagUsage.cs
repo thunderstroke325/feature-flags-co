@@ -21,7 +21,7 @@ namespace FeatureFlags.APIs.Models
                 UserVariations == null ||
                 UserVariations.Count == 0;
 
-            return invalid;
+            return !invalid;
         }
     }
 }

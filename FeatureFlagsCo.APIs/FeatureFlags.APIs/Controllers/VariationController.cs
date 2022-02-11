@@ -2,7 +2,7 @@
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
-using FeatureFlagsCo.MQ;
+using FeatureFlags.Utils.ExtensionMethods;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -89,7 +89,7 @@ namespace FeatureFlags.APIs.Controllers
                         UserCustomizedProperties = param.FFUserCustomizedProperties
                     };
 
-                    _featureFlagService.SendFeatureFlagUsageToMQ(featureFlagUsage, ffIdVM, new CachedUserVariation(variation, true));
+                    _featureFlagService.SendFeatureFlagUsageToMQ(featureFlagUsage, ffIdVM, new CachedUserVariation(variation, true), DateTime.UtcNow.UnixTimestampInMilliseconds());
                 }
                 catch (Exception exp)
                 {
@@ -162,7 +162,7 @@ namespace FeatureFlags.APIs.Controllers
                         UserCustomizedProperties = param.FFUserCustomizedProperties
                     };
 
-                    _featureFlagService.SendFeatureFlagUsageToMQ(featureFlagUsage, ffIdVm, userVariation);
+                    _featureFlagService.SendFeatureFlagUsageToMQ(featureFlagUsage, ffIdVm, userVariation, DateTime.UtcNow.UnixTimestampInMilliseconds());
                 }
                 catch(Exception exp)
                 {
