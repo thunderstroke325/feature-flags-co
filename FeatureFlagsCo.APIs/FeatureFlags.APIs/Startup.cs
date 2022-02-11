@@ -121,7 +121,6 @@ namespace FeatureFlags.APIs
             services.AddTransient<IUserInvitationService, UserInvitationService>();
 
             services.AddTransient<IFeatureFlagsService, FeatureFlagsService>();
-            services.AddScoped<IVariationService, VariationService>();
             services.AddTransient<IAppInsightsService, AppInsightsService>();
 
             services.AddScoped<IDataSyncService, DataSyncService>();
