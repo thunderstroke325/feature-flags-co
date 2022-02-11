@@ -143,7 +143,7 @@ namespace FeatureFlags.APIs.Services
                     FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(envSecret, flag.FF.KeyName);
 
                 var userVariation = 
-                    await variationService.GetUserVariationAsync(envSecret, request.User.EnvironmentUser(), ffIdVm);
+                    await variationService.GetUserVariationAsync(request.User.EnvironmentUser(), ffIdVm);
 
                 var clientSdkFeatureFlag = new ClientSdkFeatureFlag
                 {
