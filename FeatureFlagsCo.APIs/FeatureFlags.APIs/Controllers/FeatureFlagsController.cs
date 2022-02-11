@@ -27,6 +27,7 @@ namespace FeatureFlags.APIs.Controllers
         private readonly IEnvironmentService _envService;
         private readonly MongoDbFeatureFlagService _mongoDbFeatureFlagService;
         private readonly MongoDbFeatureFlagZeroCodeSettingService _mongoDbFFZCSService;
+        private readonly SdkWebSocketService _sdkWebSocketService;
 
         public FeatureFlagsController(
             ILogger<FeatureFlagsController> logger,
@@ -34,7 +35,8 @@ namespace FeatureFlags.APIs.Controllers
             IDistributedCache redisCache,
             IEnvironmentService envService,
             MongoDbFeatureFlagService mongoDbFeatureFlagService,
-            MongoDbFeatureFlagZeroCodeSettingService mongoDbFFZCSService)
+            MongoDbFeatureFlagZeroCodeSettingService mongoDbFFZCSService, 
+            SdkWebSocketService sdkWebSocketService)
         {
             _logger = logger;
             _noSqlDbService = noSqlDbService;
@@ -44,6 +46,7 @@ namespace FeatureFlags.APIs.Controllers
 
             _mongoDbFeatureFlagService = mongoDbFeatureFlagService;
             _mongoDbFFZCSService = mongoDbFFZCSService;
+            _sdkWebSocketService = sdkWebSocketService;
         }
 
 
@@ -83,6 +86,10 @@ namespace FeatureFlags.APIs.Controllers
         {
             await _redisCache.RemoveAsync(param.FeatureFlagId);
             var archivedFeatureFlag = await _noSqlDbService.ArchiveEnvironmentdFeatureFlagAsync(param);
+            
+            // sync feature flag update to sdk
+            var fireAndForget = _sdkWebSocketService.AfterFlagUpdatedAsync(param.FeatureFlagId);
+            
             return archivedFeatureFlag;
         }
 
@@ -91,7 +98,12 @@ namespace FeatureFlags.APIs.Controllers
         public async Task<FeatureFlag> UnarchiveEnvironmentdFeatureFlag([FromBody] FeatureFlagArchiveParam param)
         {
             await _redisCache.RemoveAsync(param.FeatureFlagId);
-            return await _noSqlDbService.UnarchiveEnvironmentdFeatureFlagAsync(param);
+            var updated = await _noSqlDbService.UnarchiveEnvironmentdFeatureFlagAsync(param);
+            
+            // sync feature flag update to sdk
+            var fireAndForget = _sdkWebSocketService.AfterFlagUpdatedAsync(param.FeatureFlagId);
+
+            return updated;
         }
 
         [HttpPost]
@@ -103,6 +115,9 @@ namespace FeatureFlags.APIs.Controllers
             ff.FF.Status = param.Status;
             var updatedFeatureFalg = await _noSqlDbService.UpdateFeatureFlagAsync(ff);
             await _redisCache.SetStringAsync(updatedFeatureFalg.Id, JsonConvert.SerializeObject(updatedFeatureFalg));
+            
+            // sync feature flag update to sdk
+            var fireAndForget = _sdkWebSocketService.AfterFlagUpdatedAsync(param.Id);
         }
 
 
@@ -195,6 +210,10 @@ namespace FeatureFlags.APIs.Controllers
             await _noSqlDbService.UpdateFeatureFlagAsync(featureFlag);
             param.LastUpdatedTime = featureFlag.FF.LastUpdatedTime;
             param.KeyName = featureFlag.FF.KeyName;
+            
+            // sync feature flag update to sdk
+            var fireAndForget = _sdkWebSocketService.AfterFlagUpdatedAsync(param.Id);
+            
             return param;
         }
 
@@ -257,6 +276,9 @@ namespace FeatureFlags.APIs.Controllers
                 if (returnOBj.StatusCode == 200)
                 {
                     await _redisCache.SetStringAsync(returnOBj.Data.Id, JsonConvert.SerializeObject(returnOBj.Data));
+                    
+                    // sync feature flag update to sdk
+                    var fireAndForget = _sdkWebSocketService.AfterFlagUpdatedAsync(param.Id);
                 }
                 else
                 {

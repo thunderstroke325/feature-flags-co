@@ -9,10 +9,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using FeatureFlags.Utils.ConventionalDependencyInjection;
 
 namespace FeatureFlags.APIs.Repositories
 {
-    public interface IVariationService
+    public interface IVariationService : ITransientDependency
     {
         Task<UserVariation> GetUserVariationAsync(
             EnvironmentUser user,
