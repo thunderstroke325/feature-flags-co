@@ -180,12 +180,12 @@ export class CSwitchParams {
         this.ffp = this.ffp.map(f => {
           const result = Object.assign({}, f);
           result.valueOptionsVariationValue = f.selectedFeatureFlag?.variationOptions?.find(v => v.localId === result.valueOptionsVariationValue.localId);
-
+          
           return result;
         });
-        console.log(this.fftuwmtr);
+       
         this.fftuwmtr = this.fftuwmtr.filter(f => f.ruleJsonContent.length > 0);
-        console.log(this.fftuwmtr);
+        
         this.fftuwmtr.forEach((item: IFftuwmtrParams) => {
             item.ruleJsonContent.forEach((rule: IJsonContent) => {
                 if(rule.type === 'multi') {

@@ -107,6 +107,13 @@ export class TargetConditionsComponent implements OnInit {
   private loadFeatureFlag(ff: CSwitchParams) {
     this.featureDetail = new CSwitchParams(ff);
 
+    // set prerequiste
+    const upperFeatures = this.featureDetail.getUpperFeatures().map(u => {
+      u.selectedFeatureFlag = this.featureList.find(d => d.id === u.prerequisiteFeatureFlagId);
+      return u;
+    });
+    this.featureDetail.setUpperFeatures(upperFeatures);
+
     this.variationOptions = this.featureDetail.getVariationOptions();
     this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
       acc[cur.localId] = this.featureDetail.getTargetIndividuals().filter(t => t.valueOption !== null).find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
@@ -271,6 +278,7 @@ export class TargetConditionsComponent implements OnInit {
   }
 
   public onSaveConditionsOld() {
+    console.log('old');
     const validationErrs = this.featureDetail.checkMultistatesPercentage();
 
     if (validationErrs.length > 0) {
