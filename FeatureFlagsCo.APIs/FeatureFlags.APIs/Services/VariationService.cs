@@ -15,7 +15,6 @@ namespace FeatureFlags.APIs.Repositories
     public interface IVariationService
     {
         Task<UserVariation> GetUserVariationAsync(
-            string envSecret,
             EnvironmentUser user,
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVm
         );
@@ -35,7 +34,6 @@ namespace FeatureFlags.APIs.Repositories
         }
 
         public async Task<UserVariation> GetUserVariationAsync(
-            string envSecret, 
             EnvironmentUser user, 
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVm)
         {
@@ -86,9 +84,7 @@ namespace FeatureFlags.APIs.Repositories
                 }
             }
 
-            cosmosDBFeatureFlagsUser = await ReMatch(
-                featureFlagId, featureFlagUserMappingId, featureFlag,
-                user, envSecret, ffIdVm);
+            cosmosDBFeatureFlagsUser = await ReMatch(featureFlagId, featureFlagUserMappingId, featureFlag, user, ffIdVm);
 
             cosmosDBFeatureFlagsUser.UserInfo = user;
             await _redisCache.SetStringAsync(featureFlagUserMappingId, JsonConvert.SerializeObject(cosmosDBFeatureFlagsUser));
@@ -104,7 +100,6 @@ namespace FeatureFlags.APIs.Repositories
            string environmentFeatureFlagUserId,
            FeatureFlag featureFlag,
            EnvironmentUser environmentUser,
-           string environmentSecret,
            FeatureFlagIdByEnvironmentKeyViewModel ffIdVm)
         {
             EnvironmentFeatureFlagUser environmentFeatureFlagUser = new EnvironmentFeatureFlagUser
@@ -115,8 +110,7 @@ namespace FeatureFlags.APIs.Repositories
                 };
             environmentFeatureFlagUser.LastUpdatedTime = DateTime.UtcNow;
             
-            var userVariation = await MatchUserVariationAsync(
-                featureFlag, environmentUser, environmentSecret, ffIdVm);
+            var userVariation = await MatchUserVariationAsync(featureFlag, environmentUser, ffIdVm);
             environmentFeatureFlagUser.VariationOptionResultValue = userVariation.Variation;
             environmentFeatureFlagUser.SendToExperiment = userVariation.SendToExperiment;
                 
@@ -126,12 +120,11 @@ namespace FeatureFlags.APIs.Repositories
         private async Task<UserVariation> MatchUserVariationAsync(
             FeatureFlag featureFlag, 
             EnvironmentUser user,
-            string envSecret,
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVm)
         {
             // 匹配该用户不满足上游开关设定值 或者 该开关已关闭状态下的 Variation
             var featureFlagDisabledUserVariation =
-                await MatchFeatureFlagDisabledUserVariationAsync(featureFlag, user, envSecret, ffIdVm);
+                await MatchFeatureFlagDisabledUserVariationAsync(featureFlag, user, ffIdVm);
             if (featureFlagDisabledUserVariation != null)
             {
                 return featureFlagDisabledUserVariation;
@@ -170,7 +163,6 @@ namespace FeatureFlags.APIs.Repositories
         private async Task<FeatureFlagDisabledUserVariation> MatchFeatureFlagDisabledUserVariationAsync(
             FeatureFlag featureFlag, 
             EnvironmentUser environmentUser,
-            string environmentSecret,
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVm)
         {
             // 判断开关是否处于关闭状态
@@ -185,7 +177,6 @@ namespace FeatureFlags.APIs.Repositories
                 if (ffPItem.PrerequisiteFeatureFlagId != featureFlag.FF.Id)
                 {
                     var r = await GetUserVariationAsync(
-                        environmentSecret,
                         environmentUser,
                         new FeatureFlagIdByEnvironmentKeyViewModel()
                         {

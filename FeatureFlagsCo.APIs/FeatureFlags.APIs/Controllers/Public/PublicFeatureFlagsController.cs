@@ -54,7 +54,7 @@ namespace FeatureFlags.APIs.Controllers.Public
                     FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, featureFlag.FF.KeyName);
 
                 var variation =
-                    await _variationService.GetUserVariationAsync(EnvSecret, user.EnvironmentUser(), ffIdVm);
+                    await _variationService.GetUserVariationAsync(user.EnvironmentUser(), ffIdVm);
 
                 variations.Add(new UserVariationViewModel
                 {

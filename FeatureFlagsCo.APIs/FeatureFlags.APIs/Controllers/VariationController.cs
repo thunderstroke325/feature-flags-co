@@ -2,7 +2,6 @@
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
-using FeatureFlagsCo.MQ;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -134,7 +133,7 @@ namespace FeatureFlags.APIs.Controllers
             try
             {
                 var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(param.EnvironmentSecret, param.FeatureFlagKeyName);
-                var userVariation = await _variationService.GetUserVariationAsync(param.EnvironmentSecret,
+                var userVariation = await _variationService.GetUserVariationAsync(
                     new EnvironmentUser()
                     {
                         Country = param.FFUserCountry,
