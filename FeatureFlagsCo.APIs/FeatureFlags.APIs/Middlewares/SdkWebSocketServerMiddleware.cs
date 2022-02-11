@@ -18,19 +18,14 @@ namespace FeatureFlags.APIs.Middlewares
 
         private readonly RequestDelegate _next;
         private readonly ILogger<SdkWebSocketServerMiddleware> _logger;
-        private readonly SdkWebSocketService _wsService;
 
-        public SdkWebSocketServerMiddleware(
-            RequestDelegate next,
-            ILogger<SdkWebSocketServerMiddleware> logger, 
-            SdkWebSocketService wsService)
+        public SdkWebSocketServerMiddleware(RequestDelegate next, ILogger<SdkWebSocketServerMiddleware> logger)
         {
             _next = next;
             _logger = logger;
-            _wsService = wsService;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, SdkWebSocketService wsService)
         {
             var request = context.Request;
             
@@ -57,9 +52,9 @@ namespace FeatureFlags.APIs.Middlewares
 
             sdkWebSocket.AttachWebSocket(webSocket);
 
-            await _wsService.OnConnectedAsync(sdkWebSocket);
+            await wsService.OnConnectedAsync(sdkWebSocket);
 
-            await ReceiveAsync(sdkWebSocket, _wsService.OnMessageAsync);
+            await ReceiveAsync(sdkWebSocket, wsService);
         }
 
         private (bool isValid, SdkWebSocket socket) TryAcceptRequest(HttpContext context)
@@ -93,9 +88,7 @@ namespace FeatureFlags.APIs.Middlewares
             return (true, socket);
         }
 
-        private async Task ReceiveAsync(
-            SdkWebSocket sdkWebSocket,
-            Func<SdkWebSocket, string, Task> handleMessageAsync)
+        private async Task ReceiveAsync(SdkWebSocket sdkWebSocket, SdkWebSocketService wsService)
         {
             var socket = sdkWebSocket.WebSocket;
 
@@ -129,7 +122,7 @@ namespace FeatureFlags.APIs.Middlewares
                     // handle text message only
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
-                        await handleMessageAsync(sdkWebSocket, message);
+                        await wsService.OnMessageAsync(sdkWebSocket, message);
                     }
                 }
                 catch (WebSocketException e)
@@ -145,7 +138,7 @@ namespace FeatureFlags.APIs.Middlewares
                 }
             }
 
-            await _wsService.OnDisconnectedAsync(sdkWebSocket);
+            await wsService.OnDisconnectedAsync(sdkWebSocket);
         }
     }
 }
