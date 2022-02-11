@@ -5,8 +5,8 @@ RUN mkdir -p /var/log/nginx && \
     touch /var/log/nginx/access.log && \
     touch /var/log/nginx/error.log
 #EXPOSE 80
-COPY  FeatureFlagsCo.Experiments /expt
-COPY FeatureFlagsCo.Experiments/env/docker-${exptenv}-config.ini /expt/config/config.ini
+COPY  ./FeatureFlagsCo.Experiments/* /expt
+COPY ./FeatureFlagsCo.Experiments/env/docker-${exptenv}-config.ini /expt/config/config.ini
 WORKDIR /expt
-RUN pip install -r FeatureFlagsCo.Experiments/docker-requirements.txt
+RUN pip install -r docker-requirements.txt
 CMD ["/usr/bin/supervisord","-c","supervisord.conf"]
