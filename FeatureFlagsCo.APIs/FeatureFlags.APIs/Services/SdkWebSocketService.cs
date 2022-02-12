@@ -63,7 +63,7 @@ namespace FeatureFlags.APIs.Services
             await _messageHandler.HandleAsync(context);
         }
 
-        public async Task AfterFlagUpdatedAsync(string featureFlagId)
+        public async Task OnFeatureFlagChangeAsync(string featureFlagId)
         {
             var flag = await _flagService.GetAsync(featureFlagId);
             if (flag == null)

@@ -87,8 +87,8 @@ namespace FeatureFlags.APIs.Controllers
             await _redisCache.RemoveAsync(param.FeatureFlagId);
             var archivedFeatureFlag = await _noSqlDbService.ArchiveEnvironmentdFeatureFlagAsync(param);
             
-            // sync feature flag update to sdk
-            var fireAndForget = _sdkWebSocketService.AfterFlagUpdatedAsync(param.FeatureFlagId);
+            // sync feature flag change to sdk
+            var fireAndForget = _sdkWebSocketService.OnFeatureFlagChangeAsync(param.FeatureFlagId);
             
             return archivedFeatureFlag;
         }
@@ -100,8 +100,8 @@ namespace FeatureFlags.APIs.Controllers
             await _redisCache.RemoveAsync(param.FeatureFlagId);
             var updated = await _noSqlDbService.UnarchiveEnvironmentdFeatureFlagAsync(param);
             
-            // sync feature flag update to sdk
-            var fireAndForget = _sdkWebSocketService.AfterFlagUpdatedAsync(param.FeatureFlagId);
+            // sync feature flag change to sdk
+            var fireAndForget = _sdkWebSocketService.OnFeatureFlagChangeAsync(param.FeatureFlagId);
 
             return updated;
         }
@@ -116,8 +116,8 @@ namespace FeatureFlags.APIs.Controllers
             var updatedFeatureFalg = await _noSqlDbService.UpdateFeatureFlagAsync(ff);
             await _redisCache.SetStringAsync(updatedFeatureFalg.Id, JsonConvert.SerializeObject(updatedFeatureFalg));
             
-            // sync feature flag update to sdk
-            var fireAndForget = _sdkWebSocketService.AfterFlagUpdatedAsync(param.Id);
+            // sync feature flag change to sdk
+            var fireAndForget = _sdkWebSocketService.OnFeatureFlagChangeAsync(param.Id);
         }
 
 
@@ -149,6 +149,10 @@ namespace FeatureFlags.APIs.Controllers
             var newFF = await _noSqlDbService.CreateFeatureFlagAsync(param, currentUserId, envSecret.ProjectId, envSecret.AccountId);
             param.Id = newFF.Id;
             param.KeyName = newFF.FF.KeyName;
+            
+            // sync feature flag change to sdk
+            var fireAndForget = _sdkWebSocketService.OnFeatureFlagChangeAsync(newFF.Id);
+            
             return param;
         }
 
@@ -211,8 +215,8 @@ namespace FeatureFlags.APIs.Controllers
             param.LastUpdatedTime = featureFlag.FF.LastUpdatedTime;
             param.KeyName = featureFlag.FF.KeyName;
             
-            // sync feature flag update to sdk
-            var fireAndForget = _sdkWebSocketService.AfterFlagUpdatedAsync(param.Id);
+            // sync feature flag change to sdk
+            var fireAndForget = _sdkWebSocketService.OnFeatureFlagChangeAsync(param.Id);
             
             return param;
         }
@@ -277,8 +281,8 @@ namespace FeatureFlags.APIs.Controllers
                 {
                     await _redisCache.SetStringAsync(returnOBj.Data.Id, JsonConvert.SerializeObject(returnOBj.Data));
                     
-                    // sync feature flag update to sdk
-                    var fireAndForget = _sdkWebSocketService.AfterFlagUpdatedAsync(param.Id);
+                    // sync feature flag change to sdk
+                    var fireAndForget = _sdkWebSocketService.OnFeatureFlagChangeAsync(param.Id);
                 }
                 else
                 {
