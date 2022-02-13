@@ -18,7 +18,8 @@ namespace FeatureFlags.APIs.Models
     }
 
     public class InsightUserVariation: UserVariation
-    { 
+    {
+        public string FeatureFlagKeyName { get; set; }
         public override bool SendToExperiment { get; set;  }
         public long Timestamp { get; set; }
         public InsightUserVariation(VariationOption variation) : base(variation)

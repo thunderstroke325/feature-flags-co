@@ -84,11 +84,11 @@ namespace FeatureFlags.APIs.Controllers.Public
                     {
                         try
                         {
-                            var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, item.FeatureFlagKeyName);
+                            var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, item.UserVariations[0].FeatureFlagKeyName);
 
                             item.UserVariations.ForEach(uv =>
                             {
-                                _featureFlagService.SendFeatureFlagUsageToMQ(item, ffIdVm, uv, uv.Timestamp);
+                                _featureFlagService.SendFeatureFlagUsageToMQ(item, ffIdVm, uv);
                             });
                         }
                         catch (Exception ex)

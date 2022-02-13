@@ -79,9 +79,8 @@ namespace FeatureFlags.APIs.Controllers
 
                 try
                 {
-                    var featureFlagUsage = new FeatureFlagUsageParam
+                    var featureFlagUsageParam = new FeatureFlagUsageParam
                     {
-                        FeatureFlagKeyName = param.FeatureFlagKeyName,
                         UserName = param.FFUserName,
                         Email = param.FFUserEmail,
                         Country = param.FFUserCountry,
@@ -89,7 +88,15 @@ namespace FeatureFlags.APIs.Controllers
                         UserCustomizedProperties = param.FFUserCustomizedProperties
                     };
 
-                    _featureFlagService.SendFeatureFlagUsageToMQ(featureFlagUsage, ffIdVM, new CachedUserVariation(variation, true), DateTime.UtcNow.UnixTimestampInMilliseconds());
+                    var insightUserVariation = new InsightUserVariation
+                    {
+                        FeatureFlagKeyName = param.FeatureFlagKeyName,
+                        SendToExperiment = true,
+                        Timestamp = DateTime.UtcNow.UnixTimestampInMilliseconds(),
+                        Variation = variation
+                    };
+
+                    _featureFlagService.SendFeatureFlagUsageToMQ(featureFlagUsageParam, ffIdVM, insightUserVariation);
                 }
                 catch (Exception exp)
                 {
@@ -152,17 +159,27 @@ namespace FeatureFlags.APIs.Controllers
 
                 try
                 {
-                    var featureFlagUsage = new FeatureFlagUsageParam
+                    var featureFlagUsageParam = new FeatureFlagUsageParam
                     {
-                        FeatureFlagKeyName = param.FeatureFlagKeyName,
                         UserName = param.FFUserName,
                         Email = param.FFUserEmail,
                         Country = param.FFUserCountry,
                         UserKeyId = param.FFUserKeyId,
-                        UserCustomizedProperties = param.FFUserCustomizedProperties
+                        UserCustomizedProperties = param.FFUserCustomizedProperties,
+                        UserVariations = new List<InsightUserVariation> { 
+                            
+                        }
                     };
 
-                    _featureFlagService.SendFeatureFlagUsageToMQ(featureFlagUsage, ffIdVm, userVariation, DateTime.UtcNow.UnixTimestampInMilliseconds());
+                    var insightUserVariation = new InsightUserVariation
+                    {
+                        FeatureFlagKeyName = param.FeatureFlagKeyName,
+                        SendToExperiment = userVariation.SendToExperiment,
+                        Timestamp = DateTime.UtcNow.UnixTimestampInMilliseconds(),
+                        Variation = userVariation.Variation
+                    };
+
+                    _featureFlagService.SendFeatureFlagUsageToMQ(featureFlagUsageParam, ffIdVm, insightUserVariation);
                 }
                 catch(Exception exp)
                 {

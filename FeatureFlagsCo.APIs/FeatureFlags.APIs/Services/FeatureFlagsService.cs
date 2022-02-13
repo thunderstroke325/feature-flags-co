@@ -12,7 +12,7 @@ namespace FeatureFlags.APIs.Repositories
     public interface IFeatureFlagsService
     {
         Task<EnvironmentUserQueryResultViewModel> QueryEnvironmentFeatureFlagUsersAsync(string searchText, int environmentId, int pageIndex, int pageSize, string currentUserId);
-        void SendFeatureFlagUsageToMQ(FeatureFlagUsageParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, UserVariation userVariation, long timestamp);
+        void SendFeatureFlagUsageToMQ(FeatureFlagUsageParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, InsightUserVariation userVariation);
     }
 
     public class FeatureFlagsService : IFeatureFlagsService
@@ -39,9 +39,9 @@ namespace FeatureFlags.APIs.Repositories
             };
         }
 
-        public void SendFeatureFlagUsageToMQ(FeatureFlagUsageParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, UserVariation userVariation, long timestamp)
+        public void SendFeatureFlagUsageToMQ(FeatureFlagUsageParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, InsightUserVariation insightUserVariation)
         {
-            var variation = userVariation.Variation;
+            var variation = insightUserVariation.Variation;
             var ffEvent = new FeatureFlagMessageModel()
             {
                 RequestPath = "/Variation/GetMultiOptionVariation",
@@ -49,12 +49,12 @@ namespace FeatureFlags.APIs.Repositories
                 EnvId = ffIdVM.EnvId,
                 AccountId = ffIdVM.AccountId,
                 ProjectId = ffIdVM.ProjectId,
-                FeatureFlagKeyName = param.FeatureFlagKeyName,
+                FeatureFlagKeyName = insightUserVariation.FeatureFlagKeyName,
                 UserKeyId = param.UserKeyId,
                 FFUserName = param.UserName,
                 VariationLocalId = variation.LocalId.ToString(),
                 VariationValue = variation.VariationValue,
-                TimeStamp = timestamp.UnixTimestampInMillisecondsToDateTime().ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
+                TimeStamp = insightUserVariation.Timestamp.UnixTimestampInMillisecondsToDateTime().ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
             };
 
             var labels = new List<FeatureFlagsCo.MQ.MessageLabel>()
@@ -87,7 +87,7 @@ namespace FeatureFlags.APIs.Repositories
                               new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "FeatureFlagKeyName",
-                                  LabelValue = param.FeatureFlagKeyName
+                                  LabelValue = insightUserVariation.FeatureFlagKeyName
                               },
                               new FeatureFlagsCo.MQ.MessageLabel
                               {
@@ -129,7 +129,7 @@ namespace FeatureFlags.APIs.Repositories
 
             _messagingService.SendAPIServiceToMQServiceWithoutResponse(new APIServiceToMQServiceModel
             {
-                SendToExperiment = userVariation.SendToExperiment,
+                SendToExperiment = insightUserVariation.SendToExperiment,
                 FFMessage = ffEvent,
                 Message = new FeatureFlagsCo.MQ.MessageModel
                 {

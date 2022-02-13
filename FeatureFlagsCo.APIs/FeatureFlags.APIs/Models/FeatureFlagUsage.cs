@@ -5,7 +5,6 @@ namespace FeatureFlags.APIs.Models
 {
     public class FeatureFlagUsageParam
     {
-        public string FeatureFlagKeyName { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
         public string Country { get; set; }
@@ -16,7 +15,6 @@ namespace FeatureFlags.APIs.Models
         public bool IsValid()
         {
             var invalid =
-                string.IsNullOrWhiteSpace(FeatureFlagKeyName) ||
                 string.IsNullOrWhiteSpace(UserKeyId) ||
                 UserVariations == null ||
                 UserVariations.Count == 0;
