@@ -211,7 +211,9 @@ namespace FeatureFlags.APIs.Controllers
                 await _mongoDbFFZCSService.UpdateAsync(zeroCodeSetting.Id, zeroCodeSetting);
             }
 
-            await _noSqlDbService.UpdateFeatureFlagAsync(featureFlag);
+            var updatedFeatureFlag = await _noSqlDbService.UpdateFeatureFlagAsync(featureFlag);
+            await _redisCache.SetStringAsync(updatedFeatureFlag.Id, JsonConvert.SerializeObject(updatedFeatureFlag));
+            
             param.LastUpdatedTime = featureFlag.FF.LastUpdatedTime;
             param.KeyName = featureFlag.FF.KeyName;
             
