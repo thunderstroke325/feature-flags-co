@@ -84,11 +84,13 @@ namespace FeatureFlags.APIs.Models
 
         public async Task CloseAsync()
         {
-            if (WebSocket.State == WebSocketState.CloseReceived)
+            var closeStatus = WebSocket.CloseStatus; 
+            if (closeStatus.HasValue)
             {
                 await WebSocket.CloseAsync(
-                    WebSocketCloseStatus.NormalClosure,
-                    "server receive close request, close by client", CancellationToken.None
+                    closeStatus.Value,
+                    WebSocket.CloseStatusDescription, 
+                    CancellationToken.None
                 );
             }
         }
