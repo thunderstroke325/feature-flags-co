@@ -18,6 +18,8 @@ namespace FeatureFlags.APIs.Services
             _sockets = new ConcurrentDictionary<int, List<SdkWebSocket>>();
         }
 
+        public IEnumerable<SdkWebSocket> GetAll() => _sockets.Values.SelectMany(x => x);
+
         public void RegisterSocket(SdkWebSocket socket)
         {
             var envId = socket.EnvId;

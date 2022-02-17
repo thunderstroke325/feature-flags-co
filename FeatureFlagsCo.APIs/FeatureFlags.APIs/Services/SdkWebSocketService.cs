@@ -41,7 +41,14 @@ namespace FeatureFlags.APIs.Services
         public async Task OnDisconnectedAsync(SdkWebSocket socket)
         {
             _logger.LogInformation("socket {0} disconnected", socket.ToString());
-            await _connectionManager.UnregisterSocket(socket);
+            try
+            {
+                await _connectionManager.UnregisterSocket(socket);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "error occured when disconnecting socket {0}", socket.ToString());
+            }
         }
 
         public async Task OnMessageAsync(SdkWebSocket socket, string message)
