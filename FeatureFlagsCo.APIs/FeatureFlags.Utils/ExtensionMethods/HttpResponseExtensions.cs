@@ -13,6 +13,11 @@ namespace FeatureFlags.Utils.ExtensionMethods
             string content, 
             string contentType = "application/json; charset=UTF-8")
         {
+            if (response.HasStarted)
+            {
+                return;
+            }
+            
             response.Clear();
             response.StatusCode = (int) statusCode;
             response.ContentType = contentType;

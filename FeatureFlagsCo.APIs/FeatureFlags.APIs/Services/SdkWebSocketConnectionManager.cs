@@ -52,7 +52,7 @@ namespace FeatureFlags.APIs.Services
                 return;
             }
 
-            var socketToRemove = _sockets[envId].FirstOrDefault(x => x.ConnectionId == socket.ConnectionId);
+            var socketToRemove = _sockets[envId]?.FirstOrDefault(x => x.ConnectionId == socket.ConnectionId);
             if (socketToRemove != null)
             {
                 await socketToRemove.CloseAsync();
