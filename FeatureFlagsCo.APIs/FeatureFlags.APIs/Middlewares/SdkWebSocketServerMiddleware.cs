@@ -39,8 +39,8 @@ namespace FeatureFlags.APIs.Middlewares
             // upgrade tcp connection to websocket connection
             using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
-            var (isValid, sdkWebSocket) = TryAcceptRequest(context);
-            if (!isValid)
+            var sdkWebSocket = TryAcceptRequest(context);
+            if (sdkWebSocket == null)
             {
                 await webSocket.CloseAsync(
                     (WebSocketCloseStatus)4003,
@@ -57,35 +57,33 @@ namespace FeatureFlags.APIs.Middlewares
             await ReceiveAsync(sdkWebSocket, wsService);
         }
 
-        private (bool isValid, SdkWebSocket socket) TryAcceptRequest(HttpContext context)
+        private SdkWebSocket TryAcceptRequest(HttpContext context)
         {
-            (bool isValid, SdkWebSocket socket) invalidResult = (false, null);
-
             var query = context.Request.Query;
 
             // sdkType
             var sdkType = query["type"].ToString();
             if (!SdkTypes.IsRegistered(sdkType))
             {
-                return invalidResult;
+                return null;
             }
 
             // parse token
             var token = query["token"].ToString();
             if (string.IsNullOrWhiteSpace(token) || !SdkWebSocketToken.TryCreate(token, out var socketToken))
             {
-                return invalidResult;
+                return null;
             }
 
             // timestamp
             var curTimestamp = DateTime.UtcNow.UnixTimestampInMilliseconds();
             if (curTimestamp - socketToken.Timestamp > TimeSpan.FromSeconds(30).TotalMilliseconds)
             {
-                return invalidResult;
+                return null;
             }
 
             var socket = new SdkWebSocket(socketToken.EnvSecret, sdkType);
-            return (true, socket);
+            return socket;
         }
 
         private async Task ReceiveAsync(SdkWebSocket sdkWebSocket, SdkWebSocketService wsService)

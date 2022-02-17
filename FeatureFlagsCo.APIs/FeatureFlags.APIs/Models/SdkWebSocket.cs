@@ -99,7 +99,7 @@ namespace FeatureFlags.APIs.Models
         {
             var info =
                 $"connectionId: {ConnectionId}, envSecret: {EnvSecret}, sdkType: {SdkType}" +
-                $"{(User == null ? "" : $"UserKeyId: {User.UserKeyId}")}";
+                $"{(User == null ? "" : $" UserKeyId: {User.UserKeyId}")}";
 
             return info;
         }
