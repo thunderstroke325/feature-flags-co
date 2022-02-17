@@ -99,4 +99,18 @@ namespace FeatureFlags.APIs.Services
             await socket.SendAsync(response);
         }
     }
+    
+    public class PingMessageHandler : IMessageHandler
+    {
+        public string MessageType => SdkWebSocketMessageTypes.Ping;
+        
+        public async Task HandleAsync(SdkWebSocketMessageContext context)
+        {
+            var socket = context.Socket;
+
+            var pong = new SdkWebSocketMessage(SdkWebSocketMessageTypes.Pong, null);
+
+            await socket.SendAsync(pong);
+        }
+    }
 }
