@@ -47,17 +47,15 @@ namespace FeatureFlags.APIs.Services
         {
             var envId = socket.EnvId;
 
-            if (!_sockets.ContainsKey(envId))
+            if (_sockets.TryGetValue(envId, out var envSockets))
             {
-                return;
-            }
+                var socketToRemove = envSockets?.FirstOrDefault(x => x.ConnectionId == socket.ConnectionId);
+                if (socketToRemove != null)
+                {
+                    await socketToRemove.CloseAsync();
 
-            var socketToRemove = _sockets[envId]?.FirstOrDefault(x => x.ConnectionId == socket.ConnectionId);
-            if (socketToRemove != null)
-            {
-                await socketToRemove.CloseAsync();
-
-                _sockets[envId].Remove(socketToRemove);
+                    _sockets[envId].Remove(socketToRemove);
+                }
             }
         }
     }
