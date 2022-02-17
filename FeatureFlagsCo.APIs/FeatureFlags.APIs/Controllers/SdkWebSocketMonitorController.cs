@@ -17,8 +17,10 @@ namespace FeatureFlags.APIs.Controllers
         [HttpGet("all-connection")]
         public IActionResult GetAll()
         {
-            var infos = _connectionManager.GetAll().Select(x => x.ToString());
-            
+            var connections = _connectionManager.GetAll();
+
+            var infos = connections.Select(connection => connection?.ToString() ?? "null").ToList();
+
             return Ok(infos);
         }
     }
