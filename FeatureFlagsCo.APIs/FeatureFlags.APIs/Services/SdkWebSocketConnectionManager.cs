@@ -51,7 +51,7 @@ namespace FeatureFlags.APIs.Services
 
             if (_sockets.TryGetValue(envId, out var envSockets))
             {
-                var socketToRemove = envSockets?.FirstOrDefault(x => x.ConnectionId == socket.ConnectionId);
+                var socketToRemove = envSockets.FirstOrDefault(x => x?.ConnectionId == socket.ConnectionId);
                 if (socketToRemove != null)
                 {
                     await socketToRemove.CloseAsync();
