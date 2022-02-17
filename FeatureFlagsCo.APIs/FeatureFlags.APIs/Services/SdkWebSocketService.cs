@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace FeatureFlags.APIs.Services
 {
-    public class SdkWebSocketService : ITransientDependency
+    public class SdkWebSocketService : IScopedDependency
     {
         private readonly ILogger<SdkWebSocketService> _logger;
         private readonly SdkWebSocketConnectionManager _connectionManager;
