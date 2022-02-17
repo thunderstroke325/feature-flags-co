@@ -20,6 +20,10 @@ namespace FeatureFlags.APIs.Models
 
         public string SdkType { get; protected set; }
 
+        public DateTime ConnectAt { get; set; }
+
+        public DateTime? DisConnectAt { get; set; }
+
         /// <summary>
         /// client-side sdk use only
         /// </summary>
@@ -34,21 +38,16 @@ namespace FeatureFlags.APIs.Models
             {
                 throw new ArgumentException($"invalid envSecret {envSecret}", nameof(envSecret));
             }
-
             EnvId = secret.EnvId;
             EnvSecret = envSecret;
-
-            if (string.IsNullOrWhiteSpace(sdkType))
-            {
-                throw new ArgumentException("sdkType cannot be null or whitespace", nameof(sdkType));
-            }
-
+            
             if (!SdkTypes.IsRegistered(sdkType))
             {
                 throw new ArgumentException($"sdkType {sdkType} is not registered", nameof(sdkType));
             }
-
             SdkType = sdkType;
+            
+            ConnectAt = DateTime.UtcNow;
         }
 
         public void AttachWebSocket(WebSocket webSocket)
@@ -93,12 +92,18 @@ namespace FeatureFlags.APIs.Models
                     CancellationToken.None
                 );
             }
+            
+            DisConnectAt = DateTime.UtcNow;
         }
 
         public override string ToString()
         {
+            var connectionTimeInfo = DisConnectAt.HasValue
+                ? $"[{ConnectAt:yyyy-MM-ddTHH:mm:ss.fff}, {DisConnectAt:yyyy-MM-ddTHH:mm:ss.fff}]"
+                : $"[{ConnectAt:yyyy-MM-dd HH:mm:ss.fff}, -]";
+
             var info =
-                $"connectionId: {ConnectionId}, envSecret: {EnvSecret}, sdkType: {SdkType}" +
+                $"connectionId: {ConnectionId}, connectionTime: {connectionTimeInfo} envSecret: {EnvSecret}, sdkType: {SdkType}" +
                 $"{(User == null ? "" : $" UserKeyId: {User.UserKeyId}")}";
 
             return info;

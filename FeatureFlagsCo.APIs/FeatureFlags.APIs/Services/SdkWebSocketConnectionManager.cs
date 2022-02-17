@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Models;
@@ -11,11 +12,11 @@ namespace FeatureFlags.APIs.Services
     public class SdkWebSocketConnectionManager : ISingletonDependency
     {
         // envId -> SdkWebSocket[], SdkWebSocket GroupBy envId
-        private readonly ConcurrentDictionary<int, List<SdkWebSocket>> _sockets;
+        private readonly ConcurrentDictionary<int, ImmutableList<SdkWebSocket>> _sockets;
 
         public SdkWebSocketConnectionManager()
         {
-            _sockets = new ConcurrentDictionary<int, List<SdkWebSocket>>();
+            _sockets = new ConcurrentDictionary<int, ImmutableList<SdkWebSocket>>();
         }
 
         public IEnumerable<SdkWebSocket> GetAll() => _sockets.Values.SelectMany(x => x);
@@ -24,41 +25,38 @@ namespace FeatureFlags.APIs.Services
         {
             var envId = socket.EnvId;
 
-            if (_sockets.ContainsKey(envId))
-            {
-                _sockets[envId].Add(socket);
-            }
-            else
-            {
-                _sockets[envId] = new List<SdkWebSocket> { socket };
-            }
+            _sockets.AddOrUpdate(envId, ImmutableList.Create(socket), (_, existing) => existing.Add(socket));
         }
 
         public IEnumerable<SdkWebSocket> GetSockets(int envId)
         {
-            if (!_sockets.ContainsKey(envId))
+            if (_sockets.TryGetValue(envId, out var sockets))
             {
-                return Array.Empty<SdkWebSocket>();
+                return sockets;
             }
-
-            var sockets = _sockets[envId];
-            return sockets;
+            
+            return Array.Empty<SdkWebSocket>();
         }
 
         public async Task UnregisterSocket(SdkWebSocket socket)
         {
             var envId = socket.EnvId;
-
-            if (_sockets.TryGetValue(envId, out var envSockets))
+            if (!_sockets.TryGetValue(envId, out var envSockets))
             {
-                var socketToRemove = envSockets.FirstOrDefault(x => x?.ConnectionId == socket.ConnectionId);
-                if (socketToRemove != null)
-                {
-                    await socketToRemove.CloseAsync();
-
-                    _sockets[envId].Remove(socketToRemove);
-                }
+                return;
             }
+            
+            var socketToRemove = envSockets.FirstOrDefault(x => x.ConnectionId == socket.ConnectionId);
+            if (socketToRemove != null)
+            {
+                await socketToRemove.CloseAsync();
+            }
+            
+            _sockets.AddOrUpdate(
+                envId,
+                ImmutableList<SdkWebSocket>.Empty,
+                (_, existing) => existing.RemoveAll(x => x.ConnectionId == socket.ConnectionId)
+            );
         }
     }
 }
