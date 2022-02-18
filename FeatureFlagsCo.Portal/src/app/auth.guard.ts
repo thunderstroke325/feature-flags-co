@@ -36,7 +36,7 @@ export class AuthGuard implements CanActivate {
           id: auth.email,
           email: auth.email,
           userName: auth.email.split("@")[0],
-          customizeProperties: [{
+          customizedProperties: [{
             name: 'phoneNumber',
             value: auth.phoneNumber
           }]

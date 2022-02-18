@@ -49,7 +49,14 @@ export class SDKJSComponent implements OnInit {
     });
 
     // 调用开关
-    const myVar = Ffc.variation('${this.keyName}', 'default value');`
+    // ffcscan ignore 我们这里需要这行来告诉 code reference 工具忽略此行，复制后请去掉这行注释。工具在这里：https://github.com/feature-flags-co/ffc-code-refs-core
+    const myVar = Ffc.variation('${this.keyName}', 'default value');
+    
+    // 当开关值发生变化时获取通知
+    Ffc.on('ff_update:${this.keyName}', (change) => {
+      console.log(change['newValue']); // 请将此行替换成自己的代码
+    });
+    `
   
     this.jsCodeNpm = `
     import Ffc from 'ffc-js-client-side-sdk';
