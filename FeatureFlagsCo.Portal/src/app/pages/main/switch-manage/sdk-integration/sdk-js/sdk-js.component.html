@@ -1,0 +1,38 @@
+<div class="sdk-integration">
+  <div class="sdk-header">
+    <nz-radio-group [(ngModel)]="jsMode">
+      <label nz-radio [nzValue]="jsModeScript">使用 script</label>
+      <label nz-radio [nzValue]="jsModeNpm">使用 NPM</label>
+    </nz-radio-group>
+    <a target="_blank" class="github-repo" href="https://github.com/feature-flags-co/ffc-js-client-side-sdk"><i nz-icon nzType="github" nzTheme="outline"></i> Github</a>
+  </div>
+  <div *ngIf="jsMode === jsModeScript" class="init-code">
+    将如下代码添加到页面的 head 中
+    <div class="code-wrapper" nz-typography nzCopyable nzCopyText="{{ jsCodeScript }}">
+      <pre>
+        {{jsCodeScript}}
+      </pre>
+    </div>
+    
+    请运行以下代码, 初始化 SDK
+    <div class="code-wrapper" nz-typography nzCopyable nzCopyText="{{ jsCodeCommon }}">
+      <pre>
+        {{jsCodeCommon}}
+      </pre>
+    </div>
+  </div>
+  <div *ngIf="jsMode === jsModeNpm" class="init-code">
+    运行下边命令安装最新版 SDK
+    <div class="code-wrapper" nz-typography nzCopyable nzCopyText="{{ jsNpmInstall }}">
+      <pre>
+        {{jsNpmInstall}}
+      </pre>
+    </div>
+    引入并且初始化 SDK
+    <div class="code-wrapper" nz-typography nzCopyable nzCopyText="{{ jsCodeNpm }}">
+      <pre>
+        {{jsCodeNpm}}
+      </pre>
+    </div>
+  </div>
+</div>
