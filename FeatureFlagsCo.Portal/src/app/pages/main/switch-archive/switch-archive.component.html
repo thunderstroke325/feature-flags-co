@@ -15,15 +15,19 @@
                 <th>名称</th>
                 <th>状态</th>
                 <th>最近修改</th>
+                <th style="text-align: center">操作</th>
               </tr>
               </thead>
               <tbody>
-              <tr *ngFor="let switch of basicTable.data" class="table-tr-pointer">
-                <td>{{switch.name}}</td>
+              <tr *ngFor="let theSwitch of basicTable.data" class="table-tr-pointer">
+                <td>{{theSwitch.name}}</td>
                 <td>
-                  <nz-switch [ngModel]="switch.status !== 'Disabled'" [nzDisabled]="switch.status !== 'Disabled'" [nzControl]="true" [nzLoading]="switchLoading" (click)="onUnarchiveClick(switch)" nzCheckedChildren="在档" nzUnCheckedChildren="复位"></nz-switch>
+                  <nz-switch [ngModel]="theSwitch.status !== 'Disabled'" nzDisabled [nzControl]="true" [nzLoading]="switchLoading" nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
                 </td>
-                <td>{{getLocalDate(switch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
+                <td>{{getLocalDate(theSwitch.lastUpdatedTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
+                <td style="text-align: center">
+                  <a nz-button nzType="link" style="color: #9A95CC;" (click)="onUnArchive(theSwitch)">复位</a>
+                </td>
               </tr>
               </tbody>
             </nz-table>

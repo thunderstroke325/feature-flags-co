@@ -64,7 +64,7 @@ export class SwitchArchiveComponent implements OnInit, OnDestroy {
   }
 
   // 复位开关
-  onUnarchiveClick(st: ISwitchArchive) {
+  onUnArchive(st: ISwitchArchive) {
     this.switchLoading = true;
     this.modal.create({
       nzContent: '<div>确定复位开关吗？复位后开关状态为关闭， 以避免给线上环境造成影响。</div>',
@@ -76,12 +76,12 @@ export class SwitchArchiveComponent implements OnInit, OnDestroy {
       nzOnOk: () => {
         this.switchService.unarchiveEnvFeatureFlag(st.id, st.name)
           .subscribe(
-            res => {
+            _ => {
               this.switchLists = this.switchLists.filter(s => s.id !== st.id);
               this.message.success('开关复位成功！');
               this.search$.next(this.searchText);
             },
-            err => {
+            _ => {
               this.message.error('开关复位失败，请稍后重试！');
             }
           );
