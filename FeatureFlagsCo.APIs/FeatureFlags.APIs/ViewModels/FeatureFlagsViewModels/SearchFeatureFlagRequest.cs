@@ -7,5 +7,7 @@
         public string Status { get; set; }
 
         public int[] TagIds { get; set; }
+
+        public bool IncludeArchived { get; set; } = false;
     }
 }

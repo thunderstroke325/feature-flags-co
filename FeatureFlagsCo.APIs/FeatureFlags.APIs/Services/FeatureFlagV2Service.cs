@@ -52,6 +52,7 @@ namespace FeatureFlags.APIs.Services
             string name,
             string status,
             IEnumerable<string> flagIds,
+            bool includeArchived,
             int page,
             int pageSize)
         {
@@ -70,6 +71,13 @@ namespace FeatureFlags.APIs.Services
                 filters.Add(nameFilter);
             }
 
+            // archive filter
+            if (!includeArchived)
+            {
+                var unArchiveFilter = filterBuilder.Eq(flag => flag.IsArchived, false);
+                filters.Add(unArchiveFilter);
+            }
+            
             // status filter
             if (!string.IsNullOrWhiteSpace(status))
             {

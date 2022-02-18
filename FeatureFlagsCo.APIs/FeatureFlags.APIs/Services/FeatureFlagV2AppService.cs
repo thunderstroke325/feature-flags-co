@@ -48,7 +48,7 @@ namespace FeatureFlags.APIs.Services
             }
 
             var pagedFlags = await _flagService.GetListAsync(
-                envId, request.Name, request.Status, flagIds,
+                envId, request.Name, request.Status, flagIds, request.IncludeArchived, 
                 request.PageIndex, request.PageSize
             );
 
