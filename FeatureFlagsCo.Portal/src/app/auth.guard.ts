@@ -30,17 +30,18 @@ export class AuthGuard implements CanActivate {
   checkLogin(url: string): true | UrlTree {
     const auth = getAuth();
     if (auth) {
-      this.ffcService.initialize(
-        environment.projectEnvKey,
-        {
-          key: auth.email,
+      this.ffcService.initialize({
+        secret: environment.projectEnvKey,
+        user: {
+          id: auth.email,
           email: auth.email,
           userName: auth.email.split("@")[0],
           customizeProperties: [{
             name: 'phoneNumber',
             value: auth.phoneNumber
           }]
-        });
+        }
+      });
 
       this.accountService.afterLoginSelectAccount();
       return true;

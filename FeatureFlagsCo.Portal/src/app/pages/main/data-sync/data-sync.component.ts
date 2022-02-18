@@ -43,7 +43,8 @@ export class DataSyncComponent implements OnInit, OnDestroy {
     const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
     this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
 
-    this.userBehaviorDataDownloadFunc = this.ffcService.variation('user-behavior-data-download') === "false" ? false : true;
+    this.userBehaviorDataDownloadFunc =
+      this.ffcService.variation('user-behavior-data-download', "false") !== "false";
   }
 
   ngOnDestroy(): void {
@@ -53,7 +54,7 @@ export class DataSyncComponent implements OnInit, OnDestroy {
 
   onDownload() {
     this.isDownloading = true;
-    this.dataSyncService.getEnvironmentData(this.currentEnvId).subscribe(data => this.downloadFile(data), err => {
+    this.dataSyncService.getEnvironmentData(this.currentEnvId).subscribe(data => this.downloadFile(data), _ => {
       this.isDownloading = false;
       this.message.error("数据下载失败！");
     });
@@ -76,26 +77,26 @@ export class DataSyncComponent implements OnInit, OnDestroy {
     this.uploadFormVisible = true;
   }
 
-  onUploadClosed(data: any) {
+  onUploadClosed() {
     this.uploadFormVisible = false;
   }
 
   // 用户行为数据下载
   public onDownloadUserBehaviorData() {
-    if(this.dataDateRange.length) {
+    if (this.dataDateRange.length) {
       this.userBehaviorDataDownloading = true;
       const startTimestamp = (new Date(this.dataDateRange[0])).valueOf();
       const endTimestamp = (new Date(this.dataDateRange[1])).valueOf();
-      
+
       this.dataSyncService.getUserBehaviorData(
         this.currentEnvId,
         {
           startTimestamp, endTimestamp
         }
       ).subscribe((result) => {
-        
+
         const data = JSON.stringify(result);
-        
+
         let blob = new Blob([data], {type: 'text/json'});
         let e = document.createEvent("MouseEvents");
         let a = document.createElement("a");
@@ -105,7 +106,7 @@ export class DataSyncComponent implements OnInit, OnDestroy {
         e.initEvent('click', true, true);
         a.dispatchEvent(e);
         a.remove();
-        
+
         this.userBehaviorDataDownloading = false;
       }, _ => {
         this.userBehaviorDataDownloading = false;

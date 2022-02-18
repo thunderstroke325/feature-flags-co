@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { btnsConfig } from './btns';
 import { FfcService } from 'src/app/services/ffc.service';
-import { environment } from './../../../../../../environments/environment';
 import { encodeURIComponentFfc } from 'src/app/utils';
 
 @Component({
@@ -21,7 +20,7 @@ export class NavBtnsComponent {
     private router: Router,
     private ffcService: FfcService
   ){
-    const experimentation  = this.ffcService.variation('experimentation', 'V2', 'V2');
+    const experimentation  = this.ffcService.variation('experimentation', 'V2');
     if (experimentation === 'hide') {
       const idx = this.navConfig.findIndex(n => n.id === 'experimentations');
       if (idx > -1) {
@@ -37,7 +36,7 @@ export class NavBtnsComponent {
       })
     }
 
-    const zeroCodeEnabled = this.ffcService.variation('零代码', 'false', 'true') === 'true';
+    const zeroCodeEnabled = this.ffcService.variation('零代码', 'false') === 'true';
     if (!zeroCodeEnabled) {
       const idx = this.navConfig.findIndex(n => n.id === 'zero-code-settings');
       if (idx > -1) {

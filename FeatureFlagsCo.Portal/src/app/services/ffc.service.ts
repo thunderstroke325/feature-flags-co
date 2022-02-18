@@ -1,23 +1,17 @@
-import { Injectable, Inject } from '@angular/core';
-import { FFCJsClient } from 'ffc-js-client-sdk/esm';
-import { IFFCUser, IOption } from 'ffc-js-client-sdk/esm/types';
-import { environment } from '../../environments/environment';
-
+import { Injectable } from '@angular/core';
+import Ffc from 'ffc-js-client-side-sdk';
+import { IOption } from "ffc-js-client-side-sdk/esm/types";
 
 @Injectable({
   providedIn: 'root'
 })
 export class FfcService {
 
-  private client = FFCJsClient;
-  constructor() {
+  initialize(option: IOption): void {
+    Ffc.init(option);
   }
 
-  variation (featureFlagKey: string, defaultResult?: string, standaloneValue?: string): string {
-    return environment.name === 'Standalone' ? standaloneValue : this.client.variation(featureFlagKey, defaultResult);
-  }
-
-  initialize (environmentSecret: string, user?: IFFCUser, option?: IOption): void {
-    environment.name !== 'Standalone' && this.client.initialize(environmentSecret, user, option);
+  variation(key: string, defaultResult: string): string {
+    return Ffc.variation(key, defaultResult);
   }
 }

@@ -99,7 +99,7 @@ export class MainComponent implements OnInit, OnDestroy {
       }
     ];
 
-    if (this.ffcService.variation('experimentation', 'V2', 'V2') === 'V2') {
+    if (this.ffcService.variation('experimentation', 'V2') === 'V2') {
       const experimentationItem = {
         level: 1,
         title: '数据实验',
@@ -108,7 +108,7 @@ export class MainComponent implements OnInit, OnDestroy {
       this.menus.splice(3, 0, experimentationItem);
     }
 
-    if (this.ffcService.variation('数据看板', 'false', 'false') === 'true') {
+    if (this.ffcService.variation('数据看板', 'false') === 'true') {
       const dataBoardItems = [{
         level: 1,
         line: true

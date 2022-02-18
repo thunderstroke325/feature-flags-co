@@ -5,7 +5,6 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from 'src/app/services/experiment.service';
 import { SwitchService } from 'src/app/services/switch.service';
 import { CSwitchParams, IVariationOption } from '../types/switch-new';
-import { environment } from '../../../../../environments/environment';
 import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment } from '../types/experimentations';
 import * as moment from 'moment';
 
@@ -41,7 +40,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     private experimentService: ExperimentService,
     private ffcService: FfcService
   ) {
-    this.experimentation = this.ffcService.variation('experimentation', 'V2', 'V2');
+    this.experimentation = this.ffcService.variation('experimentation', 'V2');
     const ffId: string = decodeURIComponent(this.route.snapshot.params['id']);
     this.switchServe.getSwitchDetail(ffId).subscribe(res => {
       this.currentFeatureFlag = new CSwitchParams(res);
@@ -57,7 +56,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.exptRulesVisible = true;
   }
 
-  onSetExptRulesClosed(data: CSwitchParams) {
+  onSetExptRulesClosed() {
     this.exptRulesVisible = false;
   }
 
@@ -214,7 +213,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   onDeleteExptClick(expt: IExperiment) {
     expt.isLoading  = true;
-    this.experimentService.archiveExperiment(this.switchServe.envId, expt.id).subscribe(res => {
+    this.experimentService.archiveExperiment(this.switchServe.envId, expt.id).subscribe(_ => {
       this.experimentList = this.experimentList.filter(ex => ex.id !== expt.id);
       expt.isLoading  = false;
     }, _ => {
@@ -225,7 +224,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   onDeleteExptDataClick(expt: IExperiment) {
     expt.isLoading  = true;
-    this.experimentService.archiveExperimentData(this.switchServe.envId, expt.id).subscribe(res => {
+    this.experimentService.archiveExperimentData(this.switchServe.envId, expt.id).subscribe(_ => {
       expt.selectedIteration = null;
       expt.iterations = [];
       expt.status = ExperimentStatus.NotStarted;
