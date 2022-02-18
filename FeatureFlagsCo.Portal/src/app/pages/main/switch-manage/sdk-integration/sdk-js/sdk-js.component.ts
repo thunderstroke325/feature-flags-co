@@ -55,6 +55,10 @@ export class SDKJSComponent implements OnInit {
     // 当开关值发生变化时获取通知
     Ffc.on('ff_update:${this.keyName}', (change) => {
       console.log(change['newValue']); // 请将此行替换成自己的代码
+      // 或者如下边重新调用 variation 方法，性能与上一行是一样的，但是下边的写法可以获得更好的开关调用统计报告
+      // ffcscan ignore
+      const myVar = Ffc.variation('${this.keyName}', 'default value');
+      console.log(myVar); // 请将此行替换成自己的代码
     });
     `
   
