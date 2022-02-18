@@ -197,7 +197,7 @@ namespace FeatureFlags.APIs
             // use sdk web socket server
             var websocketOptions = new WebSocketOptions
             {
-                KeepAliveInterval = TimeSpan.FromSeconds(60)
+                KeepAliveInterval = TimeSpan.FromSeconds(20)
             };
             app.UseWebSockets(websocketOptions);
             app.UseSdkWebSocketServer();

@@ -17,15 +17,24 @@ namespace FeatureFlags.APIs.Controllers
         [HttpGet("all-connection")]
         public IActionResult GetAll()
         {
-            var connections = _connectionManager.GetAll().ToList();
-
-            var infos = connections.Select(connection => connection?.ToString() ?? "null").ToList();
+            var connections = _connectionManager.GetAll()
+                .OrderBy(x => x.ConnectAt)
+                .Select(socket => new
+                {
+                    socket.ConnectionId, 
+                    socket.EnvSecret, 
+                    socket.SdkType, 
+                    socket.ConnectAt,
+                    socket.DisConnectAt, 
+                    socket.User,
+                })
+                .ToList();
 
             var insights = new
             {
                 total = connections.Count,
                 hasNull = connections.Any(x => x == null),
-                data = infos
+                data = connections
             };
             
             return Ok(insights);
