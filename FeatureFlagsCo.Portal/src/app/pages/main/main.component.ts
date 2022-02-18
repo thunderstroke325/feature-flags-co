@@ -94,7 +94,7 @@ export class MainComponent implements OnInit, OnDestroy {
         line: true
       }, {
         level: 1,
-        title: '账户管理 (集成 SDK)',
+        title: '账户管理',
         path: '/account-settings'
       }
     ];

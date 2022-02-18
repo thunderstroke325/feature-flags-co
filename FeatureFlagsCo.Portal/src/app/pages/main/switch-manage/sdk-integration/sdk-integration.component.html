@@ -1,0 +1,17 @@
+<section class="body">
+    <app-layout>
+        <app-nav-btns name="header" [routeUrl]="'sdk-integration'" [id]="id"></app-nav-btns>
+        <div class="sdk-integration-body" name="detail" *ngIf="keyName">
+          <div class="card-container">
+            <nz-tabset nzType="card">
+              <nz-tab nzTitle="JavaScript">
+                <sdk-js-integration [envSecret]="envSecret" [keyName]="keyName"></sdk-js-integration>
+              </nz-tab>
+              <nz-tab nzTitle="Java">
+                <sdk-java-integration [envSecret]="envSecret" [keyName]="keyName"></sdk-java-integration>
+              </nz-tab>
+            </nz-tabset>
+          </div>
+        </div>
+    </app-layout>
+</section>

@@ -17,5 +17,8 @@ export const btnsConfig = [
     },{
       id: 'report',
       label: '统计报表'
-  }
+    },{
+      id: 'sdk-integration',
+      label: 'SDK 集成'
+    },
 ]

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { SDKIntegrationResolver } from './sdk-integration/sdk-integration-resolver.service';
 import { StatisticalReportResolver } from './statistical-report/statistical-report-resolver.service';
 import { SwitchManageComponent } from './switch-manage.component';
 import { SwicthSettingResolver } from './switch-setting/swicth-setting-resolver.service';
@@ -57,6 +58,13 @@ const routes: Routes = [
           breadcrumb: '开关详情'
         }
       }, {
+        path: 'sdk-integration/:id',
+        resolve: { switchInfo: SDKIntegrationResolver },
+        loadChildren: () => import("./sdk-integration/sdk-integration.module").then(m => m.SDKIntegrationModule),
+        data: {
+          breadcrumb: '开关详情'
+        }
+      }, {
         path: '',
         redirectTo: '/switch-manage'
       }
@@ -68,6 +76,7 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
   providers: [
+    SDKIntegrationResolver,
     SwicthSettingResolver,
     TargetConditionsResolver,
     StatisticalReportResolver
