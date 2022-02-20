@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
 {
@@ -14,20 +11,10 @@ namespace FeatureFlags.APIs.Services
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
             return System.Convert.ToBase64String(plainTextBytes);
         }
-        public static string DecodeBase64(this string base64EncodedData)
-        {
-            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
-            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
-        }
 
         public static string GetEnvironmentUserPropertyId(int envId)
         {
             return $"WUP__{envId}";
-        }
-
-        public static string GetAccountFeatureFlagUserId(int accountId, string ffUserKeyId)
-        {
-            return $"WFFU__{accountId.ToString()}__{ffUserKeyId}";
         }
 
         public static string GetFeatureFlagUserId(string featureFlagId, string ffUserKeyId )
@@ -49,7 +36,7 @@ namespace FeatureFlags.APIs.Services
             return System.Convert.ToBase64String(plainTextBytes);
         }
 
-        public static string CreateNewFeatureFlagKeyName(int environmentId, string featureFlagName)
+        public static string CreateNewFeatureFlagKeyName(string featureFlagName)
         {
             return featureFlagName.Replace(" ", "-").Replace("/", "-").Replace("\\", "-").Replace(".", "-").Replace(":", "-").Replace("_", "").Replace("'", "").Replace("\"", "");
         }

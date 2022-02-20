@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { btnsConfig } from '../pages/main/switch-manage/components/nav-btns/btns';
 import { CSwitchParams, FeatureFlagType, IFfParams, IFfSettingParams, IPrequisiteFeatureFlag } from '../pages/main/switch-manage/types/switch-new';
@@ -11,13 +11,10 @@ import { AccountService } from './account.service';
   providedIn: 'root'
 })
 export class SwitchService {
-
-  public isFirstInto: boolean = true;
   public accountId: number = null;
   public projectId: number = null;
   public envId: number = null;
   public navConfig: any = [];
-  public currentSwitchList: IFfParams[] = [];
   public currentSwitch: IFfParams = null;
 
   constructor(
@@ -65,7 +62,7 @@ export class SwitchService {
   }
 
   // 快速创建新的开关
-  public createNewSwitch(name: string = 'demo1', type: FeatureFlagType = FeatureFlagType.Classic) {
+  public createNewSwitch(name, type: FeatureFlagType = FeatureFlagType.Classic) {
     const url = environment.url + '/FeatureFlags/CreateFeatureFlag';
     const body = {
       name: name,

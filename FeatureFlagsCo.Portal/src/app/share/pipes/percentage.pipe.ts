@@ -1,9 +1,8 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import { DomSanitizer } from "@angular/platform-browser";
 
 @Pipe({ name: "percentage" })
 export class PercentagePipe implements PipeTransform {
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor() {}
 
   transform(value) {
     if (value === -1 || value === '--') {

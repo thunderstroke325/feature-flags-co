@@ -125,26 +125,7 @@ export class MainComponent implements OnInit, OnDestroy {
     }
   }
 
-  // 跳转路由
-  public onRouteTo(value: { type: 'menu' | 'link', url: string }) {
-    if (value.type === 'menu') {
-      this.router.navigateByUrl(value.url);
-    } else if (value.type === 'link') {
-      // console.log(value.url);
-    }
-  }
-
   public logout() {
     this.authService.logout();
-  }
-
-  onRouteLabel = (label: string) => {
-    if (label === '开关详情') {
-      return this.switchService.currentSwitch.name;
-    }
-    if (label === '用户详情') {
-      return this.userService.currentUser ? this.userService.currentUser.name : label;
-    }
-    return label;
   }
 }

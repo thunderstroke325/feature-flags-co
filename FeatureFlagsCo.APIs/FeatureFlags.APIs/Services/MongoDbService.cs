@@ -236,7 +236,7 @@ namespace FeatureFlags.APIs.Services
         {
             data.FeatureFlags.ForEach(async ff =>
             {
-                var keyName = FeatureFlagKeyExtension.CreateNewFeatureFlagKeyName(envId, ff.FF.Name);
+                var keyName = FeatureFlagKeyExtension.CreateNewFeatureFlagKeyName(ff.FF.Name);
                 ff.Id = FeatureFlagKeyExtension.GetFeatureFlagId(keyName, envId.ToString(), accountId.ToString(),
                     projectId.ToString());
                 ff.EnvironmentId = envId;
@@ -309,7 +309,7 @@ namespace FeatureFlags.APIs.Services
         public async Task<FeatureFlag> CreateDemoFeatureFlagAsync(CreateFeatureFlagViewModel param, string currentUserId,
            int projectId, int accountId)
         {
-            var keyName = FeatureFlagKeyExtension.CreateNewFeatureFlagKeyName(param.EnvironmentId, param.Name);
+            var keyName = FeatureFlagKeyExtension.CreateNewFeatureFlagKeyName(param.Name);
             var featureFlagId = FeatureFlagKeyExtension.GetFeatureFlagId(keyName, param.EnvironmentId.ToString(),
                 accountId.ToString(), projectId.ToString());
             var newFeatureFlag = new FeatureFlag()
@@ -453,7 +453,7 @@ namespace FeatureFlags.APIs.Services
         public async Task<FeatureFlag> CreateFeatureFlagAsync(CreateFeatureFlagViewModel param, string currentUserId,
             int projectId, int accountId)
         {
-            var keyName = FeatureFlagKeyExtension.CreateNewFeatureFlagKeyName(param.EnvironmentId, param.Name);
+            var keyName = FeatureFlagKeyExtension.CreateNewFeatureFlagKeyName(param.Name);
             var featureFlagId = FeatureFlagKeyExtension.GetFeatureFlagId(keyName, param.EnvironmentId.ToString(),
                 accountId.ToString(), projectId.ToString());
             var newFeatureFlag = new FeatureFlag()

@@ -6,9 +6,9 @@ import {
   HttpInterceptor,
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -33,7 +33,12 @@ export class AuthInterceptor implements HttpInterceptor {
             localStorage.clear();
             this.router.navigateByUrl('/login');
           }
-          err.error.message && this.message.error(err.error.message);
+
+          const message = err.error?.message;
+          if (message) {
+            err.error.message && this.message.error(err.error.message);
+          }
+
           throw err;
         })
       );
