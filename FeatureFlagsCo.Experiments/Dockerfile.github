@@ -10,6 +10,6 @@ COPY  ./FeatureFlagsCo.Experiments/* ./expt/
 COPY ./FeatureFlagsCo.Experiments/env/docker-${exptenv}-config.ini ./expt/config/config.ini
 WORKDIR /expt
 RUN pip install -r docker-requirements.txt
-RUN export PYTHONPATH="$PYTHONPATH:/expt/"
+ENV PYTHONPATH "${PYTHONPATH}:/expt/"
 RUN echo $PYTHONPATH
 CMD ["sh", "-c", "/usr/bin/supervisord -c supervisord.conf"]
