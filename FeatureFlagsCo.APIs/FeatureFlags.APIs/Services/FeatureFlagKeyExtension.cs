@@ -38,7 +38,7 @@ namespace FeatureFlags.APIs.Services
 
         public static string CreateNewFeatureFlagKeyName(string featureFlagName)
         {
-            return featureFlagName.Replace(" ", "-").Replace("/", "-").Replace("\\", "-").Replace(".", "-").Replace(":", "-").Replace("_", "").Replace("'", "").Replace("\"", "");
+            return featureFlagName.Replace(" ", "-").Replace("/", "-").Replace("\\", "-").Replace(".", "-").Replace(":", "-").Replace("__", "").Replace("'", "").Replace("\"", "");
         }
 
         public static string GetFeatureFlagId(string featureFlagKeyName, string envId, string accountId = "-1", string projectId = "-1")
