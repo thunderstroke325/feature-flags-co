@@ -12,5 +12,5 @@ WORKDIR /expt
 RUN pip install -r docker-requirements.txt
 ENV PYTHONPATH "${PYTHONPATH}:/expt/"
 RUN echo $PYTHONPATH
-RUN echo $(ls -1 /expt)
+RUN echo $(ls  /expt)
 CMD ["sh", "-c", "/usr/bin/supervisord -c supervisord.conf"]
