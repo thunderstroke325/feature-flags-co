@@ -1,29 +1,34 @@
 ﻿import { environment } from 'src/environments/environment';
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { Observable, of } from "rxjs";
 import {
   SwitchListFilter,
   SwitchDropdown,
   SwitchListModel
 } from "../pages/main/switch-manage/types/switch-index";
+import { getCurrentProjectEnv } from "../utils/project-env";
+import { catchError } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
 })
 export class SwitchV2Service {
 
+  envId: number;
+
   constructor(private http: HttpClient) {
+    this.envId = getCurrentProjectEnv().envId;
   }
 
-  getSwitchDropDown(envId: number): Observable<SwitchDropdown[]> {
-    const url = `${environment.url}/api/v2/envs/${envId}/feature-flag/dropdown`;
+  getSwitchDropDown(): Observable<SwitchDropdown[]> {
+    const url = `${environment.url}/api/v2/envs/${this.envId}/feature-flag/dropdown`;
 
     return this.http.get<SwitchDropdown[]>(url);
   }
 
-  getSwitchList(envId: number, filter: SwitchListFilter = new SwitchListFilter()): Observable<SwitchListModel> {
-    const url = `${environment.url}/api/v2/envs/${envId}/feature-flag/`;
+  getSwitchList(filter: SwitchListFilter = new SwitchListFilter()): Observable<SwitchListModel> {
+    const url = `${environment.url}/api/v2/envs/${this.envId}/feature-flag/`;
 
     const queryParam = {
       name: filter.name ?? '',
@@ -37,5 +42,11 @@ export class SwitchV2Service {
       url,
       {params: new HttpParams({fromObject: queryParam})}
     );
+  }
+
+  isNameUsed(name: string): Observable<boolean> {
+    const url = `${environment.url}/api/v2/envs/${this.envId}/feature-flag/is-name-used?name=${name}`;
+
+    return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 }

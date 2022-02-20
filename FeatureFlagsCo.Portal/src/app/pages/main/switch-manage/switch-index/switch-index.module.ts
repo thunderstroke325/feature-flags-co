@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { SwitchIndexRoutingModule } from './switch-index-routing.module';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { SwitchIndexComponent } from './switch-index.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -12,7 +12,7 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import {NzSwitchModule} from 'ng-zorro-antd/switch';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { SwitchTagTreeViewComponent } from './switch-tag-tree-view.component';
 import { NzTreeViewModule } from "ng-zorro-antd/tree-view";
@@ -21,6 +21,8 @@ import { SwitchTagTreeSelectComponent } from './switch-tag-tree-select.component
 import { NzTransferModule } from "ng-zorro-antd/transfer";
 import { NzTagModule } from "ng-zorro-antd/tag";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
+import { NzFormModule } from "ng-zorro-antd/form";
+import { ShareModule } from "../../../../share/share.module";
 
 
 @NgModule({
@@ -43,7 +45,10 @@ import { NzToolTipModule } from "ng-zorro-antd/tooltip";
     NzTreeSelectModule,
     NzTransferModule,
     NzTagModule,
-    NzToolTipModule
+    NzToolTipModule,
+    NzFormModule,
+    ReactiveFormsModule,
+    ShareModule
   ]
 })
 export class SwitchIndexModule { }

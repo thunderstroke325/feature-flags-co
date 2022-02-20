@@ -32,6 +32,15 @@ namespace FeatureFlags.APIs.Services
             return featureFlag;
         }
 
+        public async Task<bool> IsNameUsedAsync(int envId, string name)
+        {
+            var isNameUsed = await _mongoDb
+                .QueryableOf<FeatureFlag>()
+                .AnyAsync(flag => flag.EnvironmentId == envId && flag.FF.Name == name);
+
+            return isNameUsed;
+        }
+
         public async Task<List<DropdownItem>> GetDropDownsAsync(int envId)
         {
             var query = _mongoDb.QueryableOf<FeatureFlag>()

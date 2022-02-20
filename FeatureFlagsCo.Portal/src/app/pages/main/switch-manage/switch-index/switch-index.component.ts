@@ -10,7 +10,8 @@ import { FfcService } from "../../../../services/ffc.service";
 import { SwitchTagTreeService } from "../../../../services/switch-tag-tree.service";
 import { SwitchListFilter, SwitchListModel, SwitchTagTree } from "../types/switch-index";
 import { SwitchV2Service } from "../../../../services/switch-v2.service";
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, first, map, switchMap } from 'rxjs/operators';
+import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 
 @Component({
   selector: 'index',
@@ -28,6 +29,17 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
     }
 
     return this._switchIndexVersion;
+  }
+
+  // create switch modal version
+  private _createSwitchModalVersion: 'v1' | 'v2';
+  get createSwitchModalVersion(): string {
+    if (!this._createSwitchModalVersion) {
+      const version = this.ffcService.variation('create-switch-modal-version', 'v1');
+      this._createSwitchModalVersion = version === 'v2' ? 'v2' : 'v1';
+    }
+
+    return this._createSwitchModalVersion;
   }
 
   private destory$: Subject<void> = new Subject();
@@ -69,7 +81,7 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
   loadSwitchListV2() {
     this.v2Loading = true;
     this.switchV2Service
-      .getSwitchList(this.envId, this.switchFilterV2)
+      .getSwitchList(this.switchFilterV2)
       .subscribe((switches: SwitchListModel) => {
         this.switchListModel = switches;
         this.v2Loading = false;
@@ -100,6 +112,65 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
 
   //#endregion
 
+  //#region v2 create switch
+  createModalVisibleV2: boolean = false;
+  switchFormV2: FormGroup;
+
+  switchNameValidator = (control: FormControl) => {
+    const name = control.value;
+    if (!name) {
+      return {error: true, required: true};
+    }
+
+    if (name.includes('__')) {
+      return {error: true, invalid_character: true};
+    }
+  }
+
+  switchNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
+    debounceTime(300),
+    switchMap(value => this.switchV2Service.isNameUsed(value as string)),
+    map(isNameUsed => {
+      switch (isNameUsed) {
+        case true:
+          return {error: true, duplicated: true};
+        case undefined:
+          return {error: true, unknown: true};
+        default:
+          return null;
+      }
+    }),
+    first()
+  );
+
+  creatingV2: boolean = false;
+
+  createSwitchV2() {
+    this.creatingV2 = true;
+
+    const name = this.switchFormV2.get('name').value;
+
+    this.switchServe.createNewSwitch(name, FeatureFlagType.Classic)
+      .subscribe((result: IFfParams) => {
+        this.switchServe.setCurrentSwitch(result);
+        this.toRouter(result.id);
+        this.creatingV2 = false;
+      }, err => {
+        this.msg.error(err.error);
+        this.creatingV2 = false;
+      });
+  }
+
+  closeCreateModalV2() {
+    this.createModalVisibleV2 = false;
+    this.switchFormV2.reset({
+      name: '',
+      type: FeatureFlagType.Classic
+    });
+  }
+
+  //#endregion
+
   constructor(
     private router: Router,
     public switchServe: SwitchService,
@@ -107,8 +178,15 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
     private msg: NzMessageService,
     private accountService: AccountService,
     private switchTagTreeService: SwitchTagTreeService,
-    private ffcService: FfcService
-  ) {}
+    private ffcService: FfcService,
+    private fb: FormBuilder
+  ) {
+    this.switchFormV2 = this.fb.group({
+      name: ['', [this.switchNameValidator], [this.switchNameAsyncValidator], 'change'],
+      keyName: [{value: '', disabled: true}, [Validators.required]],
+      type: [FeatureFlagType.Classic, [Validators.required]],
+    });
+  }
 
   ngOnInit(): void {
     const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
@@ -137,7 +215,11 @@ export class SwitchIndexComponent implements OnInit, OnDestroy {
 
   // 添加开关
   addSwitch() {
-    this.createModalVisible = true;
+    if (this.createSwitchModalVersion === 'v1') {
+      this.createModalVisible = true;
+    } else {
+      this.createModalVisibleV2 = true;
+    }
   }
 
   // 切换开关状态

@@ -43,9 +43,10 @@ import { G2LineChartComponent } from './uis/g2-chart/g2-line-chart/g2-line-chart
 import { ExptRulesDrawerComponent } from './uis/expt-rules-drawer/expt-rules-drawer.component';
 import { NzListModule } from 'ng-zorro-antd/list';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { SwitchKeyNamePipe } from './pipes/switch-key-name.pipe';
 
 @NgModule({
-  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent, PercentagePipe, FfcDatePipe, G2LineChartComponent, ExptRulesDrawerComponent],
+  declarations: [HeaderComponent, MenuComponent, XuBreadCrumbComponent, XuBreadCrumbItemComponent, XuBreadCrumbSeparatorComponent, PropsDrawerComponent, ProjectDrawerComponent, EnvDrawerComponent, MemberDrawerComponent, AccountDrawerComponent, UploadDrawerComponent, MetricDrawerComponent, ExperimentDrawerComponent, PercentagePipe, FfcDatePipe, G2LineChartComponent, ExptRulesDrawerComponent, SwitchKeyNamePipe],
   imports: [
     CommonModule,
     FormsModule,
@@ -95,7 +96,8 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
     PercentagePipe,
     FfcDatePipe,
     G2LineChartComponent,
-    ExptRulesDrawerComponent
+    ExptRulesDrawerComponent,
+    SwitchKeyNamePipe
   ]
 })
 export class ShareModule { }

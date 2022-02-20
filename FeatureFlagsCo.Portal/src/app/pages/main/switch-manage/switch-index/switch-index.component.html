@@ -136,6 +136,7 @@
   </div>
 </section>
 
+<!--create switch v1 modal-->
 <nz-modal [(nzVisible)]="createModalVisible"
           [nzWidth]="700"
           [nzBodyStyle]="{minHeight: '90px'}"
@@ -150,7 +151,6 @@
       <nz-form-label>开关名称</nz-form-label>
       <input nz-input placeholder="开关名称" [(ngModel)]="switchName"/>
     </nz-form-item>
-    <br/>
     <nz-form-item>
       <nz-form-label>开关类型</nz-form-label>
       <nz-select style="width:100%;" nzPlaceHolder="选择开关类型" [(ngModel)]="switchType">
@@ -158,6 +158,53 @@
       </nz-select>
     </nz-form-item>
   </ng-container>
+</nz-modal>
+
+<!--create switch v2 modal-->
+<nz-modal [(nzVisible)]="createModalVisibleV2"
+          [nzTitle]="modalTitle"
+          [nzCentered]="true"
+          [nzContent]="modalContent"
+          [nzFooter]="modalFooter"
+          (nzOnCancel)="this.closeCreateModalV2()">
+
+  <ng-template #modalTitle>新建开关</ng-template>
+
+  <ng-template #modalContent>
+    <form nz-form [formGroup]="switchFormV2">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>开关名称</nz-form-label>
+        <nz-form-control [nzSpan]="14" nzHasFeedback nzValidatingTip="校验中..." [nzErrorTip]="switchNameErrorTpl">
+          <input nz-input formControlName="name" />
+          <ng-template #switchNameErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')">开关名称必填</ng-container>
+            <ng-container *ngIf="control.hasError('invalid_character')">开关名称不能包含 '__'</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')">该名称已被使用</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')">名称校验失败</ng-container>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="7" nzRequired>KeyName</nz-form-label>
+        <nz-form-control [nzSpan]="14" nz-tooltip nzTooltipTitle="用于获取 variation 值">
+          <input nz-input [value]="this.switchFormV2.get('name').value | switchKeyName" formControlName="keyName" placeholder="由名称自动生成" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label nzRequired [nzSpan]="7">开关类型</nz-form-label>
+        <nz-form-control [nzSpan]="14">
+          <nz-select formControlName="type" style="width:100%;" nzPlaceHolder="选择开关类型">
+            <nz-option [nzValue]="ClassicFeatureFlag" nzLabel="传统开关 - 可以用于对终端用户进行条件分流"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-template>
+
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="this.closeCreateModalV2()">取消</button>
+    <button nz-button nzType="primary" [nzLoading]="this.creatingV2" [disabled]="!switchFormV2.valid" (click)="createSwitchV2()">创建</button>
+  </ng-template>
 </nz-modal>
 
 <nz-modal

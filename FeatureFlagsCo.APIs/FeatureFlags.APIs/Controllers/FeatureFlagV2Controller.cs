@@ -41,5 +41,13 @@ namespace FeatureFlags.APIs.Controllers
 
             return dropdowns;
         }
+
+        [HttpGet("is-name-used")]
+        public async Task<bool>  IsNameUsedAsync(int envId, string name)
+        {
+            var isNameUsed = await _flagService.IsNameUsedAsync(envId, name);
+
+            return isNameUsed;
+        }
     }
 }

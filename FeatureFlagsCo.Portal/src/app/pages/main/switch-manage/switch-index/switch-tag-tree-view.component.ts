@@ -6,7 +6,6 @@ import { NzTreeFlatDataSource, NzTreeFlattener } from 'ng-zorro-antd/tree-view';
 import { NzMessageService } from "ng-zorro-antd/message";
 import { SwitchTagTree, SwitchTagTreeNode } from "../types/switch-index";
 import { SwitchV2Service } from "../../../../services/switch-v2.service";
-import { AccountService } from "../../../../services/account.service";
 
 interface FlatNode {
   id: number;
@@ -103,20 +102,16 @@ export class SwitchTagTreeViewComponent implements OnInit {
   constructor(
     private message: NzMessageService,
     private switchV2Service: SwitchV2Service,
-    private accountService: AccountService
   ) {
   }
 
   ngOnInit(): void {
-    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
-    const envId = currentAccountProjectEnv.projectEnv.envId;
-
     // init tree
     this.refreshTree();
     this.treeControl.expandAll();
 
     // init transfer
-    this.switchV2Service.getSwitchDropDown(envId)
+    this.switchV2Service.getSwitchDropDown()
       .subscribe(dropDowns => {
           this.transferItems = dropDowns.map(
             dropDown => ({
