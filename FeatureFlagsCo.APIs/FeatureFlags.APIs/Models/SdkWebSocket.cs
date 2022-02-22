@@ -81,16 +81,30 @@ namespace FeatureFlags.APIs.Models
             await WebSocket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
         }
 
-        public async Task CloseAsync()
+        public async Task CloseSafelyAsync()
         {
             var closeStatus = WebSocket.CloseStatus; 
             if (closeStatus.HasValue)
             {
-                await WebSocket.CloseAsync(
-                    closeStatus.Value,
-                    WebSocket.CloseStatusDescription, 
-                    CancellationToken.None
-                );
+                try
+                {
+                    await WebSocket.CloseAsync(
+                        closeStatus.Value,
+                        WebSocket.CloseStatusDescription, 
+                        CancellationToken.None
+                    );
+                }
+                catch (WebSocketException ex)
+                {
+                    if (ex.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+                    {
+                        WebSocket.Abort();
+                    }
+                }
+                catch (Exception)
+                {
+                    // just ignore other exception
+                }
             }
             
             DisConnectAt = DateTime.UtcNow;

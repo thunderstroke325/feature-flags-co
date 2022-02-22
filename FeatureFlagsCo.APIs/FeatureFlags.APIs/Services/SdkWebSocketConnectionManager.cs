@@ -49,7 +49,7 @@ namespace FeatureFlags.APIs.Services
             var socketToRemove = envSockets.FirstOrDefault(x => x.ConnectionId == socket.ConnectionId);
             if (socketToRemove != null)
             {
-                await socketToRemove.CloseAsync();
+                await socketToRemove.CloseSafelyAsync();
             }
             
             _sockets.AddOrUpdate(
