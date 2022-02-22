@@ -31,7 +31,7 @@ export class UploadDrawerComponent implements OnInit {
     const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
     this.currentAccountId = currentAccountProjectEnv.account.id;
     this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
-    this.uploadUrl = this.dataSyncService.getUploadUrl(this.currentEnvId);
+    this.uploadUrl = this.dataSyncService.getUploadUrl();
   }
 
   onClose() {

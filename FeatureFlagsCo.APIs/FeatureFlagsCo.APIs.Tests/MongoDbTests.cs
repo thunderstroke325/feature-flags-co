@@ -73,6 +73,15 @@ namespace FeatureFlags.APIs.Tests
         }
 
         [Fact]
+        public async Task Should_Return_Default_Value()
+        {
+            var env = await _mongoDb.QueryableOf<EnvironmentV2>().FirstOrDefaultAsync();
+
+            env.Settings.ShouldNotBeNull();
+            env.Settings.ShouldBeEmpty();
+        }
+
+        [Fact]
         public async Task Should_Do_Anything()
         {
             var tables = new[] {"Accounts", "AccountUsers", "Projects", "ProjectUsers", "Environments" };

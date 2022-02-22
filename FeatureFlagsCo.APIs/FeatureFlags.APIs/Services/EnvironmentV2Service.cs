@@ -19,7 +19,7 @@ namespace FeatureFlags.APIs.Services
 
         public async Task<EnvironmentV2> GetAsync(int id)
         {
-            var env = await _environments.FirstOrDefaultAsync(env => env.Id == id);
+            var env = await FindAsync(id);
             if (env == null)
             {
                 throw new EntityNotFoundException($"environment with id {id} was not found");
@@ -43,6 +43,13 @@ namespace FeatureFlags.APIs.Services
             await _environments.UpdateAsync(environment);
 
             return environment;
+        }
+
+        public async Task<EnvironmentV2> FindAsync(int envId)
+        {
+            var env = await _environments.FirstOrDefaultAsync(env => env.Id == envId);
+            
+            return env;
         }
 
         public async Task<bool> DeleteAsync(int envId)

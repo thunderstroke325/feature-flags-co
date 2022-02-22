@@ -43,6 +43,15 @@ namespace FeatureFlags.APIs.Services.MongoDb
             return updatedEntity;
         }
 
+        public virtual async Task<bool> UpdateOneAsync(
+            Expression<Func<TEntity, bool>> filter,
+            UpdateDefinition<TEntity> updateDefinition)
+        {
+            var result = await Collection.UpdateOneAsync(filter, updateDefinition);
+
+            return result.IsAcknowledged;
+        }
+
         public virtual async Task<bool> DeleteAsync(TKey key)
         {
             var result = await Collection.DeleteOneAsync(entity => entity.Id.Equals(key));

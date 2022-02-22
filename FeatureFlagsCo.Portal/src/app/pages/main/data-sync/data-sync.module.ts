@@ -12,10 +12,18 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { ShareModule } from 'src/app/share/share.module';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
+import { NzInputModule } from "ng-zorro-antd/input";
+import { NzTypographyModule } from "ng-zorro-antd/typography";
+import { NzFormModule } from "ng-zorro-antd/form";
+import { NzTableModule } from "ng-zorro-antd/table";
+import { NzPopconfirmModule } from "ng-zorro-antd/popconfirm";
+import { SyncUrlsTableComponent } from './sync-urls-table.component';
+import { NzSelectModule } from "ng-zorro-antd/select";
+import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 
 
 @NgModule({
-  declarations: [DataSyncComponent],
+  declarations: [DataSyncComponent, SyncUrlsTableComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -28,7 +36,14 @@ import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
     NzIconModule,
     NzDatePickerModule,
     ShareModule,
-    DataSyncRoutingModule
+    DataSyncRoutingModule,
+    NzFormModule,
+    NzInputModule,
+    NzTypographyModule,
+    NzTableModule,
+    NzPopconfirmModule,
+    NzSelectModule,
+    NzToolTipModule
   ]
 })
 export class DataSyncModule { }

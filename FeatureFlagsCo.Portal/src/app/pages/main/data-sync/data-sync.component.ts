@@ -2,7 +2,6 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { AccountService } from 'src/app/services/account.service';
 import { DataSyncService } from 'src/app/services/data-sync.service';
 import { FfcService } from 'src/app/services/ffc.service';
 
@@ -23,7 +22,6 @@ export class DataSyncComponent implements OnInit, OnDestroy {
   isDownloading: boolean = false;
   destory$: Subject<void> = new Subject();
   uploadFormVisible: boolean = false;
-  currentEnvId: number;
   downloadFileName: string = null;
 
   // 用户行为数据
@@ -32,7 +30,6 @@ export class DataSyncComponent implements OnInit, OnDestroy {
   dataDateRange: Date[] = [];
 
   constructor(
-    private accountService: AccountService,
     private dataSyncService: DataSyncService,
     private message: NzMessageService,
     private sanitizer: DomSanitizer,
@@ -40,9 +37,6 @@ export class DataSyncComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
-    this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
-
     this.userBehaviorDataDownloadFunc =
       this.ffcService.variation('user-behavior-data-download', "false") !== "false";
   }
@@ -54,7 +48,7 @@ export class DataSyncComponent implements OnInit, OnDestroy {
 
   onDownload() {
     this.isDownloading = true;
-    this.dataSyncService.getEnvironmentData(this.currentEnvId).subscribe(data => this.downloadFile(data), _ => {
+    this.dataSyncService.getEnvironmentData().subscribe(data => this.downloadFile(data), _ => {
       this.isDownloading = false;
       this.message.error("数据下载失败！");
     });
@@ -88,12 +82,7 @@ export class DataSyncComponent implements OnInit, OnDestroy {
       const startTimestamp = (new Date(this.dataDateRange[0])).valueOf();
       const endTimestamp = (new Date(this.dataDateRange[1])).valueOf();
 
-      this.dataSyncService.getUserBehaviorData(
-        this.currentEnvId,
-        {
-          startTimestamp, endTimestamp
-        }
-      ).subscribe((result) => {
+      this.dataSyncService.getUserBehaviorData({startTimestamp, endTimestamp}).subscribe((result) => {
 
         const data = JSON.stringify(result);
 

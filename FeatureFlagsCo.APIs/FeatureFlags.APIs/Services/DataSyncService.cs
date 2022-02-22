@@ -2,26 +2,34 @@
 using FeatureFlags.APIs.ViewModels.DataSync;
 using System;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Mime;
+using System.Text;
 using System.Threading.Tasks;
+using FeatureFlags.Utils.ConventionalDependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace FeatureFlags.APIs.Services
 {
-    public interface IDataSyncService {
-        Task<EnvironmentDataViewModel> GetEnvironmentDataAsync(int envId);
-        Task SaveEnvironmentDataAsync(int envId, EnvironmentDataViewModel data);
-    }
-
-    public class DataSyncService : IDataSyncService
+    public class DataSyncService : ITransientDependency
     {
         private readonly INoSqlService _noSqlService;
         private readonly IEnvironmentService _envService;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<DataSyncService> _logger;
 
         public DataSyncService(
             INoSqlService noSqlService,
-            IEnvironmentService envService)
+            IEnvironmentService envService, 
+            IHttpClientFactory httpClientFactory, 
+            ILogger<DataSyncService> logger)
         {
             _noSqlService = noSqlService;
             _envService = envService;
+            _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
         public async Task<EnvironmentDataViewModel> GetEnvironmentDataAsync(int envId)
@@ -40,6 +48,35 @@ namespace FeatureFlags.APIs.Services
         {
             var envSecret = await _envService.GetSecretAsync(envId);
             await _noSqlService.SaveEnvironmentDataAsync(envSecret.AccountId, envSecret.ProjectId, envId, data);
+        }
+
+        public async Task<bool> SyncToRemoteAsync(
+            int envId, 
+            string remoteUrl, 
+            object data)
+        {
+            var client = _httpClientFactory.CreateClient();
+
+            var content = JsonConvert.SerializeObject(data, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
+            
+            var payload = new StringContent(content, Encoding.UTF8, MediaTypeNames.Application.Json);
+
+            try
+            {
+                var response = await client.PostAsync(remoteUrl, payload);
+                
+                return response.IsSuccessStatusCode;
+            }
+            catch (HttpRequestException ex)
+            {
+                var err = $"sync data to envId {envId}, remoteUrl {remoteUrl} failed";
+                _logger.LogError(ex, err);
+
+                return false;
+            }
         }
     }
 }

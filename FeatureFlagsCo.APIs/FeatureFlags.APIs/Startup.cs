@@ -110,6 +110,9 @@ namespace FeatureFlags.APIs
 
             // add auto mapper
             services.AddAutoMapper(typeof(Startup));
+            
+            // add IHttpClientFactory
+            services.AddHttpClient();
 
             services.AddScoped<IGenericRepository, GenericRepository<ApplicationDbContext>>();
             services.AddTransient<IEnvironmentUserPropertyService, EnvironmentUserPropertyService>();
@@ -122,8 +125,6 @@ namespace FeatureFlags.APIs
 
             services.AddTransient<IFeatureFlagsService, FeatureFlagsService>();
             services.AddTransient<IAppInsightsService, AppInsightsService>();
-
-            services.AddScoped<IDataSyncService, DataSyncService>();
 
             services.Configure<JWTSettings>(options => Configuration.GetSection("JWT").Bind(options));
             services.Configure<MySettings>(options => Configuration.GetSection("MySettings").Bind(options));

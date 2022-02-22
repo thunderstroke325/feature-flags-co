@@ -34,11 +34,6 @@ export class AuthInterceptor implements HttpInterceptor {
             this.router.navigateByUrl('/login');
           }
 
-          const message = err.error?.message;
-          if (message) {
-            err.error.message && this.message.error(err.error.message);
-          }
-
           throw err;
         })
       );

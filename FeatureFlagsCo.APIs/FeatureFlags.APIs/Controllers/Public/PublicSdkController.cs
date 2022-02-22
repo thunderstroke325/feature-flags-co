@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AutoMapper;
 using FeatureFlags.APIs.Models;
+using FeatureFlags.APIs.Services;
 using FeatureFlags.APIs.Services.MongoDb;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
@@ -12,13 +13,15 @@ namespace FeatureFlags.APIs.Controllers.Public
     [Route("api/public/sdk")]
     public class PublicSdkController : PublicControllerBase
     {
+        private readonly FeatureFlagV2Service _flagService;
         private readonly IMapper _mapper;
-        private readonly MongoDbPersist _mongoDb;
 
-        public PublicSdkController(IMapper mapper, MongoDbPersist mongoDb)
+        public PublicSdkController(
+            FeatureFlagV2Service flagService, 
+            IMapper mapper)
         {
+            _flagService = flagService;
             _mapper = mapper;
-            _mongoDb = mongoDb;
         }
 
         /// <summary>
@@ -29,9 +32,7 @@ namespace FeatureFlags.APIs.Controllers.Public
         [Route("latest-feature-flag")]
         public async Task<object> GetFullFeatureFlags()
         {
-            var activeFeatureFlags = await _mongoDb.QueryableOf<FeatureFlag>()
-                .Where(featureFlag => featureFlag.EnvironmentId == EnvId && !featureFlag.IsArchived)
-                .ToListAsync();
+            var activeFeatureFlags = await _flagService.GetActiveFlagsAsync(EnvId);
 
             var sdkFlags = _mapper.Map<IEnumerable<FeatureFlag>, IEnumerable<ServerSdkFeatureFlag>>(activeFeatureFlags);
 

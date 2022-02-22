@@ -117,6 +117,15 @@ namespace FeatureFlags.APIs.Services
             return new PagedResult<FeatureFlagBasicInfo>(totalCount, items);
         }
 
+        public async Task<IEnumerable<FeatureFlag>> GetActiveFlagsAsync(int envId)
+        {
+            var activeFlags = await _mongoDb.QueryableOf<FeatureFlag>()
+                .Where(featureFlag => featureFlag.EnvironmentId == envId && !featureFlag.IsArchived)
+                .ToListAsync();
+
+            return activeFlags;
+        }
+
         public async Task CreateDefaultAsync(
             int accountId,
             int projectId,

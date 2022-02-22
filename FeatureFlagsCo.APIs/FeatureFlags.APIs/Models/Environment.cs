@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using FeatureFlags.APIs.Services.MongoDb;
+using FeatureFlags.Utils.Helpers;
 
 namespace FeatureFlags.APIs.Models
 {
@@ -27,6 +30,8 @@ namespace FeatureFlags.APIs.Models
 
         public string MobileSecret { get; set; }
 
+        public List<EnvironmentSettingV2> Settings { get; set; }
+
         public EnvironmentV2(int projectId, string name, string description)
         {
             if (projectId == 0)
@@ -34,6 +39,8 @@ namespace FeatureFlags.APIs.Models
                 throw new ArgumentException("Environment projectId cannot be 0");
             }
             ProjectId = projectId;
+
+            Settings = new List<EnvironmentSettingV2>();
 
             Update(name, description);
         }
@@ -85,5 +92,100 @@ namespace FeatureFlags.APIs.Models
 
             Description = description;
         }
+
+        public void UpsertSetting(EnvironmentSettingV2 newSetting)
+        {
+            var existingSetting = Settings.FirstOrDefault(x => x.Id == newSetting.Id);
+            if (existingSetting != null)
+            {
+                existingSetting.Update(newSetting);
+            }
+            else
+            {
+                Settings.Add(newSetting);
+            }
+        }
+
+        public void DeleteSetting(string id)
+        {
+            Settings.RemoveAll(x => x.Id == id);
+        }
+    }
+
+    public class EnvironmentSettingV2
+    {
+        public string Id { get; set; }
+        
+        public string Type { get; set; }
+        
+        public string Key { get; set; }
+
+        public string Value { get; set; }
+
+        public string Tag { get; set; }
+
+        public string Remark { get; set; }
+
+        public EnvironmentSettingV2(
+            string id, 
+            string type, 
+            string key, 
+            string value, 
+            string tag = null,
+            string remark = null)
+        {
+            Check.NotNullOrWhiteSpace(id, nameof(id));
+            Id = id;
+            
+            Update(type, key, value, tag, remark);
+        }
+
+        public void Update(
+            string type, 
+            string key, 
+            string value, 
+            string tag = null,
+            string remark = null)
+        {
+            Check.NotNullOrWhiteSpace(type, nameof(type));
+            Check.NotNullOrWhiteSpace(key, nameof(key));
+            Check.NotNullOrWhiteSpace(value, nameof(value));
+            
+            Type = type;
+            Key = key;
+            Value = value;
+
+            Tag = tag ?? string.Empty;
+            Remark = remark ?? string.Empty;
+        }
+
+        public void Update(EnvironmentSettingV2 newSetting)
+        {
+            if (Id != newSetting.Id)
+            {
+                return;
+            }
+            
+            Type = newSetting.Type;
+            Key = newSetting.Key;
+            Value = newSetting.Value;
+            Tag = newSetting.Tag;
+            Remark = newSetting.Remark;
+        }
+
+        public void WriteRemark(string remark)
+        {
+            Remark = remark ?? string.Empty;
+        }
+        
+        public override string ToString()
+        {
+            return $"Type = {Type}, Key = {Key}, Value = {Value}, Tag = {Tag}, Remark = {Remark}";
+        }
+    }
+
+    public class EnvironmentSettingTypes
+    {
+        public const string SyncUrls = "sync-urls";
     }
 }

@@ -35,20 +35,27 @@
         </nz-list-item>
       </nz-list>
       <nz-space [nzSize]="20">
-        <button (click)="onDownload()" *nzSpaceItem nz-button class="submit" nz-button nzType="primary">
+        <button (click)="onDownload()" *nzSpaceItem class="submit" nz-button nzType="primary">
           <i nz-icon nzType="download" nzTheme="outline"></i>
           下载
         </button>
-        <button (click)="openUploadForm()" *nzSpaceItem nz-button class="submit" style="background-color: #9A95CC;color: #fff" nz-button nzType="default">
+        <button (click)="openUploadForm()" *nzSpaceItem class="submit" style="background-color: #9A95CC;color: #fff" nz-button nzType="default">
           <i nz-icon nzType="upload" nzTheme="outline"></i>
           上传
         </button>
         <a style="visibility: hidden;" #downloadRef [href]="downloadUri" [download]="downloadFileName"></a>
       </nz-space>
-      <nz-divider style="background-color: rgba(0, 0, 0, 0.3);" *ngIf="userBehaviorDataDownloadFunc"></nz-divider>
     </nz-spin>
 
+    <!--  push data to remote endpoint  -->
+    <ng-container>
+      <nz-divider style="background-color: rgba(0, 0, 0, 0.3);"></nz-divider>
+      <div class="data-sync-title" nz-typography>远程同步</div>
+      <sync-urls-table></sync-urls-table>
+    </ng-container>
+
     <ng-container *ngIf="userBehaviorDataDownloadFunc">
+      <nz-divider style="background-color: rgba(0, 0, 0, 0.3);"></nz-divider>
       <nz-spin style="margin-top: 50px;" [nzSpinning]="userBehaviorDataDownloading" nzTip="下载中...">
         <div class="data-sync-title" nz-typography>下载用户行为数据</div>
         <nz-list nzItemLayout="vertical" [nzSplit]="false" class="data-sync-list">
@@ -64,7 +71,7 @@
           </nz-list-item>
         </nz-list>
         <nz-space [nzSize]="20">
-          <button (click)="onDownloadUserBehaviorData()" *nzSpaceItem nz-button class="submit" nz-button nzType="primary">
+          <button (click)="onDownloadUserBehaviorData()" *nzSpaceItem class="submit" nz-button nzType="primary">
             <i nz-icon nzType="download" nzTheme="outline"></i>
             下载
           </button>

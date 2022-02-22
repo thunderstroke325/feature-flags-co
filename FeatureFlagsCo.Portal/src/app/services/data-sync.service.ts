@@ -2,29 +2,35 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { environment } from 'src/environments/environment';
+import { getCurrentProjectEnv } from "../utils/project-env";
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataSyncService {
-  baseUrl: string = environment.url + '/api/datasync/envs/#envId/';
 
-  constructor(
-    private http: HttpClient
-  ) {
+  private readonly envId: number;
+  private readonly baseUrl: string;
+
+  constructor(private http: HttpClient) {
+    const envId = getCurrentProjectEnv().envId;
+    this.envId = envId;
+    this.baseUrl = `${environment.url}/api/datasync/envs/${envId}`
   }
 
-  getUploadUrl(envId: number): string {
-    return this.baseUrl.replace(/#envId/ig, `${envId}`) + 'upload';
+  getUploadUrl(): string {
+    return `${this.baseUrl}/upload`;
   }
 
-  getEnvironmentData(envId: number): Observable<any> {
-    const url = this.baseUrl.replace(/#envId/ig, `${envId}`) + `download`;
-    return this.http.get(url);
+  getEnvironmentData(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/download`);
   }
 
-  getUserBehaviorData(envId: number, params: any): Observable<any> {
-    const url = this.baseUrl.replace(/#envId/ig, `${envId}`) + `user-behavior`;
-    return this.http.get(url, {params});
+  getUserBehaviorData(params: any): Observable<any> {
+    return this.http.get(`${this.baseUrl}/user-behavior`, {params});
+  }
+
+  syncToRemote(settingId: string): Observable<string> {
+    return this.http.put(`${this.baseUrl}/sync-to-remote?settingId=${settingId}`, { }, { responseType: 'text' });
   }
 }

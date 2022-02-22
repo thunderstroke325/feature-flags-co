@@ -30,6 +30,19 @@ export interface IEnvironment {
   mobileSecret: string
 }
 
+export interface EnvironmentSetting {
+  id: string;
+  type: string;
+  key: string;
+  value: string;
+  tag?: string;
+  remark?: string;
+}
+
+export const EnvironmentSettingTypes = {
+  SyncUrls: 'sync-urls',
+}
+
 export interface IProject {
   id: number,
   name: string,
