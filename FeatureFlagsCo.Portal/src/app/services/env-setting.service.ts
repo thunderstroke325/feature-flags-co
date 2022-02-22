@@ -20,7 +20,7 @@ export class EnvSettingService {
   }
 
   get(type: string): Observable<EnvironmentSetting[]> {
-    return this.http.get<EnvironmentSetting[]>(this.baseUrl, {params: {group: type}});
+    return this.http.get<EnvironmentSetting[]>(this.baseUrl, {params: {type}});
   }
 
   upsert(settings: EnvironmentSetting[]): Observable<EnvironmentSetting[]> {
