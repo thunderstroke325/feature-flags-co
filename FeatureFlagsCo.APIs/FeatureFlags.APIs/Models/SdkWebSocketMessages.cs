@@ -81,8 +81,6 @@ namespace FeatureFlags.APIs.Models
 
         public bool SendToExperiment { get; set; }
 
-        public bool IsArchived { get; set; }
-
         public IEnumerable<ClientSdkVariation> VariationOptions { get; set; }
 
         public long Timestamp { get; set; }
@@ -96,7 +94,6 @@ namespace FeatureFlags.APIs.Models
             Id = flag.FF.KeyName;
             Variation = userVariation.Variation.VariationValue;
             SendToExperiment = userVariation.SendToExperiment;
-            IsArchived = flag.IsArchived;
             VariationOptions = flag.VariationOptions.Select(option => new ClientSdkVariation
             {
                 Id = option.LocalId,

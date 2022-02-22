@@ -43,6 +43,7 @@ namespace FeatureFlags.APIs.Services
                 SdkTypes.Client => new
                 {
                     eventType,
+                    userKeyId = socket.User!.UserKeyId, 
                     featureFlags = new[] { await GetClientSdkDataAsync(flag, socket) }
                 },
                 SdkTypes.Server => new
@@ -98,6 +99,7 @@ namespace FeatureFlags.APIs.Services
                 SdkTypes.Client => new
                 {
                     eventType,
+                    userKeyId = socket.User!.UserKeyId, 
                     featureFlags = await GetClientSdkDataAsync(socket, request.Timestamp)
                 },
                 SdkTypes.Server => new
