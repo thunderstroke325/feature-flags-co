@@ -85,7 +85,7 @@ namespace FeatureFlags.APIs.Controllers
                         Email = param.FFUserEmail,
                         Country = param.FFUserCountry,
                         UserKeyId = param.FFUserKeyId,
-                        UserCustomizedProperties = param.FFUserCustomizedProperties
+                        CustomizedProperties = param.FFUserCustomizedProperties
                     };
 
                     var insightUserVariation = new InsightUserVariation
@@ -165,7 +165,7 @@ namespace FeatureFlags.APIs.Controllers
                         Email = param.FFUserEmail,
                         Country = param.FFUserCountry,
                         UserKeyId = param.FFUserKeyId,
-                        UserCustomizedProperties = param.FFUserCustomizedProperties,
+                        CustomizedProperties = param.FFUserCustomizedProperties,
                         UserVariations = new List<InsightUserVariation> { 
                             
                         }

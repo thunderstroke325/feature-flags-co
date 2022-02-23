@@ -115,9 +115,9 @@ namespace FeatureFlags.APIs.Repositories
                                   LabelValue = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
                               }
                         };
-            if (param.UserCustomizedProperties != null && param.UserCustomizedProperties.Count > 0)
+            if (param.CustomizedProperties != null && param.CustomizedProperties.Count > 0)
             {
-                foreach (var item in param.UserCustomizedProperties)
+                foreach (var item in param.CustomizedProperties)
                 {
                     labels.Add(new FeatureFlagsCo.MQ.MessageLabel
                     {

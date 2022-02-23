@@ -9,7 +9,7 @@ namespace FeatureFlags.APIs.Models
         public string Email { get; set; }
         public string Country { get; set; }
         public string UserKeyId { get; set; }
-        public List<FeatureFlagUserCustomizedProperty> UserCustomizedProperties { get; set; }
+        public List<FeatureFlagUserCustomizedProperty> CustomizedProperties { get; set; }
         public List<InsightUserVariation> UserVariations { get; set; }
 
         public bool IsValid()
