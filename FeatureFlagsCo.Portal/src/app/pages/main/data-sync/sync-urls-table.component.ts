@@ -60,10 +60,10 @@ interface SyncUrlSettingRow {
         <div *ngIf="row.isEditing, then editingRow else showRow"></div>
         <ng-template #editingRow>
           <td>
-            <input type="text" nz-input [(ngModel)]="row.key"/>
+            <input type="text" nz-input [(ngModel)]="row.key" placeholder="地址名称"/>
           </td>
           <td>
-            <nz-select nzShowSearch nzAllowClear [nzDropdownRender]="newItemTpl" [(ngModel)]="row.tag">
+            <nz-select nzShowSearch nzAllowClear [nzDropdownRender]="newItemTpl" nzPlaceHolder="选择类别" [(ngModel)]="row.tag">
               <nz-option *ngFor="let item of tags" [nzLabel]="item" [nzValue]="item"></nz-option>
             </nz-select>
             <ng-template #newItemTpl>
@@ -78,7 +78,7 @@ interface SyncUrlSettingRow {
             </ng-template>
           </td>
           <td>
-            <input type="text" nz-input [(ngModel)]="row.value"/>
+            <input type="text" nz-input [(ngModel)]="row.value" placeholder="地址值"/>
           </td>
         </ng-template>
         <ng-template #showRow>
@@ -320,17 +320,12 @@ export class SyncUrlsTableComponent implements OnInit {
   }
 
   newRow(): void {
-    let rows = this.filteredSettings.length;
-
-    const newId = uuidv4();
-    const newKey = `客户 ${rows}`;
-
     this.filteredSettings = [
       ...this.filteredSettings,
       {
-        id: newId,
-        key: newKey,
-        value: '推送 Url',
+        id: uuidv4(),
+        key: '',
+        value: '',
         isEditing: true
       }
     ];
