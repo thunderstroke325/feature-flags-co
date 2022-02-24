@@ -38,7 +38,7 @@ export class DataSyncComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.userBehaviorDataDownloadFunc =
-      this.ffcService.variation('user-behavior-data-download', "false") !== "false";
+      this.ffcService.variation('users-behavior-data-download', "false") !== "false";
   }
 
   ngOnDestroy(): void {
