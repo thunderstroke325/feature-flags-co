@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services.MongoDb;
@@ -30,6 +32,13 @@ namespace FeatureFlags.APIs.Services
                 .FirstOrDefaultAsync(flag => flag.Id == id);
 
             return featureFlag;
+        }
+
+        public async Task<FeatureFlag> FindAsync(Expression<Func<FeatureFlag, bool>> predicate)
+        {
+            var flag = await _mongoDb.QueryableOf<FeatureFlag>().FirstOrDefaultAsync(predicate);
+
+            return flag;
         }
 
         public async Task<bool> IsNameUsedAsync(int envId, string name)

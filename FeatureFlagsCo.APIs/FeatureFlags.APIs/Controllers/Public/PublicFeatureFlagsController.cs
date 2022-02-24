@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
@@ -13,15 +12,14 @@ namespace FeatureFlags.APIs.Controllers.Public
     public class PublicFeatureFlagsController : PublicControllerBase
     {
         private readonly IVariationService _variationService;
-        private readonly MongoDbFeatureFlagService _mongoDb;
+        private readonly FeatureFlagV2Service _flagService;
 
         public PublicFeatureFlagsController(
             IVariationService variationService,
-            MongoDbFeatureFlagService mongoDb,
-            IMapper mapper)
+            FeatureFlagV2Service flagService)
         {
             _variationService = variationService;
-            _mongoDb = mongoDb;
+            _flagService = flagService;
         }
 
         /// <summary>
@@ -32,7 +30,7 @@ namespace FeatureFlags.APIs.Controllers.Public
         [Route("feature-flag")]
         public async Task<IEnumerable<FeatureFlagViewModel>> GetActiveFeatureFlags()
         {
-            var activeFeatureFlags = await _mongoDb.GetActiveFeatureFlags(EnvId);
+            var activeFeatureFlags = await _flagService.GetActiveFlagsAsync(EnvId);
 
             return activeFeatureFlags.Select(f => new FeatureFlagViewModel { Id = f.Id, KeyName = f.FF.KeyName });
         }
@@ -47,7 +45,7 @@ namespace FeatureFlags.APIs.Controllers.Public
         {
             var variations = new List<UserVariationViewModel>();
 
-            var activeFeatureFlags = await _mongoDb.GetActiveFeatureFlags(EnvId);
+            var activeFeatureFlags = await _flagService.GetActiveFlagsAsync(EnvId);
             foreach (var featureFlag in activeFeatureFlags)
             {
                 var ffIdVm =
@@ -58,13 +56,41 @@ namespace FeatureFlags.APIs.Controllers.Public
 
                 variations.Add(new UserVariationViewModel
                 {
+                    Id = variation.Variation.LocalId, 
                     Name = featureFlag.FF.Name,
                     KeyName = featureFlag.FF.KeyName,
-                    Variation = variation.Variation.VariationValue
+                    Variation = variation.Variation.VariationValue, 
+                    Reason = string.Empty
                 });
             }
 
             return variations;
+        }
+        
+        [HttpPost]
+        [Route("feature-flag/variation")]
+        public async Task<UserVariationViewModel> GetFeatureFlagVariation(FeatureFlagUserVariationRequest request)
+        {
+            var featureFlag = await _flagService.FindAsync(flag => flag.FF.KeyName == request.FeatureFlagKeyName);
+            if (featureFlag == null)
+            {
+                return null;
+            }
+            
+            var ffIdVm =
+                FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, request.FeatureFlagKeyName);
+
+            var variation =
+                await _variationService.GetUserVariationAsync(request.EnvironmentUser(), ffIdVm);
+
+            return new UserVariationViewModel
+            {
+                Id = variation.Variation.LocalId, 
+                Name = featureFlag.FF.Name,
+                KeyName = featureFlag.FF.KeyName,
+                Variation = variation.Variation.VariationValue, 
+                Reason = string.Empty
+            };
         }
     }
 }
