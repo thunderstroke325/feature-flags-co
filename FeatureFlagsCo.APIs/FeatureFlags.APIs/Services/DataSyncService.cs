@@ -51,11 +51,12 @@ namespace FeatureFlags.APIs.Services
         }
 
         public async Task<bool> SyncToRemoteAsync(
-            int envId, 
+            EnvironmentV2 env, 
             string remoteUrl, 
             object data)
         {
             var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Add("envSecret", env.Secret);
 
             var content = JsonConvert.SerializeObject(data, new JsonSerializerSettings
             {
@@ -72,7 +73,7 @@ namespace FeatureFlags.APIs.Services
             }
             catch (HttpRequestException ex)
             {
-                var err = $"sync data to envId {envId}, remoteUrl {remoteUrl} failed";
+                var err = $"sync data to envId {env.Id}, remoteUrl {remoteUrl} failed";
                 _logger.LogError(ex, err);
 
                 return false;

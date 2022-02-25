@@ -107,15 +107,16 @@ namespace FeatureFlags.APIs.Controllers
         public async Task<string> SyncToRemoteAsync(
             int envId, 
             [Required(AllowEmptyStrings = false)] string settingId, 
-            [FromServices] EnvironmentSettingV2Service settingService, 
+            [FromServices] EnvironmentV2Service envService, 
             [FromServices] FeatureFlagV2Service flagService)
         {
-            // get setting
-            var settings = await settingService.GetAsync(envId, EnvironmentSettingTypes.SyncUrls);
-            var setting = settings.FirstOrDefault(x => x.Id == settingId);
+            // get env
+            var env = await envService.GetAsync(envId);
+            var setting =
+                env.Settings.FirstOrDefault(x => x.Type == EnvironmentSettingTypes.SyncUrls && x.Id == settingId);
             if (setting == null)
             {
-                return "";
+                return "false,0";
             }
             
             // sync data to remote
@@ -131,13 +132,13 @@ namespace FeatureFlags.APIs.Controllers
 
             var message = new SdkWebSocketMessage(SdkWebSocketMessageTypes.DataSync, dataToSync);
 
-            var syncSuccess = await _dataSyncService.SyncToRemoteAsync(envId, setting.Value, message);
+            var syncSuccess = await _dataSyncService.SyncToRemoteAsync(env, setting.Value, message);
             var timestamp = DateTime.UtcNow.UnixTimestampInMilliseconds();
             var remark = $"{syncSuccess.ToString().ToLowerInvariant()},{timestamp}";
             
-            // write remark to setting
+            // write remark to setting & save
             setting.WriteRemark(remark);
-            await settingService.UpsertAsync(envId, new []{ setting });
+            await envService.UpdateAsync(env);
 
             return remark;
         }
