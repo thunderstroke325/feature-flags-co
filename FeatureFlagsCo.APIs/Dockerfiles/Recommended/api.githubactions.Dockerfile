@@ -32,6 +32,7 @@ COPY ./FeatureFlagsCo.APIs/FeatureFlagsCo.Export/. ./FeatureFlagsCo.Export/
 COPY ./FeatureFlagsCo.APIs/FeatureFlagsCo.Messaging/. ./FeatureFlagsCo.Messaging/
 
 
+
 WORKDIR /source/FeatureFlags.APIs
 RUN dotnet publish -c release -o /app --no-restore
 
