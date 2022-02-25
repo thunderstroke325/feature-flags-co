@@ -1,12 +1,5 @@
-﻿using FeatureFlags.APIs.Authentication;
-using FeatureFlags.APIs.Models;
+﻿using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services;
-using FeatureFlags.APIs.ViewModels.Environment;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Repositories

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using FeatureFlags.APIs.Authentication;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
-using FeatureFlags.APIs.ViewModels.Environment;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;

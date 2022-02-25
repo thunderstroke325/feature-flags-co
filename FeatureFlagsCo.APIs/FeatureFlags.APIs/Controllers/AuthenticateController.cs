@@ -26,7 +26,6 @@ namespace FeatureFlags.APIs.Controllers
     public class AuthenticateController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly IOptions<MySettings> _mySettings;
         private readonly IUserInvitationService _userInvitationService;
@@ -34,14 +33,12 @@ namespace FeatureFlags.APIs.Controllers
 
         public AuthenticateController(
             UserManager<ApplicationUser> userManager, 
-            RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
             IOptions<MySettings> mySettings,
             IUserInvitationService userInvitationService,
             ILogger<AuthenticateController> logger)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _configuration = configuration;
             _mySettings = mySettings;
             _userInvitationService = userInvitationService;
@@ -131,45 +128,12 @@ namespace FeatureFlags.APIs.Controllers
         }
 
         [HttpPost]
-        [Route("register-admin")]
-        public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
-        {
-            var userExists = await _userManager.FindByEmailAsync(model.Email);
-            if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "User already exists!" });
-
-            ApplicationUser user = new ApplicationUser()
-            {
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Email,
-                PhoneNumber = model.PhoneNumber
-            };
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "User creation failed! Please check user details and try again." });
-
-            if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-
-            if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
-            {
-                await _userManager.AddToRoleAsync(user, UserRoles.Admin);
-            }
-
-            return Ok(new Response { Code = "Success", Message = "User created successfully!" });
-        }
-
-        [HttpPost]
         [Route("forgetpassword")]
         public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var callback = Url.Action("ResetPassword", "Account", new { token, email = user.Email }, Request.Scheme);
 
             string url = "http://api.sendcloud.net/apiv2/mail/sendtemplate";
             HttpClient client = new HttpClient();
@@ -221,16 +185,7 @@ namespace FeatureFlags.APIs.Controllers
         [Route("logout")]
         public IActionResult Logout()
         {
-            var currentUserId = this.HttpContext.User.Claims.FirstOrDefault(p => p.Type == "UserId").Value;
             return Ok();
-        }
-
-
-        [HttpGet]
-        [Route("Probe")]
-        public string Probe()
-        {
-            return "Good";
         }
 
         [HttpGet]
