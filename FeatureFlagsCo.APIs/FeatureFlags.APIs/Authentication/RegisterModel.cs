@@ -4,18 +4,13 @@ namespace FeatureFlags.APIs.Authentication
 {
     public class RegisterModel
     {
-        //[Required(ErrorMessage = "User Name is required")]
-        //public string Username { get; set; }
-
         [EmailAddress]
-        [Required(ErrorMessage = "Email is required")]
+        [Required(ErrorMessage = "email cannot be empty", AllowEmptyStrings = false)]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Password is required")]
+        [Required(ErrorMessage = "password cannot be empty", AllowEmptyStrings = false)]
         public string Password { get; set; }
         public string PhoneNumber { get; set; }
         public string OrgName { get; set; }
-        public string InviteCode { get; set; }
-
     }
 }

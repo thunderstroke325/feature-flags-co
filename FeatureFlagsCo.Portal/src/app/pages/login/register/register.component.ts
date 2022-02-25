@@ -5,7 +5,6 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { LoginService } from 'src/app/services/login.service';
 import { repeatPasswordValidator } from 'src/app/utils/validators';
 
-
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -52,7 +51,6 @@ export class RegisterComponent implements OnInit {
       _password: new FormControl(null, [Validators.required]),
       orgName: new FormControl(this.orgName, [Validators.required]),
       phoneNumber: new FormControl(this.phoneNumber, [Validators.required]),
-      inviteCode: new FormControl(this.inviteCode, [Validators.required])
     }, {
       validators: repeatPasswordValidator
     })
@@ -73,7 +71,7 @@ export class RegisterComponent implements OnInit {
     params.phoneNumber = params.phoneNumber.toString()
     this.loginService.register(params)
       .subscribe(
-        res => {
+        _ => {
           this.isLoading = false;
           this.message.success('注册成功！');
           this.router.navigateByUrl('/login');

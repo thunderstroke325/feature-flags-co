@@ -95,13 +95,6 @@ namespace FeatureFlags.APIs.Controllers
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "User already exists!" });
 
-            string firstCode = "ACEGIKMOQSUWY", thirdCode = "13579";
-            if (string.IsNullOrWhiteSpace(model.InviteCode) || model.InviteCode.Length != 4 || 
-                !firstCode.Contains(model.InviteCode[0]) || !thirdCode.Contains(model.InviteCode[2]))
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Code = "Error", Message = "邀请码不正确" });
-            }
-
             var result = await _userManager.CreateAsync(
                 new ApplicationUser()
                 {
@@ -120,9 +113,9 @@ namespace FeatureFlags.APIs.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
 
             // create account for new user
-            var account = await accountAppService.CreateAsync(model.OrgName, user.Id, true);
+            await accountAppService.CreateAsync(model.OrgName, user.Id, true);
 
-            _logger.LogTrace($"{model.OrgName}的{model.Email}使用{model.InviteCode}注册了账户");
+            _logger.LogTrace($"{model.OrgName}的{model.Email}注册了账户");
 
             return Ok(new Response { Code = "Success", Message = "User created successfully!" });
         }
