@@ -493,7 +493,12 @@ namespace FeatureFlags.APIs.Repositories
                         if (IfBelongRolloutPercentage(userKey, item.RolloutPercentage))
                         {
                             var newUserKey = userKey.EncodeBase64();
-                            return new ConditionedUserVariation(item, newUserKey, ffTUWMRItem.isIncludedInExpt);
+                            return new ConditionedUserVariation(
+                                item,
+                                newUserKey,
+                                cosmosDBFeatureFlag.ExptIncludeAllRules,
+                                ffTUWMRItem.isIncludedInExpt
+                            );
                         }
                     }
                 }
@@ -520,7 +525,12 @@ namespace FeatureFlags.APIs.Repositories
             
             var newUserKey = userKey.EncodeBase64();
             return matchedRollout != null
-                ? new DefaultUserVariation(matchedRollout, newUserKey, featureFlag.FF.IsDefaultRulePercentageRolloutsIncludedInExpt) 
+                ? new DefaultUserVariation(
+                    matchedRollout,
+                    newUserKey,
+                    featureFlag.ExptIncludeAllRules,
+                    featureFlag.FF.IsDefaultRulePercentageRolloutsIncludedInExpt
+                )
                 : null;
         }
 

@@ -76,8 +76,16 @@ namespace FeatureFlags.APIs.Models
         public ConditionedUserVariation(
             VariationOptionPercentageRollout percentageRollout,
             string userKey,
+            bool? includeAllInExperiment, 
             bool? thisRuleIncludedInExperiment) : base(percentageRollout.ValueOption)
         {
+            // if includeAllInExperiment is null or true, that means send all data to experiment
+            if (!includeAllInExperiment.HasValue || includeAllInExperiment.Value)
+            {
+                SendToExperiment = true;
+                return;
+            }
+            
             // if thisRuleIncludedInExperiment or this rule's experiment rollout is null
             // that means send all data to experiment
             if (!thisRuleIncludedInExperiment.HasValue || !percentageRollout.ExptRollout.HasValue)
@@ -118,8 +126,16 @@ namespace FeatureFlags.APIs.Models
         public DefaultUserVariation(
             VariationOptionPercentageRollout percentageRollout,
             string userKey,
+            bool? includeAllInExperiment, 
             bool? defaultRuleIncludedInExperiment) : base(percentageRollout.ValueOption)
         {
+            // if includeAllInExperiment is null or true, that means send all data to experiment
+            if (!includeAllInExperiment.HasValue || includeAllInExperiment.Value)
+            {
+                SendToExperiment = true;
+                return;
+            }
+            
             // if defaultRuleIncludedInExperiment is null or the default rule's experiment rollout is null, 
             // that means send all data to experiment
             if (!defaultRuleIncludedInExperiment.HasValue || !percentageRollout.ExptRollout.HasValue)
