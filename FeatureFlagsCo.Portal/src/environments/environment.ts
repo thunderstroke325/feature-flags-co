@@ -6,7 +6,7 @@ export const environment = {
   production: false,
   projectEnvKey: '#{PROJECT_ENV_KEY_DEV}#',
   // projectEnvKey: 'YjRlLWY1YjEtNCUyMDIxMDYwNzA2NTYwOF9fMl9fM19fN19fZGVmYXVsdF84NDNlMw==',
-  url: 'http://api-dev.minjiekaiguan.com:5001',
+  url: 'http://api-dev.minjiekaiguan.com',
   name: 'Development',
   statisticUrl: null
 };
