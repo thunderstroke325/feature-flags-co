@@ -46,8 +46,6 @@ stages:
             
                     $a.ConnectionStrings.RedisServerUrl = "$(REDISCACHE_ConnectionString_Dev)"
 
-                    $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey_Dev)"
-                    $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString_Dev)"
 
                     $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId_Dev)"
                     $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret_Dev)"
@@ -119,8 +117,6 @@ stages:
             
                     $a.ConnectionStrings.RedisServerUrl = "$(REDISCACHE_ConnectionString)"
 
-                    $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey)"
-                    $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString)"
 
                     $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId)"
                     $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret)"
