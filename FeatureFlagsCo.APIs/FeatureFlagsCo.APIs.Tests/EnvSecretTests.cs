@@ -42,11 +42,16 @@ namespace FeatureFlags.APIs.Tests
         }
 
         [Fact]
+<<<<<<< HEAD
         public void Should_Throw_Exception_When_Parse_Invalid_Env_Secret_Key()
+=======
+        public void Should_Throw_Exception_When_Parse_Invalid_EnvSecret()
+>>>>>>> bring newest code to migration (#196)
         {
             Should.Throw<InvalidEnvSecretException>(() => EnvironmentSecretV2.Parse(""));
             Should.Throw<InvalidEnvSecretException>(() => EnvironmentSecretV2.Parse(null));
             Should.Throw<InvalidEnvSecretException>(() => EnvironmentSecretV2.Parse("any other invalid secret"));
+<<<<<<< HEAD
         }
 
         [Fact]
@@ -61,6 +66,8 @@ namespace FeatureFlags.APIs.Tests
             var parseValidKey = EnvironmentSecretV2.TryParse(validKey, out var validSecret);
             parseValidKey.ShouldBeTrue();
             validSecret.ShouldNotBeNull();
+=======
+>>>>>>> bring newest code to migration (#196)
         }
 
         private EnvironmentSecretV2 NewEnvSecret()

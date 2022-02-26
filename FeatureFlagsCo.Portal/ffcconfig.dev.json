@@ -1,7 +1,10 @@
 {
     "envSecret": "YjRlLWY1YjEtNCUyMDIxMDYwNzA2NTYwOF9fMl9fM19fN19fZGVmYXVsdF84NDNlMw==",
     "apiUrl": "https://api.feature-flags.co",
+<<<<<<< HEAD
     "entry": [],
+=======
+>>>>>>> bring newest code to migration (#196)
     "excluded": ["package.json", "package-lock.json", "readme.md", ".gitignore", "LICENSE", "node_modules", "dist"],
     "fileExtensions": ["ts", "js"],
     "numberOfContextLines": 3,
