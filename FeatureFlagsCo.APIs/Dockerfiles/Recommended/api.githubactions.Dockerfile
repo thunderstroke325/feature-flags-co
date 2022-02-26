@@ -35,7 +35,7 @@ COPY ./FeatureFlagsCo.APIs/FeatureFlagsCo.Messaging/. ./FeatureFlagsCo.Messaging
 
 WORKDIR /source/FeatureFlags.APIs
 RUN dotnet publish -c release -o /app --no-restore
-
+RUN echo $(ls  /source/FeatureFlags.APIs)
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:3.1
