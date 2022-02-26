@@ -56,7 +56,6 @@ namespace FeatureFlags.APIs.Models
                 var accountId = int.Parse(parts[1]);
                 var projectId = int.Parse(parts[2]);
                 var envId = int.Parse(parts[3]);
-<<<<<<< HEAD
 
                 var secret = new EnvironmentSecretV2(accountId, envId, projectId);
                 return secret;
@@ -79,16 +78,6 @@ namespace FeatureFlags.APIs.Models
                 secret = null;
                 return false;
             }
-=======
-
-                var secret = new EnvironmentSecretV2(accountId, envId, projectId);
-                return secret;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidEnvSecretException($"envSecret '{envSecret}' is invalid, please check again.", ex);
-            }
->>>>>>> bring newest code to migration (#196)
         }
     }
 
