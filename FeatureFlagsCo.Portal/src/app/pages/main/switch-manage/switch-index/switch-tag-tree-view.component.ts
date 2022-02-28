@@ -232,7 +232,7 @@ export class SwitchTagTreeViewComponent implements OnInit {
     }
 
     const newNode = {
-      id: -1,
+      id: this.tagTree.getNewId(),
       name: '',
       value: [],
       children: [],
