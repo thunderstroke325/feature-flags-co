@@ -5,7 +5,7 @@ RUN mkdir -p /var/log/nginx && \
     touch /var/log/nginx/access.log && \
     touch /var/log/nginx/error.log
 EXPOSE 80
-COPY . /expt
+COPY . /expt 
 COPY ./env/docker-${exptenv}-config.ini /expt/config/config.ini
 WORKDIR /expt
 RUN pip install -r docker-requirements.txt

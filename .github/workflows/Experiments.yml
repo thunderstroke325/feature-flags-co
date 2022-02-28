@@ -58,27 +58,27 @@ jobs:
           engine: ${{ secrets.engine }}
         shell: pwsh
         run: |   
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{elasticurl}}','$env:ES_Url' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{elasticurl}}',$env:ES_Url | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
             (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{elasticusername}}','elastic' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{elasticpassword}}','$env:ES_Password' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{elasticpassword}}',$env:ES_Password | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
 
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{mq_host}}','$env:mq_host' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{mq_port}}','$env:mq_port_dev' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{mq_username}}','$env:mq_username' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{mq_passwd}}','$env:mq_passwd' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{redis_host}}','$env:redis_host' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{redis_port}}','$env:redis_port' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{redis_passwd}}','$env:redis_passwd' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{wait_timeout}}','$env:wait_timeout' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{fully_qualified_namespace}}','$env:fully_qualified_namespace' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{sas_policy}}','$env:sas_policy' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{servicebus_sas_key}}','$env:servicebus_sas_key' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{insignt_conn_str}}','$env:insignt_conn_str' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{p1_prefetch_count}}','$env:p1_prefetch_count' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{p2_prefetch_count}}','$env:p2_prefetch_count_dev' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{p3_prefetch_count}}','$env:p3_prefetch_count_dev' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{redis_ssl}}','$env:redis_ssl' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
-            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{engine}}','$env:engine' | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{mq_host}}',$env:mq_host | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{mq_port}}',$env:mq_port_dev | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{mq_username}}',$env:mq_username | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{mq_passwd}}',$env:mq_passwd | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{redis_host}}',$env:redis_host | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{redis_port}}',$env:redis_port | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{redis_passwd}}',$env:redis_passwd | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{wait_timeout}}',$env:wait_timeout | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{fully_qualified_namespace}}',$env:fully_qualified_namespace | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{sas_policy}}',$env:sas_policy | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{servicebus_sas_key}}',$env:servicebus_sas_key | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{insignt_conn_str}}',$env:insignt_conn_str | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{p1_prefetch_count}}',$env:p1_prefetch_count | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{p2_prefetch_count}}',$env:p2_prefetch_count_dev | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{p3_prefetch_count}}',$env:p3_prefetch_count_dev | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{redis_ssl}}',$env:redis_ssl | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{engine}}',$env:engine | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
             
             $a = Get-Content FeatureFlagsCo.Experiments/env/docker-dev-config.ini
             Write-Host $a
