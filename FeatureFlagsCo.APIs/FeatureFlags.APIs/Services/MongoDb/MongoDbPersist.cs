@@ -18,7 +18,8 @@ namespace FeatureFlags.APIs.Services.MongoDb
             { typeof(ProjectUserV2), "ProjectUsers" },
             { typeof(EnvironmentV2), "Environments" },
             { typeof(FeatureFlagTagTrees), "FeatureFlagTrees" },
-            { typeof(FeatureFlag), "FeatureFlags" }
+            { typeof(FeatureFlag), "FeatureFlags" }, 
+            { typeof(EnvironmentUser), "EnvironmentUsers" }
         };
 
         public MongoClient Client { get; }

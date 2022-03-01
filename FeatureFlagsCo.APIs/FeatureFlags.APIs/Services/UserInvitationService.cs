@@ -1,8 +1,4 @@
 ﻿using FeatureFlags.APIs.Authentication;
-using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.Repositories;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -17,26 +13,19 @@ namespace FeatureFlags.APIs.Services
     public class UserInvitationService : IUserInvitationService
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly IGenericRepository _repository;
 
-        public UserInvitationService(
-            ApplicationDbContext context, 
-            IGenericRepository repository)
+        public UserInvitationService(ApplicationDbContext context)
         {
             _dbContext = context;
-            _repository = repository;
         }
 
         public async Task ClearAsync(string userId)
         {
-            var invitations = _dbContext.UserInvitations.Where(x => x.UserId == userId);
-            if (invitations != null && invitations.Count() > 0)
-            {
-                foreach (var invitation in invitations)
-                {
-                    _dbContext.UserInvitations.Remove(invitation);
-                }
-            }
+            var invitations = await _dbContext.UserInvitations
+                .Where(x => x.UserId == userId)
+                .ToListAsync();
+
+            _dbContext.UserInvitations.RemoveRange(invitations);
 
             await _dbContext.SaveChangesAsync();
         }

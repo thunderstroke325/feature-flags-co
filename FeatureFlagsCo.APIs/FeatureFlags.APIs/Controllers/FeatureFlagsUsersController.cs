@@ -5,35 +5,23 @@ using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
 
 namespace FeatureFlags.APIs.Controllers
 {
-    //[Authorize(Roles = UserRoles.Admin)]
     [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class FeatureFlagsUsersController : ControllerBase
     {
-        private readonly IGenericRepository _repository;
-        private readonly ILogger<FeatureFlagsUsersController> _logger;
-        private readonly IDistributedCache _redisCache;
         private readonly IFeatureFlagsService _ffService;
         private readonly INoSqlService _nosqlDBService;
         private readonly IEnvironmentService _envService;
 
         public FeatureFlagsUsersController(
-            ILogger<FeatureFlagsUsersController> logger, 
-            IGenericRepository repository,
-            IDistributedCache redisCache,
             IFeatureFlagsService ffService,
             INoSqlService cosmosDbService,
             IEnvironmentService envService)
         {
-            _logger = logger;
-            _repository = repository;
-            _redisCache = redisCache;
             _ffService = ffService;
             _nosqlDBService = cosmosDbService;
             _envService = envService;
