@@ -22,19 +22,15 @@ namespace FeatureFlags.APIs.Services
                 .FirstOrDefaultAsync(x => x.EnvironmentId == user.EnvironmentId && x.KeyId == user.KeyId);
             if (existing != null)
             {
-                user._Id = existing._Id;
+                existing.Update(user);
+                
+                var filter = Builders<EnvironmentUser>.Filter.Eq(x => x._Id, existing._Id);
+                await _envUsers.ReplaceOneAsync(filter, existing);
             }
-            
-            var option = new ReplaceOptions
+            else
             {
-                IsUpsert = true
-            };
-
-            await _envUsers.ReplaceOneAsync(
-                x => x.EnvironmentId == user.EnvironmentId && x.KeyId == user.KeyId,
-                user,
-                option
-            );
+                await _envUsers.InsertOneAsync(user);
+            }
         }
     }
 }
