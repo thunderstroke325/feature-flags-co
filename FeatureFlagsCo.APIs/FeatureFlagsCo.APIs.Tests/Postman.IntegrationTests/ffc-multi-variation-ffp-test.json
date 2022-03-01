@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "1411554c-ee95-4d92-9d07-06e34de5b8a1",
+		"_postman_id": "dc337a7c-13cd-4282-a6ab-e629d223a17a",
 		"name": "ffc-multi-variation-ffp-test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -958,7 +958,7 @@
 							"\r",
 							"pm.test(\"Successful POST request\", function () {\r",
 							"    var responseData = JSON.parse(responseBody);\r",
-							"    pm.expect(responseData.localId).to.be.equal(0);\r",
+							"    pm.expect(responseData.data.id).to.be.equal(0);\r",
 							"});\r",
 							"\r",
 							"console.log('#########Get Varation END#######');\r",
@@ -981,10 +981,16 @@
 					]
 				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "envSecret",
+						"value": "{{environmentSecret}}",
+						"type": "default"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName3}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"hu-beau\",\r\n    \"ffUserEmail\": \"hu-beau@outlook.com\",\r\n    \"ffUserKeyId\": \"hu-beau@outlook.com\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"groups\",\r\n            \"value\": \"1\"\r\n        },\r\n        {\r\n            \"name\": \"version\",\r\n            \"value\": \"1.0.x\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName3}}\",\r\n    \"userName\": \"hu-beau\",\r\n    \"userEmail\": \"hu-beau@outlook.com\",\r\n    \"userKeyId\": \"hu-beau@outlook.com\",\r\n    \"customizedProperties\": [\r\n        {\r\n            \"name\": \"groups\",\r\n            \"value\": \"1\"\r\n        },\r\n        {\r\n            \"name\": \"version\",\r\n            \"value\": \"1.0.x\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -992,13 +998,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"raw": "{{apihost}}/api/public/feature-flag/variation",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
-						"Variation",
-						"GetMultiOptionVariation"
+						"api",
+						"public",
+						"feature-flag",
+						"variation"
 					]
 				}
 			},

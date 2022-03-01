@@ -750,7 +750,7 @@
 							"pm.test(\"Successful POST request\", function () {\r",
 							"    var ti = updateData.targetIndividuals[0];\r",
 							"    console.log(ti);\r",
-							"    pm.expect(responseData.localId).to.be.eq(ti.valueOption.localId);\r",
+							"    pm.expect(responseData.data.id).to.be.eq(ti.valueOption.localId);\r",
 							"});\r",
 							"\r",
 							"console.log('#########Get Varation - Target Individuals END#######');\r",
@@ -773,10 +773,16 @@
 					]
 				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "envSecret",
+						"value": "{{environmentSecret}}",
+						"type": "default"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-3\",\r\n    \"ffUserEmail\": \"nuser-3@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-3@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"property-0\",\r\n            \"value\": \"value-0\"\r\n        },\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"530\"\r\n        },\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"value-3\"\r\n        },\r\n        {\r\n            \"name\": \"property-4\",\r\n            \"value\": \"905\"\r\n        },\r\n        {\r\n            \"name\": \"property-5\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-6\",\r\n            \"value\": \"value-6\"\r\n        },\r\n        {\r\n            \"name\": \"property-7\",\r\n            \"value\": \"575\"\r\n        },\r\n        {\r\n            \"name\": \"property-8\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-9\",\r\n            \"value\": \"value-9\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"userName\": \"nuser-3\",\r\n    \"email\": \"nuser-3@feature-flags.test\",\r\n    \"userKeyId\": \"nuser-3@feature-flags.test\",\r\n    \"customizedProperties\": [\r\n        {\r\n            \"name\": \"property-0\",\r\n            \"value\": \"value-0\"\r\n        },\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"530\"\r\n        },\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"value-3\"\r\n        },\r\n        {\r\n            \"name\": \"property-4\",\r\n            \"value\": \"905\"\r\n        },\r\n        {\r\n            \"name\": \"property-5\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-6\",\r\n            \"value\": \"value-6\"\r\n        },\r\n        {\r\n            \"name\": \"property-7\",\r\n            \"value\": \"575\"\r\n        },\r\n        {\r\n            \"name\": \"property-8\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-9\",\r\n            \"value\": \"value-9\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -784,13 +790,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"raw": "{{apihost}}/api/public/feature-flag/variation",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
-						"Variation",
-						"GetMultiOptionVariation"
+						"api",
+						"public",
+						"feature-flag",
+						"variation"
 					]
 				}
 			},
@@ -823,7 +831,7 @@
 							"        localIds.push(valueOptionsVariationRuleValues[i].valueOption.localId);\r",
 							"    }\r",
 							"\r",
-							"    pm.expect(localIds).to.include(responseData.localId);\r",
+							"    pm.expect(localIds).to.include(responseData.data.id);\r",
 							"});\r",
 							"\r",
 							"console.log('#########Get Varation - fftuwmtr condition 0 END#######');\r",
@@ -846,10 +854,16 @@
 					]
 				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "envSecret",
+						"value": "{{environmentSecret}}",
+						"type": "default"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-9\",\r\n    \"ffUserEmail\": \"nuser-9@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-9@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"property-0\",\r\n            \"value\": \"value-0\"\r\n        },\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"530\"\r\n        },\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"value-3\"\r\n        },\r\n        {\r\n            \"name\": \"property-4\",\r\n            \"value\": \"905\"\r\n        },\r\n        {\r\n            \"name\": \"property-5\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-6\",\r\n            \"value\": \"value-6\"\r\n        },\r\n        {\r\n            \"name\": \"property-7\",\r\n            \"value\": \"575\"\r\n        },\r\n        {\r\n            \"name\": \"property-8\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-9\",\r\n            \"value\": \"value-9\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"userName\": \"nuser-9\",\r\n    \"email\": \"nuser-9@feature-flags.test\",\r\n    \"userKeyId\": \"nuser-9@feature-flags.test\",\r\n    \"customizedProperties\": [\r\n        {\r\n            \"name\": \"property-0\",\r\n            \"value\": \"value-0\"\r\n        },\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"530\"\r\n        },\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"value-3\"\r\n        },\r\n        {\r\n            \"name\": \"property-4\",\r\n            \"value\": \"905\"\r\n        },\r\n        {\r\n            \"name\": \"property-5\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-6\",\r\n            \"value\": \"value-6\"\r\n        },\r\n        {\r\n            \"name\": \"property-7\",\r\n            \"value\": \"575\"\r\n        },\r\n        {\r\n            \"name\": \"property-8\",\r\n            \"value\": \"true\"\r\n        },\r\n        {\r\n            \"name\": \"property-9\",\r\n            \"value\": \"value-9\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -857,13 +871,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"raw": "{{apihost}}/api/public/feature-flag/variation",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
-						"Variation",
-						"GetMultiOptionVariation"
+						"api",
+						"public",
+						"feature-flag",
+						"variation"
 					]
 				}
 			},
@@ -896,7 +912,7 @@
 							"        localIds.push(valueOptionsVariationRuleValues[i].valueOption.localId);\r",
 							"    }\r",
 							"\r",
-							"    pm.expect(localIds).to.include(responseData.localId);\r",
+							"    pm.expect(localIds).to.include(responseData.data.id);\r",
 							"});\r",
 							"\r",
 							"console.log('#########Get Varation - fftuwmtr condition 1 END#######');\r",
@@ -919,10 +935,16 @@
 					]
 				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "envSecret",
+						"value": "{{environmentSecret}}",
+						"type": "default"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-10\",\r\n    \"ffUserEmail\": \"nuser-10@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-10@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"99\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"550\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"userName\": \"nuser-10\",\r\n    \"userEmail\": \"nuser-10@feature-flags.test\",\r\n    \"userKeyId\": \"nuser-10@feature-flags.test\",\r\n    \"customizedProperties\": [\r\n        {\r\n            \"name\": \"property-1\",\r\n            \"value\": \"99\"\r\n        },\r\n        {\r\n            \"name\": \"property-3\",\r\n            \"value\": \"550\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -930,13 +952,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"raw": "{{apihost}}/api/public/feature-flag/variation",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
-						"Variation",
-						"GetMultiOptionVariation"
+						"api",
+						"public",
+						"feature-flag",
+						"variation"
 					]
 				}
 			},
@@ -969,7 +993,7 @@
 							"        localIds.push(valueOptionsVariationRuleValues[i].valueOption.localId);\r",
 							"    }\r",
 							"\r",
-							"    pm.expect(localIds).to.include(responseData.localId);\r",
+							"    pm.expect(localIds).to.include(responseData.data.id);\r",
 							"});\r",
 							"\r",
 							"console.log('#########Get Varation - fftuwmtr condition 2 END#######');\r",
@@ -992,10 +1016,16 @@
 					]
 				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "envSecret",
+						"value": "{{environmentSecret}}",
+						"type": "default"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-11\",\r\n    \"ffUserEmail\": \"nuser-11@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-11@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"userName\": \"nuser-11\",\r\n    \"email\": \"nuser-11@feature-flags.test\",\r\n    \"userKeyId\": \"nuser-11@feature-flags.test\",\r\n    \"customizedProperties\": [\r\n        {\r\n            \"name\": \"property-2\",\r\n            \"value\": \"true\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1003,13 +1033,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"raw": "{{apihost}}/api/public/feature-flag/variation",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
-						"Variation",
-						"GetMultiOptionVariation"
+						"api",
+						"public",
+						"feature-flag",
+						"variation"
 					]
 				}
 			},
@@ -1040,7 +1072,7 @@
 							"    for (var i = 0; i < updateData.ff.defaultRulePercentageRollouts.length; i++) {\r",
 							"        localIds.push(updateData.ff.defaultRulePercentageRollouts[i].valueOption.localId);\r",
 							"    }\r",
-							"    pm.expect(localIds).to.include(responseData.localId);\r",
+							"    pm.expect(localIds).to.include(responseData.data.id);\r",
 							"});\r",
 							"\r",
 							"console.log('#########Get Varation - DefaultRulePercentageRollouts END#######');\r",
@@ -1063,10 +1095,16 @@
 					]
 				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "envSecret",
+						"value": "{{environmentSecret}}",
+						"type": "default"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-5\",\r\n    \"ffUserEmail\": \"nuser-5@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-5@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n    ]\r\n}",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"userName\": \"nuser-5\",\r\n    \"email\": \"nuser-5@feature-flags.test\",\r\n    \"userKeyId\": \"nuser-5@feature-flags.test\",\r\n    \"customizedProperties\": [\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1074,13 +1112,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"raw": "{{apihost}}/api/public/feature-flag/variation",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
-						"Variation",
-						"GetMultiOptionVariation"
+						"api",
+						"public",
+						"feature-flag",
+						"variation"
 					]
 				}
 			},
@@ -1172,7 +1212,7 @@
 							"var updateData = JSON.parse(pm.collectionVariables.get(\"dataSample0-update\"));\r",
 							"\r",
 							"pm.test(\"Successful POST request\", function () {\r",
-							"    pm.expect(responseData.localId).to.be.eq(updateData.ff.variationOptionWhenDisabled.localId);\r",
+							"    pm.expect(responseData.data.id).to.be.eq(updateData.ff.variationOptionWhenDisabled.localId);\r",
 							"});\r",
 							"\r",
 							"console.log('#########Get Varation - When Disabled END#######');\r",
@@ -1195,10 +1235,16 @@
 					]
 				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "envSecret",
+						"value": "{{environmentSecret}}",
+						"type": "default"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"nuser-5\",\r\n    \"ffUserEmail\": \"nuser-5@feature-flags.test\",\r\n    \"ffUserKeyId\": \"nuser-5@feature-flags.test\",\r\n    \"ffUserCustomizedProperties\": [\r\n    ]\r\n}",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName}}\",\r\n    \"userName\": \"nuser-5\",\r\n    \"userEmail\": \"nuser-5@feature-flags.test\",\r\n    \"userKeyId\": \"nuser-5@feature-flags.test\",\r\n    \"customizedProperties\": [\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1206,13 +1252,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"raw": "{{apihost}}/api/public/feature-flag/variation",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
-						"Variation",
-						"GetMultiOptionVariation"
+						"api",
+						"public",
+						"feature-flag",
+						"variation"
 					]
 				}
 			},
@@ -1225,7 +1273,7 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					""
+					"pm.globals.get(\"variable_key\");"
 				]
 			}
 		},
