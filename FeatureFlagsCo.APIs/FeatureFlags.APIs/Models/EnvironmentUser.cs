@@ -1,8 +1,8 @@
-﻿using MongoDB.Bson;
+﻿using System;
+using System.Collections.Generic;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 
 namespace FeatureFlags.APIs.Models
 {
@@ -20,6 +20,15 @@ namespace FeatureFlags.APIs.Models
         public string Country { get; set; }
         public string KeyId { get; set; }
         public List<FeatureFlagUserCustomizedProperty> CustomizedProperties { get; set; }
+
+        public void Update(EnvironmentUser user)
+        {
+            Name = user.Name;
+            Email = user.Email;
+            Country = user.Country;
+            KeyId = user.KeyId;
+            CustomizedProperties = user.CustomizedProperties;
+        }
     }
 
     public class FeatureFlagUserCustomizedProperty
