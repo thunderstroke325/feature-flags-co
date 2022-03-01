@@ -37,6 +37,7 @@ namespace FeatureFlags.APIs.Controllers
             _mongoDbFeatureFlagService = mongoDbFeatureFlagService;
         }
 
+        // TODO to remove
         [HttpGet]
         [AllowAnonymous]
         [Route("{envSecret}")]
