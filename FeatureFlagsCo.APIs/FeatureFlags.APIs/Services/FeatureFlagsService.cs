@@ -119,11 +119,11 @@ namespace FeatureFlags.APIs.Repositories
                                   LabelValue = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
                               }
                         };
-            if (param.CustomizedProperties != null && param.CustomizedProperties.Count > 0)
+            if (param.User.CustomizedProperties != null && param.User.CustomizedProperties.Count > 0)
             {
-                foreach (var item in param.CustomizedProperties)
+                foreach (var item in param.User.CustomizedProperties)
                 {
-                    labels.Add(new FeatureFlagsCo.MQ.MessageLabel
+                    labels.Add(new MessageLabel
                     {
                         LabelName = item.Name,
                         LabelValue = item.Value
@@ -135,7 +135,7 @@ namespace FeatureFlags.APIs.Repositories
             {
                 SendToExperiment = insightUserVariation.SendToExperiment,
                 FFMessage = ffEvent,
-                Message = new FeatureFlagsCo.MQ.MessageModel
+                Message = new MessageModel
                 {
                     SendDateTime = DateTime.UtcNow,
                     Labels = labels,

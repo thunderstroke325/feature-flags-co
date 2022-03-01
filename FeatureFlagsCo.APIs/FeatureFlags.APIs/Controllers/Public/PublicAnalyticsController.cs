@@ -101,9 +101,9 @@ namespace FeatureFlags.APIs.Controllers.Public
                             Email = item.Email,
                             Country = item.Country,
                             KeyId = item.UserKeyId,
-                            UserName = item.UserName
+                            UserName = item.UserName,
+                            CustomizedProperties = item.CustomizedProperties,
                         },
-                        CustomizedProperties = item.CustomizedProperties,
                         UserVariations = item.UserVariations
                     };
 
