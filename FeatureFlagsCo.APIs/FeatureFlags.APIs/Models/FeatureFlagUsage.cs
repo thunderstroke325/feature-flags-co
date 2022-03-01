@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using FeatureFlags.APIs.Services;
 
 namespace FeatureFlags.APIs.Models
 {
@@ -20,6 +20,22 @@ namespace FeatureFlags.APIs.Models
                 UserVariations.Count == 0;
 
             return !invalid;
+        }
+        
+        public EnvironmentUser AsEnvironmentUser(int envId)
+        {
+            var envUser = new EnvironmentUser
+            {
+                Id = FeatureFlagKeyExtension.GetEnvironmentUserId(envId, UserKeyId), 
+                EnvironmentId = envId, 
+                KeyId = UserKeyId,
+                Name = UserName, 
+                Email = Email,
+                Country = Country,
+                CustomizedProperties = CustomizedProperties,
+            };
+
+            return envUser;
         }
     }
 }

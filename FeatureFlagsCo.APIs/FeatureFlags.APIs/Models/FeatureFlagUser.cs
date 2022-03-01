@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using FeatureFlags.APIs.Services;
 
 namespace FeatureFlags.APIs.Models
 {
@@ -46,15 +47,17 @@ namespace FeatureFlags.APIs.Models
             Country = country;
         }
         
-        public EnvironmentUser EnvironmentUser()
+        public EnvironmentUser AsEnvironmentUser(int envId)
         {
             var envUser = new EnvironmentUser
             {
+                Id = FeatureFlagKeyExtension.GetEnvironmentUserId(envId, UserKeyId), 
+                EnvironmentId = envId, 
+                KeyId = UserKeyId,
+                Name = UserName, 
+                Email = Email,
                 Country = Country,
                 CustomizedProperties = CustomizedProperties,
-                Email = Email,
-                KeyId = UserKeyId,
-                Name = UserName
             };
 
             return envUser;

@@ -80,36 +80,6 @@ namespace FeatureFlags.APIs.Controllers
             return new JsonResult(newFF);
         }
 
-        [HttpPost]
-        [Route("redistest")]
-        public string RedisTest([FromBody] GetUserVariationResultParam param)
-        {
-            var date = Guid.NewGuid().ToString() + DateTime.UtcNow.ToString();
-            var serializedParam = JsonConvert.SerializeObject(param);
-            var customizedTraceProperties = new Dictionary<string, object>()
-            {
-                ["envId"] = param.FeatureFlagKeyName,
-                ["accountId"] = param.FeatureFlagKeyName,
-                ["projectId"] = param.FeatureFlagKeyName,
-                ["userKeyName"] = param.FeatureFlagKeyName,
-                ["serializedParam"] = serializedParam
-            };
-            _redisCache.SetString(date, serializedParam);
-            using (_logger.BeginScope(customizedTraceProperties))
-            {
-                _logger.LogInformation("variation-wr-request");
-                //_logger.LogWarning("variation-wr-request");
-            }
-            return _redisCache.GetString(date);
-        }
-
-        [HttpPost]
-        [Route("throwexception")]
-        public string ThrowException([FromBody] GetUserVariationResultParam param)
-        {
-            throw new Exception("ThrowException test");
-        }
-
         [HttpGet]
         [Route("ReturnTest200")]
         public async Task<JsonResult> ReturnTest200()

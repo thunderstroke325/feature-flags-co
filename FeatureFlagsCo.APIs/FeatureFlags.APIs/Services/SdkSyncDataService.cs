@@ -15,12 +15,12 @@ namespace FeatureFlags.APIs.Services
     public class SdkSyncDataService : ITransientDependency
     {
         private readonly MongoDbPersist _mongoDb;
-        private readonly IVariationService _variationService;
+        private readonly VariationService _variationService;
         private readonly IMapper _mapper;
 
         public SdkSyncDataService(
             MongoDbPersist mongoDb,
-            IVariationService variationService, 
+            VariationService variationService, 
             IMapper mapper)
         {
             _variationService = variationService;
@@ -58,14 +58,11 @@ namespace FeatureFlags.APIs.Services
 
         private async Task<ClientSdkFeatureFlag> GetClientSdkDataAsync(FeatureFlag flag, SdkWebSocket socket)
         {
-            var ffIdVm =
-                FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(socket.EnvSecret, flag.FF.KeyName);
+            var envUser = socket.User?.AsEnvironmentUser(socket.EnvId);
             
-            var userVariation =
-                await _variationService.GetUserVariationAsync(socket.User?.EnvironmentUser(), ffIdVm);
-
+            var userVariation = await _variationService.GetVariationAsync(socket.EnvSecret, flag.FF.KeyName, envUser);
+            
             var clientSdkFeatureFlag = new ClientSdkFeatureFlag(flag, userVariation);
-
             return clientSdkFeatureFlag;
         }
 
@@ -127,13 +124,7 @@ namespace FeatureFlags.APIs.Services
             var result = new List<ClientSdkFeatureFlag>();
             foreach (var flag in flags)
             {
-                var ffIdVm =
-                    FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(socket.EnvSecret, flag.FF.KeyName);
-
-                var userVariation =
-                    await _variationService.GetUserVariationAsync(socket.User?.EnvironmentUser(), ffIdVm);
-
-                var clientSdkFeatureFlag = new ClientSdkFeatureFlag(flag, userVariation);
+                var clientSdkFeatureFlag = await GetClientSdkDataAsync(flag, socket);
 
                 result.Add(clientSdkFeatureFlag);
             }
