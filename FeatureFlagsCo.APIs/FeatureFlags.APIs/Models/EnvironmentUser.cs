@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 namespace FeatureFlags.APIs.Models
 {
+    [BsonIgnoreExtraElements]
     public class EnvironmentUser
     {
         [BsonId]
@@ -14,15 +15,11 @@ namespace FeatureFlags.APIs.Models
         [JsonProperty("id")]
         public string Id { get; set; }
         public int EnvironmentId { get; set; }
-        public string ObjectType { get { return "EnvironmentUser"; } set { value = "EnvironmentUser"; } }
         public string Name { get; set; }
         public string Email { get; set; }
         public string Country { get; set; }
         public string KeyId { get; set; }
         public List<FeatureFlagUserCustomizedProperty> CustomizedProperties { get; set; }
-        //public List<FeatureFlagUserPercentageRecord> FeatureFlagUserPercentageRecords { get; set; }
-
-        public List<string> FeatureFlags { get; set; }
     }
 
     public class FeatureFlagUserCustomizedProperty

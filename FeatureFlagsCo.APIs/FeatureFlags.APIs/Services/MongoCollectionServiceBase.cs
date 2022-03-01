@@ -52,11 +52,5 @@ namespace FeatureFlags.APIs.Services
         {
             await _collection.UpdateManyAsync(filterDefinition, updateDefinition);
         }
-
-        public async Task RemoveAsync(T bookIn) =>
-            await _collection.DeleteOneAsync(book => book.Id == bookIn.Id);
-
-        public async Task RemoveAsync(string id) =>
-            await _collection.DeleteOneAsync(book => book.Id == id);
     }
 }

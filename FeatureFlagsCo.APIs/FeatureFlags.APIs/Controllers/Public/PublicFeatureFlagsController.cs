@@ -11,14 +11,17 @@ namespace FeatureFlags.APIs.Controllers.Public
 {
     public class PublicFeatureFlagsController : PublicControllerBase
     {
-        private readonly IVariationService _variationService;
+        private readonly VariationService _variationService;
+        private readonly EnvironmentUserV2Service _envUserService;
         private readonly FeatureFlagV2Service _flagService;
 
         public PublicFeatureFlagsController(
-            IVariationService variationService,
+            VariationService variationService,
+            EnvironmentUserV2Service envUserService, 
             FeatureFlagV2Service flagService)
         {
             _variationService = variationService;
+            _envUserService = envUserService;
             _flagService = flagService;
         }
 
@@ -45,14 +48,14 @@ namespace FeatureFlags.APIs.Controllers.Public
         {
             var variations = new List<UserVariationViewModel>();
 
+            // upsert environment user
+            var envUser = user.AsEnvironmentUser(EnvId);
+            await _envUserService.UpsertAsync(envUser);
+            
             var activeFeatureFlags = await _flagService.GetActiveFlagsAsync(EnvId);
             foreach (var featureFlag in activeFeatureFlags)
             {
-                var ffIdVm =
-                    FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, featureFlag.FF.KeyName);
-
-                var variation =
-                    await _variationService.GetUserVariationAsync(user.EnvironmentUser(), ffIdVm);
+                var variation = await _variationService.GetVariationAsync(EnvSecret, featureFlag.FF.KeyName, envUser);
 
                 variations.Add(new UserVariationViewModel
                 {
@@ -77,12 +80,12 @@ namespace FeatureFlags.APIs.Controllers.Public
                 return null;
             }
             
-            var ffIdVm =
-                FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, request.FeatureFlagKeyName);
-
-            var variation =
-                await _variationService.GetUserVariationAsync(request.EnvironmentUser(), ffIdVm);
-
+            // upsert environment user
+            var envUser = request.AsEnvironmentUser(EnvId);
+            await _envUserService.UpsertAsync(envUser);
+            
+            var variation = await _variationService.GetVariationAsync(EnvSecret, featureFlag.FF.KeyName, envUser);
+            
             return new UserVariationViewModel
             {
                 Id = variation.Variation.LocalId, 

@@ -19,18 +19,15 @@ namespace FeatureFlags.APIs.Controllers.Public
         private readonly MongoDbAnalyticBoardService _mongoDb;
         private readonly ElasticSearchService _elasticSearch;
         private readonly ILogger<PublicAnalyticsController> _logger;
-        private readonly IFeatureFlagsService _featureFlagService;
 
         public PublicAnalyticsController(
             ILogger<PublicAnalyticsController> logger,
             ElasticSearchService elasticSearch,
-            IFeatureFlagsService featureFlagService,
             MongoDbAnalyticBoardService mongoDb)
         {
             _logger = logger;
             _elasticSearch = elasticSearch;
             _mongoDb = mongoDb;
-            _featureFlagService = featureFlagService;
         }
 
         /// <summary>
@@ -70,32 +67,40 @@ namespace FeatureFlags.APIs.Controllers.Public
         /// <returns></returns>
         [HttpPost]
         [Route("analytics/track/feature-flags")]
-        public async Task<object> TrackFeatureFlagUsageAsync(List<FeatureFlagUsageParam> param)
+        public async Task<object> TrackFeatureFlagUsageAsync(
+            [FromServices] IFeatureFlagsService featureFlagService,
+            [FromServices] EnvironmentUserV2Service envUserService, 
+            List<FeatureFlagUsageParam> param)
         {
-            if (param != null && param.Count > 0)
+            if (param == null || param.Count <= 0)
             {
-                foreach (var item in param)
+                return StatusCode(StatusCodes.Status200OK, new Response { Code = "OK", Message = "OK" });
+            }
+            
+            foreach (var item in param)
+            {
+                if (!item.IsValid())
                 {
-                    if (!item.IsValid())
-                    {
-                        _logger.LogError(new Exception("Invalid param"), "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(item));
-                    } 
-                    else 
-                    {
-                        try
-                        {
-                            var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, item.UserVariations[0].FeatureFlagKeyName);
+                    _logger.LogError(new Exception("Invalid param"), "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(item));
+                    continue;
+                }
 
-                            item.UserVariations.ForEach(uv =>
-                            {
-                                _featureFlagService.SendFeatureFlagUsageToMQ(item, ffIdVm, uv);
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(param));
-                        }
-                    }
+                try
+                {
+                    // upsert environment user
+                    var envUser = item.AsEnvironmentUser(EnvId);
+                    var fireAndForget = envUserService.UpsertAsync(envUser);
+                    
+                    var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, item.UserVariations[0].FeatureFlagKeyName);
+
+                    item.UserVariations.ForEach(uv =>
+                    {
+                        featureFlagService.SendFeatureFlagUsageToMQ(item, ffIdVm, uv);
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Post /analytics/track/feature-flags ; param FeatureFlagUsage: " + JsonConvert.SerializeObject(param));
                 }
             }
 

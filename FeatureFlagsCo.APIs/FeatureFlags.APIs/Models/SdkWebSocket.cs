@@ -83,23 +83,20 @@ namespace FeatureFlags.APIs.Models
 
         public async Task CloseSafelyAsync()
         {
-            var closeStatus = WebSocket.CloseStatus; 
+            var closeStatus = WebSocket.CloseStatus;
             if (closeStatus.HasValue)
             {
                 try
                 {
                     await WebSocket.CloseAsync(
                         closeStatus.Value,
-                        WebSocket.CloseStatusDescription, 
+                        WebSocket.CloseStatusDescription,
                         CancellationToken.None
                     );
                 }
-                catch (WebSocketException ex)
+                catch (WebSocketException ex) when (ex.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
                 {
-                    if (ex.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
-                    {
-                        WebSocket.Abort();
-                    }
+                    WebSocket.Abort();
                 }
                 catch (Exception)
                 {

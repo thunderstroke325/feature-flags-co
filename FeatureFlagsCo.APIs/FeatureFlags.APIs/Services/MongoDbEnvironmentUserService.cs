@@ -1,42 +1,18 @@
 ﻿using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.ViewModels;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Authentication;
 using System.Threading.Tasks;
+using FeatureFlags.APIs.Services.MongoDb;
 
 namespace FeatureFlags.APIs.Services
 {
     public class MongoDbEnvironmentUserService
     {
         private readonly IMongoCollection<EnvironmentUser> _environmentUsers;
-        private readonly IOptions<MySettings> _mySettings;
 
-        public MongoDbEnvironmentUserService(IMongoDbSettings settings,
-            IOptions<MySettings> mySettings)
+        public MongoDbEnvironmentUserService(MongoDbPersist mongoDb)
         {
-            _mySettings = mySettings;
-
-            MongoClient client = null;
-            if (mySettings.Value.HostingType == HostingTypeEnum.Azure.ToString())
-            {
-                MongoClientSettings s = MongoClientSettings.FromUrl(
-                  new MongoUrl(settings.ConnectionString)
-                );
-                s.SslSettings =
-                  new SslSettings() { EnabledSslProtocols = SslProtocols.Tls12 };
-                client = new MongoClient(s);
-            }
-            else
-            {
-                client = new MongoClient(settings.ConnectionString);
-            }
-
-            var database = client.GetDatabase(settings.DatabaseName);
-            _environmentUsers = database.GetCollection<EnvironmentUser>("EnvironmentUsers");
+            _environmentUsers = mongoDb.CollectionOf<EnvironmentUser>();
         }
 
         public async Task UpsertItemAsync(EnvironmentUser item)
@@ -53,11 +29,8 @@ namespace FeatureFlags.APIs.Services
             }
         }
 
-        public List<EnvironmentUser> Get() =>
-            _environmentUsers.Find(p => p.ObjectType == "EnvironmentUser").ToList();
-
         public async Task<EnvironmentUser> GetAsync(string id) =>
-            await _environmentUsers.Find<EnvironmentUser>(book => book.Id == id).FirstOrDefaultAsync();
+            await _environmentUsers.Find(book => book.Id == id).FirstOrDefaultAsync();
 
         public async Task<EnvironmentUser> CreateAsync(EnvironmentUser book)
         {
@@ -73,19 +46,13 @@ namespace FeatureFlags.APIs.Services
         public async Task UpsertAsync(EnvironmentUser eu)
         {
             if (string.IsNullOrWhiteSpace(eu._Id))
-                await this.CreateAsync(eu);
+                await CreateAsync(eu);
             else
-                await this.UpdateAsync(eu.Id, eu);
+                await UpdateAsync(eu.Id, eu);
         }
 
         public async Task UpdateAsync(string id, EnvironmentUser bookIn) =>
             await _environmentUsers.ReplaceOneAsync(book => book.Id == id, bookIn);
-
-        public async Task RemoveAsync(EnvironmentUser bookIn) =>
-            await _environmentUsers.DeleteOneAsync(book => book.Id == bookIn.Id);
-
-        public async Task RemoveAsync(string id) =>
-            await _environmentUsers.DeleteOneAsync(book => book.Id == id);
 
         public async Task<int> CountAsync(string searchText, int environmentId)
         {

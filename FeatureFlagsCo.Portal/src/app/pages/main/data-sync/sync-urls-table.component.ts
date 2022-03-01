@@ -267,6 +267,7 @@ export class SyncUrlsTableComponent implements OnInit {
     };
 
     this.settingService.upsert([setting]).subscribe(() => {
+      row.remark = '';
       row.isSaving = false;
       row.isEditing = false;
       this.message.success('保存配置成功');
@@ -320,24 +321,26 @@ export class SyncUrlsTableComponent implements OnInit {
   }
 
   newRow(): void {
-    this.filteredSettings = [
-      ...this.filteredSettings,
-      {
-        id: uuidv4(),
-        key: '',
-        value: '',
-        isEditing: true
-      }
-    ];
+    let newRow = {
+      id: uuidv4(),
+      key: '',
+      value: '',
+      isEditing: true
+    };
+
+    this.allSettings = [...this.allSettings, newRow];
+    this.filteredSettings = [...this.filteredSettings, newRow];
   }
 
   deleteRow(row: SyncUrlSettingRow): void {
     row.isDeleting = true;
     this.settingService.delete(row.id).subscribe(() => {
+      this.allSettings = this.allSettings.filter(d => d.id !== row.id);
       this.filteredSettings = this.filteredSettings.filter(d => d.id !== row.id);
+
       this.message.success('删除配置成功');
 
-      this.refreshTags(this.filteredSettings);
+      this.refreshTags(this.allSettings);
       row.isDeleting = false;
     });
   }

@@ -13,15 +13,7 @@ using FeatureFlags.Utils.ConventionalDependencyInjection;
 
 namespace FeatureFlags.APIs.Repositories
 {
-    public interface IVariationService : ITransientDependency
-    {
-        Task<UserVariation> GetUserVariationAsync(
-            EnvironmentUser user,
-            FeatureFlagIdByEnvironmentKeyViewModel ffIdVm
-        );
-    }
-
-    public class VariationService : IVariationService
+    public class VariationService : ITransientDependency
     {
         private readonly IDistributedCache _redisCache;
         private readonly INoSqlService _nosqlDbService;
@@ -34,15 +26,23 @@ namespace FeatureFlags.APIs.Repositories
             _nosqlDbService = nosqlDbService;
         }
 
-        public async Task<UserVariation> GetUserVariationAsync(
+        public async Task<UserVariation> GetVariationAsync(
+            string envSecret, 
+            string flagKeyName, 
+            EnvironmentUser user)
+        {
+            var ffIdVm =
+                FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(envSecret, flagKeyName);
+            
+            var userVariation = await GetVariationAsync(user, ffIdVm);
+            return userVariation;
+        }
+
+        public async Task<UserVariation> GetVariationAsync(
             EnvironmentUser user, 
             FeatureFlagIdByEnvironmentKeyViewModel ffIdVm)
         {
             string featureFlagId = ffIdVm.FeatureFlagId;
-
-            int environmentId = Convert.ToInt32(ffIdVm.EnvId);
-            user.EnvironmentId = environmentId;
-            user.Id = FeatureFlagKeyExtension.GetEnvironmentUserId(environmentId, user.KeyId);
 
             // get feature flag info
             var featureFlagString = await _redisCache.GetStringAsync(featureFlagId);
@@ -89,8 +89,6 @@ namespace FeatureFlags.APIs.Repositories
 
             cosmosDBFeatureFlagsUser.UserInfo = user;
             await _redisCache.SetStringAsync(featureFlagUserMappingId, JsonConvert.SerializeObject(cosmosDBFeatureFlagsUser));
-
-            await UpsertEnvironmentUserAsync(user);
 
             return cosmosDBFeatureFlagsUser.CachedUserVariation();
         }
@@ -177,7 +175,7 @@ namespace FeatureFlags.APIs.Repositories
             {
                 if (ffPItem.PrerequisiteFeatureFlagId != featureFlag.FF.Id)
                 {
-                    var r = await GetUserVariationAsync(
+                    var r = await GetVariationAsync(
                         environmentUser,
                         new FeatureFlagIdByEnvironmentKeyViewModel()
                         {
@@ -532,17 +530,6 @@ namespace FeatureFlags.APIs.Repositories
                     featureFlag.FF.IsDefaultRulePercentageRolloutsIncludedInExpt
                 )
                 : null;
-        }
-
-        private async Task UpsertEnvironmentUserAsync(EnvironmentUser wsUser)
-        {
-            var oldWsUser = await _nosqlDbService.GetEnvironmentUserAsync(wsUser.Id);
-            if (oldWsUser != null && !string.IsNullOrWhiteSpace(oldWsUser._Id))
-            {
-                wsUser._Id = oldWsUser._Id;
-            }
-            
-            await _nosqlDbService.UpsertEnvironmentUserAsync(wsUser);
         }
 
         private bool IfBelongRolloutPercentage(string key, double[] percentageRange)
