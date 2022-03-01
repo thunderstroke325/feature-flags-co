@@ -234,10 +234,10 @@ namespace FeatureFlags.APIs.Repositories
                     {
                         var customizedProperties = ffUser.CustomizedProperties;
                         if (ffUser.CustomizedProperties == null)
-                            customizedProperties = new List<FeatureFlagUserCustomizedProperty>();
+                            customizedProperties = new List<CustomizedProperty>();
                         var ffUCProperty = customizedProperties.FirstOrDefault(p => p.Name == rule.Property);
                         if (ffUCProperty == null)
-                            ffUCProperty = new FeatureFlagUserCustomizedProperty();
+                            ffUCProperty = new CustomizedProperty();
                         if (rule.Operation.Contains("Than") && ffUCProperty != null)
                         {
                             double conditionDoubleValue, ffUserDoubleValue;

@@ -19,7 +19,8 @@ namespace FeatureFlags.APIs.Models
         public string Email { get; set; }
         public string Country { get; set; }
         public string KeyId { get; set; }
-        public List<FeatureFlagUserCustomizedProperty> CustomizedProperties { get; set; }
+
+        public List<CustomizedProperty> CustomizedProperties { get; set; }
 
         public void Update(EnvironmentUser user)
         {
@@ -30,14 +31,6 @@ namespace FeatureFlags.APIs.Models
             CustomizedProperties = user.CustomizedProperties;
         }
     }
-
-    public class FeatureFlagUserCustomizedProperty
-    {
-        public string Name { get; set; }
-        public string Value { get; set; }
-    }
-
-
 
     public class EnvironmentFeatureFlagUser
     {

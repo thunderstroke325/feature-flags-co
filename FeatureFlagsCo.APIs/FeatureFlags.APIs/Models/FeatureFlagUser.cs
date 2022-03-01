@@ -17,8 +17,8 @@ namespace FeatureFlags.APIs.Models
 
         public string Country { get; set; }
         
-        public List<FeatureFlagUserCustomizedProperty> CustomizedProperties { get; set; } 
-            = new List<FeatureFlagUserCustomizedProperty>();
+        public List<CustomizedProperty> CustomizedProperties { get; set; } 
+            = new List<CustomizedProperty>();
 
         // for deserialization
         public FeatureFlagUser()
