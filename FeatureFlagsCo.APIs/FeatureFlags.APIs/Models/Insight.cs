@@ -10,6 +10,22 @@ namespace FeatureFlags.APIs.Models
         public string Country { get; set; }
         public string KeyId { get; set; }
         public List<CustomizedProperty> CustomizedProperties { get; set; }
+        
+        public EnvironmentUser AsEnvironmentUser(int envId)
+        {
+            var envUser = new EnvironmentUser
+            {
+                Id = FeatureFlagKeyExtension.GetEnvironmentUserId(envId, KeyId),
+                EnvironmentId = envId,
+                KeyId = KeyId,
+                Name = UserName,
+                Email = Email,
+                Country = Country,
+                CustomizedProperties = CustomizedProperties,
+            };
+
+            return envUser;
+        }
     }
 
     public class InsightParam
@@ -30,22 +46,6 @@ namespace FeatureFlags.APIs.Models
                 );
 
             return !invalid;
-        }
-
-        public EnvironmentUser AsEnvironmentUser(int envId)
-        {
-            var envUser = new EnvironmentUser
-            {
-                Id = FeatureFlagKeyExtension.GetEnvironmentUserId(envId, User.KeyId),
-                EnvironmentId = envId,
-                KeyId = User.KeyId,
-                Name = User.UserName,
-                Email = User.Email,
-                Country = User.Country,
-                CustomizedProperties = CustomizedProperties,
-            };
-
-            return envUser;
         }
     }
 

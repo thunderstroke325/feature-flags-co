@@ -10,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Controllers.Public
@@ -61,7 +60,7 @@ namespace FeatureFlags.APIs.Controllers.Public
                     try
                     {
                         // upsert environment user
-                        var envUser = item.AsEnvironmentUser(EnvId);
+                        var envUser = item.User.AsEnvironmentUser(EnvId);
                         var fireAndForget = envUserService.UpsertAsync(envUser);
 
                         var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, item.UserVariations[0].FeatureFlagKeyName);
