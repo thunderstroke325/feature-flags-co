@@ -7,8 +7,10 @@ import { IOption } from "ffc-js-client-side-sdk/esm/types";
 })
 export class FfcService {
 
-  initialize(option: IOption): void {
+  async initialize(option: IOption) {
     Ffc.init(option);
+
+    await Ffc.waitUntilReady();
   }
 
   variation(key: string, defaultResult: string): string {

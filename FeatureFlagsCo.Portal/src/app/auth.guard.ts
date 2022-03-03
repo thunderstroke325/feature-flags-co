@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import { AuthService } from './services/auth.service';
 import { getAuth } from 'src/app/utils';
 import { FfcService } from './services/ffc.service';
 import { environment } from 'src/environments/environment';
-
 
 @Injectable({
   providedIn: 'root'
@@ -18,17 +16,17 @@ export class AuthGuard implements CanActivate {
     private ffcService: FfcService
   ) { }
 
-  canActivate(
+  async canActivate(
     route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+    state: RouterStateSnapshot): Promise<boolean | UrlTree> {
 
-    return this.checkLogin(state.url);
+    return await this.checkLogin(state.url);
   }
 
-  checkLogin(url: string): true | UrlTree {
+  async checkLogin(url: string): Promise<true | UrlTree> {
     const auth = getAuth();
     if (auth) {
-      this.ffcService.initialize({
+      await this.ffcService.initialize({
         secret: environment.projectEnvKey,
         user: {
           id: auth.email,

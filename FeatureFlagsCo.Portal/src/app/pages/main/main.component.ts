@@ -5,12 +5,9 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { IAuthProps } from 'src/app/config/types';
 import { AuthService } from 'src/app/services/auth.service';
-import { UserService } from 'src/app/services/user.service';
 import { IMenuItem } from 'src/app/share/uis/menu/menu';
 import { QUICK_COMBAT_DOCUMENT} from 'src/app/config';
 import { getAuth } from 'src/app/utils';
-import { ProjectService } from 'src/app/services/project.service';
-import { SwitchService } from 'src/app/services/switch.service';
 import { FfcService } from 'src/app/services/ffc.service';
 import { environment } from '../../../environments/environment';
 
@@ -29,9 +26,6 @@ export class MainComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private projectService: ProjectService,
-    private switchService: SwitchService,
-    private userService: UserService,
     private ffcService: FfcService,
   ) {
 
