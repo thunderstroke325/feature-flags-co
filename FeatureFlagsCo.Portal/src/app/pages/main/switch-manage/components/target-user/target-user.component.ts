@@ -46,11 +46,6 @@ export class TargetUserComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.userList || this.userList.length === 0) {
-      this.userList = [...this.selectedUserDetailList || []];
-      return;
-    }
-
     if (this.selectedUserDetailList?.length > 0) {
       const usersNotInOptions = this.selectedUserDetailList.filter(su => !this.userList.find(u => u.id === su.id));
       this.userList = [...this.userList, ...usersNotInOptions];
