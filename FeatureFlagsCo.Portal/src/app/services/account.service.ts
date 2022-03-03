@@ -35,13 +35,7 @@ export class AccountService {
     return this.http.get(url);
   }
 
-  // 获取单个 account 详情
-  getAccount(params): Observable<any> {
-    const url = this.baseUrl;
-    return this.http.get(url, { params });
-  }
-
-  // 创建 account
+// 创建 account
   postCreateAccount(params): Observable<any> {
     const url = this.baseUrl;
     return this.http.post(url, params);
@@ -51,30 +45,6 @@ export class AccountService {
   putUpdateAccount(params): Observable<any> {
     const url = this.baseUrl;
     return this.http.put(url, params);
-  }
-
-  /*
-    初始登录时，判断是否有 account
-    无 => 创建一个
-    有 => 指向第一个
-  */
-  afterLoginSelectAccount() {
-    this.getAccounts()
-      .pipe()
-      .subscribe(
-        res => {
-          if (!res.length) {
-            this.postCreateAccount({
-              organizationName: 'Default'
-            }).pipe()
-              .subscribe(
-                res => {
-                  this.changeAccount(res);
-                }
-              );
-          }
-        }
-      );
   }
 
   changeAccount(account: IAccount) {

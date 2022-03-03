@@ -17,7 +17,7 @@ export class ProjectService {
   private _baseUrl: string;
   public get baseUrl(): string {
     if (!this._baseUrl) {
-      const apiVersion = this.ffcService.variation('backend-api-version', 'v1');
+      const apiVersion = this.ffcService.variation('backend-api-version', 'v2');
       this._baseUrl = `${environment.url}/api/${apiVersion}/accounts/#accountId/projects`;
     }
 

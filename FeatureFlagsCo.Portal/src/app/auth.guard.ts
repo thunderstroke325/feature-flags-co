@@ -3,7 +3,6 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Rout
 import { Observable } from 'rxjs';
 import { AuthService } from './services/auth.service';
 import { getAuth } from 'src/app/utils';
-import { AccountService } from './services/account.service';
 import { FfcService } from './services/ffc.service';
 import { environment } from 'src/environments/environment';
 
@@ -16,7 +15,6 @@ export class AuthGuard implements CanActivate {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private accountService: AccountService,
     private ffcService: FfcService
   ) { }
 
@@ -43,7 +41,6 @@ export class AuthGuard implements CanActivate {
         }
       });
 
-      this.accountService.afterLoginSelectAccount();
       return true;
     }
 

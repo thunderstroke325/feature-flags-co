@@ -8,9 +8,6 @@ import { IAccount, IProjectEnv } from 'src/app/config/types';
 
 @Injectable()
 export class AccountProjectEnvResolver implements Resolve<any> {
-
-  public isFirstInto: boolean = true;
-
   constructor(
     private projectService: ProjectService,
     private accountService: AccountService,
