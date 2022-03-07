@@ -15,21 +15,20 @@ import { catchError } from "rxjs/operators";
 })
 export class SwitchV2Service {
 
-  envId: number;
-
-  constructor(private http: HttpClient) {
-    this.envId = getCurrentProjectEnv().envId;
+  get baseUrl() {
+    const envId = getCurrentProjectEnv().envId;
+    return `${environment.url}/api/v2/envs/${envId}/feature-flag`;
   }
 
+  constructor(private http: HttpClient) { }
+
   getSwitchDropDown(): Observable<SwitchDropdown[]> {
-    const url = `${environment.url}/api/v2/envs/${this.envId}/feature-flag/dropdown`;
+    const url = `${this.baseUrl}/dropdown`;
 
     return this.http.get<SwitchDropdown[]>(url);
   }
 
   getSwitchList(filter: SwitchListFilter = new SwitchListFilter()): Observable<SwitchListModel> {
-    const url = `${environment.url}/api/v2/envs/${this.envId}/feature-flag/`;
-
     const queryParam = {
       name: filter.name ?? '',
       status: filter.status ?? '',
@@ -39,13 +38,13 @@ export class SwitchV2Service {
     };
 
     return this.http.get<SwitchListModel>(
-      url,
+      this.baseUrl,
       {params: new HttpParams({fromObject: queryParam})}
     );
   }
 
   isNameUsed(name: string): Observable<boolean> {
-    const url = `${environment.url}/api/v2/envs/${this.envId}/feature-flag/is-name-used?name=${name}`;
+    const url = `${this.baseUrl}/is-name-used?name=${name}`;
 
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }

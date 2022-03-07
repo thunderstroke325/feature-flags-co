@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
-import { AuthService } from './services/auth.service';
 import { getAuth } from 'src/app/utils';
 import { FfcService } from './services/ffc.service';
 import { environment } from 'src/environments/environment';
+import { LOGIN_REDIRECT_URL } from "./utils/localstorage-keys";
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,6 @@ export class AuthGuard implements CanActivate {
 
   constructor(
     private router: Router,
-    private authService: AuthService,
     private ffcService: FfcService
   ) { }
 
@@ -29,9 +28,9 @@ export class AuthGuard implements CanActivate {
       await this.ffcService.initialize({
         secret: environment.projectEnvKey,
         user: {
-          id: auth.email,
+          id: auth.id,
           email: auth.email,
-          userName: auth.email.split("@")[0],
+          userName: auth.userName,
           customizedProperties: [{
             name: 'phoneNumber',
             value: auth.phoneNumber
@@ -42,9 +41,7 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    this.authService.redirectUrl = url;
-
+    localStorage.setItem(LOGIN_REDIRECT_URL, url);
     return this.router.parseUrl('/login');
   }
-
 }

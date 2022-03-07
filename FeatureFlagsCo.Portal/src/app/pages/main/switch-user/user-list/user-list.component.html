@@ -1,39 +1,3 @@
-<!-- <div class="switch-user-list" #listContent>
-    <div class="operation-tools">
-      <section>
-        <input nz-input type="text" [(ngModel)]="searchValue">
-        <button nz-button (click)="onSearchClick()" (key.enter)="onSearchClick()">查找</button>
-      </section>
-      <section>
-        <button nz-button (click)="onPropsSettingClick()">属性管理</button>
-      </section>
-    </div>
-    <nz-table #basicTable
-            [nzData]="list"
-            [nzFrontPagination]="false"
-            [nzLoading]="isLoading"
-            [nzTotal]="totalCount"
-            [nzPageSize]="pageSize"
-            [nzPageIndex]="pageIndex + 1"
-            (nzQueryParams)="onQueryChange($event)">
-        <thead>
-          <tr>
-            <th>名称</th>
-            <th>Key Name</th>
-            <th>Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of basicTable.data" (click)="onRowClick(user)" class="table-tr-pointer">
-            <td>{{ user.name }}</td>
-            <td>{{ user.keyId }}</td>
-            <td>{{ user.email }}</td>
-          </tr>
-        </tbody>
-      </nz-table>
-      <app-props-drawer [visible]="visible" [envId]="currentEnvId" (close)="onClose()"></app-props-drawer>
-</div> -->
-
 <section class="body">
   <div class="content">
       <div class="switch-wrap">
@@ -41,7 +5,7 @@
               <div nz-row>
                   <div class="search-wrap ant-col ant-col-12" nz-col nzSpan="12">
                     <input style="margin-right: 20px;" nz-input type="text" placeholder="按名字查找" [(ngModel)]="searchValue">
-                    <button nz-button nzType="primary" (click)="onSearchClick()" (key.enter)="onSearchClick()">
+                    <button nz-button nzType="primary" (click)="onSearchClick()" (keydown.enter)="onSearchClick()">
                       <i nz-icon nzType="search" nzTheme="outline"></i>
                       查找
                     </button>

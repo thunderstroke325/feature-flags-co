@@ -1,77 +1,117 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { LoginService } from 'src/app/services/login.service';
+import { phoneNumberOrEmailValidator } from "../../../utils/form-validators";
+import { UserService } from "../../../services/user.service";
 
 @Component({
   selector: 'app-forget',
   templateUrl: './forget.component.html',
   styleUrls: ['./forget.component.less', '../login.component.less']
 })
-export class ForgetComponent implements OnInit, OnDestroy {
+export class ForgetComponent implements OnInit {
 
-  forgetForm!: FormGroup;
-
-  isLoading: boolean = false;
-
-  timer;
-
-  seconds: number = 60;
+  isResetting: boolean = false;
+  resetForm: FormGroup;
 
   constructor(
     private fb: FormBuilder,
-    private loginService: LoginService,
+    private userService: UserService,
     private router: Router,
     private message: NzMessageService
   ) { }
 
   ngOnInit(): void {
-    this.initForm();
+    this.resetForm = this.fb.group({
+      identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
+      code: ['', [Validators.required, Validators.minLength(6)]],
+      newPassword: ['', [Validators.required, Validators.minLength(5)]]
+    })
   }
 
-  ngOnDestroy(): void {
-    window.clearInterval(this.timer);
+  login() {
+    this.router.navigateByUrl('/login');
   }
 
-  initForm() {
-    this.forgetForm = this.fb.group({
-      email: [null, [Validators.required, Validators.email]],
-    });
-  }
+  passwordVisible: boolean = false;
 
-  doFind() {
-    if (this.forgetForm.invalid) {
-      for (const i in this.forgetForm.controls) {
-        this.forgetForm.controls[i].markAsDirty();
-        this.forgetForm.controls[i].updateValueAndValidity();
-      }
+  isSendingCode: boolean = false;
+  getCodeInterval: number = 0;
+  sendIdentityCode() {
+    this.resetForm.get('code').reset();
+
+    let identity = this.resetForm.get('identity');
+    if (identity.invalid) {
+      identity.markAsDirty();
+      identity.updateValueAndValidity();
       return;
     }
-    this.isLoading = true;
-    const { _password, ...params } = this.forgetForm.value
-    this.loginService.forgetPassword(params)
-      .subscribe(
-        res => {
-          this.message.success('邮件已发送至该邮箱，请注意查收！');
-          this.timer = window.setInterval(() => {
-            this.seconds--;
-            if (!this.seconds) {
-              window.clearInterval(this.timer);
-              this.seconds = 60;
-              this.isLoading = false;
-            }
-          }, 1000)
-        },
-        err => {
-          this.isLoading = false;
-          this.message.error('该邮箱尚未注册！');
+    this.isSendingCode = true;
+
+    this.userService.sendIdentityCode(identity.value, 'forget-password').subscribe(
+      _ => {
+        this.message.success('验证码已发送, 请注意查收');
+        this.isSendingCode = false;
+
+        this.getCodeInterval = 60;
+        const codeInterval = setInterval(() => {
+          if (this.getCodeInterval === 0) {
+            clearInterval(codeInterval);
+            return;
+          }
+
+          this.getCodeInterval--;
+        }, 1000);
+      },
+      err => {
+        this.isSendingCode = false;
+
+        if (err.status === 403) {
+          console.log(err);
+          this.message.warning(err.error);
+        } else {
+          this.message.error('发送验证码失败, 请联系运营人员');
         }
-      )
+      }
+    );
   }
 
-  changeRoute(url) {
-    this.router.navigateByUrl(url);
+  resetPwd() {
+    if (this.resetForm.invalid) {
+      Object.values(this.resetForm.controls).forEach(control => {
+        if (control.invalid) {
+          control.markAsDirty();
+          control.updateValueAndValidity({ onlySelf: true });
+        }
+      });
+
+      return;
+    }
+
+    this.isResetting = true;
+
+    const {identity, code, newPassword} = this.resetForm.value;
+    this.userService.resetPassword(identity, code, newPassword).subscribe(
+      response => this.handleResponse(response),
+      err => this.handleError(err)
+    );
   }
 
+  handleResponse(response) {
+    this.isResetting = false;
+
+    if (response.success) {
+      this.message.success('密码重置成功, 请重新登录');
+      this.login();
+    } else {
+      this.message.error(response.message);
+    }
+  }
+
+  handleError(error) {
+    this.isResetting = false;
+
+    this.message.error(error.error.message);
+  }
 }

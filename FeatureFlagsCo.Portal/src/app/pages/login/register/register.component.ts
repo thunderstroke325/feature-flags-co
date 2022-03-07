@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { LoginService } from 'src/app/services/login.service';
-import { repeatPasswordValidator } from 'src/app/utils/validators';
+import { repeatPasswordValidator } from "../../../utils/form-validators";
+import { UserService } from "../../../services/user.service";
+import { randomString } from "../../../utils";
 
 @Component({
   selector: 'app-register',
@@ -12,78 +13,87 @@ import { repeatPasswordValidator } from 'src/app/utils/validators';
 })
 export class RegisterComponent implements OnInit {
 
-  registerForm!: FormGroup;
-
-  isLoading: boolean = false;
-  phoneNumber: string = null;
-  orgName: string = null;
-  inviteCode: string = null;
-
-  get password() {
-    if (!this.registerForm || !this.registerForm.value) return '';
-    return this.registerForm.value['password'];
-  }
-
-  get _password() {
-    if (!this.registerForm || !this.registerForm.value) return '';
-    return this.registerForm.value['_password'];
-  }
+  isRegistering: boolean = false;
+  emailRegistrationForm: FormGroup;
 
   constructor(
-    private loginService: LoginService,
     private router: Router,
-    private route: ActivatedRoute,
-    private message: NzMessageService
-  ) {
-    this.route.queryParams.subscribe(params => {
-      this.phoneNumber = params['tel'];
-    });
-  }
+    private userService: UserService,
+    private message: NzMessageService,
+    private fb: FormBuilder,
+  ) { }
 
   ngOnInit(): void {
-    this.initForm();
+    this.emailRegistrationForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(5)]],
+      _password: ['', [Validators.required]]
+    }, { validators: repeatPasswordValidator });
   }
 
-  initForm() {
-    this.registerForm = new FormGroup({
-      email: new FormControl(null, [Validators.required, Validators.email]),
-      password: new FormControl(null, [Validators.required, Validators.minLength(5)]),
-      _password: new FormControl(null, [Validators.required]),
-      orgName: new FormControl(this.orgName, [Validators.required]),
-      phoneNumber: new FormControl(this.phoneNumber, [Validators.required]),
-    }, {
-      validators: repeatPasswordValidator
-    })
+  passwordVisible: boolean = false;
+  login() {
+    this.router.navigateByUrl('/login').then();
   }
 
-  getPassword = (key: string = 'password') => this[key];
+  registerByEmail() {
+    const form = this.emailRegistrationForm;
 
-  doRegister() {
-    if (this.registerForm.invalid) {
-      for (const i in this.registerForm.controls) {
-        this.registerForm.controls[i].markAsDirty();
-        this.registerForm.controls[i].updateValueAndValidity();
-      }
+    // if invalid
+    if (form.invalid) {
+      Object.values(form.controls).forEach(control => {
+        if (control.invalid) {
+          control.markAsDirty();
+          control.updateValueAndValidity({onlySelf: true});
+        }
+      });
+
       return;
     }
-    this.isLoading = true;
-    const { _password, ...params } = this.registerForm.value
-    params.phoneNumber = params.phoneNumber.toString()
-    this.loginService.register(params)
-      .subscribe(
-        _ => {
-          this.isLoading = false;
-          this.message.success('注册成功！');
-          this.router.navigateByUrl('/login');
-        }, err => {
-          this.isLoading = false;
-          this.message.error(err.error.message);
-        }
-      );
+
+    this.isRegistering = true;
+
+    const {email, _password} = this.emailRegistrationForm.value;
+    this.userService.registerByEmail(email, _password).subscribe(
+      response => this.handleSuccess(response),
+      err => this.handleError(err)
+    );
   }
 
-  changeRoute(url) {
-    this.router.navigateByUrl(url);
+  randomPwd: string = randomString(7);
+  get isValidRandomPwd() {
+    return this.randomPwd && this.randomPwd.length >= 5;
+  }
+  newRandomPwd() {
+    this.randomPwd = randomString(7);
   }
 
+  registerByPhone(data) {
+    if (!this.isValidRandomPwd) {
+      return;
+    }
+
+    this.isRegistering = true;
+
+    const {phoneNumber, code} = data;
+    this.userService.registerByPhone(phoneNumber, code, this.randomPwd).subscribe(
+      response => this.handleSuccess(response),
+      err => this.handleError(err)
+    );
+  }
+
+  handleSuccess(response) {
+    this.isRegistering = false;
+    if (response.success) {
+      this.message.success('注册成功');
+      this.router.navigateByUrl('/login').then();
+    } else {
+      this.message.error(`注册失败: ${response.message}`);
+    }
+  }
+
+  handleError(_) {
+    this.isRegistering = false;
+    this.message.error(`服务错误，请联系运营人员。`);
+  }
 }

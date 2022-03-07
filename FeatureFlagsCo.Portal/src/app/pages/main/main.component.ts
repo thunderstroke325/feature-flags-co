@@ -4,7 +4,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { IAuthProps } from 'src/app/config/types';
-import { AuthService } from 'src/app/services/auth.service';
 import { IMenuItem } from 'src/app/share/uis/menu/menu';
 import { QUICK_COMBAT_DOCUMENT} from 'src/app/config';
 import { getAuth } from 'src/app/utils';
@@ -25,7 +24,6 @@ export class MainComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private authService: AuthService,
     private ffcService: FfcService,
   ) {
 
@@ -120,6 +118,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   public logout() {
-    this.authService.logout();
+    localStorage.clear();
+    this.router.navigateByUrl('/login');
   }
 }

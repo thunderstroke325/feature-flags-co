@@ -1,6 +1,8 @@
 export interface IAuthProps {
-    email: string
-    phoneNumber: string
+  id: string;
+  email: string;
+  userName: string;
+  phoneNumber: string;
 }
 
 export interface IAccount {

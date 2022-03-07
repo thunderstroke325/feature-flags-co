@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { AuthService } from 'src/app/services/auth.service';
-import { LoginService } from 'src/app/services/login.service';
+import { phoneNumberOrEmailValidator } from "../../../utils/form-validators";
+import { UserService } from "../../../services/user.service";
+import { IDENTITY_TOKEN, LOGIN_REDIRECT_URL, USER_PROFILE } from "../../../utils/localstorage-keys";
 
 @Component({
   selector: 'app-do-login',
@@ -12,56 +13,95 @@ import { LoginService } from 'src/app/services/login.service';
 })
 export class DoLoginComponent implements OnInit {
 
-  loginForm!: FormGroup;
-
-  isLoading: boolean = false;
+  pwdLoginForm: FormGroup;
+  passwordVisible: boolean = false;
+  isLogin: boolean = false;
 
   constructor(
     private fb: FormBuilder,
-    private loginService: LoginService,
+    private userService: UserService,
     private router: Router,
-    private message: NzMessageService,
-    private authService: AuthService
+    private message: NzMessageService
   ) { }
 
   ngOnInit(): void {
-    this.initForm();
-  }
-
-  initForm() {
-    this.loginForm = this.fb.group({
-      email: [null, [Validators.required, Validators.email]],
-      password: [null, [Validators.required]],
+    this.pwdLoginForm = this.fb.group({
+      identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
+      password: ['', [Validators.required]]
     });
   }
 
-  doLogin() {
-    if (this.loginForm.invalid) {
-      for (const i in this.loginForm.controls) {
-        this.loginForm.controls[i].markAsDirty();
-        this.loginForm.controls[i].updateValueAndValidity();
-      }
+  passwordLogin() {
+    if (this.pwdLoginForm.invalid) {
+      Object.values(this.pwdLoginForm.controls).forEach(control => {
+        if (control.invalid) {
+          control.markAsDirty();
+          control.updateValueAndValidity({ onlySelf: true });
+        }
+      });
+
       return;
     }
-    this.isLoading = true;
-    this.loginService.login(this.loginForm.value)
-      .subscribe(
-        res => {
-          localStorage.setItem('token', res.token);
-          this.authService.redirectUrl = '';
-          this.authService.getSelfInfo();
-        },
-        err => {
-          this.isLoading = false;
-          if (err.status === 401) {
-            this.message.warning('用户名或密码错误！');
-          }
+
+    this.isLogin = true;
+
+    const {identity, password} = this.pwdLoginForm.value;
+    this.userService.loginByPassword(identity, password).subscribe(
+      response => this.handleResponse(response),
+      error => this.handleError(error)
+    )
+  }
+
+  phoneCodeLogin(data) {
+    const {phoneNumber, code} = data;
+
+    this.isLogin = true;
+
+    this.userService.loginByPhoneCode(phoneNumber, code).subscribe(
+      response => this.handleResponse(response),
+      error => this.handleError(error)
+    )
+  }
+
+  forgetPassword() {
+    this.router.navigateByUrl('/login/forget-password');
+  }
+
+  register() {
+    this.router.navigateByUrl('/login/register');
+  }
+
+  handleResponse(response) {
+    this.isLogin = false;
+
+    if (!response.success) {
+      this.message.error(response.message);
+      return;
+    }
+
+    this.message.success('登录成功');
+
+    // store identity token
+    localStorage.setItem(IDENTITY_TOKEN, response.token);
+
+    // store user profile
+    this.userService.getProfile().subscribe(profile => {
+        localStorage.setItem(USER_PROFILE, JSON.stringify(profile));
+
+        const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
+        if (redirectUrl) {
+          localStorage.removeItem(LOGIN_REDIRECT_URL);
+          this.router.navigateByUrl(redirectUrl);
+        } else {
+          this.router.navigateByUrl('/');
         }
-      )
+      }
+    );
   }
 
-  changeRoute(url) {
-    this.router.navigateByUrl('/login/' + url);
-  }
+  handleError(_) {
+    this.isLogin = false;
 
+    this.message.error(`服务错误，请联系运营人员。`);
+  }
 }

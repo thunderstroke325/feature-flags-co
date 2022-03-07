@@ -1,23 +1,15 @@
 import { Injectable } from '@angular/core';
-import {
-  Router, Resolve,
-  RouterStateSnapshot,
-  ActivatedRouteSnapshot
-} from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Resolve, ActivatedRouteSnapshot } from '@angular/router';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UserService } from 'src/app/services/user.service';
+import { EnvironmentUserService } from 'src/app/services/environment-user.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SwitchUserResolver implements Resolve<boolean> {
 
-  constructor(
-    private userService: UserService
-  ) {
-
-  }
+  constructor(private userService: EnvironmentUserService) { }
 
   resolve(route: ActivatedRouteSnapshot): Observable<boolean> {
     const id: string = decodeURIComponent(route.params['id']);

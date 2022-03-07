@@ -1,26 +1,44 @@
-<form nz-form [formGroup]="loginForm" (ngSubmit)="doLogin()" nzLayout="vertical">
-    <nz-form-item>
-        <nz-form-label>邮箱</nz-form-label>
-        <nz-form-control nzErrorTip="请输入邮箱！">
-            <nz-input-group nzPrefixIcon="user">
-                <input type="text" nz-input formControlName="email" placeholder="邮箱" />
-            </nz-input-group>
+<nz-tabset>
+  <nz-tab nzTitle="密码登录">
+    <form nz-form [formGroup]="pwdLoginForm" (ngSubmit)="passwordLogin()">
+      <nz-form-item>
+        <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
+          <nz-input-group nzPrefixIcon="user">
+            <input type="text" nz-input formControlName="identity" placeholder="请输入手机号/邮箱"/>
+          </nz-input-group>
+          <ng-template #invalidPhoneNumberOrEmail let-control>
+            <ng-container *ngIf="control.hasError('required')">请输入手机号/邮箱</ng-container>
+            <ng-container *ngIf="control.hasError('invalid')">非法的手机号/邮箱</ng-container>
+          </ng-template>
         </nz-form-control>
-    </nz-form-item>
-    <nz-form-item>
-        <nz-form-label>密码</nz-form-label>
+      </nz-form-item>
+      <nz-form-item>
         <nz-form-control nzErrorTip="请输入密码">
-            <nz-input-group nzPrefixIcon="lock">
-                <input type="password" nz-input formControlName="password" placeholder="密码" />
-            </nz-input-group>
+          <nz-input-group nzPrefixIcon="key" [nzSuffix]="suffixTemplate">
+            <input
+              formControlName="password"
+              [type]="passwordVisible ? 'text' : 'password'"
+              nz-input
+              placeholder="请输入登录密码"
+            />
+          </nz-input-group>
+          <ng-template #suffixTemplate>
+            <i nz-icon [nzType]="passwordVisible ? 'eye' : 'eye-invisible'" (click)="passwordVisible = !passwordVisible">
+            </i>
+          </ng-template>
         </nz-form-control>
-    </nz-form-item>
+      </nz-form-item>
+      <button type="submit" nz-button nzType="primary" class="submit-btn" [nzLoading]="isLogin">登录</button>
+      <a (click)="forgetPassword()">忘记密码</a>
+      <a style="float: right" (click)="register()">立即注册</a>
+    </form>
+  </nz-tab>
 
-    <button nz-button class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">登录</button>
-    <div nz-row class="form-margin">
-        <div>
-            <a (click)="changeRoute('forgetpassword')">忘记密码？</a>
-            <a (click)="changeRoute('register')">注册账户</a>
-        </div>
-    </div>
-</form>
+  <nz-tab nzTitle="短信验证码">
+    <phone-code-form scene="login" (onSubmit)="phoneCodeLogin($event)" [footer]="footerTpl"></phone-code-form>
+    <ng-template #footerTpl>
+      <button type="submit" class="submit-btn" nz-button nzType="primary" [nzLoading]="isLogin">登录</button>
+      <a style="float: right" (click)="register()">立即注册</a>
+    </ng-template>
+  </nz-tab>
+</nz-tabset>

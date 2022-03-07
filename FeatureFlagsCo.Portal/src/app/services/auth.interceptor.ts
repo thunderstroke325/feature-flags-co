@@ -1,14 +1,10 @@
 import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor,
-} from '@angular/common/http';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Router } from '@angular/router';
+import { IDENTITY_TOKEN } from "../utils/localstorage-keys";
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -21,8 +17,7 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<unknown>> {
 
     const authReq = request.clone({
-      headers: request.headers
-        .set('Authorization', 'Bearer ' + localStorage.getItem('token') || '')
+      headers: request.headers.set('Authorization', 'Bearer ' + localStorage.getItem(IDENTITY_TOKEN))
     });
 
 

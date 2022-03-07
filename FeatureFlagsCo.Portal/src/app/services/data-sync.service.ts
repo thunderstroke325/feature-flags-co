@@ -9,14 +9,12 @@ import { getCurrentProjectEnv } from "../utils/project-env";
 })
 export class DataSyncService {
 
-  private readonly envId: number;
-  private readonly baseUrl: string;
-
-  constructor(private http: HttpClient) {
+  get baseUrl() {
     const envId = getCurrentProjectEnv().envId;
-    this.envId = envId;
-    this.baseUrl = `${environment.url}/api/datasync/envs/${envId}`
+    return `${environment.url}/api/datasync/envs/${envId}`;
   }
+
+  constructor(private http: HttpClient) { }
 
   getUploadUrl(): string {
     return `${this.baseUrl}/upload`;

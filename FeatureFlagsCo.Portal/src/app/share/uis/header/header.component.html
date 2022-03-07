@@ -1,7 +1,6 @@
 <section class="header-body">
   <a [routerLink]="['/']"><img class="header-logo" src="assets/ff_logo_text.png" alt=""></a>
   <div class="header-info" >
-    <!--    <div class="title">{{auth?.email}}(用户邮箱)</div>-->
     <div class="title" style="cursor:pointer" [routerLink]="['/account-settings']">{{currentAccount?.organizationName}}</div>
     <a nz-button nzType="link" class="title" style="display: flex;flex-direction: row;" (click)="envModalVisible=true">
       <div style="color: #4CB287;line-height: 32px;margin-right: 15px;">{{currentProjectEnv?.projectName}}</div>
@@ -14,7 +13,7 @@
     <nz-dropdown-menu #menu="nzDropdownMenu">
       <ul nz-menu class="user-item">
         <!-- <li nz-menu-item>{{currentAccount?.organizationName}}</li> -->
-        <li nz-menu-item>{{auth?.email}}</li>
+        <li nz-menu-item>{{auth?.userName}}</li>
         <li nz-menu-item [routerLink]="['/account-settings/profile']">个人信息</li>
         <li nz-menu-item (click)="logout.emit()">登出</li>
       </ul>

@@ -47,7 +47,7 @@ namespace FeatureFlags.APIs.Controllers
                 {
                     UserId = identityUser.Id,
                     Email = identityUser.Email,
-                    UserName = identityUser.UserName,
+                    PhoneNumber = identityUser.PhoneNumber, 
                     Role = accountUser.Role,
 
                     // only project owner or invitor can view the initial password 
