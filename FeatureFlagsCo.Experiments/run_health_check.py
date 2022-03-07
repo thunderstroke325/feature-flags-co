@@ -14,6 +14,7 @@ if __name__ == '__main__':
     redis_host = get_config_value('redis', 'redis_host')
     redis_port = get_config_value('redis', 'redis_port')
     redis_passwd = get_config_value('redis', 'redis_passwd')
+    redis_mode = get_config_value('redis', 'redis_mode')
     try:
         redis_ssl = strtobool(get_config_value('redis', 'redis_ssl'))
         wait_timeout = 3 * float(get_config_value('p2', 'wait_timeout'))
@@ -21,16 +22,17 @@ if __name__ == '__main__':
         redis_ssl = False
         wait_timeout = 30.0
     if engine == 'azure':
-        AzureHealthCheck(redis_host, redis_port, redis_passwd, wait_timeout).check_health()
+        AzureHealthCheck(redis_host, redis_port, redis_passwd, redis_mode, wait_timeout).check_health()
     elif engine == 'redis':
-        RedisHealthCheck(redis_host, redis_port, redis_passwd, redis_ssl, wait_timeout).check_health()
+        RedisHealthCheck(redis_host, redis_port, redis_passwd, redis_ssl, redis_mode, wait_timeout).check_health()
     else:
         redis_host = cus_redis_host if (cus_redis_host := os.getenv('CUSTOMERS_HOST', False)) else redis_host
         redis_port = cus_redis_port if (cus_redis_port := os.getenv('CUSTOMERS_PORT', False)) else redis_port
         redis_passwd = cus_redis_passwd if (cus_redis_passwd := os.getenv('CUSTOMERS_PASSWD', False)) else redis_passwd
+        redis_mode = cus_redis_mode if (cus_redis_mode := os.getenv('CUSTOMERS_MODE', False)) else redis_mode
         try:
             if (cus_redis_ssl := os.getenv('CUSTOMERS_SSL', False)):
                 redis_ssl = strtobool(cus_redis_ssl)
         except:
             pass
-        RedisHealthCheck(redis_host, redis_port, redis_passwd, redis_ssl, wait_timeout).check_health()
+        RedisHealthCheck(redis_host, redis_port, redis_passwd, redis_ssl, redis_mode, wait_timeout).check_health()

@@ -17,6 +17,7 @@ if __name__ == '__main__':
     redis_host = get_config_value('redis', 'redis_host')
     redis_port = get_config_value('redis', 'redis_port')
     redis_passwd = get_config_value('redis', 'redis_passwd')
+    redis_mode = get_config_value('redis', 'redis_mode')
     topic = get_config_value('p3', 'topic_Q4')
     subscription = get_config_value('p3', 'subscription_Q4')
     try:
@@ -34,13 +35,13 @@ if __name__ == '__main__':
         sb_host = get_config_value('azure', 'fully_qualified_namespace')
         sb_sas_policy = get_config_value('azure', 'sas_policy')
         sb_sas_key = get_config_value('azure', 'servicebus_sas_key')
-        azure_sb_p3(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd) \
+        azure_sb_p3(sb_host, sb_sas_policy, sb_sas_key, redis_host, redis_port, redis_passwd, redis_mode) \
             .consume(process_name=process_name,
                      topic=(topic, subscription),
                      prefetch_count=prefetch_count,
                      is_dlq=False)
     elif engine == 'redis':
-        redis_p3(redis_host, redis_port, redis_passwd, redis_ssl) \
+        redis_p3(redis_host, redis_port, redis_passwd, redis_ssl, redis_mode) \
             .consume(process_name=process_name,
                      topic=topic,
                      fetch_mode='multi')
@@ -48,12 +49,13 @@ if __name__ == '__main__':
         redis_host = cus_redis_host if (cus_redis_host := os.getenv('CUSTOMERS_HOST', False)) else redis_host
         redis_port = cus_redis_port if (cus_redis_port := os.getenv('CUSTOMERS_PORT', False)) else redis_port
         redis_passwd = cus_redis_passwd if (cus_redis_passwd := os.getenv('CUSTOMERS_PASSWD', False)) else redis_passwd
+        redis_mode = cus_redis_mode if (cus_redis_mode := os.getenv('CUSTOMERS_MODE', False)) else redis_mode
         try:
             if (cus_redis_ssl := os.getenv('CUSTOMERS_SSL', False)):
                 redis_ssl = strtobool(cus_redis_ssl)
         except:
             pass
-        redis_p3(redis_host, redis_port, redis_passwd, redis_ssl) \
+        redis_p3(redis_host, redis_port, redis_passwd, redis_ssl, redis_mode) \
             .consume(process_name=process_name,
                      topic=topic,
                      fetch_mode='multi')

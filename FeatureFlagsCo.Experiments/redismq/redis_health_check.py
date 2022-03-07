@@ -1,4 +1,3 @@
-
 import logging
 
 from azure_service_bus.insight_utils import get_insight_logger
@@ -23,11 +22,13 @@ class RedisHealthCheck(HealthCheck):
                  redis_port=6379,
                  redis_passwd='',
                  redis_ssl=False,
+                 mode='standalone',
                  wait_timeout=180):
         super().__init__(redis_host=redis_host,
                          redis_port=redis_port,
                          redis_passwd=redis_passwd,
                          ssl=redis_ssl,
+                         mode=mode,
                          wait_timeout=wait_timeout,
                          trace_health_check_logger=trace_health_check_logger,
                          debug_health_check_logger=debug_health_check_logger,

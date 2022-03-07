@@ -79,6 +79,7 @@ jobs:
             (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{p3_prefetch_count}}',$env:p3_prefetch_count_dev | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
             (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{redis_ssl}}',$env:redis_ssl | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
             (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{engine}}',$env:engine | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
+            (Get-Content -path FeatureFlagsCo.Experiments/env/docker-dev-config.ini -Raw) -replace '{{redis_mode}}',$env:redis_mode | Set-Content -Path FeatureFlagsCo.Experiments/env/docker-dev-config.ini
             
             $a = Get-Content FeatureFlagsCo.Experiments/env/docker-dev-config.ini
             Write-Host $a

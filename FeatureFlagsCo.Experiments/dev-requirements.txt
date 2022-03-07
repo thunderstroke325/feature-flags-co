@@ -1,16 +1,16 @@
 flask
 elasticsearch
 elasticsearch_dsl
-numpy
-scipy
-pandas
+numpy > 1.17
+scipy > 1.3
+pandas > 1.2.0
+redis > 4.1.0
+statsmodels > 0.13
 requests
 pika
-redis
 azure-servicebus
 opencensus-ext-azure
 flake8
 autopep8
 pylint
 supervisor
-statsmodels

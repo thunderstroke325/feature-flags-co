@@ -1,4 +1,3 @@
-
 from experiment.generic_p1 import P1GetExptRecordingInfo
 from experiment.generic_p2 import P2GetExptResult
 from experiment.generic_p3 import P3GetExptFFEvents, P3GetExptUserEvents
@@ -10,13 +9,15 @@ class P1RedisGetExptRecordingInfoReceiver(RedisReceiver, P1GetExptRecordingInfo)
 
 
 class P2RedisGetExptResultReceiver(RedisReceiver, P2GetExptResult):
+
     def __init__(self,
                  redis_host='localhost',
                  redis_port='6379',
                  redis_passwd=None,
                  redis_ssl=False,
+                 redis_mode='standalone',
                  wait_timeout=30.0):
-        super().__init__(redis_host, redis_port, redis_passwd, ssl=redis_ssl)
+        super().__init__(redis_host, redis_port, redis_passwd, ssl=redis_ssl, mode=redis_mode)
         self._init_wait_timeout(wait_timeout=wait_timeout)
 
 

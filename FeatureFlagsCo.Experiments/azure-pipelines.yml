@@ -56,6 +56,7 @@ stages:
                   (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{p3_prefetch_count}}','$(p3_prefetch_count_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
                   (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{redis_ssl}}','$(redis_ssl_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
                   (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{engine}}','$(engine_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini -Raw) -replace '{{redis_mode}}','$(redis_mode_dev)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
                   
                   $a = Get-Content $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-dev-config.ini
                   Write-Host $a
@@ -135,6 +136,7 @@ stages:
                   (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-prod-config.ini -Raw) -replace '{{p3_prefetch_count}}','$(p3_prefetch_count_prod)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-prod-config.ini
                   (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-prod-config.ini -Raw) -replace '{{redis_ssl}}','$(redis_ssl_prod)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-prod-config.ini
                   (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-prod-config.ini -Raw) -replace '{{engine}}','$(engine_prod)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-prod-config.ini
+                  (Get-Content -path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-prod-config.ini -Raw) -replace '{{redis_mode}}','$(redis_mode_prod)' | Set-Content -Path $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-prod-config.ini
 
                   $a = Get-Content $(System.DefaultWorkingDirectory)\FeatureFlagsCo.Experiments\env\docker-prod-config.ini
 

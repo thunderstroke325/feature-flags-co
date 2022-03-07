@@ -1,5 +1,3 @@
-
-
 import logging
 
 from config.config_handling import get_config_value
@@ -19,11 +17,8 @@ debug_health_check_logger.setLevel(logging.INFO)
 
 
 class AzureHealthCheck(HealthCheck):
-    def __init__(self,
-                 redis_host='localhost',
-                 redis_port=6379,
-                 redis_passwd='',
-                 wait_timeout=180):
+
+    def __init__(self, redis_host='localhost', redis_port=6379, redis_passwd='', mode='standalone', wait_timeout=180):
         try:
             ssl = True if int(redis_port) == 6380 else False
         except:
@@ -32,6 +27,7 @@ class AzureHealthCheck(HealthCheck):
                          redis_port=redis_port,
                          redis_passwd=redis_passwd,
                          ssl=ssl,
+                         mode=mode,
                          wait_timeout=wait_timeout,
                          trace_health_check_logger=trace_health_check_logger,
                          debug_health_check_logger=debug_health_check_logger,

@@ -8,20 +8,14 @@ from datetime import datetime, timedelta
 from random import choice
 
 import redis
-from azure.servicebus import (AutoLockRenewer, ServiceBusClient,
-                              ServiceBusMessage, ServiceBusReceiver,
+from azure.servicebus import (AutoLockRenewer, ServiceBusClient, ServiceBusMessage, ServiceBusReceiver,
                               ServiceBusSender)
 from azure.servicebus._common.constants import ServiceBusSubQueue
-from azure.servicebus.exceptions import (MessageAlreadySettled,
-                                         MessageLockLostError,
-                                         MessageNotFoundError,
-                                         MessageSizeExceededError,
-                                         ServiceBusError)
+from azure.servicebus.exceptions import (MessageAlreadySettled, MessageLockLostError, MessageNotFoundError,
+                                         MessageSizeExceededError, ServiceBusError)
 from config.config_handling import get_config_value
-from experiment.constants import (ERROR_RETRY_INTERVAL, FMT,
-                                  get_azure_instance_id)
-from experiment.generic_sender_receiver import (MessageHandler, Receiver,
-                                                RedisStub, Sender)
+from experiment.constants import (ERROR_RETRY_INTERVAL, FMT, get_azure_instance_id)
+from experiment.generic_sender_receiver import (MessageHandler, Receiver, RedisStub, Sender)
 from experiment.utils import decode, encode, get_custom_properties, quite_app
 
 from azure_service_bus.insight_utils import get_insight_logger
@@ -55,6 +49,7 @@ else:
 
 
 class AzureServiceBus(RedisStub):
+
     def __init__(self,
                  sb_host,
                  sb_sas_policy,
@@ -62,6 +57,7 @@ class AzureServiceBus(RedisStub):
                  redis_host='localhost',
                  redis_port=6379,
                  redis_passwd='',
+                 redis_mode='standalone',
                  special_topic=get_config_value('p2', 'topic_Q2')):
         self._sb_host = sb_host
         self._sb_sas_policy = sb_sas_policy
@@ -69,11 +65,12 @@ class AzureServiceBus(RedisStub):
         self._redis_host = redis_host
         self._redis_port = redis_port
         self._redis_passwd = redis_passwd
+        self._mode = redis_mode
         try:
             self._ssl = True if int(redis_port) == 6380 else False
         except:
             self._ssl = False
-        super()._init__redis_connection(redis_host, redis_port, redis_passwd, self._ssl)
+        super()._init__redis_connection(redis_host, redis_port, redis_passwd, self._ssl, redis_mode)
         self._sender_pool = {}
         self._check_dupicated_message_topic = special_topic
 
@@ -89,10 +86,8 @@ class AzureServiceBus(RedisStub):
         expiry = str(int(time.time() + token_ttl.total_seconds()))
         string_to_sign = (auth_uri + '\n' + expiry).encode('utf-8')
         signed_hmac_sha256 = hmac.HMAC(sas, string_to_sign, hashlib.sha256)
-        signature = url_parse_quote(
-            base64.b64encode(signed_hmac_sha256.digest()))
-        sas_token = 'SharedAccessSignature sr={}&sig={}&se={}&skn={}'.format(
-            auth_uri, signature, expiry, sas_name)
+        signature = url_parse_quote(base64.b64encode(signed_hmac_sha256.digest()))
+        sas_token = 'SharedAccessSignature sr={}&sig={}&se={}&skn={}'.format(auth_uri, signature, expiry, sas_name)
         credential = AzureSasCredential(sas_token)
         return ServiceBusClient(fully_qualified_namespace, credential, logging_enable=True)
 
@@ -135,12 +130,12 @@ class AzureSender(AzureServiceBus, Sender):
                     continue
             if last_error:
                 raise last_error
+
         bus = kwargs.pop('bus', None)
         topic = kwargs.pop('topic', '')
         subscription = kwargs.pop('subscription', '')
         if not bus:
-            bus = self._init_azure_service_bus(
-                self._sb_host, self._sb_sas_policy, self._sb_sas_key)
+            bus = self._init_azure_service_bus(self._sb_host, self._sb_sas_policy, self._sb_sas_key)
             with bus:
                 if not (sender := self._sender_pool.get(topic, None)):
                     sender = bus.get_topic_sender(topic_name=topic)
@@ -158,7 +153,13 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
 
     def consume(self, **kwargs):
 
-        def receive_message(receiver: ServiceBusReceiver, process_name, topic=None, instance_id=None, renewer: AutoLockRenewer = None, settlement_retries=3, is_dlq=False):
+        def receive_message(receiver: ServiceBusReceiver,
+                            process_name,
+                            topic=None,
+                            instance_id=None,
+                            renewer: AutoLockRenewer = None,
+                            settlement_retries=3,
+                            is_dlq=False):
             if is_dlq:
                 debug_logger.info("################dlq receiver################")
             else:
@@ -169,8 +170,13 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                 try:
                     debug_logger.info(f'################pulling the message into {topic}-{instance_id}################')
                     if process_name:
-                        current_pulling_timestamp = {'topic': topic, 'instance': instance_id, 'datetime': datetime.utcnow().strftime(FMT)}
-                        self.redis.hset(f'topic_pulling_last_exec_time_in_{machine_id}', process_name, encode(current_pulling_timestamp))
+                        current_pulling_timestamp = {
+                            'topic': topic,
+                            'instance': instance_id,
+                            'datetime': datetime.utcnow().strftime(FMT)
+                        }
+                        self.redis.hset(f'topic_pulling_last_exec_time_in_{machine_id}', process_name,
+                                        encode(current_pulling_timestamp))
                     unique_messages = set()
                     for msg in receiver.receive_messages(max_message_count=None, max_wait_time=60):
                         last_error = None
@@ -192,14 +198,20 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                                                  debug_logger=debug_logger)
                             should_complete = True
                         except ServiceBusError:
-                            logger.exception("Maybe error in send message, retrying to connect...", extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
+                            logger.exception("Maybe error in send message, retrying to connect...",
+                                             extra=get_custom_properties(topic=msg.subject,
+                                                                         instance=f'{msg.subject}-{instance_id}'))
                             raise
                         except redis.RedisError as e:
-                            logger.exception('redis error', extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
+                            logger.exception('redis error',
+                                             extra=get_custom_properties(topic=msg.subject,
+                                                                         instance=f'{msg.subject}-{instance_id}'))
                             last_error = e
                             should_complete = False
                         except Exception as e:
-                            logger.exception(f'Application level error in {msg.subject}', extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
+                            logger.exception(f'Application level error in {msg.subject}',
+                                             extra=get_custom_properties(topic=msg.subject,
+                                                                         instance=f'{msg.subject}-{instance_id}'))
                             last_error = e
                             should_complete = False
 
@@ -218,10 +230,8 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                                             self.redis.ping()
                                         except:
                                             logger.exception('CANNOT PING redis, trying to reconnect...')
-                                            self._init__redis_connection(self._redis_host,
-                                                                         self._redis_port,
-                                                                         self._redis_passwd,
-                                                                         self._ssl)
+                                            self._init__redis_connection(self._redis_host, self._redis_port,
+                                                                         self._redis_passwd, self._ssl, self._mode)
                                         receiver.abandon_message(msg)
                                     elif is_dlq:
                                         # messages will be handled later
@@ -230,17 +240,23 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                                         self.redis.sadd(id, str(msg.sequence_number))
                                         receiver.defer_message(msg)
                                     else:
-                                        receiver.dead_letter_message(msg, reason=str(last_error), error_description='Application level failure')
+                                        receiver.dead_letter_message(msg,
+                                                                     reason=str(last_error),
+                                                                     error_description='Application level failure')
                                 break
                             except (MessageAlreadySettled, MessageLockLostError, MessageNotFoundError):
                                 # Message was already settled, either somewhere earlier in this processing or by another node.  Continue.
                                 # Message lock was lost before settlement.  Handle as necessary in the app layer for idempotency then continue on.
                                 # Message has an improper sequence number, was dead lettered, or otherwise does not exist.  Handle at app layer, continue on.
-                                logger.exception('message settled or lost or not found', extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
+                                logger.exception('message settled or lost or not found',
+                                                 extra=get_custom_properties(topic=msg.subject,
+                                                                             instance=f'{msg.subject}-{instance_id}'))
                                 break
                             except ServiceBusError:
                                 # Any other undefined service errors during settlement.  Can be transient, and can retry, but should be logged, and alerted on high volume.
-                                logger.exception('undefined service errors during settlement, retrying...', extra=get_custom_properties(topic=msg.subject, instance=f'{msg.subject}-{instance_id}'))
+                                logger.exception('undefined service errors during settlement, retrying...',
+                                                 extra=get_custom_properties(topic=msg.subject,
+                                                                             instance=f'{msg.subject}-{instance_id}'))
                                 continue
                 except ServiceBusError:
                     # some service bus error in connection that can be handled at the higher level, such as connection/auth errors
@@ -251,7 +267,9 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                     # Logging the associated failure and alerting on high volume is often prudent.
                     if isinstance(e, KeyboardInterrupt):
                         raise
-                    logger.exception('service errors and interruptions occasionally occur during receiving, trying to fetch next message...')
+                    logger.exception(
+                        'service errors and interruptions occasionally occur during receiving, trying to fetch next message...'
+                    )
                     continue
 
         process_name = kwargs.pop('process_name', '')
@@ -270,7 +288,9 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                     if topic:
                         topic_name, subscription = topic
                         if not is_dlq:
-                            receiver = self._bus.get_subscription_receiver(topic_name=topic_name, subscription_name=subscription, prefetch_count=prefetch_count)
+                            receiver = self._bus.get_subscription_receiver(topic_name=topic_name,
+                                                                           subscription_name=subscription,
+                                                                           prefetch_count=prefetch_count)
                         else:
                             receiver = self._bus.get_subscription_receiver(topic_name=topic_name,
                                                                            subscription_name=subscription,
@@ -280,11 +300,22 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                         quite_app(0)
                     with AutoLockRenewer(max_workers=4) as renewer:
                         with receiver:
-                            logger.info('RECEIVER START', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
-                            receive_message(receiver, process_name, topic=topic_name, instance_id=instance_id, renewer=renewer, settlement_retries=settlement_retries, is_dlq=is_dlq)
+                            logger.info('RECEIVER START',
+                                        extra=get_custom_properties(topic=topic_name,
+                                                                    subscription=subscription,
+                                                                    instance=f'{topic_name}-{instance_id}'))
+                            receive_message(receiver,
+                                            process_name,
+                                            topic=topic_name,
+                                            instance_id=instance_id,
+                                            renewer=renewer,
+                                            settlement_retries=settlement_retries,
+                                            is_dlq=is_dlq)
             except ServiceBusError:
-                logger.exception('An error occurred in service bus level, retrying to connect...', extra=get_custom_properties(
-                    topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
+                logger.exception('An error occurred in service bus level, retrying to connect...',
+                                 extra=get_custom_properties(topic=topic_name,
+                                                             subscription=subscription,
+                                                             instance=f'{topic_name}-{instance_id}'))
                 self.clear()
                 time.sleep(ERROR_RETRY_INTERVAL)
                 continue
@@ -292,8 +323,15 @@ class AzureReceiver(AzureSender, Receiver, MessageHandler, ABC):
                 debug_logger.info('################Interrupted################')
                 quite_app(0)
             except:
-                logger.exception('unexpected error occurs, retrying to connect...', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}'))
+                logger.exception('unexpected error occurs, retrying to connect...',
+                                 extra=get_custom_properties(topic=topic_name,
+                                                             subscription=subscription,
+                                                             instance=f'{topic_name}-{instance_id}'))
                 continue
 
-        logger.warning('APP QUIT', extra=get_custom_properties(topic=topic_name, subscription=subscription, instance=f'{topic_name}-{instance_id}', reason='TOO MANY RETRIES'))
+        logger.warning('APP QUIT',
+                       extra=get_custom_properties(topic=topic_name,
+                                                   subscription=subscription,
+                                                   instance=f'{topic_name}-{instance_id}',
+                                                   reason='TOO MANY RETRIES'))
         quite_app(1)
