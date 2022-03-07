@@ -55,9 +55,10 @@
     <ng-template #footerTpl>
       <nz-form-item>
         <nz-input-group [style.border-color]="!isValidRandomPwd ? 'red' : ''" nzPrefixIcon="key" [nzSuffix]="regeneratePwd">
-          <input type="text" nz-input [(ngModel)]="randomPwd" placeholder="请输入登录密码"/>
+          <input type="text" nz-input [(ngModel)]="randomPwd" placeholder="请输入登录密码（可选）"/>
           <ng-template #regeneratePwd>
             <button style="padding-right: 0;" type="button" nz-button nzType="link" nzSize="small" (click)="newRandomPwd()">
+              自动生成密码
               <i nz-icon nzType="reload" nzTheme="outline" nz-tooltip="重新生成登录密码"></i>
             </button>
           </ng-template>

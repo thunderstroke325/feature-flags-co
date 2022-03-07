@@ -60,9 +60,9 @@ export class RegisterComponent implements OnInit {
     );
   }
 
-  randomPwd: string = randomString(7);
+  randomPwd: string = '';
   get isValidRandomPwd() {
-    return this.randomPwd && this.randomPwd.length >= 5;
+    return !this.randomPwd || this.randomPwd.length >= 5;
   }
   newRandomPwd() {
     this.randomPwd = randomString(7);
@@ -76,7 +76,11 @@ export class RegisterComponent implements OnInit {
     this.isRegistering = true;
 
     const {phoneNumber, code} = data;
-    this.userService.registerByPhone(phoneNumber, code, this.randomPwd).subscribe(
+    const pwd = this.randomPwd ? this.randomPwd : randomString(7);
+
+    this.isRegistering = false;
+
+    this.userService.registerByPhone(phoneNumber, code, pwd).subscribe(
       response => this.handleSuccess(response),
       err => this.handleError(err)
     );
