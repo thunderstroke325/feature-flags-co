@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ctypes import Union
+from typing import Union
 
 import redis
 from redis.cluster import RedisCluster as rc

@@ -47,6 +47,7 @@ jobs:
           redis_port: ${{ secrets.redis_port }}
           redis_password: ${{ secrets.redis_password}}
           redis_ssl: ${{ secrets.redis_ssl}}
+          redis_mode: ${{ secrets.redis_mode }}
           wait_timeout: ${{ secrets.wait_timeout }}
           fully_qualified_namespace: ${{ secrets.fully_qualified_namespace }}
           sas_policy: ${{ secrets.sas_policy }}
