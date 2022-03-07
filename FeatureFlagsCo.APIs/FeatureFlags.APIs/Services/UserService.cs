@@ -71,7 +71,7 @@ namespace FeatureFlags.APIs.Services
             return registerAppUserResult;
         }
 
-        public async Task<bool> SendIdentityCode(string identity, string scene)
+        public async Task<SendIdentityCodeResult> SendIdentityCode(string identity, string scene)
         {
             var identityType = IdentityTypes.Check(identity);
 
@@ -88,7 +88,7 @@ namespace FeatureFlags.APIs.Services
                 default:
                     var ex = new NotSupportedException($"identity type({identity}) with scene({scene}) not supported");
                     _logger.LogError(ex, ex.Message);
-                    return false;
+                    return SendIdentityCodeResult.Failed(ex.Message);
             }
 
             if (!response.Success || response.Data.Code != 200)
@@ -96,10 +96,10 @@ namespace FeatureFlags.APIs.Services
                 var reason = response.Data != null ? response.Data.Message : response.Message;
                 var ex = new SendIdentityCodeException($"send identity code failed, reason: {reason}");
                 _logger.LogError(ex, ex.Message);
-                return false;
+                return SendIdentityCodeResult.Failed(reason);
             }
 
-            return true;
+            return SendIdentityCodeResult.Ok();
         }
 
         public async Task<RegisterResult> RegisterByPhoneAsync(string phoneNumber, string code, string password)

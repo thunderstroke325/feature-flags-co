@@ -50,29 +50,28 @@ export class ForgetComponent implements OnInit {
     this.isSendingCode = true;
 
     this.userService.sendIdentityCode(identity.value, 'forget-password').subscribe(
-      _ => {
-        this.message.success('验证码已发送, 请注意查收');
+      (response: any) => {
         this.isSendingCode = false;
 
-        this.getCodeInterval = 60;
-        const codeInterval = setInterval(() => {
-          if (this.getCodeInterval === 0) {
-            clearInterval(codeInterval);
-            return;
-          }
+        if (response.success) {
+          this.message.success('验证码已发送, 请注意查收');
 
-          this.getCodeInterval--;
-        }, 1000);
-      },
-      err => {
-        this.isSendingCode = false;
+          this.getCodeInterval = 60;
+          const codeInterval = setInterval(() => {
+            if (this.getCodeInterval === 0) {
+              clearInterval(codeInterval);
+              return;
+            }
 
-        if (err.status === 403) {
-          console.log(err);
-          this.message.warning(err.error);
+            this.getCodeInterval--;
+          }, 1000);
         } else {
-          this.message.error('发送验证码失败, 请联系运营人员');
+          this.message.error(response.message);
         }
+      },
+      _ => {
+        this.isSendingCode = false;
+        this.message.error('发送验证码失败, 请联系运营人员');
       }
     );
   }

@@ -47,7 +47,7 @@ namespace FeatureFlags.APIs.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Route("send-identity-code")]
-        public async Task<IActionResult> SendIdentityCodeAsync(
+        public async Task<SendIdentityCodeResult> SendIdentityCodeAsync(
             [Required(AllowEmptyStrings = false)] string identity, 
             [Required(AllowEmptyStrings = false)] string scene)
         {
@@ -62,12 +62,12 @@ namespace FeatureFlags.APIs.Controllers
                     _logger.LogWarning("identity {0} not exists but try send identity code", identity);
                     
                     var message = identityType == IdentityType.Email ? "该邮箱尚未注册" : "该手机号尚未注册";
-                    return StatusCode(StatusCodes.Status403Forbidden, message);
+                    return SendIdentityCodeResult.Failed(message);
                 }
             }
             
-            var success = await _userService.SendIdentityCode(identity, scene);
-            return success ? Ok() : StatusCode(StatusCodes.Status500InternalServerError);
+            var result = await _userService.SendIdentityCode(identity, scene);
+            return result;
         }
 
         [HttpPost]

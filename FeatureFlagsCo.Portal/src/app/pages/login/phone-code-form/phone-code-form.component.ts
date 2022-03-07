@@ -95,30 +95,34 @@ export class PhoneCodeFormComponent implements OnInit {
   sendCode(phoneNumber: string) {
     this.userService.sendIdentityCode(phoneNumber, this.scene)
       .subscribe(
-      _ => {
-        this.message.success('验证码已发送, 请注意查收');
-        this.isGettingPhoneCode = false;
+        response => this.handleResponse(response),
+        err => this.handleError(err)
+      );
+  }
 
-        this.getPhoneCodeInterval = 60;
-        const phoneCodeInterval = setInterval(() => {
-          if (this.getPhoneCodeInterval === 0) {
-            clearInterval(phoneCodeInterval);
-            return;
-          }
+  handleResponse(response) {
+    this.isGettingPhoneCode = false;
 
-          this.getPhoneCodeInterval--;
-        }, 1000);
+    if (response.success) {
+      this.message.success('验证码已发送, 请注意查收');
 
-      },
-      err => {
-        this.isGettingPhoneCode = false;
-
-        if (err.status === 403) {
-          this.message.warning(err.error);
-        } else {
-          this.message.error('发送验证码失败, 请联系运营人员');
+      this.getPhoneCodeInterval = 60;
+      const phoneCodeInterval = setInterval(() => {
+        if (this.getPhoneCodeInterval === 0) {
+          clearInterval(phoneCodeInterval);
+          return;
         }
-      }
-    );
+
+        this.getPhoneCodeInterval--;
+      }, 1000);
+    } else {
+      this.message.error(response.message);
+    }
+  }
+
+  handleError(_) {
+    this.isGettingPhoneCode = false;
+
+    this.message.error('发送验证码失败, 请联系运营人员');
   }
 }
