@@ -78,8 +78,6 @@ export class RegisterComponent implements OnInit {
     const {phoneNumber, code} = data;
     const pwd = this.randomPwd ? this.randomPwd : randomString(7);
 
-    this.isRegistering = false;
-
     this.userService.registerByPhone(phoneNumber, code, pwd).subscribe(
       response => this.handleSuccess(response),
       err => this.handleError(err)
