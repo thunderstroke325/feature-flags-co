@@ -16,13 +16,16 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { SDKJSComponent } from './sdk-js/sdk-js.component';
 import { SDKJavaComponent } from './sdk-java/sdk-java.component';
+import { SDKReactComponent } from './sdk-react/sdk-react.component';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzResultModule } from 'ng-zorro-antd/result';
 
 @NgModule({
   declarations: [
     SDKIntegrationComponent,
     SDKJSComponent,
     SDKJavaComponent,
+    SDKReactComponent,
   ],
   imports: [
     NzButtonModule,
@@ -36,6 +39,7 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
     NzTabsModule,
     NzRadioModule,
     NzEmptyModule,
+    NzResultModule,
     FormsModule,
     ComponentsModule,
     SDKIntegrationRoutingModule
