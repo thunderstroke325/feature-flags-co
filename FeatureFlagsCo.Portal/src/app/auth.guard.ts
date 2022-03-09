@@ -25,18 +25,21 @@ export class AuthGuard implements CanActivate {
   async checkLogin(url: string): Promise<true | UrlTree> {
     const auth = getAuth();
     if (auth) {
-      await this.ffcService.initialize({
-        secret: environment.projectEnvKey,
-        user: {
-          id: auth.id,
-          email: auth.email,
-          userName: auth.userName,
-          customizedProperties: [{
-            name: 'phoneNumber',
-            value: auth.phoneNumber
-          }]
+      if (this.ffcService.getUser().id !== auth.id) {
+        try {
+          await this.ffcService.identify({
+            id: auth.id,
+            email: auth.email,
+            userName: auth.userName,
+            customizedProperties: [{
+              name: 'phoneNumber',
+              value: auth.phoneNumber
+            }]
+          })
+        } catch (err) {
+          console.log('identify', err);
         }
-      });
+      }
 
       return true;
     }

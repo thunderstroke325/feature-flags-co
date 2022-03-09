@@ -117,8 +117,11 @@ export class MainComponent implements OnInit, OnDestroy {
     }
   }
 
-  public logout() {
+  public async logout() {
+    const anonymousUser = await this.ffcService.logout();
     localStorage.clear();
+    // restore guid of ffc-js-client-side-sdk, this would keep the same anonymous user
+    localStorage.setItem('ffc-guid', anonymousUser.id);
     this.router.navigateByUrl('/login');
   }
 }
