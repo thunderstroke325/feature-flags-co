@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '../config/types';
+import { getLocalStorageKey } from '../utils';
 import { FfcService } from "./ffc.service";
 
 @Injectable({
@@ -10,7 +11,6 @@ import { FfcService } from "./ffc.service";
 })
 export class ProjectService {
 
-  readonly projectEnvKey: string = 'current-project';
   currentProjectEnvChanged$: Subject<void> = new Subject<void>();
   projectListChanged$: Subject<void> = new Subject<void>();
 
@@ -56,13 +56,13 @@ export class ProjectService {
 
   // update or set current project env
   upsertCurrentProjectEnvLocally(project: IProjectEnv) {
-    localStorage.setItem(this.projectEnvKey, JSON.stringify(project));
+    localStorage.setItem(getLocalStorageKey('current-project'), JSON.stringify(project));
     this.currentProjectEnvChanged$.next();
   }
 
   // update current project env by partial object
   updateCurrentProjectEnvLocally(partialUpdated: Partial<IProjectEnv>) {
-    const projectEnvJson = localStorage.getItem(this.projectEnvKey);
+    const projectEnvJson = localStorage.getItem(getLocalStorageKey('current-project'));
     if (!projectEnvJson) {
       return;
     }
@@ -75,7 +75,7 @@ export class ProjectService {
 
   // get local project env
   getLocalCurrentProjectEnv(): IProjectEnv {
-    const projectEnvJson = localStorage.getItem(this.projectEnvKey);
+    const projectEnvJson = localStorage.getItem(getLocalStorageKey('current-project'));
     return projectEnvJson ? JSON.parse(projectEnvJson) : undefined;
   }
 
@@ -108,6 +108,6 @@ export class ProjectService {
 
   // reset current project env
   clearCurrentProjectEnv() {
-    localStorage.removeItem(this.projectEnvKey);
+    localStorage.removeItem(getLocalStorageKey('current-project'));
   }
 }

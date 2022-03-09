@@ -10,6 +10,7 @@ import { PendingChange } from '../types/pending-changes';
 import { TeamService } from 'src/app/services/team.service';
 import { IAccount, IProjectEnv } from 'src/app/config/types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { getLocalStorageKey } from 'src/app/utils';
 
 @Component({
   selector: 'conditions',
@@ -137,8 +138,8 @@ export class TargetConditionsComponent implements OnInit {
     this.switchServe.setCurrentSwitch(detail);
     this.switchId = detail.id;
 
-    this.currentProjectEnv = JSON.parse(localStorage.getItem('current-project'));
-    this.currentAccount = JSON.parse(localStorage.getItem('current-account'));
+    this.currentProjectEnv = JSON.parse(localStorage.getItem(getLocalStorageKey('current-project')));
+    this.currentAccount = JSON.parse(localStorage.getItem(getLocalStorageKey('current-account')));
     const currentUrl = this.route.snapshot['_routerState'].url;
     this.pendingChanges = new PendingChange(
       this.teamService,

@@ -7,7 +7,7 @@ import { IAccount } from 'src/app/config/types';
 import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric, UrlMatchType } from 'src/app/pages/main/switch-manage/types/experimentations';
 import { MetricService } from 'src/app/services/metric.service';
 import { TeamService } from 'src/app/services/team.service';
-import { uuidv4 } from 'src/app/utils';
+import { getLocalStorageKey, uuidv4 } from 'src/app/utils';
 
 @Component({
   selector: 'app-metric-drawer',
@@ -62,7 +62,7 @@ export class MetricDrawerComponent implements OnInit {
     private metricService: MetricService,
     private message: NzMessageService
   ) {
-    const currentAccount: IAccount = JSON.parse(localStorage.getItem('current-account'));
+    const currentAccount: IAccount = JSON.parse(localStorage.getItem(getLocalStorageKey('current-account')));
 
     this.maintainerSearchChange$.pipe(
       debounceTime(500),
