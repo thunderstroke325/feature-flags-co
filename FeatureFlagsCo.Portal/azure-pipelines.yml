@@ -54,6 +54,16 @@ stages:
                   storage: 'ffc0stws0adminportal0dev'
                   ContainerName: $web
 
+              - task: AzureFileCopy@4
+                displayName: Set index.html cache control header
+                inputs:
+                  SourcePath: $(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal/dist/feature-flagsco-fontend/index.html
+                  azureSubscription: 'azure-china-devops'
+                  Destination: 'AzureBlob'
+                  storage: 'ffc0stws0adminportal0dev'
+                  ContainerName: $web
+                  additionalArgumentsForBlobCopy: '--cache-control "no-cache"'
+
 - stage: 'Production'
   dependsOn: Development
   condition: succeeded()
@@ -98,7 +108,6 @@ stages:
                   Destination: 'AzureBlob'
                   storage: 'ffc0st0sws0adminportal'
                   ContainerName: $web
-                  additionalArgumentsForBlobCopy: '--cache-control=no-cache'
 
               - task: AzureFileCopy@4
                 displayName: Set index.html cache control header
