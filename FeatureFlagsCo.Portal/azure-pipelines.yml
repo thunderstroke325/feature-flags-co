@@ -47,6 +47,7 @@ stages:
                 displayName: 'npm install and build'
 
               - task: AzureFileCopy@4
+                displayName: Copy files to azure storage account
                 inputs:
                   SourcePath: $(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal/dist/feature-flagsco-fontend/*
                   azureSubscription: 'azure-china-devops'
