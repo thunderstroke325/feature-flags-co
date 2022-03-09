@@ -91,12 +91,24 @@ stages:
                 displayName: 'npm install and build'
 
               - task: AzureFileCopy@4
+                displayName: Copy files to azure storage account
                 inputs:
                   SourcePath: $(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal/dist/feature-flagsco-fontend/*
                   azureSubscription: 'azure-china-devops'
                   Destination: 'AzureBlob'
                   storage: 'ffc0st0sws0adminportal'
                   ContainerName: $web
+                  additionalArgumentsForBlobCopy: '--cache-control=no-cache'
+
+              - task: AzureFileCopy@4
+                displayName: Set index.html cache control header
+                inputs:
+                  SourcePath: $(System.DefaultWorkingDirectory)/FeatureFlagsCo.Portal/dist/feature-flagsco-fontend/index.html
+                  azureSubscription: 'azure-china-devops'
+                  Destination: 'AzureBlob'
+                  storage: 'ffc0st0sws0adminportal'
+                  ContainerName: $web
+                  additionalArgumentsForBlobCopy: '--cache-control "no-cache"'
 
 
 
