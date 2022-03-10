@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Union
 
 import redis
-from redis.cluster import RedisCluster as rc
+from redis.cluster import RedisCluster, ClusterNode
 
 
 class RedisStub:
@@ -24,18 +24,18 @@ class RedisStub:
                                       charset='utf-8',
                                       decode_responses=True)
         elif 'cluster' == mode:
-            startup_nodes = [{"host": host, "port": port}]
-            self._redis = rc(startup_nodes=startup_nodes,
-                             password=password,
-                             ssl=ssl,
-                             charset='utf-8',
-                             decode_responses=True,
-                             skip_full_coverage_check=True)
+            startup_nodes = [ClusterNode(host=host, port=port)]
+            self._redis = RedisCluster(startup_nodes=startup_nodes,
+                                       password=password,
+                                       ssl=ssl,
+                                       charset='utf-8',
+                                       decode_responses=True,
+                                       skip_full_coverage_check=True)
         else:
             raise NotImplementedError("this mode is not supported")
 
     @property
-    def redis(self) -> Union[redis.Redis, rc]:
+    def redis(self) -> Union[redis.Redis, RedisCluster]:
         return self._redis
 
 
