@@ -1,5 +1,3 @@
-import { ApplicationInsights } from '@microsoft/applicationinsights-web';
-import { AngularPlugin } from '@microsoft/applicationinsights-angularplugin-js';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
