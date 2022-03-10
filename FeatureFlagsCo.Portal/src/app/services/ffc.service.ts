@@ -21,7 +21,7 @@ export class FfcService {
   }
 
   async logout(): Promise<IUser> {
-    return await Ffc.logout();
+    return Ffc.logout();
   }
 
   variation(key: string, defaultResult: string): string {
