@@ -5,6 +5,7 @@ using FeatureFlags.APIs.Authentication.Scheme;
 using FeatureFlags.APIs.Middlewares;
 using FeatureFlags.APIs.Repositories;
 using FeatureFlags.APIs.Services;
+using FeatureFlags.APIs.Services.Authing;
 using FeatureFlags.APIs.Services.MongoDb;
 using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.Utils.ExtensionMethods;
@@ -113,6 +114,9 @@ namespace FeatureFlags.APIs
             
             // add IHttpClientFactory
             services.AddHttpClient();
+            
+            // add authing client
+            services.AddAuthingClient(Configuration);
 
             services.AddScoped<IGenericRepository, GenericRepository<ApplicationDbContext>>();
             services.AddTransient<IEnvironmentUserPropertyService, EnvironmentUserPropertyService>();

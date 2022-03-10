@@ -7,6 +7,7 @@ import { IAccount, IAccountUser, IProjectEnv } from 'src/app/config/types';
 import { MetricService } from 'src/app/services/metric.service';
 import { TeamService } from 'src/app/services/team.service';
 import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from '../../switch-manage/types/experimentations';
+import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'experiments-metrics',
@@ -40,8 +41,8 @@ export class MetricsComponent implements OnInit, OnDestroy {
     private teamService: TeamService,
     private metricService: MetricService
   ) {
-    this.currentProjectEnv = JSON.parse(localStorage.getItem('current-project'));
-    this.currentAccount = JSON.parse(localStorage.getItem('current-account'));
+    this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
+    this.currentAccount = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT()));
 
   //   const metricId = this.route.snapshot.queryParams['id'];
   //   if (metricId) {

@@ -13,21 +13,23 @@ import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { ShareModule } from 'src/app/share/share.module';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzGridModule } from "ng-zorro-antd/grid";
 
 
 @NgModule({
   declarations: [SwitchUserComponent, UserDetailComponent, UserListComponent],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ShareModule,
-    NzTableModule,
-    NzInputModule,
-    NzDrawerModule,
-    NzButtonModule,
-    NzSpinModule,
-    SwitchUserRoutingModule,
-    NzIconModule
-  ]
+    imports: [
+        CommonModule,
+        FormsModule,
+        ShareModule,
+        NzTableModule,
+        NzInputModule,
+        NzDrawerModule,
+        NzButtonModule,
+        NzSpinModule,
+        SwitchUserRoutingModule,
+        NzIconModule,
+        NzGridModule
+    ]
 })
 export class SwitchUserModule { }

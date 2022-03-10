@@ -61,6 +61,7 @@ namespace FeatureFlags.APIs.Controllers.Public
             }
         }
 
+        // TODO remove
         /// <summary>
         /// collect feature flag usage data
         /// </summary>
@@ -93,9 +94,22 @@ namespace FeatureFlags.APIs.Controllers.Public
                     
                     var ffIdVm = FeatureFlagKeyExtension.GetFeatureFlagIdByEnvironmentKey(EnvSecret, item.UserVariations[0].FeatureFlagKeyName);
 
+                    var insightParam = new InsightParam
+                    {
+                        User = new InsightUser 
+                        {
+                            Email = item.Email,
+                            Country = item.Country,
+                            KeyId = item.UserKeyId,
+                            UserName = item.UserName,
+                            CustomizedProperties = item.CustomizedProperties,
+                        },
+                        UserVariations = item.UserVariations
+                    };
+
                     item.UserVariations.ForEach(uv =>
                     {
-                        featureFlagService.SendFeatureFlagUsageToMQ(item, ffIdVm, uv);
+                        featureFlagService.SendFeatureFlagUsageToMQ(insightParam, ffIdVm, uv);
                     });
                 }
                 catch (Exception ex)

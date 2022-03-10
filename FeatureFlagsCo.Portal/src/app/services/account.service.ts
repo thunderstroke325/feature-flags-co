@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { IAccount, IProjectEnv, IAccountProjectEnv } from '../config/types';
 import { ProjectService } from './project.service';
 import { FfcService } from "./ffc.service";
+import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Injectable({
   providedIn: 'root'
@@ -35,13 +36,7 @@ export class AccountService {
     return this.http.get(url);
   }
 
-  // 获取单个 account 详情
-  getAccount(params): Observable<any> {
-    const url = this.baseUrl;
-    return this.http.get(url, { params });
-  }
-
-  // 创建 account
+// 创建 account
   postCreateAccount(params): Observable<any> {
     const url = this.baseUrl;
     return this.http.post(url, params);
@@ -53,37 +48,13 @@ export class AccountService {
     return this.http.put(url, params);
   }
 
-  /*
-    初始登录时，判断是否有 account
-    无 => 创建一个
-    有 => 指向第一个
-  */
-  afterLoginSelectAccount() {
-    this.getAccounts()
-      .pipe()
-      .subscribe(
-        res => {
-          if (!res.length) {
-            this.postCreateAccount({
-              organizationName: 'Default'
-            }).pipe()
-              .subscribe(
-                res => {
-                  this.changeAccount(res);
-                }
-              );
-          }
-        }
-      );
-  }
-
   changeAccount(account: IAccount) {
     if (!!account) {
-      localStorage.setItem('current-account', JSON.stringify(account));
+      localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(account));
       const currentAccount = this.accounts.find(ws => ws.id == account.id);
       currentAccount.organizationName = account.organizationName;
     } else {
-      localStorage.setItem('current-account', '');
+      localStorage.setItem(CURRENT_ACCOUNT(), '');
     }
 
     this.projectService.clearCurrentProjectEnv();
@@ -92,23 +63,23 @@ export class AccountService {
 
   setAccountName(account: IAccount) {
     if (!!account) {
-      localStorage.setItem('current-account', JSON.stringify(account));
+      localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(account));
       const currentAccount = this.accounts.find(ws => ws.id == account.id);
       currentAccount.organizationName = account.organizationName;
     } else {
-      localStorage.setItem('current-account', '');
+      localStorage.setItem(CURRENT_ACCOUNT(), '');
     }
   }
 
   getCurrentAccount(): Observable<IAccount> {
     return new Observable(observer => {
-      const accountStr = localStorage.getItem('current-account');
+      const accountStr = localStorage.getItem(CURRENT_ACCOUNT());
       if (this.accounts.length === 0 || !accountStr) {
         this.getAccounts().subscribe(res => {
           this.accounts = res as IAccount[];
           if (!accountStr) {
             const currentAcount = this.accounts[0];
-            localStorage.setItem('current-account', JSON.stringify(currentAcount));
+            localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(currentAcount));
             observer.next(currentAcount);
           } else {
             observer.next(this.accounts.find(ws => ws.id == JSON.parse(accountStr).id));
@@ -121,8 +92,8 @@ export class AccountService {
   }
 
   getCurrentAccountProjectEnv(): IAccountProjectEnv {
-    const account: IAccount = JSON.parse(localStorage.getItem('current-account'));
-    const projectEnv: IProjectEnv = JSON.parse(localStorage.getItem('current-project'));
+    const account: IAccount = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT()));
+    const projectEnv: IProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
     return {
       account: this.accounts.find(x => x.id === account.id),
       projectEnv

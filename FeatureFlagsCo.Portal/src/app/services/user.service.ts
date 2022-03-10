@@ -1,50 +1,49 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { HttpClient } from "@angular/common/http";
+import { environment } from "../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  currentUser;
+  baseUrl: string = `${environment.url}/api/v2/user`
 
-  constructor(
-    private http: HttpClient
-  ) { }
+  constructor(private http: HttpClient) { }
 
-  setCurrentUser(user) {
-    this.currentUser = user;
+  registerByEmail(email: string, password: string) {
+    return this.http.post(`${this.baseUrl}/register-by-email`, { email, password });
   }
 
-  // 获取开关用户列表
-  getEnvUsers(params): Observable<any> {
-    const url = environment.url + '/FeatureFlagsUsers/QueryEnvironmentFeatureFlagUsers';
-    return this.http.get(url, { params });
+  registerByPhone(phoneNumber: string, code: string, password: string) {
+    return this.http.post(`${this.baseUrl}/register-by-phone`, { phoneNumber, code, password });
   }
 
-  // 获取单个用户详情
-  getEnvUserDetail(params): Observable<any> {
-    const url = environment.url + `/FeatureFlagsUsers/GetEnvironmentUser/${params.id}`;
-    return this.http.get(url);
+  loginByPassword(identity: string, password: string) {
+    return this.http.post(`${this.baseUrl}/login-by-password`, { identity, password });
   }
 
-  // 创建开关用户
-  postCreateUser(params): Observable<any> {
-    const url = environment.url + '/FeatureFlagsUsers/CreateFeatureFlagUser';
-    return this.http.post(url, params);
+  loginByPhoneCode(phoneNumber: string, code: string) {
+    return this.http.post(`${this.baseUrl}/login-by-phone-code`, { phoneNumber, code });
   }
 
-  // 获取开关用户自定义属性列表
-  getUserProperties(params): Observable<any> {
-    const url = environment.url + `/Environment/GetEnvironmentUserProperties/${params.id}`;
-    return this.http.get(url);
+  resetPassword(identity: string, code: string, newPassword: string) {
+    return this.http.post(`${this.baseUrl}/reset-password`, { identity, code, newPassword });
   }
 
-  // 修改开关用户自定义属性
-  postUserProperties(params): Observable<any> {
-    const url = environment.url + `/Environment/CreateOrUpdateCosmosDBEnvironmentUserProperties`;
-    return this.http.post(url, params);
+  checkIdentityExists(identity: string) {
+    return this.http.get(`${this.baseUrl}/check-identity-exists?identity=${identity}`);
+  }
+
+  sendIdentityCode(identity: string, scene: string) {
+    return this.http.get(`${this.baseUrl}/send-identity-code`, { params: { identity, scene } });
+  }
+
+  getProfile() {
+    return this.http.get(`${this.baseUrl}/user-profile`);
+  }
+
+  updateProfile(userName: string) {
+    return this.http.put(`${this.baseUrl}/user-profile`, { userName });
   }
 }

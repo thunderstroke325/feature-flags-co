@@ -6,9 +6,6 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./sdk-java.component.less']
 })
 export class SDKJavaComponent implements OnInit {
-
-  
-
   constructor() {}
 
   @Input() envSecret: string;

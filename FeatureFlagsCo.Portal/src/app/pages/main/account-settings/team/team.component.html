@@ -25,6 +25,7 @@
                       <thead>
                           <tr class="table-th-style">
                               <th>邮箱</th>
+                              <th>电话</th>
                               <th>权限</th>
                               <th>初始密码</th>
                               <th nzAlign="center">操作</th>
@@ -32,12 +33,13 @@
                       </thead>
                       <tbody>
                       <tr *ngFor="let member of basicTable.data">
-                        <td>{{ member.email }}</td>
+                        <td>{{ member.email ?? '未关联' }}</td>
+                        <td>{{ member.phoneNumber ?? '未绑定' }}</td>
                         <td>{{ member.role }}</td>
                         <td><span *ngIf="member.initialPassword?.length > 0" nz-typography nzCopyable nzCopyText="{{ member.initialPassword }}">{{ member.initialPassword }}</span></td>
                         <td style="text-align: center">
                           <ng-container *ngIf="isMemberDeleteBtnVisible(member)">
-                            <a nz-popconfirm nzPopconfirmTitle="确定删除吗?"
+                            <a nz-popconfirm="确定删除么"
                                nzPopconfirmPlacement="bottomRight"
                                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                                (nzOnConfirm)="onDeleteMemberClick(member)" [nzIcon]="iconTplMember">

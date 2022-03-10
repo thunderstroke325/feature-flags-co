@@ -1,14 +1,15 @@
+import { ApplicationInsights } from '@microsoft/applicationinsights-web';
+import { AngularPlugin } from '@microsoft/applicationinsights-angularplugin-js';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { IAuthProps } from 'src/app/config/types';
-import { AuthService } from 'src/app/services/auth.service';
-import { UserService } from 'src/app/services/user.service';
 import { IMenuItem } from 'src/app/share/uis/menu/menu';
 import { QUICK_COMBAT_DOCUMENT} from 'src/app/config';
 import { getAuth } from 'src/app/utils';
-import { SwitchService } from 'src/app/services/switch.service';
 import { FfcService } from 'src/app/services/ffc.service';
+import { environment } from 'src/environments/environment';
+import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'app-main',
@@ -24,11 +25,23 @@ export class MainComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private authService: AuthService,
-    private switchService: SwitchService,
-    private userService: UserService,
     private ffcService: FfcService,
   ) {
+
+    if (environment.name === 'Production') {
+      // setup the microsoft insights
+      const angularPlugin = new AngularPlugin();
+      const appInsights = new ApplicationInsights({ config: {
+      instrumentationKey: 'c706330b-e4e1-cf9b-9aef-ff26397502d7',
+      endpointUrl: 'https://dc.applicationinsights.azure.cn/v2/track', // this points to azure china, ref https://docs.microsoft.com/en-us/azure/azure-monitor/app/custom-endpoints?tabs=nodejs
+      extensions: [angularPlugin],
+      extensionConfig: {
+          [angularPlugin.identifier]: { router: this.router }
+      }
+      } });
+      appInsights.loadAppInsights();
+    }
+
     this.setMenus();
   }
 
@@ -105,7 +118,20 @@ export class MainComponent implements OnInit, OnDestroy {
     }
   }
 
-  public logout() {
-    this.authService.logout();
+
+  public async logout() {
+    const anonymousUser = await this.ffcService.logout();
+    const storageToKeep = {
+      // restore account and project, so when user login, he would always see the same project & env
+      [CURRENT_ACCOUNT()]: localStorage.getItem(CURRENT_ACCOUNT()),
+      [CURRENT_PROJECT()]: localStorage.getItem(CURRENT_PROJECT()),
+
+      // restore guid of ffc-js-client-side-sdk, this would keep the same anonymous user
+      'ffc-guid': anonymousUser.id
+    };
+
+    localStorage.clear();
+    Object.keys(storageToKeep).forEach(k => localStorage.setItem(k, storageToKeep[k]))
+    this.router.navigateByUrl('/login');
   }
 }

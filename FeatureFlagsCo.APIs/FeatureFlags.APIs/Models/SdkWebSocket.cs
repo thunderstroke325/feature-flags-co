@@ -86,22 +86,11 @@ namespace FeatureFlags.APIs.Models
             var closeStatus = WebSocket.CloseStatus;
             if (closeStatus.HasValue)
             {
-                try
-                {
-                    await WebSocket.CloseAsync(
-                        closeStatus.Value,
-                        WebSocket.CloseStatusDescription,
-                        CancellationToken.None
-                    );
-                }
-                catch (WebSocketException ex) when (ex.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
-                {
-                    WebSocket.Abort();
-                }
-                catch (Exception)
-                {
-                    // just ignore other exception
-                }
+                await WebSocket.CloseOutputAsync(
+                    closeStatus.Value,
+                    WebSocket.CloseStatusDescription,
+                    CancellationToken.None
+                );
             }
             
             DisConnectAt = DateTime.UtcNow;

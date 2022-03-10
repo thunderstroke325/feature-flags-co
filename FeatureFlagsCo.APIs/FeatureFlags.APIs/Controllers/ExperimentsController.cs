@@ -40,6 +40,7 @@ namespace FeatureFlags.APIs.Controllers
         }
 
         // SDK call this endpoint to get the active experiment settings
+        // TODO remove
         [HttpGet]
         [AllowAnonymous]
         [Route("{envSecret}")]

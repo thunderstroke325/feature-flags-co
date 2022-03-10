@@ -9,14 +9,17 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { RegisterComponent } from './register/register.component';
 import { ForgetComponent } from './forget/forget.component';
-import { ResetComponent } from './reset/reset.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DoLoginComponent } from './do-login/do-login.component';
 import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzTabsModule } from "ng-zorro-antd/tabs";
+import { NzIconModule } from "ng-zorro-antd/icon";
+import { PhoneCodeFormComponent } from './phone-code-form/phone-code-form.component';
+import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 
 
 @NgModule({
-  declarations: [LoginComponent, RegisterComponent, ForgetComponent, ResetComponent, DoLoginComponent],
+  declarations: [LoginComponent, RegisterComponent, ForgetComponent, DoLoginComponent, PhoneCodeFormComponent],
   imports: [
     CommonModule,
     NzGridModule,
@@ -25,7 +28,11 @@ import { NzMessageModule } from 'ng-zorro-antd/message';
     NzButtonModule,
     NzMessageModule,
     ReactiveFormsModule,
-    LoginRoutingModule
+    LoginRoutingModule,
+    NzTabsModule,
+    NzIconModule,
+    NzToolTipModule,
+    FormsModule
   ]
 })
 export class LoginModule { }

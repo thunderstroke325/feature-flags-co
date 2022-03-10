@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import { Observable } from 'rxjs';
+import { IDENTITY_TOKEN } from "./utils/localstorage-keys";
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,7 @@ export class LoginGuard implements CanActivate {
   }
 
   checkLogin(): true | UrlTree {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(IDENTITY_TOKEN);
     if (!token) return true;
     return this.router.parseUrl('/');
   }

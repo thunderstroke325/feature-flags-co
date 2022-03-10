@@ -135,6 +135,13 @@ namespace FeatureFlags.APIs.Services
             return activeFlags;
         }
 
+        public async Task<List<FeatureFlag>> GetActiveByIdsAsync(IEnumerable<string> ids)
+        {
+            return await _mongoDb.QueryableOf<FeatureFlag>()
+                .Where(featureFlag => ids.Contains(featureFlag.Id) && !featureFlag.IsArchived)
+                .ToListAsync();
+        }
+
         public async Task CreateDefaultAsync(
             int accountId,
             int projectId,

@@ -1,202 +1,10 @@
 {
 	"info": {
-		"_postman_id": "5381ca78-3c24-4aca-bcc3-d27b0d5e37e0",
+		"_postman_id": "adf5462f-6dbf-4718-8524-dc701ab00725",
 		"name": "ffc-multi-variation-cache-test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
-		{
-			"name": "Data Initialization",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"var environmentSecret = \"YzA4LTUxZTEtNCUyMDIxMDkwMjEwNDQ1N19fMl9fMl9fNF9fZGVmYXVsdF9kNmZlNQ==\";\r",
-							"var environmentId = 4;\r",
-							"\r",
-							"\r",
-							"pm.collectionVariables.set(\"environmentId\", environmentId);\r",
-							"pm.collectionVariables.set(\"projectId\", 2);\r",
-							"pm.collectionVariables.set(\"organizationId\", 2);\r",
-							"pm.collectionVariables.set(\"organizationId\", 2);\r",
-							"pm.collectionVariables.set(\"environmentSecret\", environmentSecret)\r",
-							"\r",
-							"var variationOptions = generateVariationOptions(5);\r",
-							"\r",
-							"\r",
-							"var defaultRulePercentageRollouts = [\r",
-							"    {\r",
-							"        \"rolloutPercentage\": [0, 0.7],\r",
-							"        \"valueOption\": {\r",
-							"            \"localId\": 2,\r",
-							"            \"displayOrder\": 2,\r",
-							"            \"variationValue\": \"A\"\r",
-							"        }\r",
-							"    },\r",
-							"    {\r",
-							"        \"rolloutPercentage\": [0.7, 1],\r",
-							"        \"valueOption\": {\r",
-							"            \"localId\": 3,\r",
-							"            \"displayOrder\": 3,\r",
-							"            \"variationValue\": \"B\"\r",
-							"        }\r",
-							"    }\r",
-							"];\r",
-							"var variationOptionWhenDisabled = randomGetVariationOption(variationOptions);\r",
-							"var targetIndividuals = [];\r",
-							"var fftuwmtr = [\r",
-							"    {\r",
-							"        \"RuleId\": uuidv4(),\r",
-							"        \"RuleName\": \"rule-0\",\r",
-							"        \"RuleJsonContent\": [\r",
-							"            {\r",
-							"                \"property\": \"groups\",\r",
-							"                \"operation\": \"IsOneOf\",\r",
-							"                \"value\": \"[\\\"1\\\",\\\"2\\\"]\"\r",
-							"            },\r",
-							"            {\r",
-							"                \"property\": \"version\",\r",
-							"                \"operation\": \"StartsWith\",\r",
-							"                \"value\": \"1.\"\r",
-							"            }\r",
-							"        ],\r",
-							"        \"valueOptionsVariationRuleValues\": [\r",
-							"            {\r",
-							"                \"rolloutPercentage\": [0, 0.7],\r",
-							"                \"valueOption\": {\r",
-							"                    \"localId\": 0,\r",
-							"                    \"displayOrder\": 0,\r",
-							"                    \"variationValue\": \"Green\"\r",
-							"                }\r",
-							"            },\r",
-							"            {\r",
-							"                \"rolloutPercentage\": [0.7, 1],\r",
-							"                \"valueOption\": {\r",
-							"                    \"localId\": 1,\r",
-							"                    \"displayOrder\": 1,\r",
-							"                    \"variationValue\": \"Blue\"\r",
-							"                }\r",
-							"            }\r",
-							"        ]\r",
-							"    }\r",
-							"];\r",
-							"var testData1 = {\r",
-							"    \"id\": \"##{featureFlagId1}##\",\r",
-							"    \"environmentId\": environmentId,\r",
-							"    \"objectType\": \"FeatureFlag\",\r",
-							"    \"ff\": {\r",
-							"        \"id\": \"##{featureFlagId1}##\",\r",
-							"        \"name\": \"##{featureFlagName1}##\",\r",
-							"        \"keyName\": \"##{featureFlagKeyName1}##\",\r",
-							"        \"environmentId\": environmentId,\r",
-							"        \"status\": \"Enabled\",\r",
-							"        \"defaultRulePercentageRollouts\": defaultRulePercentageRollouts,\r",
-							"        \"variationOptionWhenDisabled\": variationOptionWhenDisabled\r",
-							"    },\r",
-							"    \"ffp\": [\r",
-							"    ],\r",
-							"    \"fftuwmtr\": fftuwmtr,\r",
-							"    \"targetIndividuals\": targetIndividuals,\r",
-							"    \"variationOptions\": variationOptions,\r",
-							"    \"isMultiOptionMode\": true\r",
-							"}\r",
-							"\r",
-							"\r",
-							"pm.collectionVariables.set(\"testData1\", JSON.stringify(testData1));\r",
-							"\r",
-							"\r",
-							"\r",
-							"\r",
-							"\r",
-							"\r",
-							"// ======================== ==============================================\r",
-							"\r",
-							"\r",
-							"function getRandomInt(min, max) {\r",
-							"    min = Math.ceil(min);\r",
-							"    max = Math.floor(max);\r",
-							"    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive\r",
-							"}\r",
-							"\r",
-							"function arraySum(arr, stopIndex) {\r",
-							"    var sum = 0;\r",
-							"    for (let i = 0; i < stopIndex; i++) {\r",
-							"        sum += arr[i];\r",
-							"    }\r",
-							"    return sum;\r",
-							"}\r",
-							"function randomGetVariationOption(vops) {\r",
-							"    return vops[getRandomInt(0, vops.length - 1)];\r",
-							"}\r",
-							"\r",
-							"\r",
-							"function generateVariationOptions(variationOptionCount) {\r",
-							"    var variationOptions = [];\r",
-							"    variationOptions.push({\r",
-							"        \"localId\": 0,\r",
-							"        \"displayOrder\": 0,\r",
-							"        \"variationValue\": \"Green\"\r",
-							"    });\r",
-							"    variationOptions.push({\r",
-							"        \"localId\": 0,\r",
-							"        \"displayOrder\": 0,\r",
-							"        \"variationValue\": \"Blue\"\r",
-							"    });\r",
-							"    variationOptions.push({\r",
-							"        \"localId\": 0,\r",
-							"        \"displayOrder\": 0,\r",
-							"        \"variationValue\": \"A\"\r",
-							"    });\r",
-							"    variationOptions.push({\r",
-							"        \"localId\": 0,\r",
-							"        \"displayOrder\": 0,\r",
-							"        \"variationValue\": \"B\"\r",
-							"    });\r",
-							"    return variationOptions;\r",
-							"}\r",
-							"\r",
-							"function getRandomElementsFromArray(arr, n) {\r",
-							"    var result = new Array(n),\r",
-							"        len = arr.length,\r",
-							"        taken = new Array(len);\r",
-							"    if (n > len)\r",
-							"        throw new RangeError(\"getRandom: more elements taken than available\");\r",
-							"    while (n--) {\r",
-							"        var x = Math.floor(Math.random() * len);\r",
-							"        result[n] = arr[x in taken ? taken[x] : x];\r",
-							"        taken[x] = --len in taken ? taken[len] : len;\r",
-							"    }\r",
-							"    return result;\r",
-							"}\r",
-							"function uuidv4() {\r",
-							"    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {\r",
-							"        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);\r",
-							"        return v.toString(16);\r",
-							"    });\r",
-							"}"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{apihost}}/api/Authenticate/Probe",
-					"host": [
-						"{{apihost}}"
-					],
-					"path": [
-						"api",
-						"Authenticate",
-						"Probe"
-					]
-				}
-			},
-			"response": []
-		},
 		{
 			"name": "Login",
 			"event": [
@@ -246,7 +54,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"email\": \"me@hu-beau.com\",\r\n  \"password\": \"OTgxZDhiNmMt\"\r\n}",
+					"raw": "{\r\n  \"identity\": \"me@hu-beau.com\",\r\n  \"password\": \"OTgxZDhiNmMt\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -254,14 +62,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/api/Authenticate/login",
+					"raw": "{{apihost}}/api/v2/user/login-by-password",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
 						"api",
-						"Authenticate",
-						"login"
+						"v2",
+						"user",
+						"login-by-password"
 					]
 				}
 			},
@@ -518,7 +327,7 @@
 							"\r",
 							"pm.test(\"Successful POST request\", function () {\r",
 							"    var responseData = JSON.parse(responseBody);\r",
-							"    pm.expect(responseData.localId).to.be.equal(0);\r",
+							"    pm.expect(responseData.data.id).to.be.equal(0);\r",
 							"});\r",
 							"\r",
 							"console.log('#########Get Varation first time END#######');\r",
@@ -541,10 +350,16 @@
 					]
 				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "envSecret",
+						"value": "{{environmentSecret}}",
+						"type": "default"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName1}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"hu-beau\",\r\n    \"ffUserEmail\": \"hu-beau@outlook.com\",\r\n    \"ffUserKeyId\": \"hu-beau@outlook.com\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"groups\",\r\n            \"value\": \"1\"\r\n        },\r\n        {\r\n            \"name\": \"version\",\r\n            \"value\": \"1.0.x\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName1}}\",\r\n    \"userName\": \"hu-beau\",\r\n    \"userEmail\": \"hu-beau@outlook.com\",\r\n    \"userKeyId\": \"hu-beau@outlook.com\",\r\n    \"customizedProperties\": [\r\n        {\r\n            \"name\": \"groups\",\r\n            \"value\": \"1\"\r\n        },\r\n        {\r\n            \"name\": \"version\",\r\n            \"value\": \"1.0.x\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -552,13 +367,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"raw": "{{apihost}}/api/public/feature-flag/variation",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
-						"Variation",
-						"GetMultiOptionVariation"
+						"api",
+						"public",
+						"feature-flag",
+						"variation"
 					]
 				}
 			},
@@ -585,7 +402,7 @@
 							"\r",
 							"pm.test(\"Successful POST request\", function () {\r",
 							"    var responseData = JSON.parse(responseBody);\r",
-							"    pm.expect(responseData.localId).to.be.equal(0);\r",
+							"    pm.expect(responseData.data.id).to.be.equal(0);\r",
 							"});\r",
 							"\r",
 							"console.log('#########Get Varation without change END#######');\r",
@@ -608,10 +425,16 @@
 					]
 				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "envSecret",
+						"value": "{{environmentSecret}}",
+						"type": "default"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName1}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"hu-beau\",\r\n    \"ffUserEmail\": \"hu-beau@outlook.com\",\r\n    \"ffUserKeyId\": \"hu-beau@outlook.com\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"groups\",\r\n            \"value\": \"1\"\r\n        },\r\n        {\r\n            \"name\": \"version\",\r\n            \"value\": \"1.0.x\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName1}}\",\r\n    \"userName\": \"hu-beau\",\r\n    \"userEmail\": \"hu-beau@outlook.com\",\r\n    \"userKeyId\": \"hu-beau@outlook.com\",\r\n    \"customizedProperties\": [\r\n        {\r\n            \"name\": \"groups\",\r\n            \"value\": \"1\"\r\n        },\r\n        {\r\n            \"name\": \"version\",\r\n            \"value\": \"1.0.x\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -619,13 +442,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"raw": "{{apihost}}/api/public/feature-flag/variation",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
-						"Variation",
-						"GetMultiOptionVariation"
+						"api",
+						"public",
+						"feature-flag",
+						"variation"
 					]
 				}
 			},
@@ -652,7 +477,7 @@
 							"\r",
 							"pm.test(\"Successful POST request\", function () {\r",
 							"    var responseData = JSON.parse(responseBody);\r",
-							"    pm.expect(responseData.localId).to.be.equal(2);\r",
+							"    pm.expect(responseData.data.id).to.be.equal(2);\r",
 							"});\r",
 							"\r",
 							"console.log('#########Get Varation without changed properties END#######');\r",
@@ -675,10 +500,16 @@
 					]
 				},
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "envSecret",
+						"value": "{{environmentSecret}}",
+						"type": "default"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName1}}\",\r\n    \"environmentSecret\": \"{{environmentSecret}}\",\r\n    \"ffUserName\": \"hu-beau\",\r\n    \"ffUserEmail\": \"hu-beau@outlook.com\",\r\n    \"ffUserKeyId\": \"hu-beau@outlook.com\",\r\n    \"ffUserCustomizedProperties\": [\r\n        {\r\n            \"name\": \"groups\",\r\n            \"value\": \"1\"\r\n        },\r\n        {\r\n            \"name\": \"version\",\r\n            \"value\": \"2.0.x\"\r\n        }\r\n    ]\r\n}",
+					"raw": "{\r\n    \"featureFlagKeyName\": \"{{featureFlagKeyName1}}\",\r\n    \"userName\": \"hu-beau\",\r\n    \"userEmail\": \"hu-beau@outlook.com\",\r\n    \"userKeyId\": \"hu-beau@outlook.com\",\r\n    \"customizedProperties\": [\r\n        {\r\n            \"name\": \"groups\",\r\n            \"value\": \"1\"\r\n        },\r\n        {\r\n            \"name\": \"version\",\r\n            \"value\": \"2.0.x\"\r\n        }\r\n    ]\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -686,13 +517,15 @@
 					}
 				},
 				"url": {
-					"raw": "{{apihost}}/Variation/GetMultiOptionVariation",
+					"raw": "{{apihost}}/api/public/feature-flag/variation",
 					"host": [
 						"{{apihost}}"
 					],
 					"path": [
-						"Variation",
-						"GetMultiOptionVariation"
+						"api",
+						"public",
+						"feature-flag",
+						"variation"
 					]
 				}
 			},
@@ -705,7 +538,169 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					""
+					"var environmentSecret = \"YzA4LTUxZTEtNCUyMDIxMDkwMjEwNDQ1N19fMl9fMl9fNF9fZGVmYXVsdF9kNmZlNQ==\";",
+					"var environmentId = 4;",
+					"",
+					"",
+					"pm.collectionVariables.set(\"environmentId\", environmentId);",
+					"pm.collectionVariables.set(\"projectId\", 2);",
+					"pm.collectionVariables.set(\"organizationId\", 2);",
+					"pm.collectionVariables.set(\"organizationId\", 2);",
+					"pm.collectionVariables.set(\"environmentSecret\", environmentSecret)",
+					"",
+					"var variationOptions = generateVariationOptions(5);",
+					"",
+					"",
+					"var defaultRulePercentageRollouts = [",
+					"    {",
+					"        \"rolloutPercentage\": [0, 0.7],",
+					"        \"valueOption\": {",
+					"            \"localId\": 2,",
+					"            \"displayOrder\": 2,",
+					"            \"variationValue\": \"A\"",
+					"        }",
+					"    },",
+					"    {",
+					"        \"rolloutPercentage\": [0.7, 1],",
+					"        \"valueOption\": {",
+					"            \"localId\": 3,",
+					"            \"displayOrder\": 3,",
+					"            \"variationValue\": \"B\"",
+					"        }",
+					"    }",
+					"];",
+					"var variationOptionWhenDisabled = randomGetVariationOption(variationOptions);",
+					"var targetIndividuals = [];",
+					"var fftuwmtr = [",
+					"    {",
+					"        \"RuleId\": uuidv4(),",
+					"        \"RuleName\": \"rule-0\",",
+					"        \"RuleJsonContent\": [",
+					"            {",
+					"                \"property\": \"groups\",",
+					"                \"operation\": \"IsOneOf\",",
+					"                \"value\": \"[\\\"1\\\",\\\"2\\\"]\"",
+					"            },",
+					"            {",
+					"                \"property\": \"version\",",
+					"                \"operation\": \"StartsWith\",",
+					"                \"value\": \"1.\"",
+					"            }",
+					"        ],",
+					"        \"valueOptionsVariationRuleValues\": [",
+					"            {",
+					"                \"rolloutPercentage\": [0, 0.7],",
+					"                \"valueOption\": {",
+					"                    \"localId\": 0,",
+					"                    \"displayOrder\": 0,",
+					"                    \"variationValue\": \"Green\"",
+					"                }",
+					"            },",
+					"            {",
+					"                \"rolloutPercentage\": [0.7, 1],",
+					"                \"valueOption\": {",
+					"                    \"localId\": 1,",
+					"                    \"displayOrder\": 1,",
+					"                    \"variationValue\": \"Blue\"",
+					"                }",
+					"            }",
+					"        ]",
+					"    }",
+					"];",
+					"var testData1 = {",
+					"    \"id\": \"##{featureFlagId1}##\",",
+					"    \"environmentId\": environmentId,",
+					"    \"objectType\": \"FeatureFlag\",",
+					"    \"ff\": {",
+					"        \"id\": \"##{featureFlagId1}##\",",
+					"        \"name\": \"##{featureFlagName1}##\",",
+					"        \"keyName\": \"##{featureFlagKeyName1}##\",",
+					"        \"environmentId\": environmentId,",
+					"        \"status\": \"Enabled\",",
+					"        \"defaultRulePercentageRollouts\": defaultRulePercentageRollouts,",
+					"        \"variationOptionWhenDisabled\": variationOptionWhenDisabled",
+					"    },",
+					"    \"ffp\": [",
+					"    ],",
+					"    \"fftuwmtr\": fftuwmtr,",
+					"    \"targetIndividuals\": targetIndividuals,",
+					"    \"variationOptions\": variationOptions,",
+					"    \"isMultiOptionMode\": true",
+					"}",
+					"",
+					"",
+					"pm.collectionVariables.set(\"testData1\", JSON.stringify(testData1));",
+					"",
+					"",
+					"",
+					"",
+					"",
+					"",
+					"// ======================== ==============================================",
+					"",
+					"",
+					"function getRandomInt(min, max) {",
+					"    min = Math.ceil(min);",
+					"    max = Math.floor(max);",
+					"    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive",
+					"}",
+					"",
+					"function arraySum(arr, stopIndex) {",
+					"    var sum = 0;",
+					"    for (let i = 0; i < stopIndex; i++) {",
+					"        sum += arr[i];",
+					"    }",
+					"    return sum;",
+					"}",
+					"function randomGetVariationOption(vops) {",
+					"    return vops[getRandomInt(0, vops.length - 1)];",
+					"}",
+					"",
+					"",
+					"function generateVariationOptions(variationOptionCount) {",
+					"    var variationOptions = [];",
+					"    variationOptions.push({",
+					"        \"localId\": 0,",
+					"        \"displayOrder\": 0,",
+					"        \"variationValue\": \"Green\"",
+					"    });",
+					"    variationOptions.push({",
+					"        \"localId\": 0,",
+					"        \"displayOrder\": 0,",
+					"        \"variationValue\": \"Blue\"",
+					"    });",
+					"    variationOptions.push({",
+					"        \"localId\": 0,",
+					"        \"displayOrder\": 0,",
+					"        \"variationValue\": \"A\"",
+					"    });",
+					"    variationOptions.push({",
+					"        \"localId\": 0,",
+					"        \"displayOrder\": 0,",
+					"        \"variationValue\": \"B\"",
+					"    });",
+					"    return variationOptions;",
+					"}",
+					"",
+					"function getRandomElementsFromArray(arr, n) {",
+					"    var result = new Array(n),",
+					"        len = arr.length,",
+					"        taken = new Array(len);",
+					"    if (n > len)",
+					"        throw new RangeError(\"getRandom: more elements taken than available\");",
+					"    while (n--) {",
+					"        var x = Math.floor(Math.random() * len);",
+					"        result[n] = arr[x in taken ? taken[x] : x];",
+					"        taken[x] = --len in taken ? taken[len] : len;",
+					"    }",
+					"    return result;",
+					"}",
+					"function uuidv4() {",
+					"    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {",
+					"        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);",
+					"        return v.toString(16);",
+					"    });",
+					"}"
 				]
 			}
 		},

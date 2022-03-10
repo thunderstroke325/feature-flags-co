@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { map } from 'rxjs/operators';
-import { UserService } from 'src/app/services/user.service';
+import { EnvironmentUserService } from 'src/app/services/environment-user.service';
 
 @Component({
   selector: 'app-props-drawer',
@@ -22,7 +22,7 @@ export class PropsDrawerComponent implements OnInit {
   set visible(visible: boolean) {
     if (visible) {
       this.loading = true;
-      this.userService.getUserProperties({ id: this.envId })
+      this.envUserService.getUserProperties({ id: this.envId })
         .pipe()
         .subscribe(res => {
           this.list = res.properties;
@@ -40,7 +40,7 @@ export class PropsDrawerComponent implements OnInit {
 
 
   constructor(
-    private userService: UserService,
+    private envUserService: EnvironmentUserService,
     private message: NzMessageService
   ) { }
 
@@ -93,7 +93,7 @@ export class PropsDrawerComponent implements OnInit {
   }
 
   saveProperties(list: string[]) {
-    return this.userService.postUserProperties({
+    return this.envUserService.postUserProperties({
       environmentId: this.envId,
       properties: list
     })

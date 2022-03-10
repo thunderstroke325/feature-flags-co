@@ -9,6 +9,7 @@ import { uuidv4 } from 'src/app/utils';
 import { IProjectEnv } from 'src/app/config/types';
 import { NzConfigService } from 'ng-zorro-antd/core/config';
 import { DomSanitizer } from '@angular/platform-browser';
+import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'zero-code-settings',
@@ -53,7 +54,7 @@ export class ZeroCodeSettingsComponent implements OnInit, OnDestroy {
     });
 
     this.featureFlagId = decodeURIComponent(this.route.snapshot.params['id']);
-    const currentProjectEnv: IProjectEnv = JSON.parse(localStorage.getItem('current-project'));
+    const currentProjectEnv: IProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
     this.model = {
       envId: currentProjectEnv.envId,
       envSecret: currentProjectEnv.envSecret,

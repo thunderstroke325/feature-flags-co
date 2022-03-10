@@ -9,15 +9,13 @@ import { Observable } from "rxjs";
   providedIn: 'root'
 })
 export class EnvSettingService {
-
-  private readonly envId: number;
-  private readonly baseUrl: string;
-
-  constructor(private http: HttpClient) {
+  get baseUrl() {
     const envId = getCurrentProjectEnv().envId;
-    this.envId = envId;
-    this.baseUrl = `${environment.url}/api/v2/envs/${envId}/settings`
+
+    return `${environment.url}/api/v2/envs/${envId}/settings`
   }
+
+  constructor(private http: HttpClient) { }
 
   get(type: string): Observable<EnvironmentSetting[]> {
     return this.http.get<EnvironmentSetting[]>(this.baseUrl, {params: {type}});

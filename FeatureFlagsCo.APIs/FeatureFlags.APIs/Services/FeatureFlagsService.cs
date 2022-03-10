@@ -6,26 +6,30 @@ using System.Threading.Tasks;
 using FeatureFlagsCo.MQ;
 using System;
 using Newtonsoft.Json;
+using AutoMapper;
 
 namespace FeatureFlags.APIs.Repositories
 {
     public interface IFeatureFlagsService
     {
         Task<EnvironmentUserQueryResultViewModel> QueryEnvironmentFeatureFlagUsersAsync(string searchText, int environmentId, int pageIndex, int pageSize, string currentUserId);
-        void SendFeatureFlagUsageToMQ(FeatureFlagUsageParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, InsightUserVariation userVariation);
+        void SendFeatureFlagUsageToMQ(InsightParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, InsightUserVariationParam insightUserVariation);
     }
 
     public class FeatureFlagsService : IFeatureFlagsService
     {
         private readonly INoSqlService _cosmosDbService;
         private readonly MessagingService _messagingService;
+        private readonly IMapper _mapper;
 
         public FeatureFlagsService(
             INoSqlService cosmosDbService,
-            MessagingService messagingService)
+            MessagingService messagingService,
+            IMapper mapper)
         {
             _cosmosDbService = cosmosDbService;
             _messagingService = messagingService;
+            _mapper = mapper;
         }
 
         public async Task<EnvironmentUserQueryResultViewModel> QueryEnvironmentFeatureFlagUsersAsync(string searchText, int environmentId, int pageIndex, int pageSize, string currentUserId)
@@ -39,7 +43,7 @@ namespace FeatureFlags.APIs.Repositories
             };
         }
 
-        public void SendFeatureFlagUsageToMQ(FeatureFlagUsageParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, InsightUserVariation insightUserVariation)
+        public void SendFeatureFlagUsageToMQ(InsightParam param, FeatureFlagIdByEnvironmentKeyViewModel ffIdVM, InsightUserVariationParam insightUserVariation)
         {
             var variation = insightUserVariation.Variation;
             var ffEvent = new FeatureFlagMessageModel()
@@ -50,8 +54,8 @@ namespace FeatureFlags.APIs.Repositories
                 AccountId = ffIdVM.AccountId,
                 ProjectId = ffIdVM.ProjectId,
                 FeatureFlagKeyName = insightUserVariation.FeatureFlagKeyName,
-                UserKeyId = param.UserKeyId,
-                FFUserName = param.UserName,
+                UserKeyId = param.User.KeyId,
+                FFUserName = param.User.UserName,
                 VariationLocalId = variation.LocalId.ToString(),
                 VariationValue = variation.VariationValue,
                 TimeStamp = insightUserVariation.Timestamp.UnixTimestampInMillisecondsToDateTime().ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
@@ -92,12 +96,12 @@ namespace FeatureFlags.APIs.Repositories
                               new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "UserKeyId",
-                                  LabelValue = param.UserKeyId
+                                  LabelValue = param.User.KeyId
                               },
                               new FeatureFlagsCo.MQ.MessageLabel
                               {
                                   LabelName = "FFUserName",
-                                  LabelValue = param.UserName
+                                  LabelValue = param.User.UserName
                               },
                               new FeatureFlagsCo.MQ.MessageLabel
                               {
@@ -115,11 +119,11 @@ namespace FeatureFlags.APIs.Repositories
                                   LabelValue = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
                               }
                         };
-            if (param.CustomizedProperties != null && param.CustomizedProperties.Count > 0)
+            if (param.User.CustomizedProperties != null && param.User.CustomizedProperties.Count > 0)
             {
-                foreach (var item in param.CustomizedProperties)
+                foreach (var item in param.User.CustomizedProperties)
                 {
-                    labels.Add(new FeatureFlagsCo.MQ.MessageLabel
+                    labels.Add(new MessageLabel
                     {
                         LabelName = item.Name,
                         LabelValue = item.Value
@@ -131,11 +135,11 @@ namespace FeatureFlags.APIs.Repositories
             {
                 SendToExperiment = insightUserVariation.SendToExperiment,
                 FFMessage = ffEvent,
-                Message = new FeatureFlagsCo.MQ.MessageModel
+                Message = new MessageModel
                 {
                     SendDateTime = DateTime.UtcNow,
                     Labels = labels,
-                    Message = JsonConvert.SerializeObject(param ?? new FeatureFlagUsageParam()),
+                    Message = JsonConvert.SerializeObject(param != null ? _mapper.Map<InsightParam, FeatureFlagUsage>(param) : new FeatureFlagUsage()),
                     FeatureFlagId = ffIdVM.FeatureFlagId,
                     IndexTarget = "ffvariationrequestindex"
                 }

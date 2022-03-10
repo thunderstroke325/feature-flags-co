@@ -42,23 +42,11 @@ namespace FeatureFlags.APIs.Middlewares
             var sdkWebSocket = TryAcceptRequest(context);
             if (sdkWebSocket == null)
             {
-                try
-                {
-                    await webSocket.CloseAsync(
-                        (WebSocketCloseStatus)4003,
-                        "invalid request, close by server",
-                        CancellationToken.None
-                    );
-                }
-                catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
-                {
-                    webSocket.Abort();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, ex.Message);
-                }
-                
+                await webSocket.CloseOutputAsync(
+                    (WebSocketCloseStatus)4003,
+                    "invalid request, close by server",
+                    CancellationToken.None
+                );
                 return;
             }
 

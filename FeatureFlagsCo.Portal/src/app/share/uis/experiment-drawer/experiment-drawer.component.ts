@@ -1,15 +1,15 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { IAccount, IProjectEnv } from 'src/app/config/types';
+import { IProjectEnv } from 'src/app/config/types';
 import { IExperiment } from 'src/app/pages/main/switch-manage/types/experimentations';
 import { IVariationOption } from 'src/app/pages/main/switch-manage/types/switch-new';
 import { ExperimentService } from 'src/app/services/experiment.service';
 import { MetricService } from 'src/app/services/metric.service';
 import { SwitchService } from 'src/app/services/switch.service';
-import { TeamService } from 'src/app/services/team.service';
+import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 
 @Component({
@@ -53,7 +53,7 @@ export class ExperimentDrawerComponent implements OnInit {
     private experimentService: ExperimentService,
     private message: NzMessageService
   ) {
-    const currentProjectEnv: IProjectEnv = JSON.parse(localStorage.getItem('current-project'));
+    const currentProjectEnv: IProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
 
     this.featureFlagSearchChange$.pipe(
       debounceTime(500),

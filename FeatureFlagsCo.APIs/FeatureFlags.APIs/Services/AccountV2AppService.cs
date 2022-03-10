@@ -54,18 +54,20 @@ namespace FeatureFlags.APIs.Services
             string initialPassword = null;
             
             var user = await _userService.FindByEmailAsync(email);
+            var userId = user?.Id;
             if (user == null)
             {
                 // create a new user
                 initialPassword = MiscService.GeneratePassword(email);
-                user = await _userService.CreateAsync(email, email, initialPassword);
-
+                var registerResult = await _userService.RegisterByEmailAsync(email, initialPassword);
+                userId = registerResult.UserId;
+                
                 // create default account for user
-                await CreateAsync("Default Organization", user.Id);
+                await CreateAsync("Default Organization", userId);
             }
 
             // create account user
-            await _accountService.CreateUserAsync(accountId, user.Id, role, invitorId, initialPassword);
+            await _accountService.CreateUserAsync(accountId, userId, role, invitorId, initialPassword);
 
             return true;
         }

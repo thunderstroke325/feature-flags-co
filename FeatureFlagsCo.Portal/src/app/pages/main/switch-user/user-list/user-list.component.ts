@@ -1,8 +1,8 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzTableQueryParams } from 'ng-zorro-antd/table';
 import { Subject } from 'rxjs';
-import { UserService } from 'src/app/services/user.service';
+import { EnvironmentUserService } from 'src/app/services/environment-user.service';
 import { AccountService } from 'src/app/services/account.service';
 
 
@@ -30,7 +30,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   visible: boolean = false;
 
   constructor(
-    private userService: UserService,
+    private envUserService: EnvironmentUserService,
     private accountService: AccountService,
     private router: Router
   ) {
@@ -55,7 +55,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   fetchUserList() {
     this.isLoading = true;
-    this.userService.getEnvUsers({ pageIndex: this.pageIndex, pageSize: this.pageSize, environmentId: this.currentEnvId, searchText: this.searchValue })
+    this.envUserService.getEnvUsers({ pageIndex: this.pageIndex, pageSize: this.pageSize, environmentId: this.currentEnvId, searchText: this.searchValue })
       .pipe()
       .subscribe(
         res => {

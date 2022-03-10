@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs/operators';
-import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-user-detail',

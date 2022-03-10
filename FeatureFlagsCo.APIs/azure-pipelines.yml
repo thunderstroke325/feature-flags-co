@@ -51,13 +51,6 @@ stages:
                     $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey_Dev)"
                     $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString_Dev)"
 
-                    $a.MySettings.SendCloudAPIUser = "$(SendCloudAPIUser)"
-                    $a.MySettings.SendCloudAPIKey = "$(SendCloudAPIKey)"
-                    $a.MySettings.SendCloudFrom = "noreply@feature-flags.co"
-                    $a.MySettings.SendCloudFromName = "feature-flags.co"
-                    $a.MySettings.SendCloudTemplate = "forgetpassword"
-                    $a.MySettings.SendCloudEmailSubject = "feature-flags.co"
-
                     $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId_Dev)"
                     $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret_Dev)"
 
@@ -70,6 +63,9 @@ stages:
 
                     $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString_Dev)"
                     $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName_Dev)"
+
+                    # authing service variables
+                    $a.Authing.AppId = "$(Authing_AppId_Dev)"
 
                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
 
@@ -236,13 +232,6 @@ stages:
                     $a.ApplicationInsights.InstrumentationKey = "$(AppInsights_InstrumentationKey)"
                     $a.ApplicationInsights.ConnectionString = "$(AppInsights_ConnectionString)"
                     
-                    $a.MySettings.SendCloudAPIUser = "$(SendCloudAPIUser)"
-                    $a.MySettings.SendCloudAPIKey = "$(SendCloudAPIKey)"
-                    $a.MySettings.SendCloudFrom = "noreply@feature-flags.co"
-                    $a.MySettings.SendCloudFromName = "feature-flags.co"
-                    $a.MySettings.SendCloudTemplate = "forgetpassword"
-                    $a.MySettings.SendCloudEmailSubject = "feature-flags.co"
-                    
                     $a.MySettings.AppInsightsApplicationId = "$(AppInsights_ApplicationId)"
                     $a.MySettings.AppInsightsApplicationApiSecret = "$(AppInsights_ApplicationApiSecret)"
 
@@ -255,6 +244,9 @@ stages:
 
                     $a.MongoDbSettings.ConnectionString = "$(MongoDbSettings_ConnectionString)"
                     $a.MongoDbSettings.DatabaseName = "$(MongoDbSettings_DatabaseName)"
+
+                    # authing service variables
+                    $a.Authing.AppId = "$(Authing_AppId)"
                     
                     ConvertTo-Json $a -depth 100  | set-content $pathToJson
 
