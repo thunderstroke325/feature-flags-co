@@ -6,9 +6,10 @@ import { Subject } from 'rxjs';
 import { IAuthProps } from 'src/app/config/types';
 import { IMenuItem } from 'src/app/share/uis/menu/menu';
 import { QUICK_COMBAT_DOCUMENT} from 'src/app/config';
-import { getAuth, getLocalStorageKey } from 'src/app/utils';
+import { getAuth } from 'src/app/utils';
 import { FfcService } from 'src/app/services/ffc.service';
-import { environment } from '../../../environments/environment';
+import { environment } from 'src/environments/environment';
+import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'app-main',
@@ -121,9 +122,12 @@ export class MainComponent implements OnInit, OnDestroy {
   public async logout() {
     const anonymousUser = await this.ffcService.logout();
     const storageToKeep = {
-      [getLocalStorageKey('current-account')]: localStorage.getItem(getLocalStorageKey('current-account')), // restore account and project, so when user login, he would always see the same project & env
-      [getLocalStorageKey('current-project')]: localStorage.getItem(getLocalStorageKey('current-project')),
-      'ffc-guid': anonymousUser.id // restore guid of ffc-js-client-side-sdk, this would keep the same anonymous user
+      // restore account and project, so when user login, he would always see the same project & env
+      [CURRENT_ACCOUNT()]: localStorage.getItem(CURRENT_ACCOUNT()),
+      [CURRENT_PROJECT()]: localStorage.getItem(CURRENT_PROJECT()),
+
+      // restore guid of ffc-js-client-side-sdk, this would keep the same anonymous user
+      'ffc-guid': anonymousUser.id
     };
 
     localStorage.clear();

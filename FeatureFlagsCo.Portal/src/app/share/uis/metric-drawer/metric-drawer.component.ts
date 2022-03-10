@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -7,7 +7,8 @@ import { IAccount } from 'src/app/config/types';
 import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric, UrlMatchType } from 'src/app/pages/main/switch-manage/types/experimentations';
 import { MetricService } from 'src/app/services/metric.service';
 import { TeamService } from 'src/app/services/team.service';
-import { getLocalStorageKey, uuidv4 } from 'src/app/utils';
+import { uuidv4 } from 'src/app/utils';
+import { CURRENT_ACCOUNT } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'app-metric-drawer',
@@ -62,7 +63,7 @@ export class MetricDrawerComponent implements OnInit {
     private metricService: MetricService,
     private message: NzMessageService
   ) {
-    const currentAccount: IAccount = JSON.parse(localStorage.getItem(getLocalStorageKey('current-account')));
+    const currentAccount: IAccount = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT()));
 
     this.maintainerSearchChange$.pipe(
       debounceTime(500),

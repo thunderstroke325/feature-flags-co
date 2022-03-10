@@ -5,8 +5,8 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IProjectEnv } from 'src/app/config/types';
 import { ExperimentService } from 'src/app/services/experiment.service';
-import { getLocalStorageKey } from 'src/app/utils';
 import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment } from '../../switch-manage/types/experimentations';
+import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'experiments-overview',
@@ -32,7 +32,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
     private message: NzMessageService,
     private experimentService: ExperimentService
   ) {
-    this.currentProjectEnv = JSON.parse(localStorage.getItem(getLocalStorageKey('current-project')));
+    this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
   }
 
   ngOnInit(): void {

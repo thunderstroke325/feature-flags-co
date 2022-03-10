@@ -5,7 +5,7 @@ import { environment } from 'src/environments/environment';
 import { IAccount, IProjectEnv, IAccountProjectEnv } from '../config/types';
 import { ProjectService } from './project.service';
 import { FfcService } from "./ffc.service";
-import { getLocalStorageKey } from '../utils';
+import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Injectable({
   providedIn: 'root'
@@ -50,11 +50,11 @@ export class AccountService {
 
   changeAccount(account: IAccount) {
     if (!!account) {
-      localStorage.setItem(getLocalStorageKey('current-account'), JSON.stringify(account));
+      localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(account));
       const currentAccount = this.accounts.find(ws => ws.id == account.id);
       currentAccount.organizationName = account.organizationName;
     } else {
-      localStorage.setItem(getLocalStorageKey('current-account'), '');
+      localStorage.setItem(CURRENT_ACCOUNT(), '');
     }
 
     this.projectService.clearCurrentProjectEnv();
@@ -63,23 +63,23 @@ export class AccountService {
 
   setAccountName(account: IAccount) {
     if (!!account) {
-      localStorage.setItem(getLocalStorageKey('current-account'), JSON.stringify(account));
+      localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(account));
       const currentAccount = this.accounts.find(ws => ws.id == account.id);
       currentAccount.organizationName = account.organizationName;
     } else {
-      localStorage.setItem(getLocalStorageKey('current-account'), '');
+      localStorage.setItem(CURRENT_ACCOUNT(), '');
     }
   }
 
   getCurrentAccount(): Observable<IAccount> {
     return new Observable(observer => {
-      const accountStr = localStorage.getItem(getLocalStorageKey('current-account'));
+      const accountStr = localStorage.getItem(CURRENT_ACCOUNT());
       if (this.accounts.length === 0 || !accountStr) {
         this.getAccounts().subscribe(res => {
           this.accounts = res as IAccount[];
           if (!accountStr) {
             const currentAcount = this.accounts[0];
-            localStorage.setItem(getLocalStorageKey('current-account'), JSON.stringify(currentAcount));
+            localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(currentAcount));
             observer.next(currentAcount);
           } else {
             observer.next(this.accounts.find(ws => ws.id == JSON.parse(accountStr).id));
@@ -92,8 +92,8 @@ export class AccountService {
   }
 
   getCurrentAccountProjectEnv(): IAccountProjectEnv {
-    const account: IAccount = JSON.parse(localStorage.getItem(getLocalStorageKey('current-account')));
-    const projectEnv: IProjectEnv = JSON.parse(localStorage.getItem(getLocalStorageKey('current-project')));
+    const account: IAccount = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT()));
+    const projectEnv: IProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
     return {
       account: this.accounts.find(x => x.id === account.id),
       projectEnv
