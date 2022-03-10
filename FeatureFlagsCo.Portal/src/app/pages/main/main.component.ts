@@ -92,13 +92,30 @@ export class MainComponent implements OnInit, OnDestroy {
       }
     ];
 
+    if (this.ffcService.boolVariation('segments', false)) {
+      const segmentsItem = {
+        level: 1,
+        title: '用户组',
+        path: '/segments'
+      }
+
+      const idx = this.menus.findIndex(m => m.path === '/switch-user');
+      if (idx > -1) {
+        this.menus.splice(idx + 1, 0, segmentsItem);
+      }
+    }
+
     if (this.ffcService.variation('experimentation', 'V2') === 'V2') {
       const experimentationItem = {
         level: 1,
         title: '数据实验',
         path: '/experiments'
       }
-      this.menus.splice(3, 0, experimentationItem);
+
+      const idx = this.menus.findIndex(m => m.path === '/switch-archive');
+      if (idx > -1) {
+        this.menus.splice(idx + 1, 0, experimentationItem);
+      }
     }
 
     if (this.ffcService.variation('数据看板', 'false') === 'true') {

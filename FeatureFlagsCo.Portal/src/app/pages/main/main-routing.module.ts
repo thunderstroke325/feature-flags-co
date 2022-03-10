@@ -22,6 +22,13 @@ const routes: Routes = [
         },
       },
       {
+        path: 'segments',
+        loadChildren: () => import("./segments/segments.module").then(m => m.SegmentsModule),
+        data: {
+          breadcrumb: '用户组'
+        },
+      },
+      {
         path: 'switch-archive',
         loadChildren: () => import("./switch-archive/switch-archive.module").then(m => m.SwitchArchiveModule),
         data: {

@@ -27,4 +27,8 @@ export class FfcService {
   variation(key: string, defaultResult: string): string {
     return Ffc.variation(key, defaultResult);
   }
+
+  boolVariation(key: string, defaultResult: boolean): boolean {
+    return Ffc.boolVariation(key, defaultResult);
+  }
 }
