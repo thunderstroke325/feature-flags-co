@@ -141,7 +141,7 @@ namespace FeatureFlags.APIs.Services
                 var metric = await _metricService.GetAsync(experiment.MetricId);
                 // If the experiment has active iteration
                 var operationTime = DateTime.UtcNow;
-                experiment.Iterations.ForEach(async i =>
+                experiment.Iterations.ForEach(i =>
                 {
                     if (!i.EndTime.HasValue)
                     {
@@ -175,7 +175,7 @@ namespace FeatureFlags.APIs.Services
                 var metric = await _metricService.GetAsync(experiment.MetricId);
                 // If the experiment has active iteration
                 var operationTime = DateTime.UtcNow;
-                experiment.Iterations.ForEach(async i =>
+                experiment.Iterations.ForEach(i =>
                 {
                     if (!i.EndTime.HasValue)
                     {
@@ -258,7 +258,7 @@ namespace FeatureFlags.APIs.Services
                 };
                 
                 // stop active iterations
-                experiment.Iterations.ForEach(async i =>
+                experiment.Iterations.ForEach(i =>
                 {
                     if (!i.EndTime.HasValue)
                     {

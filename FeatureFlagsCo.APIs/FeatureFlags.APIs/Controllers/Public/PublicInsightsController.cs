@@ -37,7 +37,7 @@ namespace FeatureFlags.APIs.Controllers.Public
         /// <returns></returns>
         [HttpPost]
         [Route("track")]
-        public async Task<object> TrackAsync(
+        public object TrackAsync(
             [FromServices] IFeatureFlagsService featureFlagService,
             [FromServices] EnvironmentUserV2Service envUserService,
             List<InsightParam> param)

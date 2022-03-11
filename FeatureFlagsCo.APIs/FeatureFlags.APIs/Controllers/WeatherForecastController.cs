@@ -82,7 +82,7 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpGet]
         [Route("ReturnTest200")]
-        public async Task<JsonResult> ReturnTest200()
+        public JsonResult ReturnTest200()
         {
             var date = Guid.NewGuid().ToString();
             var customizedTraceProperties = new Dictionary<string, object>()
@@ -111,7 +111,7 @@ namespace FeatureFlags.APIs.Controllers
 
         [HttpPost]
         [Route("SendDataToElasticSearch")]
-        public async Task<dynamic> SendDataToElasticSearch()
+        public dynamic SendDataToElasticSearch()
         {
             var date = Guid.NewGuid().ToString();
             Response.StatusCode = 200;
