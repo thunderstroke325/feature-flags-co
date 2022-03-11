@@ -1,19 +1,9 @@
-﻿using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.ViewModels;
+﻿using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Documents.Client;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace FeatureFlags.APIs.Services
 {

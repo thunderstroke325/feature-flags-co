@@ -1,20 +1,9 @@
-﻿using FeatureFlags.APIs.Models;
-using FeatureFlags.APIs.ViewModels;
-using FeatureFlags.APIs.ViewModels.FeatureFlagsViewModels;
-using FeatureFlagsCo.FeatureInsights;
-using FeatureFlagsCo.MQ;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Documents.Client;
-using Microsoft.Extensions.Caching.Distributed;
+﻿using FeatureFlags.APIs.ViewModels;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -88,7 +77,7 @@ namespace FeatureFlags.APIs.Services
 
                 if (esHost.Contains("@")) // esHost contains username and password 
                 {
-                    var startIndex = esHost.LastIndexOf("/") + 1;
+                    var startIndex = esHost.LastIndexOf("//") + 2;
                     var endIndex = esHost.LastIndexOf("@");
                     var credential = esHost.Substring(startIndex, endIndex - startIndex).Split(":");
                     var userName = credential[0];
@@ -162,7 +151,7 @@ namespace FeatureFlags.APIs.Services
 
                 if (esHost.Contains("@")) // esHost contains username and password 
                 {
-                    var startIndex = esHost.LastIndexOf("/") + 1;
+                    var startIndex = esHost.LastIndexOf("//") + 2;
                     var endIndex = esHost.LastIndexOf("@");
                     var credential = esHost.Substring(startIndex, endIndex - startIndex).Split(":");
                     var userName = credential[0];

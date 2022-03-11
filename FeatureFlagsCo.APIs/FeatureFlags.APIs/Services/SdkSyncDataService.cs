@@ -50,7 +50,10 @@ namespace FeatureFlags.APIs.Services
                 {
                     eventType,
                     featureFlags = new[] { GetServerSdkData(flag) }
-                }
+                },
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(socket.SdkType), $"unsupported sdk type {socket.SdkType}"
+                )
             };
 
             return data;
@@ -103,7 +106,10 @@ namespace FeatureFlags.APIs.Services
                 {
                     eventType,
                     featureFlags = await GetServerSdkDataAsync(socket.EnvId, request.Timestamp)
-                }
+                },
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(socket.SdkType), $"unsupported sdk type {socket.SdkType}"
+                )
             };
 
             return data;

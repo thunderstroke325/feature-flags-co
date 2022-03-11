@@ -68,7 +68,7 @@ namespace FeatureFlags.APIs.Controllers.Public
         /// <returns></returns>
         [HttpPost]
         [Route("analytics/track/feature-flags")]
-        public async Task<object> TrackFeatureFlagUsageAsync(
+        public object TrackFeatureFlagUsageAsync(
             [FromServices] IFeatureFlagsService featureFlagService,
             [FromServices] EnvironmentUserV2Service envUserService, 
             List<FeatureFlagUsageParam> param)

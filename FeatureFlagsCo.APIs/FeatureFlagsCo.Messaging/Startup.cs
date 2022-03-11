@@ -5,12 +5,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
-using FeatureFlagsCo.MQ;
 using FeatureFlagsCo.MQ.ElasticSearch;
 using StackExchange.Redis;
 
@@ -120,24 +118,15 @@ namespace FeatureFlagsCo.Messaging
             // add elastic search service
             services.AddElasticsearch(Configuration);
             
-            services.AddSingleton<ExperimentsService, ExperimentsService>();
+            services.AddSingleton<ExperimentsService>();
 
-            var serviceProvider = services.BuildServiceProvider();
             // service bus sender
-            var q1SenderLogger = serviceProvider.GetService<ILogger<ServiceBusQ1Sender>>();
-            var q4SenderLogger = serviceProvider.GetService<ILogger<ServiceBusQ4Sender>>();
-            var q5SenderLogger = serviceProvider.GetService<ILogger<ServiceBusQ5Sender>>();
-
-            var redis = serviceProvider.GetService<IConnectionMultiplexer>();
+            services.AddSingleton<ServiceBusQ1Sender>();
+            services.AddSingleton<ServiceBusQ4Sender>();
+            services.AddSingleton<ServiceBusQ5Sender>();
             
-            services.AddSingleton<ServiceBusQ1Sender>(new ServiceBusQ1Sender(Configuration, q1SenderLogger, redis));
-            services.AddSingleton<ServiceBusQ4Sender>(new ServiceBusQ4Sender(Configuration, q4SenderLogger, redis));
-            services.AddSingleton<ServiceBusQ5Sender>(new ServiceBusQ5Sender(Configuration, q5SenderLogger, redis));
-
             // service bus receiver
-            var experimentsService = serviceProvider.GetService<ExperimentsService>();
-            var q3ReceiverLogger = serviceProvider.GetService<ILogger<ServiceBusQ3Receiver>>();
-            services.AddSingleton(new ServiceBusQ3Receiver(Configuration, experimentsService, q3ReceiverLogger, redis));
+            services.AddSingleton<ServiceBusQ3Receiver>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
