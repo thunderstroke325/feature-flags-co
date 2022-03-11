@@ -7,6 +7,8 @@ namespace FeatureFlags.APIs.ViewModels
 {
     public class MySettings
     {
+        private string _elasticSearchHost;
+
         public string AdminWebPortalUrl { get; set; }
         public string SendCloudAPIUser { get; set; }
         public string SendCloudAPIKey { get; set; }
@@ -25,7 +27,7 @@ namespace FeatureFlags.APIs.ViewModels
         public string StartSleepTime { get; set; }
         public string HostingType { get; set; }
         public string CacheType { get; set; }
-        public string ElasticSearchHost { get; set; }
+        public string ElasticSearchHost { get { return String.IsNullOrWhiteSpace(this._elasticSearchHost)? this._elasticSearchHost : this._elasticSearchHost.TrimEnd('/'); } set { this._elasticSearchHost = value; } }
         public string ExperimentsServiceHost { get; set; }
         public string MessagingServiceHost { get; set; }
     }

@@ -49,3 +49,5 @@ Thumbs.db
 package-lock.json
 
 *.log
+
+.angular

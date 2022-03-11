@@ -28,9 +28,10 @@ namespace FeatureFlagsCo.Messaging.Services
             Logger.LogInformation("RECEIVER START: {topic} {subscription}", TopicPath, "standard");
         }
 
-        public override async Task Processor_ProcessErrorAsync(ProcessErrorEventArgs arg)
+        public override Task Processor_ProcessErrorAsync(ProcessErrorEventArgs arg)
         {
             Logger.LogError(arg.Exception, "Q3 ERROR");
+            return Task.CompletedTask;
         }
 
         public override async Task Processor_ProcessMessageAsync(ProcessMessageEventArgs args)
