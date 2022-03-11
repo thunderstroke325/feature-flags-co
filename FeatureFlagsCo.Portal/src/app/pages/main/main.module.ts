@@ -10,6 +10,8 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
     ShareModule,
     NzBreadCrumbModule,
     MainRoutingModule
+  ],
+  providers: [
   ]
 })
 export class MainModule { }
