@@ -23,7 +23,8 @@ namespace FeatureFlags.Utils.ExtensionMethods
                 return HttpStatusCode.NotFound;
             }
 
-            if (exception is PermissionDeniedException)
+            if (exception is PermissionDeniedException || 
+                exception is InvalidOperationException)
             {
                 return HttpStatusCode.Forbidden;
             }
