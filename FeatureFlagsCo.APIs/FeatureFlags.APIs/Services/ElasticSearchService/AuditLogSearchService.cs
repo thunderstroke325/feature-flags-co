@@ -77,7 +77,7 @@ namespace FeatureFlags.APIs.Services
 
                 if (esHost.Contains("@")) // esHost contains username and password 
                 {
-                    var startIndex = esHost.LastIndexOf("/") + 1;
+                    var startIndex = esHost.LastIndexOf("//") + 2;
                     var endIndex = esHost.LastIndexOf("@");
                     var credential = esHost.Substring(startIndex, endIndex - startIndex).Split(":");
                     var userName = credential[0];
@@ -151,7 +151,7 @@ namespace FeatureFlags.APIs.Services
 
                 if (esHost.Contains("@")) // esHost contains username and password 
                 {
-                    var startIndex = esHost.LastIndexOf("/") + 1;
+                    var startIndex = esHost.LastIndexOf("//") + 2;
                     var endIndex = esHost.LastIndexOf("@");
                     var credential = esHost.Substring(startIndex, endIndex - startIndex).Split(":");
                     var userName = credential[0];
