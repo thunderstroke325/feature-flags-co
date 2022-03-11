@@ -35,10 +35,10 @@
           </thead>
           <tbody>
           <tr *ngFor="let item of table.data">
-            <td style="cursor: pointer;" (click)="onIntoSegmentDetail(theSwitch)">{{item.name}}</td>
+            <td style="cursor: pointer;" (click)="onIntoSegmentDetail(item)">{{item.name}}</td>
             <td>{{getLocalDate(item.lastModificationTime) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
             <td style="text-align: center">
-              <a nz-button nzType="link" style="color: #9A95CC;" (click)="onIntoSwitchDetail(item)">详情</a>
+              <a nz-button nzType="link" style="color: #9A95CC;" (click)="onIntoSegmentDetail(item)">详情</a>
             </td>
           </tr>
           </tbody>
