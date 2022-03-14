@@ -1,6 +1,6 @@
 # feature-flags-co
 
-Feature flags-driven product intelligence platform that makes iterating on products as fast as Commit code.
+Feature management platform for faster and more secure software delivery and iteration.
 
 
 Official Website: [https://www.feature-flags.co](https://www.feature-flags.co)
