@@ -19,7 +19,7 @@ namespace FeatureFlags.APIs.Models
 
         public DateTime CreatedAt { get; set; }
 
-        public DateTime? UpdateAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         public Segment(
             int envId, 
@@ -43,6 +43,7 @@ namespace FeatureFlags.APIs.Models
             Description = description ?? string.Empty;
             
             CreatedAt = DateTime.UtcNow;
+            UpdatedAt = CreatedAt;
         }
 
         public void Update(
@@ -59,7 +60,7 @@ namespace FeatureFlags.APIs.Models
             
             Description = description ?? string.Empty;
             
-            UpdateAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
         }
     }
     

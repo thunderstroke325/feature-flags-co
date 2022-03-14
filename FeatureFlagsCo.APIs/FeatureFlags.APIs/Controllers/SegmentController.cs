@@ -30,11 +30,15 @@ namespace FeatureFlags.APIs.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<SegmentListItem>> GetListAsync(int envId)
+        public async Task<PagedResult<SegmentListItem>> GetListAsync(int envId, [FromQuery] SearchSegmentRequest filter)
         {
-            var segments = await _service.GetListAsync(envId);
+            var pagedSegments = await _service.GetListAsync(envId, filter.Name, filter.PageIndex, filter.PageSize);
 
-            var vm = _mapper.Map<IEnumerable<Segment>, IEnumerable<SegmentListItem>>(segments);
+            var vm = new PagedResult<SegmentListItem>
+            {
+                Items = _mapper.Map<IEnumerable<SegmentListItem>>(pagedSegments.Items).ToArray(),
+                TotalCount = pagedSegments.TotalCount
+            };
             return vm;
         }
 
@@ -92,6 +96,15 @@ namespace FeatureFlags.APIs.Controllers
         {
             var references = await _appService.GetFlagSegmentReferencesAsync(envId, id);
             return references;
+        }
+
+        [HttpGet]
+        [Route("is-name-used")]
+        public async Task<bool> IsNameUsedAsync(int envId, string name)
+        {
+            var isNameUsed = await _service.IsNameUsedAsync(envId, name);
+            
+            return isNameUsed;
         }
     }
 }

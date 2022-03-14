@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using FeatureFlags.APIs.Models;
 using FeatureFlags.APIs.Services.MongoDb;
+using FeatureFlags.APIs.ViewModels;
 using FeatureFlags.Utils.ConventionalDependencyInjection;
 using FeatureFlags.Utils.Exceptions;
 using MongoDB.Bson;
@@ -19,13 +20,39 @@ namespace FeatureFlags.APIs.Services
             _segments = segments;
         }
 
-        public async Task<IEnumerable<Segment>> GetListAsync(int envId)
+        public async Task<PagedResult<Segment>> GetListAsync(
+            int envId, 
+            string name,
+            int page,
+            int pageSize)
         {
-            var segments = await _segments.Queryable
-                .Where(x => x.EnvId == envId)
-                .ToListAsync();
+            var filterBuilder = Builders<Segment>.Filter;
             
-            return segments;
+            var filters = new List<FilterDefinition<Segment>>
+            {
+                // envId filter
+                filterBuilder.Eq(segment => segment.EnvId, envId)
+            };
+            
+            // name filter
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                var nameFilter = filterBuilder.Where(segment => segment.Name.ToLower().Contains(name.ToLower()));
+                filters.Add(nameFilter);
+            }
+            
+            var filter = filterBuilder.And(filters);
+            
+            var totalCount = await _segments.Collection.CountDocumentsAsync(filter);
+            var itemsQuery = _segments.Collection
+                .Find(filter)
+                .SortByDescending(segment => segment.UpdatedAt)
+                .Skip(page * pageSize)
+                .Limit(pageSize);
+            
+            var items = await itemsQuery.ToListAsync();
+
+            return new PagedResult<Segment>(totalCount, items);
         }
 
         public async Task<Segment> GetAsync(string id)
@@ -59,6 +86,14 @@ namespace FeatureFlags.APIs.Services
 
             var isDeleted = await _segments.DeleteAsync(objectId);
             return isDeleted;
+        }
+
+        public async Task<bool> IsNameUsedAsync(int envId, string name)
+        {
+            var isNameUsed = await _segments.Queryable
+                .AnyAsync(segment => segment.EnvId == envId && segment.Name == name);
+
+            return isNameUsed;
         }
     }
 }
