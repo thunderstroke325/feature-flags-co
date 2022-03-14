@@ -1,10 +1,11 @@
 name: APIs 
-on: 
+on:
+  workflow_dispatch:
   push:
     branches:
       - migration
     paths:
-    - 'FeatureFlagsCo.APIs/FeatureFlags.APIs/**'
+    - 'FeatureFlagsCo.APIs/**'
 jobs:
   deploy-dev:
     name : Deploy to development
